@@ -449,11 +449,22 @@ svg.phase-icon {
 }
 
 .task-time-badge {
-  font-size: 0.8rem;
-  color: #64748b;
+  font-size: 0.85rem;
+  color: #64748b; /* رنگ طوسی ملایم */
   font-weight: 600;
   background: transparent;
   padding: 0;
+  margin-top: 4px;
+  
+  /* 🌟 این خطوط جدید باعث تراز شدن آیکون و متن می‌شوند */
+  display: flex;
+  align-items: center;
+  opacity: 0.8; /* کمی محو برای ظرافت بیشتر */
+}
+
+/* در دارک مود هم رنگش رو تنظیم می‌کنیم */
+body[data-theme="dark"] .task-time-badge {
+  color: #94a3b8;
 }
 
 .task-actions { display: flex; gap: 10px; }

@@ -18,7 +18,7 @@ function showToast(message, type = 'info') {
   for (let t of existingToasts) {
     if (t.innerText.includes(message)) return; // اگر پیام تکراری بود، تابع رو متوقف کن
   }
-  
+
   // محدودیت تعداد پیام‌ها: اگر بیشتر از 3 تا بود، قدیمی‌ترین رو پاک کن
   if (container.childElementCount >= 3) {
     const oldest = container.firstChild;
@@ -63,6 +63,7 @@ function showToast(message, type = 'info') {
 const iconWork = `<svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`;
 const iconShort = `<svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`;
 const iconLong = `<svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>`;
+const iconClock = `<svg class="ui-icon" style="width:14px; height:14px; margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
 
 // ==========================================
 // 2. NAVIGATION BUBBLE & TABS
@@ -332,7 +333,7 @@ function toggleTimer() {
             activeTask.timeSpent++; 
             saveTasks(); 
             const badge = document.getElementById(`badge-${activeTask.id}`);
-            if (badge) badge.textContent = formatTaskTime(activeTask.timeSpent);
+            if (badge) badge.innerHTML = formatTaskTime(activeTask.timeSpent);
           }
         }
       }
@@ -419,7 +420,7 @@ function formatTaskTime(totalSeconds) {
   if (totalSeconds === 0) return ''; 
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
-  return `⏱️ ${m}m ${s}s`;
+  return `${iconClock} ${m}m ${s}s`;
 }
 
 function renderTasks() {
