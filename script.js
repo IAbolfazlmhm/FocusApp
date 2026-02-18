@@ -9,22 +9,50 @@ let currentPhase = 'work'; // 'work', 'shortBreak', 'longBreak'
 let completedSessions = 0; 
 
 // تابع نمایش نوتیفیکیشن (جایگزین Alert)
+// تابع نمایش نوتیفیکیشن (نسخه شیشه‌ای و محدود)
 function showToast(message, type = 'info') {
   const container = document.getElementById('toast-container');
+  
+  // 🌟 فیکس رگباری: چک کن اگر پیامی با همین متن وجود داره، دیگه نساز!
+  const existingToasts = container.querySelectorAll('.toast');
+  for (let t of existingToasts) {
+    if (t.innerText.includes(message)) return; // اگر پیام تکراری بود، تابع رو متوقف کن
+  }
+  
+  // محدودیت تعداد پیام‌ها: اگر بیشتر از 3 تا بود، قدیمی‌ترین رو پاک کن
+  if (container.childElementCount >= 3) {
+    const oldest = container.firstChild;
+    oldest.style.animation = 'toastOut 0.2s forwards';
+    setTimeout(() => oldest.remove(), 200);
+  }
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   
-  // آیکون برای هر نوع پیام
+  // آیکون فقط برای موفقیت و خطا (برای اینفو حذف شد)
   let icon = '';
-  if (type === 'success') icon = '✅';
-  if (type === 'error') icon = '⚠️';
+  if (type === 'success') icon = '<span style="color:#10b981">✔</span>'; // تیک سبز
+  if (type === 'warning') icon = '<span style="color:#f59e0b">⚠️</span>'; // خطر زرد
+  // برای info آیکونی نمی‌ذاریم تا ساده باشه
 
-  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  // اگر آیکون داشت نشون بده، اگر نه فقط متن
+  toast.innerHTML = icon ? `${icon} <span>${message}</span>` : `<span>${message}</span>`;
+  
   container.appendChild(toast);
+
+  // صدای ملایم فقط برای ارور و موفقیت (برای اینفو صدا نمی‌خوایم شاید آزاردهنده باشه)
+  if (type !== 'info') {
+      // چک کردن تنظیمات صدا که قبلا اضافه کردیم
+      const soundToggle = document.getElementById('sound-toggle');
+      if (!soundToggle || soundToggle.checked) {
+          if (type === 'success') playUI('success');
+          if (type === 'warning') playUI('click');
+      }
+  }
 
   // حذف خودکار بعد از 3 ثانیه
   setTimeout(() => {
-    toast.style.animation = 'fadeOut 0.3s forwards';
+    toast.style.animation = 'toastOut 0.3s forwards';
     toast.addEventListener('animationend', () => {
       toast.remove();
     });
@@ -510,11 +538,25 @@ function applySettingsToTimer() {
   const skipBtn = document.getElementById('skip-btn');
 
   if (selectedMode === 'stopwatch') {
-    tracker.classList.add('hidden'); skipBtn.style.visibility = 'hidden'; 
-    timeLeft = 0; updateDisplay(); circle.style.strokeDashoffset = circumference;
-    updatePhaseColors(); // Apply stopwatch theme
+    tracker.classList.add('hidden'); 
+    
+    // 🌟 فیکس تقارن: بجای مخفی کردن، شفافیتش رو کم می‌کنیم و غیرفعالش می‌کنیم
+    skipBtn.style.opacity = '0.3';
+    skipBtn.style.pointerEvents = 'none'; // غیرقابل کلیک
+    skipBtn.style.visibility = 'visible'; // اما دیده شود تا جا پر شود
+    
+    timeLeft = 0; 
+    updateDisplay();
+    circle.style.strokeDashoffset = circumference; 
+    updatePhaseColors(); 
   } else {
-    tracker.classList.remove('hidden'); skipBtn.style.visibility = 'visible';
+    tracker.classList.remove('hidden'); 
+    
+    // برگرداندن به حالت عادی
+    skipBtn.style.opacity = '1';
+    skipBtn.style.pointerEvents = 'auto';
+    skipBtn.style.visibility = 'visible';
+    
     totalTime = parseInt(selectedDuration) * 60; timeLeft = totalTime;
     currentPhase = 'work'; completedSessions = 0;
     updatePhaseText(); updatePhaseColors(); updateDisplay(); updateCircle(); 

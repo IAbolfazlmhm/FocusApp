@@ -255,7 +255,7 @@ svg.phase-icon {
   stroke-linecap: round;
   stroke-dasharray: 691;
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear;
+  transition: stroke-dashoffset 1s linear !important;
 }
 
 .time-display {
@@ -284,7 +284,6 @@ svg.phase-icon {
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  /* شیشه‌ای و شفاف */
   background-color: rgba(255, 255, 255, 0.4); 
   color: #2b2d42; 
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
@@ -298,11 +297,18 @@ svg.phase-icon {
   transform: translateY(-2px);
 }
 
+/* اصلاح دکمه پاز: دقیقاً شبیه استارت */
 .start-btn.pause {
-  /* وقتی پاز است، متن قرمز و پس‌زمینه سفیدتر */
-  color: #ef4444 !important;
-  background-color: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+  /* هیچ رنگ خاصی نمی‌دیم تا همون رنگ فاز (قرمز/سبز) رو حفظ کنه */
+  opacity: 0.9; 
+  transform: scale(0.98); /* یک کوچولو فرورفتگی برای حس فعال بودن */
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); /* سایه داخلی ریز */
+}
+
+/* هاور دکمه پاز: مثل دکمه عادی */
+.start-btn.pause:hover {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .icon-btn {
@@ -517,8 +523,13 @@ svg.phase-icon {
 }
 .modal-overlay.show { opacity: 1; pointer-events: auto; }
 .modal-content {
-  background: rgba(255, 255, 255, 0.9); width: 90%; max-width: 400px;
-  border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.65); /* شفافیت بیشتر */
+  backdrop-filter: blur(20px); /* بلور قوی */
+  -webkit-backdrop-filter: blur(20px);
+  width: 90%; max-width: 400px;
+  border-radius: 30px; padding: 25px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   transform: translateY(-20px); transition: transform 0.3s ease;
 }
 .modal-overlay.show .modal-content { transform: translateY(0); }
@@ -528,7 +539,15 @@ svg.phase-icon {
 .close-btn:hover { color: #ef4444; }
 .setting-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
 .setting-group label { font-weight: bold; font-size: 0.9rem; color: #475569; }
-.custom-select { padding: 10px; border-radius: 10px; border: 2px solid #e2e8f0; outline: none; font-size: 1rem; background: white; }
+.custom-select { 
+  padding: 10px; 
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  outline: none; font-size: 1rem;
+  background: rgba(255, 255, 255, 0.4); /* ورودی شیشه‌ای */
+  color: #2b2d42;
+  font-weight: 500; 
+}
 .custom-select option { background: #ffffff; color: #2b2d42; font-weight: 500; padding: 10px; }
 .toggle-group { flex-direction: row; justify-content: space-between; align-items: center; }
 .disabled-settings { opacity: 0.4; pointer-events: none; }
@@ -578,10 +597,17 @@ body[data-theme="dark"] .task-item {
 body[data-theme="dark"] .task-item:hover { border-color: #38bdf8; }
 body[data-theme="dark"] .progress-ring-track { stroke: rgba(255, 255, 255, 0.05); }
 body[data-theme="dark"] .progress-ring-circle { stroke: #3b82f6; }
-body[data-theme="dark"] .modal-content { background: rgba(30, 41, 59, 0.95); }
+body[data-theme="dark"] .modal-content { 
+  background: rgba(30, 41, 59, 0.7);
+  border-color: rgba(255, 255, 255, 0.1); 
+}
 body[data-theme="dark"] .modal-header h2,
 body[data-theme="dark"] .setting-group label { color: #f8fafc; }
-body[data-theme="dark"] .custom-select { background: #0f172a; color: #f8fafc; border-color: #334155; }
+body[data-theme="dark"] .custom-select { 
+  background: rgba(15, 23, 42, 0.6);
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.1); 
+}
 body[data-theme="dark"] .custom-select option { background: #1e293b; color: #f8fafc; }
 body[data-theme="dark"] .add-btn {
     background: rgba(255, 255, 255, 0.1);
@@ -609,44 +635,53 @@ body[data-theme="dark"] .start-btn:hover { background-color: rgba(255, 255, 255,
 
 /* ========================================== */
 /* 11. ADAPTIVE COLORS (Phase Colors) 🎨      */
+/* شامل: رنگ پس‌زمینه، دکمه‌ها و هاور تسک‌ها   */
 /* ========================================== */
 
-/* --- WORK MODE (قرمز/صورتی جدی) --- */
+/* --- WORK MODE (قرمز/صورتی) --- */
+body.phase-work { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
 body.phase-work .progress-ring-circle { stroke: #f43f5e; }
-body.phase-work .time-display, body.phase-work .start-btn { color: #f43f5e; }
-body.phase-work .add-btn, body.phase-work .active-bubble { background-color: #f43f5e; }
+body.phase-work .time-display { color: #f43f5e; }
+body.phase-work .active-bubble { background-color: #f43f5e; }
 body.phase-work .tab.active { color: white; }
+/* دکمه‌های اصلی و استارت */
+body.phase-work .start-btn, body.phase-work .add-btn { background-color: #f43f5e; color: white; border: none; }
+/* هاور تسک متناسب با فاز */
+body.phase-work .task-item:hover { border-color: #f43f5e; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); }
 
-/* --- SHORT BREAK (سبز کله‌غازی آرامش‌بخش) --- */
+/* --- SHORT BREAK (سبز نعنایی) --- */
+body.phase-short { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
 body.phase-short .progress-ring-circle { stroke: #14b8a6; }
-body.phase-short .time-display, body.phase-short .start-btn { color: #14b8a6; }
-body.phase-short .add-btn, body.phase-short .active-bubble { background-color: #14b8a6; }
+body.phase-short .time-display { color: #14b8a6; }
+body.phase-short .active-bubble { background-color: #14b8a6; }
 body.phase-short .tab.active { color: white; }
+body.phase-short .start-btn, body.phase-short .add-btn { background-color: #14b8a6; color: white; border: none; }
+body.phase-short .task-item:hover { border-color: #14b8a6; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2); }
 
-/* --- LONG BREAK (آبی نفتی عمیق) --- */
+/* --- LONG BREAK (آبی آسمانی) --- */
+body.phase-long { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
 body.phase-long .progress-ring-circle { stroke: #3b82f6; }
-body.phase-long .time-display, body.phase-long .start-btn { color: #3b82f6; }
-body.phase-long .add-btn, body.phase-long .active-bubble { background-color: #3b82f6; }
+body.phase-long .time-display { color: #3b82f6; }
+body.phase-long .active-bubble { background-color: #3b82f6; }
 body.phase-long .tab.active { color: white; }
+body.phase-long .start-btn, body.phase-long .add-btn { background-color: #3b82f6; color: white; border: none; }
+body.phase-long .task-item:hover { border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
 
-/* --- STOPWATCH (بنفش خلاقانه) --- */
+/* --- STOPWATCH (بنفش) --- */
+body.phase-stopwatch { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
 body.phase-stopwatch .progress-ring-circle { stroke: #8b5cf6; }
-body.phase-stopwatch .time-display, body.phase-stopwatch .start-btn { color: #8b5cf6; }
-body.phase-stopwatch .add-btn, body.phase-stopwatch .active-bubble { background-color: #8b5cf6; }
+body.phase-stopwatch .time-display { color: #8b5cf6; }
+body.phase-stopwatch .active-bubble { background-color: #8b5cf6; }
 body.phase-stopwatch .tab.active { color: white; }
+body.phase-stopwatch .start-btn, body.phase-stopwatch .add-btn { background-color: #8b5cf6; color: white; border: none; }
+body.phase-stopwatch .task-item:hover { border-color: #8b5cf6; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); }
 
-/* --- DARK MODE OVERRIDES FOR ADAPTIVE COLORS --- */
-body[data-theme="dark"].phase-work .progress-ring-circle, body[data-theme="dark"].phase-work .time-display, body[data-theme="dark"].phase-work .start-btn { color: #fb7185; stroke: #fb7185; }
-body[data-theme="dark"].phase-work .add-btn, body[data-theme="dark"].phase-work .active-bubble { background-color: #fb7185; color: #0f172a; }
-
-body[data-theme="dark"].phase-short .progress-ring-circle, body[data-theme="dark"].phase-short .time-display, body[data-theme="dark"].phase-short .start-btn { color: #2dd4bf; stroke: #2dd4bf; }
-body[data-theme="dark"].phase-short .add-btn, body[data-theme="dark"].phase-short .active-bubble { background-color: #2dd4bf; color: #0f172a; }
-
-body[data-theme="dark"].phase-long .progress-ring-circle, body[data-theme="dark"].phase-long .time-display, body[data-theme="dark"].phase-long .start-btn { color: #60a5fa; stroke: #60a5fa; }
-body[data-theme="dark"].phase-long .add-btn, body[data-theme="dark"].phase-long .active-bubble { background-color: #60a5fa; color: #0f172a; }
-
-body[data-theme="dark"].phase-stopwatch .progress-ring-circle, body[data-theme="dark"].phase-stopwatch .time-display, body[data-theme="dark"].phase-stopwatch .start-btn { color: #a78bfa; stroke: #a78bfa; }
-body[data-theme="dark"].phase-stopwatch .add-btn, body[data-theme="dark"].phase-stopwatch .active-bubble { background-color: #a78bfa; color: #0f172a; }
+/* --- DARK MODE OVERRIDES --- */
+/* (رنگ‌ها کمی نئونی‌تر می‌شوند ولی پس‌زمینه دکمه‌ها حفظ می‌شود) */
+body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn { background-color: #fb7185; color: #0f172a; }
+body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { background-color: #2dd4bf; color: #0f172a; }
+body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn { background-color: #60a5fa; color: #0f172a; }
+body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { background-color: #a78bfa; color: #0f172a; }
 
 /* ========================================== */
 /* 12. OTHER SECTIONS (Placeholder Style)     */
@@ -678,35 +713,59 @@ body[data-theme="dark"] .placeholder-box { color: #94a3b8; }
   display: flex;
   flex-direction: column;
   gap: 10px;
-  pointer-events: none;
+  pointer-events: none; /* کلیک از توش رد بشه */
+  width: auto;
+  align-items: center;
 }
 
 .toast {
-  background: rgba(43, 45, 66, 0.9);
+  background: rgba(40, 45, 60, 0.75); 
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: 50px;
   font-size: 0.9rem;
   font-weight: 500;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   opacity: 0;
-  transform: translateY(20px);
-  animation: slideUpFade 0.3s forwards;
+  transform: translateY(20px) scale(0.9);
+  animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* رنگ‌بندی انواع پیام‌ها */
+@keyframes toastIn {
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+  to { opacity: 0; transform: translateY(-10px) scale(0.95); }
+}
+
+/* رنگ آیکون‌ها یا حاشیه پایین برای تمایز */
 .toast.success { border-bottom: 2px solid #10b981; }
-.toast.error { border-bottom: 2px solid #ef4444; }
-.toast.info { border-bottom: 2px solid #3b82f6; }
+.toast.warning { border-bottom: 2px solid #f59e0b; }
+.toast.info { border-bottom: 2px solid rgba(255, 255, 255, 0.3); }
 
-@keyframes slideUpFade {
-  to { opacity: 1; transform: translateY(0); }
+/* ========================================== */
+/* DARK MODE FIXES (Force Dark Background)    */
+/* ========================================== */
+
+/* این کد رو حتماً آخر فایل بذار تا اولویت داشته باشه */
+body[data-theme="dark"],
+body[data-theme="dark"].phase-work,
+body[data-theme="dark"].phase-short,
+body[data-theme="dark"].phase-long,
+body[data-theme="dark"].phase-stopwatch {
+  /* بازگشت به همون تم جذاب و عمیقِ اولیه */
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
 }
 
-@keyframes fadeOut {
-  to { opacity: 0; transform: translateY(-20px); }
-}
+/* اصلاح رنگ دکمه استارت در دارک مود (که رنگی و تو پُر باشه) */
+body[data-theme="dark"].phase-work .start-btn { background-color: #fb7185; color: #0f172a; border: none; }
+body[data-theme="dark"].phase-short .start-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
+body[data-theme="dark"].phase-long .start-btn { background-color: #60a5fa; color: #0f172a; border: none; }
+body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; color: #0f172a; border: none; }
