@@ -11,18 +11,14 @@
       const savedTimer = localStorage.getItem('focusTimerState');
       const savedSettings = localStorage.getItem('focusSettings');
       
-      // اعمال دارک مود قبل از لود شدن
       if (savedSettings) {
         const settings = JSON.parse(savedSettings);
         if (settings.darkMode) document.body.setAttribute('data-theme', 'dark');
       }
-
-      // اعمال رنگ فاز قبل از لود شدن
+      
       if (savedTimer) {
         const state = JSON.parse(savedTimer);
-        // اگر کرنومتر بود
-        if (state.timeLeft === 0 && state.totalTime === 0) { // تشخیص ساده کرنومتر
-             // رنگ کرنومتر بعدا توسط JS اعمال میشه، اینجا مهم نیست
+        if (state.timeLeft === 0 && state.totalTime === 0) {
         } else {
             if (state.currentPhase === 'work') document.body.classList.add('phase-work');
             else if (state.currentPhase === 'shortBreak') document.body.classList.add('phase-short');
@@ -33,6 +29,8 @@
   </script>
 </head>
 <body class="preload">
+
+  <div id="toast-container"></div>
 
   <div class="header-container">
     <nav class="glass-tabs-container">
@@ -71,6 +69,14 @@
               <span class="slider round"></span>
             </label>
         </div>
+
+        <div class="setting-group toggle-group">
+            <label for="sound-toggle">Sound Effects (Haptics):</label>
+            <label class="switch">
+              <input type="checkbox" id="sound-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
 
         <div id="pomodoro-settings-wrapper">
           <div class="setting-group">

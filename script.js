@@ -8,6 +8,29 @@ let isRunning = false;
 let currentPhase = 'work'; // 'work', 'shortBreak', 'longBreak'
 let completedSessions = 0; 
 
+// تابع نمایش نوتیفیکیشن (جایگزین Alert)
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  // آیکون برای هر نوع پیام
+  let icon = '';
+  if (type === 'success') icon = '✅';
+  if (type === 'error') icon = '⚠️';
+
+  toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
+  container.appendChild(toast);
+
+  // حذف خودکار بعد از 3 ثانیه
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s forwards';
+    toast.addEventListener('animationend', () => {
+      toast.remove();
+    });
+  }, 3000);
+}
+
 // SVG Icons
 const iconWork = `<svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`;
 const iconShort = `<svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>`;
@@ -62,6 +85,10 @@ tabs.forEach((tab, index) => {
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playUI(type) {
+  // اگر چک‌باکس صدا خاموش بود، هیچ صدایی پخش نکن!
+  const soundToggle = document.getElementById('sound-toggle');
+  if (soundToggle && !soundToggle.checked) return;
+  
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const oscillator = audioCtx.createOscillator();
   const gainNode = audioCtx.createGain();
@@ -255,7 +282,7 @@ function toggleTimer() {
   if (currentTaskName === 'Nothing') {
     const activeTasks = tasks.filter(t => !t.completed);
     if (activeTasks.length === 1) toggleFocus(activeTasks[0].id);
-    else { alert('🎯 Please focus on a task first before starting the timer!'); return; }
+    else { showToast('🎯 Please focus on a task first before starting the timer!'); return; }
   }
 
   if (isRunning) {
@@ -329,7 +356,7 @@ resetBtn.addEventListener('dblclick', function() {
     updateDisplay();
     updateCircle();
     saveTimerState(); 
-    alert('🔄 Full Session Reset! Back to Work 1.');
+    showToast('Full Session Reset! Back to Work 1.');
   }
 });
 
@@ -422,7 +449,7 @@ taskListContainer.addEventListener('scroll', () => {
 
 function addTask() {
   const text = taskInput.value.trim();
-  if (!text || !/[a-zA-Z0-9\u0600-\u06FF]/.test(text)) { alert("Please enter a valid task."); return; }
+  if (!text || !/[a-zA-Z0-9\u0600-\u06FF]/.test(text)) { showToast("Please enter a valid task."); return; }
   const newTask = { id: Date.now(), text: text, completed: false, timeSpent: 0 };
   tasks.push(newTask); playUI('click'); saveTasks(); renderTasks(); taskInput.value = '';
 }
@@ -444,7 +471,7 @@ function toggleCompleted(id) {
 
 function toggleFocus(id) {
   const task = tasks.find(t => t.id === id);
-  if (task && task.completed) { alert("✅ This task is already completed! You can't focus on it."); return; }
+  if (task && task.completed) { showToast("✅ This task is already completed! You can't focus on it."); return; }
   if (focusedTaskId === id) focusedTaskId = null; else focusedTaskId = id;
   playUI('click'); saveTasks(); renderTasks(); checkAutoPause();
 }
@@ -504,6 +531,7 @@ function loadSettings() {
     document.getElementById('breaks-toggle').checked = settings.breaksEnabled;
     document.getElementById('autostart-breaks-toggle').checked = settings.autoStart;
     document.getElementById('sound-select').value = settings.sound;
+    document.getElementById('sound-toggle').checked = settings.haptics;
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     if (settings.darkMode) { darkModeToggle.checked = true; document.body.setAttribute('data-theme', 'dark'); }
     else { darkModeToggle.checked = false; document.body.removeAttribute('data-theme'); }
@@ -517,7 +545,8 @@ function saveSettings() {
   const settings = {
     mode: modeSelect.value, workDuration: document.getElementById('work-duration').value,
     breaksEnabled: document.getElementById('breaks-toggle').checked, autoStart: document.getElementById('autostart-breaks-toggle').checked,
-    sound: document.getElementById('sound-select').value, darkMode: document.getElementById('dark-mode-toggle').checked
+    sound: document.getElementById('sound-select').value, darkMode: document.getElementById('dark-mode-toggle').checked,
+    haptics: document.getElementById('sound-toggle').checked
   };
   localStorage.setItem('focusSettings', JSON.stringify(settings));
 }

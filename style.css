@@ -387,17 +387,19 @@ svg.phase-icon {
 
 .add-btn {
   padding: 10px 25px;
-  background: #2b2d42;
-  color: white;
-  border: none;
+  background: rgba(255, 255, 255, 0.4); /* شیشه‌ای */
+  color: #2b2d42;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 40px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
 .add-btn:hover {
-  background: #1a1b26;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
 }
 
 /* ========================================== */
@@ -454,9 +456,9 @@ svg.phase-icon {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid #cbd5e1;
-  background: white;
-  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.3); /* شیشه‌ای */
+  color: #555;
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -464,9 +466,9 @@ svg.phase-icon {
   transition: all 0.2s;
 }
 
-.done-btn:hover { border-color: #10b981; background: #10b981; color: white; }
-.remove-btn:hover { border-color: #ef4444; background: #ef4444; color: white; }
-.focus-btn:hover { border-color: #3b82f6; background: #3b82f6; color: white; }
+.done-btn:hover { background: #10b981; color: white; border-color: #10b981; transform: scale(1.1); }
+.remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; transform: scale(1.1); }
+.focus-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.1); }
 
 .task-item.active-focus {
   order: 1;
@@ -581,10 +583,17 @@ body[data-theme="dark"] .modal-header h2,
 body[data-theme="dark"] .setting-group label { color: #f8fafc; }
 body[data-theme="dark"] .custom-select { background: #0f172a; color: #f8fafc; border-color: #334155; }
 body[data-theme="dark"] .custom-select option { background: #1e293b; color: #f8fafc; }
-body[data-theme="dark"] .done-btn,
-body[data-theme="dark"] .remove-btn,
+body[data-theme="dark"] .add-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+body[data-theme="dark"] .done-btn, 
+body[data-theme="dark"] .remove-btn, 
 body[data-theme="dark"] .focus-btn {
-  background: rgba(15, 23, 42, 0.5); border-color: rgba(255, 255, 255, 0.1); color: #94a3b8;
+    background: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    border-color: rgba(255, 255, 255, 0.2);
 }
 body[data-theme="dark"] .done-btn:hover { background: #10b981; color: white; border-color: #10b981; }
 body[data-theme="dark"] .remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
@@ -658,3 +667,46 @@ body[data-theme="dark"].phase-stopwatch .add-btn, body[data-theme="dark"].phase-
   margin-top: 50px;
 }
 body[data-theme="dark"] .placeholder-box { color: #94a3b8; }
+
+/* --- TOAST NOTIFICATIONS --- */
+#toast-container {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  background: rgba(43, 45, 66, 0.9);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUpFade 0.3s forwards;
+}
+
+/* رنگ‌بندی انواع پیام‌ها */
+.toast.success { border-bottom: 2px solid #10b981; }
+.toast.error { border-bottom: 2px solid #ef4444; }
+.toast.info { border-bottom: 2px solid #3b82f6; }
+
+@keyframes slideUpFade {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: translateY(-20px); }
+}
