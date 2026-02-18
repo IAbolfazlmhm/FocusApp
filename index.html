@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus App</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <script>
+    (function() {
+      const savedTimer = localStorage.getItem('focusTimerState');
+      const savedSettings = localStorage.getItem('focusSettings');
+      
+      // اعمال دارک مود قبل از لود شدن
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        if (settings.darkMode) document.body.setAttribute('data-theme', 'dark');
+      }
+
+      // اعمال رنگ فاز قبل از لود شدن
+      if (savedTimer) {
+        const state = JSON.parse(savedTimer);
+        // اگر کرنومتر بود
+        if (state.timeLeft === 0 && state.totalTime === 0) { // تشخیص ساده کرنومتر
+             // رنگ کرنومتر بعدا توسط JS اعمال میشه، اینجا مهم نیست
+        } else {
+            if (state.currentPhase === 'work') document.body.classList.add('phase-work');
+            else if (state.currentPhase === 'shortBreak') document.body.classList.add('phase-short');
+            else if (state.currentPhase === 'longBreak') document.body.classList.add('phase-long');
+        }
+      }
+    })();
+  </script>
+</head>
+<body class="preload">
+
+  <div class="header-container">
+    <nav class="glass-tabs-container">
+      <div class="active-bubble"></div>
+      <button class="tab active">Pomodoro</button>
+      <button class="tab">Habits</button>
+      <button class="tab">Progress</button>
+    </nav>
+  </div>
+
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal-content glass-effect">
+      <div class="modal-header">
+        <h2>
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          Settings
+        </h2>
+        <button class="close-btn" id="close-settings" title="Close">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="setting-group">
+          <label for="mode-select">Mode:</label>
+          <select id="mode-select" class="custom-select">
+            <option value="pomodoro">Pomodoro Timer</option>
+            <option value="stopwatch">Stopwatch (Count up)</option>
+          </select>
+        </div>
+
+        <div class="setting-group toggle-group">
+            <label for="dark-mode-toggle">Dark mode</label>
+            <label class="switch">
+              <input type="checkbox" id="dark-mode-toggle">
+              <span class="slider round"></span>
+            </label>
+        </div>
+
+        <div id="pomodoro-settings-wrapper">
+          <div class="setting-group">
+            <label for="work-duration">Work Duration:</label>
+            <select id="work-duration" class="custom-select">
+              <option value="10">10 Minutes</option>
+              <option value="15">15 Minutes</option>
+              <option value="25" selected>25 Minutes (Default)</option>
+              <option value="45">45 Minutes</option>
+              <option value="60">60 Minutes</option>
+            </select>
+          </div>
+
+          <div class="setting-group toggle-group">
+            <label for="breaks-toggle">Enable Breaks (Short/Long):</label>
+            <label class="switch">
+              <input type="checkbox" id="breaks-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          
+          <div class="setting-group toggle-group">
+            <label for="autostart-breaks-toggle">Auto-start Breaks:</label>
+            <label class="switch">
+              <input type="checkbox" id="autostart-breaks-toggle" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+          
+          <div class="setting-group">
+            <label for="sound-select">Sound Alert:</label>
+            <select id="sound-select" class="custom-select">
+              <option value="mute">Mute (No Sound)</option>
+              <option value="bell" selected>Soft Bell</option>
+              <option value="digital">Digital Beep</option>
+              <option value="bird">Bird Chirp</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="save-settings-btn" id="save-settings">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+
+    <div id="pomodoro-view" class="view-section active-view">
+      <section class="timer-section">
+
+        <div class="timer-header glass-pill">
+          <span class="locked-task-label">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            Focus: <strong id="current-task-name">Nothing</strong>
+          </span>
+          <button class="icon-btn settings-btn" title="Settings">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          </button>
+        </div>
+
+        <div class="session-tracker" id="session-tracker">
+          <span id="current-phase">Work 1/4</span>
+          <span id="next-phase">Next: Short Break</span>
+        </div>
+
+        <div class="timer-circle">
+          <svg class="progress-ring" width="250" height="250">
+            <circle class="progress-ring-track" stroke-width="8" fill="transparent" r="110" cx="125" cy="125"/>
+            <circle class="progress-ring-circle" stroke-width="10" fill="transparent" r="110" cx="125" cy="125"/>
+          </svg>
+          <span class="time-display" id="time-left">25:00</span>
+        </div>
+
+        <div class="timer-controls glass-pill">
+          <button class="icon-btn reset-btn" id="reset-btn" title="Reset (Double click for deep reset)">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+          
+          <button class="start-btn" id="start-btn">
+             <span class="btn-text">Start</span>
+          </button>
+          
+          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="tasks-section">
+        <div class="task-list-container">
+          <div id="guide-text" class="guide-text">
+              Your new tasks will appear here...
+          </div>
+        </div>
+          
+        <div class="add-task-area glass-pill">
+          <input type="text" placeholder="Add a new task..." class="task-input" maxlength="60">
+          <button class="add-btn">Add</button>
+        </div>
+      </section>
+    </div>
+      
+    <div id="habits-view" class="view-section" style="display: none;">
+      <div class="glass-pill placeholder-box">
+        <h2>🌱 Habits Tracker</h2>
+        <p>This section is under construction...</p>
+      </div>
+    </div>
+
+    <div id="progress-view" class="view-section" style="display: none;">
+      <div class="glass-pill placeholder-box">
+        <h2>📊 Your Progress</h2>
+        <p>This section is under construction...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
