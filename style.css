@@ -352,11 +352,12 @@ svg.phase-icon {
   padding-bottom: 30px;
   margin-bottom: 20px;
   overflow-y: auto;
-  -webkit-mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 90%, transparent 100%);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  
+  /* افکت محو شدن بالا و پایین */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
 }
 
 .task-list-container.is-scrolled {
@@ -780,3 +781,351 @@ body[data-theme="dark"].phase-work .start-btn { background-color: #fb7185; color
 body[data-theme="dark"].phase-short .start-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
 body[data-theme="dark"].phase-long .start-btn { background-color: #60a5fa; color: #0f172a; border: none; }
 body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; color: #0f172a; border: none; }
+
+/* --- FILTER NAV (Mini Version of Top Nav) --- */
+.filter-nav-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 40px;
+  padding: 4px;
+  width: 100%;
+  margin-bottom: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.filter-scroll-area {
+  display: flex;
+  overflow-x: auto;
+  flex: 1;
+  gap: 5px;
+  scrollbar-width: none; /* مخفی کردن اسکرول */
+  padding-right: 10px;
+  z-index: 1; /* روی حباب قرار بگیرد */
+}
+.filter-scroll-area::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 30px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.filter-btn.active {
+  color: white;
+}
+
+/* حباب متحرک فیلتر */
+.filter-bubble {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  height: calc(100% - 8px);
+  background: #2b2d42; /* پیش‌فرض */
+  border-radius: 30px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  width: 0; /* با JS تنظیم می‌شود */
+}
+
+.add-tag-filter-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 5px;
+  cursor: pointer;
+  border-left: 1px solid rgba(255,255,255,0.3);
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+}
+.add-tag-filter-btn:hover { color: #2b2d42; }
+
+/* --- DATE HEADERS --- */
+.date-header {
+  width: 100%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #94a3b8;
+  margin: 15px 0 8px 0;
+  padding-left: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.date-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255, 0.3);
+}
+
+/* --- TAG STYLES --- */
+.tag-input {
+  width: 90px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.3);
+  padding: 0 10px;
+  font-size: 0.85rem;
+  color: #334155;
+  outline: none;
+}
+.tags-list-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+/* استایل پایه تگ */
+.tag-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2e8f0;
+  color: #475569;
+}
+
+/* حالت حذف (در مودال Manage Tags) */
+.tag-chip.deletable:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #ef4444;
+  text-decoration: line-through;
+}
+
+/* حالت انتخاب (در مودال Edit Tag) - درخواستت برای رنگ زرد */
+.tag-chip.selectable:hover {
+  background: #fef3c7; /* زرد روشن */
+  border-color: #f59e0b; /* زرد پررنگ */
+  color: #d97706;
+  transform: scale(1.05); /* کمی بزرگ شدن به جای خط خوردن */
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* دارک مود تگ‌ها */
+body[data-theme="dark"] .tag-chip { background: rgba(255,255,255,0.1); color: #cbd5e1; }
+
+/* --- DARK MODE UPDATES --- */
+body[data-theme="dark"] .filter-nav-container { background: rgba(30, 41, 59, 0.4); border-color: rgba(255,255,255,0.1); }
+body[data-theme="dark"] .filter-btn { color: #94a3b8; }
+body[data-theme="dark"] .filter-btn.active { color: #ffffff; }
+body[data-theme="dark"] .tag-input { color: #f8fafc; }
+body[data-theme="dark"] .add-tag-filter-btn { color: #94a3b8; }
+body[data-theme="dark"] .date-header { color: #64748b; }
+
+/* --- FILTER NAV REVISED --- */
+.filter-nav-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.manage-tags-btn {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.manage-tags-btn:hover {
+  background: white;
+  color: #2b2d42;
+  transform: scale(1.1);
+}
+
+/* ناحیه اسکرول شونده */
+.filter-scroll-area {
+  position: relative; /* برای اینکه حباب نسبت به این حرکت کند */
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  flex: 1;
+  gap: 5px;
+  scrollbar-width: none;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.filter-scroll-area::-webkit-scrollbar { display: none; }
+
+.filter-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 30px;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.3s;
+  z-index: 2; /* روی حباب */
+  position: relative;
+}
+
+.filter-btn.active {
+  color: white;
+}
+
+/* حباب داخل اسکرول */
+.filter-bubble {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: calc(100% - 10px);
+  background: #2b2d42;
+  border-radius: 30px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* --- ADD TASK AREA FIX --- */
+.add-task-area {
+  display: flex;
+  width: 100%;
+  padding: 6px; /* پدینگ یکدست */
+  align-items: center;
+  gap: 8px; /* فاصله بین المان‌ها */
+}
+
+.task-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  outline: none;
+  color: #334155;
+  min-width: 0; /* جلوگیری از بیرون زدگی */
+}
+
+.add-btn {
+  flex-shrink: 0; /* جلوگیری از تغییر سایز دکمه */
+  padding: 10px 25px;
+}
+
+/* --- ADD TAG ROW IN MODAL --- */
+.add-tag-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* --- CONFIRM MODAL TEXT --- */
+#confirm-message {
+  font-size: 1.1rem;
+}
+body[data-theme="dark"] #confirm-message { color: white; }
+
+/* --- ADAPTIVE COLORS FIX (Including new elements) --- */
+/* Work */
+body.phase-work .filter-bubble, 
+body.phase-work .manage-tags-btn:hover { background-color: #f43f5e; color: white; border-color: #f43f5e; }
+
+/* Short Break */
+body.phase-short .filter-bubble, 
+body.phase-short .manage-tags-btn:hover { background-color: #14b8a6; color: white; border-color: #14b8a6; }
+
+/* Long Break */
+body.phase-long .filter-bubble, 
+body.phase-long .manage-tags-btn:hover { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+
+/* Stopwatch */
+body.phase-stopwatch .filter-bubble, 
+body.phase-stopwatch .manage-tags-btn:hover { background-color: #8b5cf6; color: white; border-color: #8b5cf6; }
+
+/* Dark mode fix for filter nav */
+body[data-theme="dark"] .manage-tags-btn { color: #94a3b8; border-color: rgba(255,255,255,0.1); }
+body[data-theme="dark"] .filter-scroll-area { background: rgba(30, 41, 59, 0.4); border-color: rgba(255,255,255,0.1); }
+
+/* اصلاح رنگ متن تسک در دارک مود */
+body[data-theme="dark"] .task-item {
+    color: #f1f5f9; /* سفید یخی */
+}
+body[data-theme="dark"] .task-info span {
+    color: #f1f5f9;
+}
+/* دکمه‌ها در دارک مود */
+body[data-theme="dark"] .done-btn, 
+body[data-theme="dark"] .remove-btn, 
+body[data-theme="dark"] .focus-btn,
+body[data-theme="dark"] .edit-tag-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+/* --- COMPACT TASK ACTIONS --- */
+.task-actions {
+  display: flex;
+  gap: 6px; /* فاصله کمتر */
+  opacity: 0.6; /* در حالت عادی کمرنگ */
+  transition: opacity 0.2s;
+}
+
+.task-item:hover .task-actions {
+  opacity: 1; /* با هاور پررنگ میشه */
+}
+
+.done-btn, .remove-btn, .focus-btn, .edit-tag-btn {
+  width: 28px; /* کوچک‌تر */
+  height: 28px;
+  border-radius: 8px; /* کمی مربعی‌تر و مدرن */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.2);
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.done-btn:hover { background: #10b981; color: white; border-color: #10b981; transform: translateY(-2px); }
+.remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; transform: translateY(-2px); }
+/* دکمه فوکوس (همون آبی بمونه) */
+.focus-btn:hover { 
+  background: #3b82f6; 
+  color: white; 
+  border-color: #3b82f6; 
+  transform: translateY(-2px); 
+}
+
+/* دکمه ادیت تگ (زرد/نارنجی جذاب) 🏷️ */
+.edit-tag-btn:hover { 
+  background: #f59e0b; /* رنگ Amber هماهنگ با تگ‌ها */
+  color: white; 
+  border-color: #f59e0b; 
+  transform: translateY(-2px); 
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* آیکون‌ها رو کمی کوچک‌تر کنیم */
+.task-actions svg { width: 16px; height: 16px; }

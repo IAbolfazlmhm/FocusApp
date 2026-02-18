@@ -166,17 +166,68 @@
       </section>
 
       <section class="tasks-section">
+        
+        <div class="filter-nav-wrapper">
+            <button class="icon-btn manage-tags-btn" id="manage-tags-btn" title="Manage Tags">
+                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            
+            <div class="filter-scroll-area" id="filter-list">
+                <div class="filter-bubble"></div>
+                </div>
+        </div>
+
         <div class="task-list-container">
           <div id="guide-text" class="guide-text">
-              Your new tasks will appear here...
+              Your tasks will be grouped by date here...
           </div>
         </div>
           
         <div class="add-task-area glass-pill">
+          <div class="tag-selector-wrapper">
+             <input type="text" placeholder="#Tag" class="tag-input" id="new-task-tag" list="tags-datalist" maxlength="15">
+             <datalist id="tags-datalist">
+               </datalist>
+          </div>
           <input type="text" placeholder="Add a new task..." class="task-input" maxlength="60">
           <button class="add-btn">Add</button>
         </div>
       </section>
+
+    <div class="modal-overlay" id="tags-modal">
+      <div class="modal-content glass-effect">
+          <div class="modal-header">
+              <h2>🏷️ Manage Tags</h2>
+              <button class="close-btn" id="close-tags-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div class="modal-body">
+              <div class="add-tag-row">
+                  <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select" style="flex:1;">
+                  <button id="manage-add-tag-btn" class="add-btn" style="padding: 8px 15px;">Add</button>
+              </div>
+              <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.2); margin: 15px 0;">
+              <div id="tags-management-list" class="tags-list-grid"></div>
+              <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px; text-align: center;">Click to delete.</p>
+          </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="confirm-modal">
+        <div class="modal-content glass-effect" style="max-width: 300px; text-align: center;">
+            <h3 id="confirm-message" style="margin-bottom: 20px; color: #2b2d42;">Are you sure?</h3>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="confirm-yes-btn" class="add-btn" style="background: #ef4444;">Yes, Delete</button>
+                <button id="confirm-no-btn" class="add-btn" style="background: #64748b;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="edit-tag-modal">
+        <div class="modal-content glass-effect" style="max-width: 300px;">
+            <h3 style="margin-bottom: 15px;">Set Tag</h3>
+            <div id="edit-tag-list" class="tags-list-grid"></div>
+            <button id="close-edit-tag" class="add-btn" style="width:100%; margin-top:15px; background:#64748b;">Cancel</button>
+        </div>
     </div>
       
     <div id="habits-view" class="view-section" style="display: none;">

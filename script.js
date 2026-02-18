@@ -404,104 +404,247 @@ if (skipBtn) {
 }
 
 // ==========================================
-// 6. TASKS LOGIC
+// 6. TASKS LOGIC (FINAL POLISHED VERSION)
 // ==========================================
 let tasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
 let focusedTaskId = JSON.parse(localStorage.getItem('focusedTaskId')) || null;
+let savedTags = JSON.parse(localStorage.getItem('focusTagsList')) || ['Work', 'Study', 'Personal'];
+let currentFilter = 'all';
+
+// DOM Elements
 const taskInput = document.querySelector('.task-input');
+const tagInput = document.getElementById('new-task-tag');
 const addBtn = document.querySelector('.add-btn');
 const taskListContainer = document.querySelector('.task-list-container');
 const tasksSection = document.querySelector('.tasks-section');
 const currentTaskNameEl = document.getElementById('current-task-name');
+const filterListEl = document.getElementById('filter-list');
+const filterBubble = document.querySelector('.filter-bubble');
+const manageTagsBtn = document.getElementById('manage-tags-btn');
+const tagsModal = document.getElementById('tags-modal');
+const closeTagsModal = document.getElementById('close-tags-modal');
+const tagsManagementList = document.getElementById('tags-management-list');
+const tagsDatalist = document.getElementById('tags-datalist');
+const manageAddTagBtn = document.getElementById('manage-add-tag-btn');
+const manageNewTagInput = document.getElementById('manage-new-tag-input');
+// Confirm Modal Elements
+const confirmModal = document.getElementById('confirm-modal');
+const confirmMsg = document.getElementById('confirm-message');
+const confirmYes = document.getElementById('confirm-yes-btn');
+const confirmNo = document.getElementById('confirm-no-btn');
+let confirmCallback = null;
+// Edit Tag Modal Elements
+const editTagModal = document.getElementById('edit-tag-modal');
+const editTagList = document.getElementById('edit-tag-list');
+const closeEditTagBtn = document.getElementById('close-edit-tag');
+let editingTaskId = null;
 
-function saveTasks() { localStorage.setItem('focusTasks', JSON.stringify(tasks)); localStorage.setItem('focusedTaskId', JSON.stringify(focusedTaskId)); }
+// Icons
+const iconTag = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
 
-function formatTaskTime(totalSeconds) {
+// --- CORE FUNCTIONS ---
+
+function saveTasks() { 
+  localStorage.setItem('focusTasks', JSON.stringify(tasks)); 
+  localStorage.setItem('focusedTaskId', JSON.stringify(focusedTaskId)); 
+  localStorage.setItem('focusTagsList', JSON.stringify(savedTags));
+}
+
+function formatTaskTime(totalSeconds) { 
   if (totalSeconds === 0) return ''; 
-  const m = Math.floor(totalSeconds / 60);
-  const s = totalSeconds % 60;
-  return `${iconClock} ${m}m ${s}s`;
+  const m = Math.floor(totalSeconds / 60); 
+  const s = totalSeconds % 60; 
+  return `${iconClock} ${m}m ${s}s`; 
+}
+
+function getRelativeDate(timestamp) {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.toDateString() === now.toDateString()) return 'Today';
+  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// --- CUSTOM CONFIRM DIALOG ---
+function customConfirm(message, onConfirm) {
+  confirmMsg.textContent = message;
+  confirmCallback = onConfirm;
+  confirmModal.classList.add('show');
+}
+confirmYes.onclick = () => { if(confirmCallback) confirmCallback(); confirmModal.classList.remove('show'); };
+confirmNo.onclick = () => { confirmModal.classList.remove('show'); };
+
+
+// --- RENDER LOGIC ---
+
+// رندر کردن اولیه فیلترها (فقط وقتی تگ جدید اضافه/حذف میشه صدا زده میشه)
+function renderFilters() {
+  // حفظ موقعیت اسکرول فعلی
+  const scrollPos = filterListEl.scrollLeft;
+
+  let html = `
+    <div class="filter-bubble"></div>
+    <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>
+    <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active">Active</button>
+    <button class="filter-btn ${currentFilter === 'completed' ? 'active' : ''}" data-filter="completed">Done</button>
+  `;
+  
+  savedTags.forEach(tag => {
+    html += `<button class="filter-btn ${currentFilter === tag ? 'active' : ''}" data-filter="${tag}">#${tag}</button>`;
+  });
+
+  filterListEl.innerHTML = html;
+  updateTagsDatalist();
+
+  // اضافه کردن ایونت لیسنر (بدون رندر مجدد HTML!)
+  const btns = filterListEl.querySelectorAll('.filter-btn');
+  btns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      playUI('click');
+      currentFilter = btn.dataset.filter;
+      
+      // 🌟 تغییر کلیدی: به جای رندر مجدد، فقط کلاس‌ها رو عوض می‌کنیم
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      updateFilterBubble(); // انیمیشن نرم حباب
+      renderTasks(); // فقط تسک‌ها رو آپدیت کن
+    });
+  });
+
+  // بازیابی اسکرول و آپدیت حباب
+  filterListEl.scrollLeft = scrollPos;
+  setTimeout(() => {
+    updateFilterBubble();
+    updatePhaseColors(); // اعمال رنگ فاز به حباب
+  }, 50);
+}
+
+function updateFilterBubble() {
+  const activeBtn = filterListEl.querySelector('.filter-btn.active');
+  const bubble = filterListEl.querySelector('.filter-bubble');
+  
+  if (activeBtn && bubble) {
+    bubble.style.width = `${activeBtn.offsetWidth}px`;
+    bubble.style.left = `${activeBtn.offsetLeft}px`;
+    
+    // اسکرول خودکار برای دیده شدن دکمه فعال
+    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+function updateTagsDatalist() {
+  tagsDatalist.innerHTML = savedTags.map(tag => `<option value="${tag}">`).join('');
 }
 
 function renderTasks() {
-  const existingTasks = taskListContainer.querySelectorAll('.task-item');
-  existingTasks.forEach(task => task.remove());
+  taskListContainer.innerHTML = ''; 
+  
+  let filtered = tasks;
+  if (currentFilter === 'active') filtered = tasks.filter(t => !t.completed);
+  else if (currentFilter === 'completed') filtered = tasks.filter(t => t.completed);
+  else if (currentFilter !== 'all') filtered = tasks.filter(t => t.tag === currentFilter);
 
-  tasks.forEach(task => {
+  filtered.sort((a, b) => b.createdAt - a.createdAt);
+
+  let lastDateHeader = null;
+
+  filtered.forEach(task => {
+    const dateLabel = getRelativeDate(task.createdAt);
+    if (dateLabel !== lastDateHeader) {
+      const header = document.createElement('div');
+      header.className = 'date-header';
+      header.textContent = dateLabel;
+      taskListContainer.appendChild(header);
+      lastDateHeader = dateLabel;
+    }
+
     const taskDiv = document.createElement('div');
     taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
     
+    // تگ تسک
+    const tagHTML = task.tag ? `<span class="task-tag">#${task.tag}</span>` : '';
+
     taskDiv.innerHTML = `
       <div class="task-info">
+        ${tagHTML}
         <span>${task.text}</span>
         <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
       </div>
       <div class="task-actions">
-        <button class="focus-btn" title="Focus"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>
+        <button class="focus-btn edit-tag-btn" title="Edit Tag">${iconTag}</button>
+        
+        <button class="focus-btn focus-action" title="Focus"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>
         <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
         <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
       </div>
     `;
 
-    taskDiv.querySelector('.focus-btn').addEventListener('click', () => toggleFocus(task.id));
+    taskDiv.querySelector('.focus-action').addEventListener('click', () => toggleFocus(task.id));
     taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
-    taskDiv.querySelector('.remove-btn').addEventListener('click', () => removeTask(task.id));
+    taskDiv.querySelector('.remove-btn').addEventListener('click', () => {
+      customConfirm("Delete this task?", () => removeTask(task.id));
+    });
+    // باز کردن مودال ادیت تگ برای این تسک
+    taskDiv.querySelector('.edit-tag-btn').addEventListener('click', () => openEditTagModal(task.id));
 
     taskListContainer.appendChild(taskDiv);
   });
 
   if (focusedTaskId) {
     tasksSection.classList.add('zen-mode');
-    const focusedTask = tasks.find(t => t.id === focusedTaskId);
-    currentTaskNameEl.textContent = focusedTask ? focusedTask.text : 'Nothing';
+    const t = tasks.find(x => x.id === focusedTaskId);
+    currentTaskNameEl.textContent = t ? t.text : 'Nothing';
+    taskListContainer.scrollTop = 0;
   } else {
     tasksSection.classList.remove('zen-mode');
     currentTaskNameEl.textContent = 'Nothing';
   }
-
-  let guideTextEl = document.getElementById('guide-text');
-  if (tasks.length === 0) {
-    guideTextEl.innerHTML = `
-      <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; margin-top: 40px; opacity: 0.7;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 60px; height: 60px; margin-bottom: 10px;"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
-        <p>No tasks yet. Take a deep breath and start planning!</p>
-      </div>`;
-    guideTextEl.style.display = 'block';
-  } else { guideTextEl.style.display = 'none'; }
+  
+  if (filtered.length === 0) {
+    taskListContainer.innerHTML = `<div class="empty-state" style="opacity:0.7;text-align:center;margin-top:40px;"><p>No tasks found.</p></div>`;
+  }
 }
 
-// اسکرول افکت
-taskListContainer.addEventListener('scroll', () => {
-  if (taskListContainer.scrollTop > 5) taskListContainer.classList.add('is-scrolled');
-  else taskListContainer.classList.remove('is-scrolled');
-});
+// --- ACTIONS ---
 
 function addTask() {
   const text = taskInput.value.trim();
-  if (!text || !/[a-zA-Z0-9\u0600-\u06FF]/.test(text)) { showToast("Please enter a valid task."); return; }
-  const newTask = { id: Date.now(), text: text, completed: false, timeSpent: 0 };
-  tasks.push(newTask); playUI('click'); saveTasks(); renderTasks(); taskInput.value = '';
+  const tagRaw = tagInput.value.trim();
+  const tag = tagRaw ? tagRaw.charAt(0).toUpperCase() + tagRaw.slice(1) : null;
+
+  if (!text) { showToast('Please enter a valid task.', 'warning'); return; }
+
+  if (tag && !savedTags.includes(tag)) {
+    savedTags.push(tag);
+  }
+
+  tasks.push({ id: Date.now(), text, tag, completed: false, timeSpent: 0, createdAt: Date.now() });
+
+  playUI('click'); 
+  saveTasks(); 
+  renderFilters(); 
+  renderTasks(); 
+  taskInput.value = '';
 }
 
 function removeTask(id) {
-  playUI('trash'); tasks = tasks.filter(task => task.id !== id);
+  playUI('trash'); tasks = tasks.filter(t => t.id !== id);
   if (focusedTaskId === id) focusedTaskId = null;
   saveTasks(); renderTasks(); checkAutoPause();
 }
 
 function toggleCompleted(id) {
-  const task = tasks.find(t => t.id === id);
-  if (task) {
-    task.completed = !task.completed;
-    if (task.completed) { playUI('success'); if (focusedTaskId === id) focusedTaskId = null; }
-    saveTasks(); renderTasks(); checkAutoPause();
-  }
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.completed = !t.completed; t.completedAt = t.completed ? Date.now() : null; if (t.completed) { playUI('success'); if(focusedTaskId===id) focusedTaskId=null; } saveTasks(); renderTasks(); checkAutoPause(); }
 }
 
 function toggleFocus(id) {
-  const task = tasks.find(t => t.id === id);
-  if (task && task.completed) { showToast("✅ This task is already completed! You can't focus on it."); return; }
-  if (focusedTaskId === id) focusedTaskId = null; else focusedTaskId = id;
+  const t = tasks.find(x => x.id === id);
+  if (t && t.completed) { showToast('Task completed!', 'warning'); return; }
+  focusedTaskId = (focusedTaskId === id) ? null : id;
   playUI('click'); saveTasks(); renderTasks(); checkAutoPause();
 }
 
@@ -514,8 +657,97 @@ function checkAutoPause() {
   updateDisplay();
 }
 
+// --- TAG MANAGEMENT & EDIT ---
+
+manageTagsBtn.addEventListener('click', () => {
+  tagsModal.classList.add('show');
+  renderTagsManagement();
+});
+
+closeTagsModal.addEventListener('click', () => tagsModal.classList.remove('show'));
+
+// افزودن تگ جدید از داخل مودال
+manageAddTagBtn.addEventListener('click', () => {
+    const newTagName = manageNewTagInput.value.trim();
+    if(newTagName && !savedTags.includes(newTagName)) {
+        savedTags.push(newTagName.charAt(0).toUpperCase() + newTagName.slice(1));
+        saveTasks();
+        renderTagsManagement();
+        renderFilters();
+        manageNewTagInput.value = '';
+        showToast('Tag added', 'success');
+    }
+});
+
+// مودال مدیریت (حذف) -> قرمز
+function renderTagsManagement() {
+  tagsManagementList.innerHTML = '';
+  savedTags.forEach(tag => {
+    const chip = document.createElement('div');
+    // کلاس deletable اضافه شد
+    chip.className = 'tag-chip deletable'; 
+    chip.textContent = `#${tag}`;
+    chip.addEventListener('click', () => {
+      customConfirm(`Delete tag "${tag}"?`, () => {
+        savedTags = savedTags.filter(t => t !== tag);
+        if (currentFilter === tag) currentFilter = 'all';
+        saveTasks();
+        renderTagsManagement();
+        renderFilters();
+        renderTasks();
+      });
+    });
+    tagsManagementList.appendChild(chip);
+  });
+}
+
+// مودال انتخاب (ادیت) -> زرد
+function openEditTagModal(taskId) {
+    editingTaskId = taskId;
+    editTagList.innerHTML = '';
+    
+    // گزینه No Tag
+    const noTagBtn = document.createElement('div');
+    noTagBtn.className = 'tag-chip selectable'; // کلاس selectable اضافه شد
+    noTagBtn.textContent = '❌ No Tag';
+    noTagBtn.onclick = () => setTaskTag(null);
+    editTagList.appendChild(noTagBtn);
+
+    savedTags.forEach(tag => {
+        const btn = document.createElement('div');
+        btn.className = 'tag-chip selectable'; // کلاس selectable اضافه شد
+        btn.textContent = `#${tag}`;
+        btn.onclick = () => setTaskTag(tag);
+        editTagList.appendChild(btn);
+    });
+
+    editTagModal.classList.add('show');
+}
+
+function setTaskTag(tag) {
+    const task = tasks.find(t => t.id === editingTaskId);
+    if (task) {
+        task.tag = tag;
+        saveTasks();
+        renderTasks();
+        // همچنین اگر فیلتر فعلی روی تگ بود، رفرش کن
+        if (currentFilter !== 'all' && currentFilter !== 'active' && currentFilter !== 'completed') {
+             renderTasks(); // تا شاید تسک از لیست حذف بشه اگر تگش عوض شد
+        }
+    }
+    editTagModal.classList.remove('show');
+}
+
+closeEditTagBtn.addEventListener('click', () => editTagModal.classList.remove('show'));
+
+// Event Listeners
 addBtn.addEventListener('click', addTask);
 taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
+tagInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
+
+// Init
+renderFilters();
+renderTasks();
 
 // ==========================================
 // 7. SETTINGS
