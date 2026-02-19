@@ -7,6 +7,10 @@ let timerId = null;
 let isRunning = false;
 let currentPhase = 'work'; // 'work', 'shortBreak', 'longBreak'
 let completedSessions = 0; 
+let currentSort = 'newest'; // 'newest', 'az', 'tag', 'time'
+let sortOrder = 'desc'; // 'asc' (صعودی) یا 'desc' (نزولی)
+const sortDropdown = document.getElementById('sort-dropdown');
+const customTagDropdown = document.getElementById('custom-tag-dropdown');
 
 // تابع نمایش نوتیفیکیشن (جایگزین Alert)
 // تابع نمایش نوتیفیکیشن (نسخه شیشه‌ای و محدود)
@@ -480,8 +484,8 @@ confirmNo.onclick = () => { confirmModal.classList.remove('show'); };
 // --- RENDER LOGIC ---
 
 // رندر کردن اولیه فیلترها (فقط وقتی تگ جدید اضافه/حذف میشه صدا زده میشه)
+// رندر کردن اولیه فیلترها
 function renderFilters() {
-  // حفظ موقعیت اسکرول فعلی
   const scrollPos = filterListEl.scrollLeft;
 
   let html = `
@@ -496,30 +500,34 @@ function renderFilters() {
   });
 
   filterListEl.innerHTML = html;
-  updateTagsDatalist();
 
-  // اضافه کردن ایونت لیسنر (بدون رندر مجدد HTML!)
   const btns = filterListEl.querySelectorAll('.filter-btn');
   btns.forEach(btn => {
     btn.addEventListener('click', (e) => {
       playUI('click');
       currentFilter = btn.dataset.filter;
       
-      // 🌟 تغییر کلیدی: به جای رندر مجدد، فقط کلاس‌ها رو عوض می‌کنیم
       btns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       
-      updateFilterBubble(); // انیمیشن نرم حباب
-      renderTasks(); // فقط تسک‌ها رو آپدیت کن
+      updateFilterBubble(); 
+      renderTasks(); 
     });
   });
 
-  // بازیابی اسکرول و آپدیت حباب
   filterListEl.scrollLeft = scrollPos;
-  setTimeout(() => {
-    updateFilterBubble();
-    updatePhaseColors(); // اعمال رنگ فاز به حباب
-  }, 50);
+  
+  // 🌟 فیکس حباب: جلوگیری از انیمیشن اضافی موقع رفرش
+  const bubble = filterListEl.querySelector('.filter-bubble');
+  if (bubble) {
+      bubble.style.transition = 'none'; // 1. انیمیشن رو خاموش کن
+      updateFilterBubble();             // 2. حباب رو ببر سر جاش
+      updatePhaseColors();              // 3. رنگش رو تنظیم کن
+      
+      void bubble.offsetWidth;          // 4. به مرورگر بگو همین الان تغییرات رو اعمال کن (Force Reflow)
+      
+      bubble.style.transition = '';     // 5. انیمیشن رو دوباره روشن کن برای کلیک‌های بعدی کاربر
+  }
 }
 
 function updateFilterBubble() {
@@ -535,10 +543,6 @@ function updateFilterBubble() {
   }
 }
 
-function updateTagsDatalist() {
-  tagsDatalist.innerHTML = savedTags.map(tag => `<option value="${tag}">`).join('');
-}
-
 function renderTasks() {
   taskListContainer.innerHTML = ''; 
   
@@ -547,19 +551,63 @@ function renderTasks() {
   else if (currentFilter === 'completed') filtered = tasks.filter(t => t.completed);
   else if (currentFilter !== 'all') filtered = tasks.filter(t => t.tag === currentFilter);
 
-  filtered.sort((a, b) => b.createdAt - a.createdAt);
+  // 🌟 ۱. اعمال منطق مرتب‌سازی پیشرفته (با پشتیبانی از Asc/Desc)
+  filtered.sort((a, b) => {
+      let val = 0;
+      if (currentSort === 'newest') val = a.createdAt - b.createdAt; 
+      else if (currentSort === 'az') val = a.text.localeCompare(b.text);
+      else if (currentSort === 'tag') val = (a.tag || '').localeCompare(b.tag || '');
+      else if (currentSort === 'time') val = a.timeSpent - b.timeSpent;
+
+      // اگر sortOrder مساوی asc بود عادی مرتب کن، اگر desc بود برعکسش کن
+      return sortOrder === 'asc' ? val : -val;
+  });
 
   let lastDateHeader = null;
+  let isFirstHeader = true;
 
   filtered.forEach(task => {
     const dateLabel = getRelativeDate(task.createdAt);
+    
+    // 🌟 ۲. ساخت هدر تاریخ (دکمه سمت چپ، تاریخ، خط افقی)
     if (dateLabel !== lastDateHeader) {
       const header = document.createElement('div');
       header.className = 'date-header';
-      header.textContent = dateLabel;
+      header.dataset.dateGroup = dateLabel;
+
+      // اضافه کردن دکمه Sort اول از همه (سمت چپ) فقط برای اولین تاریخ
+      if (isFirstHeader) {
+          const sortBtn = document.createElement('button');
+          sortBtn.className = 'sort-btn-inline';
+          // آیکون بدون متن
+          sortBtn.innerHTML = `<svg class="ui-icon" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>`;
+          
+          sortBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              header.appendChild(sortDropdown); // منو رو میاره زیر دکمه
+              updateSortUI(); // تنظیم فلش‌ها قبل از باز شدن
+              sortDropdown.classList.toggle('show');
+          });
+          
+          header.appendChild(sortBtn);
+          isFirstHeader = false;
+      }
+      
+      // متن تاریخ
+      const titleSpan = document.createElement('span');
+      titleSpan.textContent = dateLabel;
+      header.appendChild(titleSpan);
+      
+      // خط افقی
+      const line = document.createElement('div');
+      line.className = 'date-header-line';
+      header.appendChild(line);
+
       taskListContainer.appendChild(header);
       lastDateHeader = dateLabel;
     }
+
+    // ... ادامه ساخت taskDiv ...
 
     const taskDiv = document.createElement('div');
     taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
@@ -603,8 +651,18 @@ function renderTasks() {
     currentTaskNameEl.textContent = 'Nothing';
   }
   
+  // --- Empty State (فنجان قهوه و متن هوشمند) ---
   if (filtered.length === 0) {
-    taskListContainer.innerHTML = `<div class="empty-state" style="opacity:0.7;text-align:center;margin-top:40px;"><p>No tasks found.</p></div>`;
+    let msg = "No tasks yet. Take a deep breath and start planning!";
+    if (currentFilter === 'active') msg = "No active tasks.";
+    else if (currentFilter === 'completed') msg = "No completed tasks.";
+    else if (currentFilter !== 'all') msg = `No tasks found for #${currentFilter}.`;
+
+    taskListContainer.innerHTML = `
+      <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; margin-top: 40px; opacity: 0.7;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 60px; height: 60px; margin-bottom: 10px;"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+        <p>${msg}</p>
+      </div>`;
   }
 }
 
@@ -664,6 +722,14 @@ manageTagsBtn.addEventListener('click', () => {
   renderTagsManagement();
 });
 
+// پشتیبانی از Enter در بخش ساخت تگ جدید در مودال مدیریت
+manageNewTagInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault(); // جلوگیری از رفرش ناخواسته فرم
+        manageAddTagBtn.click(); // شبیه‌سازی کلیک روی دکمه Add
+    }
+});
+
 closeTagsModal.addEventListener('click', () => tagsModal.classList.remove('show'));
 
 // افزودن تگ جدید از داخل مودال
@@ -684,13 +750,24 @@ function renderTagsManagement() {
   tagsManagementList.innerHTML = '';
   savedTags.forEach(tag => {
     const chip = document.createElement('div');
-    // کلاس deletable اضافه شد
-    chip.className = 'tag-chip deletable'; 
+    chip.className = 'tag-chip deletable';
     chip.textContent = `#${tag}`;
+    
     chip.addEventListener('click', () => {
+      // 🌟 فیکس کلمه Undefined: مستقیم از خود متغیر tag استفاده کردیم
       customConfirm(`Delete tag "${tag}"?`, () => {
+        
         savedTags = savedTags.filter(t => t !== tag);
+        
+        // 🌟 فیکس پاک نشدن تگ تسک‌ها: هر تسکی این تگ رو داره، تگش پاک میشه
+        tasks.forEach(t => {
+            if (t.tag === tag) {
+                t.tag = null;
+            }
+        });
+
         if (currentFilter === tag) currentFilter = 'all';
+        
         saveTasks();
         renderTagsManagement();
         renderFilters();
@@ -853,3 +930,105 @@ document.addEventListener('keydown', (event) => {
     if (settingsModal.classList.contains('show')) settingsModal.classList.remove('show');
   }
 });
+
+// --- CUSTOM DROPDOWN LOGIC ---
+function showCustomDropdown() {
+    const val = tagInput.value.toLowerCase().trim();
+    
+    // فیلتر کردن تگ‌هایی که شامل حروف تایپ شده هستن
+    const filteredTags = savedTags.filter(t => t.toLowerCase().includes(val));
+    
+    if (filteredTags.length === 0) {
+        customTagDropdown.classList.remove('show');
+        return;
+    }
+    
+    // ساخت آیتم‌های منو
+    customTagDropdown.innerHTML = filteredTags.map(tag => 
+        `<div class="dropdown-item">#${tag}</div>`
+    ).join('');
+    
+    customTagDropdown.classList.add('show');
+    
+    // کلیک روی هر آیتم
+    customTagDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            // حذف # از اول متن و قرار دادن در اینپوت
+            tagInput.value = item.textContent.replace('#', ''); 
+            customTagDropdown.classList.remove('show');
+            taskInput.focus(); // انتقال خودکار کرسر به بخش نوشتن تسک
+        });
+    });
+};
+
+// نمایش منو موقع فوکوس و تایپ
+tagInput.addEventListener('input', showCustomDropdown);
+tagInput.addEventListener('focus', showCustomDropdown);
+
+// مخفی کردن منو وقتی جای دیگه‌ای کلیک میشه
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.tag-selector-wrapper')) {
+        customTagDropdown.classList.remove('show');
+    }
+});
+
+// لاجیک بسته شدن منوی سورت
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sort-btn-inline') && sortDropdown) {
+        sortDropdown.classList.remove('show');
+    }
+});
+
+// اعمال نوع مرتب‌سازی
+if (sortDropdown) {
+    sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            currentSort = item.dataset.sort;
+            playUI('click');
+            sortDropdown.classList.remove('show');
+            renderTasks();
+        });
+    });
+};
+
+// آپدیت UI منوی کشویی سورت (گذاشتن فلش و رنگ)
+function updateSortUI() {
+    if (!sortDropdown) return;
+    sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        const dirSpan = item.querySelector('.sort-dir');
+        if (item.dataset.sort === currentSort) {
+            item.classList.add('active-sort');
+            dirSpan.textContent = sortOrder === 'asc' ? '↑' : '↓';
+        } else {
+            item.classList.remove('active-sort');
+            dirSpan.textContent = '';
+        }
+    });
+}
+
+// کلیک روی آیتم‌های سورت
+if (sortDropdown) {
+    sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const clickedSort = item.dataset.sort;
+            
+            // اگر کاربر روی همون فیلتری که فعاله دوباره کلیک کرد (مثل دابل کلیک)
+            if (currentSort === clickedSort) {
+                // فقط در این حالت جهتش رو برعکس کن
+                sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                // 🌟 اگر رفت روی یه فیلتر جدید، همیشه برگرد به منطقی‌ترین حالت
+                currentSort = clickedSort;
+                if (clickedSort === 'newest') sortOrder = 'desc'; // جدیدترین‌ها اول
+                else if (clickedSort === 'time') sortOrder = 'desc'; // بیشترین زمان اول
+                else if (clickedSort === 'az') sortOrder = 'desc'; // الف تا ی
+                else if (clickedSort === 'tag') sortOrder = 'desc'; // الفبای تگ‌ها
+            }
+            
+            playUI('click');
+            updateSortUI(); 
+            sortDropdown.classList.remove('show');
+            renderTasks();
+        });
+    });
+};

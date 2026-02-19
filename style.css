@@ -1129,3 +1129,153 @@ body[data-theme="dark"] .edit-tag-btn {
 
 /* آیکون‌ها رو کمی کوچک‌تر کنیم */
 .task-actions svg { width: 16px; height: 16px; }
+
+/* --- CUSTOM TAG DROPDOWN (GLASSMORPHISM) --- */
+.custom-dropdown {
+  position: absolute;
+  bottom: 120%; /* باز شدن به سمت بالا برای جلوگیری از رفتن زیر صفحه */
+  left: 0;
+  width: 150px;
+  max-height: 115px;
+  overflow-y: auto;
+  border-radius: 15px;
+  z-index: 1000;
+  display: none; /* پیش‌فرض مخفی */
+  flex-direction: column;
+  padding: 5px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.custom-dropdown.show {
+  display: flex;
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* اسکرول‌بار ظریف برای منوی کشویی */
+.custom-dropdown::-webkit-scrollbar { width: 10px; }
+.custom-dropdown::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+.custom-dropdown::-webkit-scrollbar-thumb { 
+  background: rgba(0,0,0,0.2); 
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.dropdown-item {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+/* کوچک کردن آیکون‌های داخل منو */
+.dropdown-item svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #2b2d42;
+  transform: translateX(3px);
+}
+
+/* دارک مود منوی کشویی */
+body[data-theme="dark"] .custom-dropdown {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb { 
+  background: rgba(255,255,255,0.25); 
+  background-clip: content-box; 
+}
+body[data-theme="dark"] .dropdown-item { color: #94a3b8; }
+body[data-theme="dark"] .dropdown-item:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+
+/* 🌟 فیکس نهایی: حذف رنگ مزاحم اتوفیل کروم در اینپوت‌ها */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: #334155 !important;
+}
+body[data-theme="dark"] input:-webkit-autofill {
+    -webkit-text-fill-color: #f8fafc !important;
+}
+
+/* --- DATE HEADER & SORT BUTTON --- */
+.date-header {
+  position: relative; 
+  width: 100%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #94a3b8;
+  margin: 15px 0 8px 0;
+  padding-left: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px; /* فاصله بین دکمه، تاریخ و خط */
+}
+
+/* خط افقی بین تاریخ و دکمه سورت */
+.date-header-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.3);
+  margin: 15px;
+}
+
+.sort-btn-inline {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px; /* راحت‌تر کلیک بشه */
+  border-radius: 6px;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.sort-btn-inline:hover {
+  opacity: 1;
+  color: #2b2d42;
+  background: rgba(0, 0, 0, 0.05); /* یک هاله ملایم موقع هاور */
+}
+
+body[data-theme="dark"] .sort-btn-inline:hover { 
+  color: #f8fafc; 
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* برای اینکه آیتمِ فعال تو منو مشخص باشه */
+.dropdown-item.active-sort {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+body[data-theme="dark"] .dropdown-item.active-sort {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.15);
+}

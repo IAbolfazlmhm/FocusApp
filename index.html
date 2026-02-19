@@ -169,7 +169,7 @@
         
         <div class="filter-nav-wrapper">
             <button class="icon-btn manage-tags-btn" id="manage-tags-btn" title="Manage Tags">
-                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
             </button>
             
             <div class="filter-scroll-area" id="filter-list">
@@ -182,12 +182,30 @@
               Your tasks will be grouped by date here...
           </div>
         </div>
+
+        <div id="sort-dropdown" class="custom-dropdown glass-effect" style="width: 140px; top: 100%; left: 0; bottom: auto; position: absolute; z-index: 100;">
+            <div class="dropdown-item" data-sort="newest">
+                <svg class="ui-icon" style="width:14px;height:14px;margin-right:8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
+                <span>Newest</span> <span class="sort-dir" style="margin-left:auto; font-size:0.8rem;"></span>
+            </div>
+            <div class="dropdown-item" data-sort="time">
+                <svg class="ui-icon" style="width:14px;height:14px;margin-right:8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14M5 2h14M7 22V16l5-6-5-6V2M17 22V16l-5-6 5-6V2"/></svg> 
+                <span>Time Spent</span> <span class="sort-dir" style="margin-left:auto; font-size:0.8rem;"></span>
+            </div>
+            <div class="dropdown-item" data-sort="az">
+                <svg class="ui-icon" style="width:14px;height:14px;margin-right:8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
+                <span>A-Z</span> <span class="sort-dir" style="margin-left:auto; font-size:0.8rem;"></span>
+            </div>
+            <div class="dropdown-item" data-sort="tag">
+                <svg class="ui-icon" style="width:14px;height:14px;margin-right:8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
+                <span>By Tag</span> <span class="sort-dir" style="margin-left:auto; font-size:0.8rem;"></span>
+            </div>
+        </div>
           
         <div class="add-task-area glass-pill">
-          <div class="tag-selector-wrapper">
-             <input type="text" placeholder="#Tag" class="tag-input" id="new-task-tag" list="tags-datalist" maxlength="15">
-             <datalist id="tags-datalist">
-               </datalist>
+          <div class="tag-selector-wrapper" style="position: relative;">
+             <input type="text" placeholder="#Tag" class="tag-input" id="new-task-tag" autocomplete="off" maxlength="15">
+             <div id="custom-tag-dropdown" class="custom-dropdown glass-effect"></div>
           </div>
           <input type="text" placeholder="Add a new task..." class="task-input" maxlength="60">
           <button class="add-btn">Add</button>
@@ -197,7 +215,7 @@
     <div class="modal-overlay" id="tags-modal">
       <div class="modal-content glass-effect">
           <div class="modal-header">
-              <h2>🏷️ Manage Tags</h2>
+              <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Manage Tags</h2>
               <button class="close-btn" id="close-tags-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
           <div class="modal-body">
