@@ -543,102 +543,217 @@ function updateFilterBubble() {
   }
 }
 
+// 🌟 متغیر گلوبال برای نگهداری تنظیمات مرتب‌سازیِ هر روز به صورت مجزا
+window.groupSortStates = window.groupSortStates || {};
+
 function renderTasks() {
   taskListContainer.innerHTML = ''; 
-  
+
   let filtered = tasks;
   if (currentFilter === 'active') filtered = tasks.filter(t => !t.completed);
   else if (currentFilter === 'completed') filtered = tasks.filter(t => t.completed);
   else if (currentFilter !== 'all') filtered = tasks.filter(t => t.tag === currentFilter);
 
-  // 🌟 ۱. اعمال منطق مرتب‌سازی پیشرفته (با پشتیبانی از Asc/Desc)
-  filtered.sort((a, b) => {
-      let val = 0;
-      if (currentSort === 'newest') val = a.createdAt - b.createdAt; 
-      else if (currentSort === 'az') val = a.text.localeCompare(b.text);
-      else if (currentSort === 'tag') val = (a.tag || '').localeCompare(b.tag || '');
-      else if (currentSort === 'time') val = a.timeSpent - b.timeSpent;
-
-      // اگر sortOrder مساوی asc بود عادی مرتب کن، اگر desc بود برعکسش کن
-      return sortOrder === 'asc' ? val : -val;
+  // 🌟 ۱. اول از همه، تسک‌ها رو بر اساس روزها دسته‌بندی می‌کنیم
+  const groupedTasks = {};
+  filtered.forEach(task => {
+      const dateLabel = getRelativeDate(task.createdAt);
+      if (!groupedTasks[dateLabel]) groupedTasks[dateLabel] = [];
+      groupedTasks[dateLabel].push(task);
   });
 
-  let lastDateHeader = null;
-  let isFirstHeader = true;
+  // مرتب کردن خودِ روزها (امروز اول باشه، بعد دیروز، بعد...)
+  const sortedDateLabels = Object.keys(groupedTasks).sort((a, b) => {
+      return groupedTasks[b][0].createdAt - groupedTasks[a][0].createdAt;
+  });
 
-  filtered.forEach(task => {
-    const dateLabel = getRelativeDate(task.createdAt);
-    
-    // 🌟 ۲. ساخت هدر تاریخ (دکمه سمت چپ، تاریخ، خط افقی)
-    if (dateLabel !== lastDateHeader) {
+  // 🌟 ۲. حالا روی هر روز به صورت کاملاً مستقل کار می‌کنیم
+  sortedDateLabels.forEach(dateLabel => {
+      
+      // تنظیمات سورت دیفالت برای این روز (اگر قبلاً ست نشده باشه)
+      if (!window.groupSortStates[dateLabel]) {
+          window.groupSortStates[dateLabel] = { type: 'newest', order: 'desc' };
+      }
+      const sortState = window.groupSortStates[dateLabel];
+      let groupTasks = groupedTasks[dateLabel];
+
+      // 🌟 ۳. مرتب‌سازیِ اختصاصی فقط برای تسک‌های همین روز
+      groupTasks.sort((a, b) => {
+          let val = 0;
+          if (sortState.type === 'newest') val = a.createdAt - b.createdAt; 
+          else if (sortState.type === 'az') val = a.text.localeCompare(b.text);
+          else if (sortState.type === 'tag') val = (a.tag || '').localeCompare(b.tag || '');
+          else if (sortState.type === 'time') val = a.timeSpent - b.timeSpent;
+
+          return sortState.order === 'asc' ? val : -val;
+      });
+
+      // 🌟 ۴. ساخت هدر تاریخ
       const header = document.createElement('div');
       header.className = 'date-header';
-      header.dataset.dateGroup = dateLabel;
+      header.style.cursor = 'pointer'; 
+      header.title = "Click to collapse/expand";
 
-      // اضافه کردن دکمه Sort اول از همه (سمت چپ) فقط برای اولین تاریخ
-      if (isFirstHeader) {
-          const sortBtn = document.createElement('button');
-          sortBtn.className = 'sort-btn-inline';
-          // آیکون بدون متن
-          sortBtn.innerHTML = `<svg class="ui-icon" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>`;
-          
-          sortBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              header.appendChild(sortDropdown); // منو رو میاره زیر دکمه
-              updateSortUI(); // تنظیم فلش‌ها قبل از باز شدن
-              sortDropdown.classList.toggle('show');
-          });
-          
-          header.appendChild(sortBtn);
-          isFirstHeader = false;
-      }
+      // دکمه Sort اختصاصی برای این روز
+      const sortBtn = document.createElement('button');
+      sortBtn.className = 'sort-btn-inline';
+      sortBtn.innerHTML = `<svg class="ui-icon" style="width:16px;height:16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>`;
       
-      // متن تاریخ
+      // منوی کشویی اختصاصی برای این روز
+      const localDropdown = document.createElement('div');
+      localDropdown.className = 'custom-dropdown glass-effect';
+      localDropdown.style.cssText = 'width: 140px; top: 100%; left: 0; bottom: auto; position: absolute; z-index: 100;';
+
+      const sortOptions = [
+          { id: 'newest', text: 'Newest', icon: '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>' },
+          { id: 'time', text: 'Time Spent', icon: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>' },
+          { id: 'az', text: 'A-Z', icon: '<polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line>' },
+          { id: 'tag', text: 'By Tag', icon: '<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>' }
+      ];
+
+      localDropdown.innerHTML = sortOptions.map(opt => `
+          <div class="dropdown-item ${sortState.type === opt.id ? 'active-sort' : ''}" data-sort="${opt.id}">
+              <svg class="ui-icon" style="width:14px;height:14px;margin-right:8px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${opt.icon}</svg>
+              <span>${opt.text}</span>
+              <span class="sort-dir" style="margin-left:auto; font-size:0.8rem;">${sortState.type === opt.id ? (sortState.order === 'asc' ? '↑' : '↓') : ''}</span>
+          </div>
+      `).join('');
+
+      // لاجیک کلیک روی سورت‌های این روز
+      localDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const clickedSort = item.dataset.sort;
+
+              if (sortState.type === clickedSort) {
+                  // اگر روی همون کلیک کرد، برعکسش کن
+                  sortState.order = sortState.order === 'asc' ? 'desc' : 'asc';
+              } else {
+                  // اگر گزینه جدید بود، نوع رو عوض کن و به دیفالتِ اون نوع برگرد
+                  sortState.type = clickedSort;
+                  sortState.order = (clickedSort === 'az' || clickedSort === 'tag') ? 'asc' : 'desc';
+              }
+
+              playUI('click');
+              renderTasks(); 
+          });
+      });
+
+      sortBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // بستن بقیه منوهای باز
+          document.querySelectorAll('.custom-dropdown.show').forEach(el => {
+              if(el !== localDropdown) el.classList.remove('show');
+          });
+          localDropdown.classList.toggle('show');
+      });
+
+      header.appendChild(sortBtn);
+      header.appendChild(localDropdown);
+
       const titleSpan = document.createElement('span');
       titleSpan.textContent = dateLabel;
       header.appendChild(titleSpan);
       
-      // خط افقی
       const line = document.createElement('div');
       line.className = 'date-header-line';
       header.appendChild(line);
 
       taskListContainer.appendChild(header);
-      lastDateHeader = dateLabel;
-    }
 
-    // ... ادامه ساخت taskDiv ...
+      // ظرف اختصاصی برای تسک‌های همین روز
+      const groupContainer = document.createElement('div');
+      groupContainer.style.display = 'block';
+      taskListContainer.appendChild(groupContainer);
 
-    const taskDiv = document.createElement('div');
-    taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
-    
-    // تگ تسک
-    const tagHTML = task.tag ? `<span class="task-tag">#${task.tag}</span>` : '';
+      // لاجیک دقیق باز و بسته شدن تسک‌های همین روز
+      header.addEventListener('click', (e) => {
+          if(e.target.closest('.sort-btn-inline') || e.target.closest('.custom-dropdown')) return; 
+          if (groupContainer.style.display === 'none') {
+              groupContainer.style.display = 'block';
+              titleSpan.style.opacity = '1';
+          } else {
+              groupContainer.style.display = 'none';
+              titleSpan.style.opacity = '0.5';
+          }
+      });
 
-    taskDiv.innerHTML = `
-      <div class="task-info">
-        ${tagHTML}
-        <span>${task.text}</span>
-        <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
-      </div>
-      <div class="task-actions">
-        <button class="focus-btn edit-tag-btn" title="Edit Tag">${iconTag}</button>
-        
-        <button class="focus-btn focus-action" title="Focus"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>
-        <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-        <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-      </div>
-    `;
+      // 🌟 ۵. ساخت تسک‌ها داخل ظرفِ همین روز
+      groupTasks.forEach(task => {
+          const taskDiv = document.createElement('div');
+          taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
+          
+          let tagHTML = '';
+          if (task.tag) {
+              if (typeof getTagObj === 'function') {
+                  const tagObj = getTagObj(task.tag);
+                  const bg = hexToRgba(tagObj.color, 0.15);
+                  const border = hexToRgba(tagObj.color, 0.3);
+                  tagHTML = `<span class="task-tag" style="background:${bg}; color:${tagObj.color}; border-color:${border};">#${task.tag}</span>`;
+              } else {
+                  tagHTML = `<span class="task-tag">#${task.tag}</span>`;
+              }
+          }
 
-    taskDiv.querySelector('.focus-action').addEventListener('click', () => toggleFocus(task.id));
-    taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
-    taskDiv.querySelector('.remove-btn').addEventListener('click', () => {
-      customConfirm("Delete this task?", () => removeTask(task.id));
-    });
-    // باز کردن مودال ادیت تگ برای این تسک
-    taskDiv.querySelector('.edit-tag-btn').addEventListener('click', () => openEditTagModal(task.id));
+          // 🌟 لاجیک تسک‌های گذشته (انتقال به امروز)
+          const isPastTask = dateLabel !== 'Today';
+          let actionButtons = '';
 
-    taskListContainer.appendChild(taskDiv);
+          if (isPastTask && !task.completed) {
+              // دکمه انتقال به امروز
+              actionButtons = `
+                <button class="focus-btn reschedule-btn" title="Move to Today">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                </button>
+              `;
+          } else {
+              // دکمه فوکوس معمولی
+              actionButtons = `
+                <button class="focus-btn focus-action" title="Focus">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                </button>
+              `;
+          }
+
+          taskDiv.innerHTML = `
+            <div class="task-info">
+              ${tagHTML}
+              <span>${task.text}</span>
+              <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
+            </div>
+            <div class="task-actions">
+              <button class="edit-tag-btn" title="Edit Tag">${iconTag}</button>
+              ${actionButtons}
+              <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+              <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+            </div>
+          `;
+
+          // ایونت‌های دکمه‌ها
+          const focusBtn = taskDiv.querySelector('.focus-action');
+          if (focusBtn) focusBtn.addEventListener('click', () => toggleFocus(task.id));
+
+          // ایونت دکمه انتقال به امروز
+          const rescheduleBtn = taskDiv.querySelector('.reschedule-btn');
+          if (rescheduleBtn) {
+              rescheduleBtn.addEventListener('click', () => {
+                  task.createdAt = Date.now(); // تبدیل تاریخ ساخت به همین الان
+                  playUI('success');
+                  saveTasks();
+                  renderTasks();
+              });
+          }
+
+          taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
+          taskDiv.querySelector('.remove-btn').addEventListener('click', () => {
+            customConfirm("Delete this task?", () => removeTask(task.id));
+          });
+          if(taskDiv.querySelector('.edit-tag-btn')) {
+              taskDiv.querySelector('.edit-tag-btn').addEventListener('click', () => openEditTagModal(task.id));
+          }
+
+          groupContainer.appendChild(taskDiv);
+      });
   });
 
   if (focusedTaskId) {
@@ -651,7 +766,6 @@ function renderTasks() {
     currentTaskNameEl.textContent = 'Nothing';
   }
   
-  // --- Empty State (فنجان قهوه و متن هوشمند) ---
   if (filtered.length === 0) {
     let msg = "No tasks yet. Take a deep breath and start planning!";
     if (currentFilter === 'active') msg = "No active tasks.";

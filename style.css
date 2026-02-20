@@ -497,13 +497,24 @@ body[data-theme="dark"] .task-time-badge {
 }
 
 .task-item.completed {
-  background-color: #f1f5f9;
-  opacity: 0.8;
-  border-color: #e2e8f0;
+  background-color: rgba(255, 255, 255, 0.15);
+  opacity: 0.55;
+  border-color: rgba(255, 255, 255, 0.2);
 }
-.task-item.completed .task-info span:first-child {
-  text-decoration: line-through;
-  color: #94a3b8;
+.task-item.completed .task-info span {
+  text-decoration: none;
+}
+
+/* 🌟 اعمال هاله رنگی ملایم بر اساس فاز فعلی */
+body.phase-work .task-item.completed { background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.15); }
+body.phase-short .task-item.completed { background: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.15); }
+body.phase-long .task-item.completed { background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); }
+body.phase-stopwatch .task-item.completed { background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.15); }
+
+/* دارک مود */
+body[data-theme="dark"] .task-item.completed {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 .tasks-section.zen-mode .add-task-area,
@@ -862,12 +873,6 @@ body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; 
   display: flex;
   align-items: center;
   gap: 10px;
-}
-.date-header::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255,255,255, 0.3);
 }
 
 /* --- TAG STYLES --- */
@@ -1235,14 +1240,19 @@ body[data-theme="dark"] input:-webkit-autofill {
   display: flex;
   align-items: center;
   gap: 8px; /* فاصله بین دکمه، تاریخ و خط */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* خط افقی بین تاریخ و دکمه سورت */
 .date-header-line {
-  flex: 1;
+  flex-grow: 1;
   height: 1px;
-  background: rgba(148, 163, 184, 0.3);
-  margin: 15px;
+  background: rgba(148, 163, 184, 0.4);
+  margin-left: 15px;
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
 }
 
 .sort-btn-inline {
