@@ -76,38 +76,52 @@ const tabs = document.querySelectorAll('.tab');
 const bubble = document.querySelector('.active-bubble');
 
 function updateBubble(targetTab) {
+  if (!targetTab || !bubble) return;
   bubble.style.width = `${targetTab.offsetWidth}px`;
   bubble.style.left = `${targetTab.offsetLeft}px`;
 }
 
 window.addEventListener('load', () => {
-  // حذف کلاس preload برای فعال‌سازی انیمیشن‌ها
   document.body.classList.remove('preload');
-  
   const activeTab = document.querySelector('.tab.active');
   if (activeTab) updateBubble(activeTab);
 });
 
 tabs.forEach((tab, index) => {
-  tab.addEventListener('click', (e) => {
-    playUI('click');
+  tab.addEventListener('click', () => { 
+    if (typeof playUI === 'function') playUI('click');
+    
+    // مدیریت ظاهر تب‌ها
     tabs.forEach(t => t.classList.remove('active')); 
-    e.target.classList.add('active'); 
-    updateBubble(e.target); 
+    tab.classList.add('active'); 
+    updateBubble(tab); 
     
-    document.getElementById('pomodoro-view').style.display = 'none';
-    document.getElementById('habits-view').style.display = 'none';
-    document.getElementById('progress-view').style.display = 'none';
+    const pomodoroView = document.getElementById('pomodoro-view');
+    const habitsView = document.getElementById('habits-view');
+    const progressView = document.getElementById('progress-view');
     
-    // مدیریت رنگ‌ها بر اساس تب
+    // مخفی کردن همه
+    if (pomodoroView) pomodoroView.style.display = 'none';
+    if (habitsView) habitsView.style.display = 'none';
+    if (progressView) progressView.style.display = 'none';
+    
+    // نمایش تب مورد نظر با استایل Flex
     if (index === 0) {
-      document.getElementById('pomodoro-view').style.display = 'flex';
-      updatePhaseColors(); // برگرداندن رنگ فاز فعلی
+      if (pomodoroView) pomodoroView.style.display = 'flex'; 
+      document.body.classList.remove('phase-habits'); // 🌟 حذف تم عادت‌ها
+      if (typeof updatePhaseColors === 'function') updatePhaseColors(); 
     } else {
-      // در تب‌های دیگر، رنگ‌ها را پاک کن
       document.body.classList.remove('phase-work', 'phase-short', 'phase-long', 'phase-stopwatch');
-      if (index === 1) document.getElementById('habits-view').style.display = 'flex';
-      if (index === 2) document.getElementById('progress-view').style.display = 'flex';
+      
+      if (index === 1 && habitsView) {
+          habitsView.style.display = 'flex';
+          document.body.classList.add('phase-habits'); // 🌟 اعمال تم اختصاصی عادت‌ها
+      }
+      
+      if (index === 2 && progressView) {
+          progressView.style.display = 'flex';
+          document.body.classList.remove('phase-habits'); 
+      }
     }
   });
 });
@@ -1146,3 +1160,276 @@ if (sortDropdown) {
         });
     });
 };
+
+// ==========================================
+// HABIT MOTIVATIONAL QUOTES (ROTATING)
+// ==========================================
+const habitQuotes = [
+    "Small steps every day.",
+    "Consistency over intensity.",
+    "Your habits define your future.",
+    "Focus on the system, not the goal.",
+    "Every action is a vote for who you want to be."
+];
+
+let currentQuoteIndex = 0;
+const quoteElement = document.getElementById('motivational-quote');
+
+// تابعی که هر 8 ثانیه متن رو با افکت محو شدن عوض می‌کنه
+if (quoteElement) {
+    setInterval(() => {
+        // اول محو میشه
+        quoteElement.classList.add('fade-out');
+        
+        setTimeout(() => {
+            // وقتی نامرئی شد، تکست رو عوض می‌کنیم
+            currentQuoteIndex = (currentQuoteIndex + 1) % habitQuotes.length;
+            quoteElement.textContent = `"${habitQuotes[currentQuoteIndex]}"`;
+            
+            // دوباره ظاهرش می‌کنیم
+            quoteElement.classList.remove('fade-out');
+        }, 800); // 800 میلی‌ثانیه صبر می‌کنه تا افکت fade-out کامل بشه
+    }, 8000); // هر 8 ثانیه اجرا میشه
+}
+
+// ==========================================
+// 9. HABITS ENGINE (DATA & STATE)
+// ==========================================
+// پایگاه داده لوکال برای عادت‌ها
+let habits = JSON.parse(localStorage.getItem('focusHabits')) || [];
+
+// متغیر تاریخِ فعلی که کاربر داره می‌بینه (پیش‌فرض امروز)
+let currentHabitDate = new Date();
+currentHabitDate.setHours(0, 0, 0, 0); // صفر کردن ساعت برای مقایسه دقیق روزها
+
+// DOM Elements - تقویم
+const habitDateDisplay = document.getElementById('habit-date-display');
+const prevDayBtn = document.getElementById('prev-day-btn');
+const nextDayBtn = document.getElementById('next-day-btn');
+
+// DOM Elements - مودال ساخت عادت
+const openAddHabitBtn = document.getElementById('open-add-habit-btn');
+const habitModal = document.getElementById('habit-modal');
+const closeHabitModalBtn = document.getElementById('close-habit-modal');
+const colorOptions = document.querySelectorAll('.color-option');
+const iconOptions = document.querySelectorAll('.icon-option');
+
+// --- 1. DATE NAVIGATION LOGIC ---
+
+// تابعی که تاریخ رو به متن قابل فهم تبدیل می‌کنه (Today, Yesterday, یا تاریخ دقیق)
+function formatHabitDate(dateObj) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = dateObj - today;
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === -1) return 'Yesterday';
+    if (diffDays === 1) return 'Tomorrow';
+    
+    // اگر فاصله‌ش زیاد بود، تاریخ کامل بده (مثلاً: Mon, Oct 24)
+    return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+// آپدیت کردنِ نوشته‌ی تاریخ تو هدر
+function updateHabitDateDisplay() {
+    if (habitDateDisplay) {
+        habitDateDisplay.textContent = formatHabitDate(currentHabitDate);
+    }
+    // اینجا بعداً تابعی که کارت‌های اون روز رو رندر می‌کنه صدا می‌زنیم
+    // renderHabitsForCurrentDate();
+}
+
+// رویداد کلیک دکمه روز قبل
+if (prevDayBtn) {
+    prevDayBtn.addEventListener('click', () => {
+        currentHabitDate.setDate(currentHabitDate.getDate() - 1);
+        playUI('click');
+        updateHabitDateDisplay();
+    });
+}
+
+// رویداد کلیک دکمه روز بعد
+if (nextDayBtn) {
+    nextDayBtn.addEventListener('click', () => {
+        currentHabitDate.setDate(currentHabitDate.getDate() + 1);
+        playUI('click');
+        updateHabitDateDisplay();
+    });
+}
+
+// --- 2. MODAL & PICKER LOGIC ---
+
+// باز کردن مودال ساخت عادت
+if (openAddHabitBtn) {
+    openAddHabitBtn.addEventListener('click', () => {
+        playUI('click');
+        habitModal.classList.add('show');
+        document.getElementById('habit-name-input').focus();
+    });
+}
+
+// بستن مودال
+if (closeHabitModalBtn) {
+    closeHabitModalBtn.addEventListener('click', () => {
+        habitModal.classList.remove('show');
+    });
+}
+
+// کلیک روی بیرون مودال برای بستن
+habitModal.addEventListener('click', (e) => {
+    if (e.target === habitModal) habitModal.classList.remove('show');
+});
+
+// منطق انتخاب رنگ (فقط یکی می‌تونه فعال باشه)
+colorOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        playUI('click');
+        colorOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+    });
+});
+
+// منطق انتخاب آیکون (فقط یکی می‌تونه فعال باشه)
+iconOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        playUI('click');
+        iconOptions.forEach(opt => opt.classList.remove('selected'));
+        option.classList.add('selected');
+    });
+});
+
+// اینیت کردن تاریخ موقع لود شدن صفحه
+updateHabitDateDisplay();
+
+// --- 3. HABIT CATEGORY LOGIC (FIXED) ---
+let savedHabitCategories = JSON.parse(localStorage.getItem('focusHabitCategories')) || ['Health', 'Learning', 'Productivity', 'Mindfulness'];
+const habitCategoryInput = document.getElementById('habit-category-input');
+const habitCategoryDropdown = document.getElementById('habit-category-dropdown');
+const habitCategoryWrapper = document.getElementById('habit-category-wrapper');
+
+function showHabitCategoryDropdown() {
+    if (!habitCategoryInput || !habitCategoryDropdown) return;
+    const val = habitCategoryInput.value.toLowerCase().trim();
+    
+    const filteredCats = savedHabitCategories.filter(c => c.toLowerCase().includes(val));
+    if (filteredCats.length === 0) {
+        habitCategoryDropdown.classList.remove('show');
+        return;
+    }
+    
+    // 🌟 آیکون تگ حذف شد
+    habitCategoryDropdown.innerHTML = filteredCats.map(cat => 
+        `<div class="dropdown-item">${cat}</div>`
+    ).join('');
+    
+    habitCategoryDropdown.classList.add('show');
+    
+    habitCategoryDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            habitCategoryInput.value = item.textContent; 
+            habitCategoryDropdown.classList.remove('show');
+        });
+    });
+}
+
+if (habitCategoryInput) {
+    habitCategoryInput.addEventListener('input', showHabitCategoryDropdown);
+    habitCategoryInput.addEventListener('focus', showHabitCategoryDropdown);
+}
+
+// 🌟 پاپ‌آپ فقط وقتی بیرون از Wrapper کلیک کنی بسته میشه
+document.addEventListener('click', (e) => {
+    if (habitCategoryDropdown && habitCategoryWrapper && !habitCategoryWrapper.contains(e.target)) {
+        habitCategoryDropdown.classList.remove('show');
+    }
+});
+
+// --- 4. MODAL GOAL SETTINGS LOGIC ---
+const freqInput = document.getElementById('habit-frequency-input');
+const customDaysPicker = document.getElementById('custom-days-picker');
+const dayOptions = document.querySelectorAll('.day-option');
+
+// نمایش یا مخفی کردن انتخاب روزهای سفارشی
+if (freqInput) {
+    freqInput.addEventListener('change', () => {
+        if (freqInput.value === 'custom') {
+            customDaysPicker.style.display = 'flex';
+        } else {
+            customDaysPicker.style.display = 'none';
+        }
+    });
+}
+
+// انتخاب روزهای سفارشی
+dayOptions.forEach(day => {
+    day.addEventListener('click', () => {
+        playUI('click');
+        day.classList.toggle('selected');
+    });
+});
+
+// --- 5. CORE JS: SAVE HABIT ---
+const saveHabitBtn = document.getElementById('save-habit-btn');
+
+if (saveHabitBtn) {
+    saveHabitBtn.addEventListener('click', () => {
+        const name = document.getElementById('habit-name-input').value.trim();
+        const category = document.getElementById('habit-category-input').value.trim();
+        const frequency = freqInput.value;
+        const color = document.querySelector('.color-option.selected').dataset.color;
+        const icon = document.querySelector('.icon-option.selected').dataset.icon;
+        
+        let customDays = [];
+        if (frequency === 'custom') {
+            document.querySelectorAll('.day-option.selected').forEach(d => {
+                customDays.push(parseInt(d.dataset.day));
+            });
+            if (customDays.length === 0) {
+                showToast('Please select at least one day.', 'warning');
+                return;
+            }
+        }
+
+        if (!name) { 
+            showToast('Please enter a habit name', 'warning'); 
+            return; 
+        }
+
+        // ساخت آبجکت عادت جدید
+        const newHabit = {
+            id: Date.now(),
+            name,
+            category: category || 'Uncategorized',
+            frequency,
+            customDays,
+            color,
+            icon,
+            createdAt: Date.now(),
+            logs: {} // اینجا ثبت می‌کنیم چه روزهایی انجام شده (مثلاً: {'2026-02-27': 'done'})
+        };
+
+        habits.push(newHabit);
+        
+        // ذخیره کتگوری جدید در صورت وجود نداشتن
+        if (category && !savedHabitCategories.includes(category)) {
+            savedHabitCategories.push(category);
+            localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
+        }
+
+        localStorage.setItem('focusHabits', JSON.stringify(habits));
+        
+        // ریست کردن مودال و بستن
+        habitModal.classList.remove('show');
+        document.getElementById('habit-name-input').value = '';
+        freqInput.value = 'everyday';
+        customDaysPicker.style.display = 'none';
+        dayOptions.forEach(d => d.classList.remove('selected'));
+        
+        playUI('success');
+        showToast('Habit Created Successfully!', 'success');
+        
+        // تابع رندر کردن رو بعداً می‌نویسیم
+        // renderHabits(); 
+    });
+}
