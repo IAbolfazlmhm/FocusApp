@@ -1,0 +1,374 @@
+import { 
+  timeLeft, totalTime, timerId, isRunning, currentPhase, completedSessions,
+  setTimeLeft, setTotalTime, setTimerId, setIsRunning, setCurrentPhase, setCompletedSessions,
+  tasks, focusedTaskId 
+} from './state.js';
+
+import { playAlarm } from './audio.js';
+import { showToast, icons } from './ui-utils.js';
+
+// Note: These will be exported from tasks.js in the next steps. 
+// We import them here to maintain modularity.
+import { saveTasks, formatTaskTime } from './tasks.js';
+
+// ==========================================
+// DOM ELEMENTS & INITIALIZATION
+// ==========================================
+const timeDisplay = document.getElementById('time-left');
+const startBtn = document.getElementById('start-btn');
+const circle = document.querySelector('.progress-ring-circle');
+
+// Calculate circle circumference for progress animation
+const radius = circle ? circle.r.baseVal.value : 110;
+const circumference = radius * 2 * Math.PI;
+
+if (circle) {
+  circle.style.strokeDasharray = `${circumference} ${circumference}`;
+  circle.style.strokeDashoffset = 0;
+}
+
+// ==========================================
+// TIMER STATE MANAGEMENT
+// ==========================================
+export function saveTimerState() {
+  const state = { 
+    timeLeft, 
+    totalTime, 
+    currentPhase, 
+    completedSessions, 
+    lastSaved: Date.now() 
+  };
+  localStorage.setItem('focusTimerState', JSON.stringify(state));
+}
+
+export function loadTimerState() {
+  const saved = localStorage.getItem('focusTimerState');
+  if (!saved) return false;
+
+  const state = JSON.parse(saved);
+  const FOUR_HOURS = 4 * 60 * 60 * 1000; 
+
+  // Invalidate state if it's older than 4 hours
+  if (Date.now() - state.lastSaved > FOUR_HOURS) { 
+    localStorage.removeItem('focusTimerState'); 
+    return false; 
+  }
+  
+  // Use state setters to update global state
+  setTimeLeft(state.timeLeft);
+  setTotalTime(state.totalTime);
+  setCurrentPhase(state.currentPhase);
+  setCompletedSessions(state.completedSessions);
+  
+  const modeSelect = document.getElementById('mode-select');
+  if (modeSelect && modeSelect.value === 'pomodoro') {
+    updatePhaseText();
+  }
+
+  updateDisplay();
+  updateCircle();
+  updatePhaseColors();
+  
+  return true; 
+}
+
+// ==========================================
+// DOM UPDATE FUNCTIONS
+// ==========================================
+export function updateCircle() {
+  if (!circle) return;
+  const offset = circumference - (timeLeft / totalTime) * circumference;
+  circle.style.strokeDashoffset = offset;
+}
+
+export function updateDisplay() {
+  if (!timeDisplay) return;
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  timeDisplay.textContent = formattedTime;
+  
+  let activeTaskName = 'Focus App';
+  if (focusedTaskId !== null && tasks) {
+    const activeTask = tasks.find(t => t.id === focusedTaskId);
+    if (activeTask) activeTaskName = activeTask.text;
+  }
+  
+  document.title = `${formattedTime} - ${activeTaskName}`;
+}
+
+export function updatePhaseText() {
+  const currentPhaseEl = document.getElementById('current-phase');
+  const nextPhaseEl = document.getElementById('next-phase');
+  const breaksToggle = document.getElementById('breaks-toggle');
+  const modeSelect = document.getElementById('mode-select');
+
+  if (!currentPhaseEl || !nextPhaseEl) return;
+  if (modeSelect && modeSelect.value === 'stopwatch') return;
+
+  const breaksEnabled = breaksToggle ? breaksToggle.checked : true;
+
+  if (currentPhase === 'work') {
+    if (breaksEnabled) {
+      currentPhaseEl.innerHTML = `${icons.work} Work ${completedSessions + 1}/4`;
+      nextPhaseEl.innerHTML = (completedSessions === 3) 
+        ? `Next: ${icons.long} Long Break` 
+        : `Next: ${icons.short} Short Break`;
+    } else {
+      currentPhaseEl.innerHTML = `${icons.work} Work (Session ${completedSessions + 1})`;
+      nextPhaseEl.innerHTML = `Breaks disabled`;
+    }
+  } else if (currentPhase === 'shortBreak') {
+    currentPhaseEl.innerHTML = `${icons.short} Short Break`;
+    nextPhaseEl.innerHTML = `Next: ${icons.work} Work ${completedSessions + 1}/4`;
+  } else if (currentPhase === 'longBreak') {
+    currentPhaseEl.innerHTML = `${icons.long} Long Break`;
+    nextPhaseEl.innerHTML = `Next: ${icons.work} Work 1/4`;
+  }
+}
+
+export function updatePhaseColors() {
+  // Clear all phase classes
+  document.body.classList.remove('phase-work', 'phase-short', 'phase-long', 'phase-stopwatch');
+  
+  const modeSelect = document.getElementById('mode-select');
+  
+  if (modeSelect && modeSelect.value === 'stopwatch') {
+      document.body.classList.add('phase-stopwatch');
+      return;
+  }
+  
+  if (currentPhase === 'work') document.body.classList.add('phase-work');
+  else if (currentPhase === 'shortBreak') document.body.classList.add('phase-short');
+  else if (currentPhase === 'longBreak') document.body.classList.add('phase-long');
+}
+
+// ==========================================
+// CORE TIMER LOGIC
+// ==========================================
+export function resetTimer() {
+  clearInterval(timerId); 
+  setTimerId(null);
+  setIsRunning(false); 
+  
+  if (startBtn) {
+    startBtn.querySelector('.btn-text').textContent = 'Start';
+    startBtn.classList.remove('pause');
+  }
+  
+  const modeSelect = document.getElementById('mode-select');
+  
+  if (modeSelect && modeSelect.value === 'stopwatch') {
+    setTimeLeft(0);
+    updateDisplay();
+    if (circle) circle.style.strokeDashoffset = circumference; 
+    updatePhaseColors();
+  } else {
+    setTimeLeft(totalTime); 
+    updateDisplay(); 
+    updateCircle(); 
+    updatePhaseColors();
+  }
+  
+  saveTimerState(); 
+}
+
+export function switchPhase() {
+  const breaksToggle = document.getElementById('breaks-toggle');
+  const workDurationSelect = document.getElementById('work-duration');
+  
+  const breaksEnabled = breaksToggle ? breaksToggle.checked : true;
+  const workDuration = workDurationSelect ? parseInt(workDurationSelect.value) * 60 : 25 * 60;
+  
+  if (currentPhase === 'work') {
+    setCompletedSessions(completedSessions + 1);
+    
+    if (breaksEnabled) {
+      if (completedSessions >= 4) { 
+        setCurrentPhase('longBreak'); 
+        setTotalTime(15 * 60); 
+        setCompletedSessions(0); 
+      } else { 
+        setCurrentPhase('shortBreak'); 
+        setTotalTime(5 * 60); 
+      }
+    } else { 
+      setTotalTime(workDuration); 
+    }
+  } else {
+    setCurrentPhase('work');
+    setTotalTime(workDuration);
+  }
+
+  setTimeLeft(totalTime);
+  updatePhaseText();
+  updatePhaseColors();
+  updateDisplay();
+  updateCircle();
+  saveTimerState();
+}
+
+export function toggleTimer() {
+  const currentTaskNameEl = document.getElementById('current-task-name');
+  const modeSelect = document.getElementById('mode-select');
+  const soundSelect = document.getElementById('sound-select');
+  const autostartBreaks = document.getElementById('autostart-breaks-toggle');
+  
+  const currentTaskName = currentTaskNameEl ? currentTaskNameEl.textContent : '';
+
+  // Auto-focus logic
+  if (currentTaskName === 'Nothing' && tasks) {
+    const activeTasks = tasks.filter(t => !t.completed);
+    if (activeTasks.length === 1) {
+      // Logic for toggling focus will be fully implemented in tasks.js
+      const event = new CustomEvent('autoFocusTask', { detail: { id: activeTasks[0].id } });
+      document.dispatchEvent(event);
+    } else { 
+      showToast('🎯 Please focus on a task first before starting the timer!', 'warning'); 
+      return; 
+    }
+  }
+
+  if (isRunning) {
+    // Pause timer
+    clearInterval(timerId); 
+    setTimerId(null);
+    setIsRunning(false);
+    
+    if (startBtn) {
+      startBtn.querySelector('.btn-text').textContent = 'Start';
+      startBtn.classList.remove('pause');
+    }
+  } else {
+    // Start timer
+    setIsRunning(true);
+    
+    if (startBtn) {
+      startBtn.querySelector('.btn-text').textContent = 'Pause'; 
+      startBtn.classList.add('pause');
+    }
+    
+    const interval = setInterval(() => {
+      // Task time tracking logic
+      if (focusedTaskId !== null && tasks) {
+        if ((modeSelect && modeSelect.value === 'stopwatch') || currentPhase === 'work') {
+          const activeTask = tasks.find(t => t.id === focusedTaskId);
+          if (activeTask) {
+            activeTask.timeSpent++; 
+            saveTasks(); 
+            const badge = document.getElementById(`badge-${activeTask.id}`);
+            if (badge) badge.innerHTML = formatTaskTime(activeTask.timeSpent);
+          }
+        }
+      }
+      
+      // Stopwatch or Pomodoro mode checks
+      if (modeSelect && modeSelect.value === 'stopwatch') {
+        setTimeLeft(timeLeft + 1); 
+        updateDisplay();
+        
+        if (circle) {
+          const offset = circumference - ((timeLeft % 60) / 60) * circumference;
+          circle.style.strokeDashoffset = offset;
+        }
+      } else {
+        setTimeLeft(timeLeft - 1); 
+        updateDisplay(); 
+        updateCircle(); 
+        
+        // Phase completion logic
+        if (timeLeft === 0) {
+          clearInterval(timerId); 
+          setTimerId(null);
+          setIsRunning(false);
+          
+          if (startBtn) {
+            startBtn.querySelector('.btn-text').textContent = 'Start';
+            startBtn.classList.remove('pause');
+          }
+          
+          playAlarm(soundSelect ? soundSelect.value : 'bell');
+          switchPhase();
+          
+          if (autostartBreaks && autostartBreaks.checked && currentPhase !== 'work') {
+            toggleTimer(); 
+          }
+        }
+      }
+      saveTimerState(); 
+    }, 1000);
+    
+    setTimerId(interval);
+  }
+}
+
+// ==========================================
+// TIMER EVENT LISTENERS
+// ==========================================
+export function setupTimerEvents() {
+  const startBtn = document.getElementById('start-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const skipBtn = document.getElementById('skip-btn');
+
+  if (startBtn) startBtn.addEventListener('click', toggleTimer);
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetTimer);
+    resetBtn.addEventListener('dblclick', function() {
+      const modeSelect = document.getElementById('mode-select');
+      if (modeSelect && modeSelect.value === 'pomodoro') {
+        clearInterval(timerId);
+        setIsRunning(false);
+        setTimerId(null);
+        startBtn.querySelector('.btn-text').textContent = 'Start';
+        startBtn.classList.remove('pause');
+        setCurrentPhase('work');
+        setCompletedSessions(0);
+        updatePhaseText();
+        updatePhaseColors();
+        
+        const workDuration = document.getElementById('work-duration');
+        const newTotal = workDuration ? parseInt(workDuration.value) * 60 : 25 * 60;
+        setTotalTime(newTotal);
+        setTimeLeft(newTotal);
+        
+        updateDisplay();
+        updateCircle();
+        saveTimerState(); 
+        showToast('Full Session Reset! Back to Work 1.', 'info');
+      }
+    });
+  }
+
+  if (skipBtn) {
+    skipBtn.addEventListener('click', function(event) {
+      event.preventDefault(); 
+      const modeSelect = document.getElementById('mode-select');
+      if (modeSelect && modeSelect.value === 'pomodoro') {
+        clearInterval(timerId); 
+        setIsRunning(false);
+        setTimerId(null);
+        if (startBtn) {
+          startBtn.querySelector('.btn-text').textContent = 'Start';
+          startBtn.classList.remove('pause');
+        }
+        switchPhase(); 
+      }
+    });
+  }
+
+  // Listen for auto-pause triggers from the Tasks module
+  document.addEventListener('checkAutoPauseTimer', () => {
+    if (focusedTaskId === null && isRunning) {
+      clearInterval(timerId); 
+      setIsRunning(false);
+      setTimerId(null);
+      if (startBtn) {
+        startBtn.querySelector('.btn-text').textContent = 'Start';
+        startBtn.classList.remove('pause');
+      }
+    }
+    updateDisplay();
+  });
+}

@@ -1,4 +1,43 @@
 /* ========================================== */
+/* 0. CSS VARIABLES (DESIGN SYSTEM)           */
+/* ========================================== */
+:root {
+  /* 🎨 Light Mode (Default) */
+  --bg-main: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --modal-bg: rgba(255, 255, 255, 0.65); /* 🌟 Soft transparent white */
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --text-main: #2b2d42;
+  --text-muted: #64748b;
+  --btn-bg: rgba(255, 255, 255, 0.4);
+  --btn-hover: rgba(255, 255, 255, 0.6);
+  --danger-color: #ef4444;
+  --success-color: #10b981;
+}
+
+body[data-theme="dark"] {
+  /* 🌙 Dark Mode Overrides */
+  --bg-main: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --glass-bg: rgba(30, 41, 59, 0.6);
+  --modal-bg: rgba(30, 41, 59, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --btn-bg: rgba(255, 255, 255, 0.1);
+  --btn-hover: rgba(255, 255, 255, 0.2);
+}
+
+/* 🌟 FORCE DARK MODE BACKGROUND OVER PHASES */
+body[data-theme="dark"].phase-work,
+body[data-theme="dark"].phase-short,
+body[data-theme="dark"].phase-long,
+body[data-theme="dark"].phase-stopwatch {
+  background: var(--bg-main) !important;
+}
+
+/* ========================================== */
 /* 1. RESET & BASE STYLES                     */
 /* ========================================== */
 * {
@@ -8,12 +47,10 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* انیمیشن نرم برای همه چیز */
 body, .timer-section, .tasks-section, .glass-pill, .modal-content, .task-item, .progress-ring-track, .progress-ring-circle, .start-btn, .add-btn, .active-bubble {
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* کلاس preload برای جلوگیری از انیمیشن موقع لود */
 .preload * {
     transition: none !important;
 }
@@ -22,10 +59,9 @@ button:focus, input:focus, .tab:focus, .custom-select:focus {
   outline: none !important;
 }
 
-/* --- DYNAMIC BACKGROUNDS (گرادینت‌های زنده) --- */
-/* پیش‌فرض */
+/* --- DYNAMIC BACKGROUNDS --- */
 body {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  background: var(--bg-main);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -33,25 +69,10 @@ body {
   padding: 20px;
 }
 
-/* فاز کار: هلویی/قرمز ملایم */
-body.phase-work {
-  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-}
-
-/* فاز استراحت کوتاه: نعنایی/سبز */
-body.phase-short {
-  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
-}
-
-/* فاز استراحت طولانی: آبی آسمانی */
-body.phase-long {
-  background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
-}
-
-/* فاز کرنومتر: بنفش/یاسی */
-body.phase-stopwatch {
-  background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-}
+body.phase-work { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
+body.phase-short { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+body.phase-long { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+body.phase-stopwatch { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
 
 /* ========================================== */
 /* 2. TOP NAV & HEADER                        */
@@ -69,15 +90,13 @@ body.phase-stopwatch {
 .glass-tabs-container {
   display: flex;
   position: relative;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--glass-border);
   border-radius: 50px;
   padding: 5px;
-  box-shadow: 
-    inset 1px 1px 0px rgba(255, 255, 255, 0.4), 
-    0 8px 32px rgba(0, 0, 0, 0.1); 
+  box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
   width: 100%;
   max-width: 400px;
 }
@@ -88,7 +107,7 @@ body.phase-stopwatch {
   padding: 12px 0;
   border: none;
   background: transparent;
-  color: #555;
+  color: var(--text-muted);
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
@@ -105,7 +124,7 @@ body.phase-stopwatch {
   position: absolute;
   top: 5px;
   height: calc(100% - 10px);
-  background: rgba(43, 45, 66, 1);
+  background: var(--text-main);
   border-radius: 50px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.15);
   z-index: 0;
@@ -116,14 +135,12 @@ body.phase-stopwatch {
 /* 3. REUSABLE GLASS PILL UTILITY             */
 /* ========================================== */
 .glass-pill {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--glass-bg);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--glass-border);
   border-radius: 50px;
-  box-shadow: 
-    inset 1px 1px 0px rgba(255, 255, 255, 0.4), 
-    0 8px 32px rgba(0, 0, 0, 0.1); 
+  box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow); 
 }
 
 /* ========================================== */
@@ -151,21 +168,19 @@ svg.phase-icon {
   max-width: 900px;
   gap: 40px;
   justify-content: center;
-  flex-wrap: nowrap; /* این خط باعث می‌شود در دسکتاپ همیشه کنار هم باشند */
+  flex-wrap: nowrap;
 }
 
 .timer-section, .tasks-section {
   flex: 1;
   min-width: 320px;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--glass-border);
   padding: 30px;
   border-radius: 50px;
-  box-shadow: 
-    inset 1px 1px 0px rgba(255, 255, 255, 0.4),
-    0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -191,12 +206,12 @@ svg.phase-icon {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.95rem;
 }
 
 .locked-task-label strong {
-  color: #2b2d42;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -214,7 +229,7 @@ svg.phase-icon {
 #current-phase {
   font-size: 1.1rem;
   font-weight: bold;
-  color: #2b2d42;
+  color: var(--text-main);
   background: #f1f5f9;
   padding: 5px 15px;
   border-radius: 20px;
@@ -225,7 +240,7 @@ svg.phase-icon {
 
 #next-phase {
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
 }
@@ -251,7 +266,7 @@ svg.phase-icon {
 }
 .progress-ring-track { stroke: #e2e8f0; }
 .progress-ring-circle {
-  stroke: #2b2d42;
+  stroke: var(--text-main);
   stroke-linecap: round;
   stroke-dasharray: 691;
   stroke-dashoffset: 0;
@@ -261,7 +276,7 @@ svg.phase-icon {
 .time-display {
   font-size: 3.5rem;
   font-weight: bold;
-  color: #2b2d42;
+  color: var(--text-main);
   z-index: 1;
   font-family: 'Courier New', Courier, monospace;
 }
@@ -276,7 +291,6 @@ svg.phase-icon {
   margin: 0 auto;
 }
 
-/* --- دکمه استارت شیشه‌ای (Glassy Style) --- */
 .start-btn {
   padding: 12px 30px;
   border: none;
@@ -284,28 +298,25 @@ svg.phase-icon {
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.4); 
-  color: #2b2d42; 
+  background-color: var(--btn-bg); 
+  color: var(--text-main); 
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--glass-border);
   transition: all 0.2s;
   min-width: 100px;
 }
 
 .start-btn:hover {
-  background-color: rgba(255, 255, 255, 0.6);
+  background-color: var(--btn-hover);
   transform: translateY(-2px);
 }
 
-/* اصلاح دکمه پاز: دقیقاً شبیه استارت */
 .start-btn.pause {
-  /* هیچ رنگ خاصی نمی‌دیم تا همون رنگ فاز (قرمز/سبز) رو حفظ کنه */
   opacity: 0.9; 
-  transform: scale(0.98); /* یک کوچولو فرورفتگی برای حس فعال بودن */
-  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); /* سایه داخلی ریز */
+  transform: scale(0.98);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
 }
 
-/* هاور دکمه پاز: مثل دکمه عادی */
 .start-btn.pause:hover {
   opacity: 1;
   transform: scale(1);
@@ -316,7 +327,7 @@ svg.phase-icon {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #555;
+  color: var(--text-muted);
   transition: transform 0.2s, color 0.2s;
   display: flex;
   justify-content: center;
@@ -326,15 +337,14 @@ svg.phase-icon {
 
 .icon-btn:hover {
   transform: scale(1.1);
-  color: #2b2d42;
+  color: var(--text-main);
 }
 
 .reset-btn { justify-self: end; margin-right: 10px; }
 .skip-btn { justify-self: start; margin-left: 10px; }
 
-/* هاور برای دکمه‌های آیکون‌دار */
-.reset-btn:hover, body[data-theme="dark"] .reset-btn:hover { color: #3b82f6 !important; }
-.skip-btn:hover, body[data-theme="dark"] .skip-btn:hover { color: #eab308 !important; }
+.reset-btn:hover { color: #3b82f6 !important; }
+.skip-btn:hover { color: #eab308 !important; }
 
 /* ========================================== */
 /* 7. TASKS RIGHT SIDE                        */
@@ -354,8 +364,6 @@ svg.phase-icon {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  
-  /* افکت محو شدن بالا و پایین */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
 }
@@ -369,7 +377,7 @@ svg.phase-icon {
 
 .guide-text {
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.9rem;
   font-style: italic;
   margin-top: 15px;
@@ -389,14 +397,14 @@ svg.phase-icon {
   border: none;
   font-size: 1rem;
   outline: none;
-  color: #334155;
+  color: var(--text-main);
 }
 
 .add-btn {
   padding: 10px 25px;
-  background: rgba(255, 255, 255, 0.4); /* شیشه‌ای */
-  color: #2b2d42;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: var(--btn-bg);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
   border-radius: 40px;
   font-weight: bold;
   cursor: pointer;
@@ -405,7 +413,7 @@ svg.phase-icon {
 }
 
 .add-btn:hover {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--btn-hover);
   transform: translateY(-2px);
 }
 
@@ -419,12 +427,13 @@ svg.phase-icon {
   padding: 15px 20px;
   width: 100%;
   margin-bottom: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--glass-border);
   border-radius: 50px;
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   order: 2;
+  min-height: 76px;
 }
 
 .task-item:hover {
@@ -443,7 +452,7 @@ svg.phase-icon {
 
 .task-info span:first-child {
   font-weight: 500;
-  color: #334155;
+  color: var(--text-main);
   word-break: break-word;
   white-space: normal;
   width: 100%;
@@ -451,21 +460,14 @@ svg.phase-icon {
 
 .task-time-badge {
   font-size: 0.85rem;
-  color: #64748b; /* رنگ طوسی ملایم */
+  color: var(--text-muted);
   font-weight: 600;
   background: transparent;
   padding: 0;
   margin-top: 4px;
-  
-  /* 🌟 این خطوط جدید باعث تراز شدن آیکون و متن می‌شوند */
   display: flex;
   align-items: center;
-  opacity: 0.8; /* کمی محو برای ظرافت بیشتر */
-}
-
-/* در دارک مود هم رنگش رو تنظیم می‌کنیم */
-body[data-theme="dark"] .task-time-badge {
-  color: #94a3b8;
+  opacity: 0.8;
 }
 
 .task-actions { display: flex; gap: 10px; }
@@ -474,9 +476,9 @@ body[data-theme="dark"] .task-time-badge {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.3); /* شیشه‌ای */
-  color: #555;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -484,56 +486,32 @@ body[data-theme="dark"] .task-time-badge {
   transition: all 0.2s;
 }
 
-.done-btn:hover { background: #10b981; color: white; border-color: #10b981; transform: scale(1.1); }
-.remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; transform: scale(1.1); }
+.done-btn:hover { background: var(--success-color); color: white; border-color: var(--success-color); transform: scale(1.1); }
+.remove-btn:hover { background: var(--danger-color); color: white; border-color: var(--danger-color); transform: scale(1.1); }
 .focus-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; transform: scale(1.1); }
 
 .task-item.active-focus {
   order: 1;
-  border-color: #2b2d42;
-  background-color: #f1f5f9;
-  border-left: 6px solid #2b2d42;
-  box-shadow: 0 4px 15px rgba(43, 45, 66, 0.15);
+  border-color: var(--text-main);
+  background-color: var(--glass-bg);
+  border-left: 6px solid var(--text-main);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .task-item.completed {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: var(--btn-bg);
   opacity: 0.55;
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--glass-border);
 }
 .task-item.completed .task-info span {
   text-decoration: none;
 }
 
-/* 🌟 اعمال هاله رنگی ملایم بر اساس فاز فعلی */
+/* Phase-specific completed backgrounds */
 body.phase-work .task-item.completed { background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.15); }
 body.phase-short .task-item.completed { background: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.15); }
 body.phase-long .task-item.completed { background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); }
 body.phase-stopwatch .task-item.completed { background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.15); }
-
-/* دارک مود */
-body[data-theme="dark"] .task-item.completed {
-  background: rgba(0, 0, 0, 0.2);
-  border-color: rgba(255, 255, 255, 0.05);
-}
-
-.tasks-section.zen-mode .add-task-area,
-.tasks-section.zen-mode .task-item,
-.tasks-section.zen-mode .guide-text {
-  opacity: 0.3;
-  filter: blur(4px);
-  pointer-events: none;
-  transition: all 0.4s ease;
-}
-
-.tasks-section.zen-mode .task-item.active-focus {
-  opacity: 1;
-  filter: none;
-  pointer-events: auto;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 10px 25px rgba(43, 45, 66, 0.15);
-}
 
 /* ========================================== */
 /* 9. SETTINGS MODAL                         */
@@ -546,133 +524,113 @@ body[data-theme="dark"] .task-item.completed {
 }
 .modal-overlay.show { opacity: 1; pointer-events: auto; }
 .modal-content {
-  background: rgba(255, 255, 255, 0.65); /* شفافیت بیشتر */
-  backdrop-filter: blur(20px); /* بلور قوی */
+  background: var(--modal-bg); 
+  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   width: 90%; max-width: 400px;
   border-radius: 30px; padding: 25px;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
   transform: translateY(-20px); transition: transform 0.3s ease;
 }
 .modal-overlay.show .modal-content { transform: translateY(0); }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; }
-.modal-header h2 { display: flex; align-items: center; gap: 8px; font-size: 1.2rem; color: #2b2d42; }
-.close-btn { background: none; border: none; font-size: 1.2rem; color: #94a3b8; cursor: pointer; transition: color 0.2s; }
-.close-btn:hover { color: #ef4444; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; }
+.modal-header h2 { display: flex; align-items: center; gap: 8px; font-size: 1.2rem; color: var(--text-main); }
+.close-btn { background: none; border: none; font-size: 1.2rem; color: var(--text-muted); cursor: pointer; transition: color 0.2s; }
+.close-btn:hover { color: var(--danger-color); }
 .setting-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
-.setting-group label { font-weight: bold; font-size: 0.9rem; color: #475569; }
+.setting-group label { font-weight: bold; font-size: 0.9rem; color: var(--text-muted); }
 .custom-select { 
   padding: 10px; 
   border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--glass-border);
   outline: none; font-size: 1rem;
-  background: rgba(255, 255, 255, 0.4); /* ورودی شیشه‌ای */
-  color: #2b2d42;
+  background: var(--btn-bg);
+  color: var(--text-main);
   font-weight: 500; 
 }
 .custom-select option { background: #ffffff; color: #2b2d42; font-weight: 500; padding: 10px; }
+body[data-theme="dark"] .custom-select option { background: #1e293b; color: #f8fafc; }
+
 .toggle-group { flex-direction: row; justify-content: space-between; align-items: center; }
 .disabled-settings { opacity: 0.4; pointer-events: none; }
 .save-settings-btn {
-  width: 100%; padding: 12px; background: #2b2d42; color: white;
+  width: 100%; padding: 12px; 
+  background: #3b82f6; /* Readable blue */
+  color: white;
   border: none; border-radius: 12px; font-weight: bold; font-size: 1rem;
   cursor: pointer; margin-top: 10px;
 }
-.save-settings-btn:hover { background: #1a1b26; }
+.save-settings-btn:hover { background: #2563eb; }
 .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
 .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; }
-input:checked + .slider { background-color: #10b981; }
+input:checked + .slider { background-color: var(--success-color); }
 input:checked + .slider:before { transform: translateX(26px); }
 .slider.round { border-radius: 34px; }
 .slider.round:before { border-radius: 50%; }
 
 /* ========================================== */
-/* 10. DARK MODE STYLES 🌙                    */
+/* 10. DARK MODE SPECIFIC FIXES 🌙            */
 /* ========================================== */
-body[data-theme="dark"] {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-body[data-theme="dark"] .timer-section,
-body[data-theme="dark"] .tasks-section {
-  background: rgba(30, 41, 59, 0.4);
-  border-color: rgba(255, 255, 255, 0.05);
-}
-body[data-theme="dark"] .glass-pill {
-  background: rgba(15, 23, 42, 0.5);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-body[data-theme="dark"] .locked-task-label strong,
-body[data-theme="dark"] .task-info span:first-child,
-body[data-theme="dark"] .task-input { color: #f8fafc; }
+/* Notice how much code we deleted here! Variables handled the rest. */
+
 body[data-theme="dark"] .time-display { color: #3b82f6; }
-body[data-theme="dark"] .guide-text,
-body[data-theme="dark"] .locked-task-label,
-body[data-theme="dark"] #next-phase,
-body[data-theme="dark"] .icon-btn { color: #94a3b8; }
-body[data-theme="dark"] .task-time-badge { color: #94a3b8; }
-body[data-theme="dark"] .task-item {
-  background: rgba(30, 41, 59, 0.6);
-  border-color: rgba(255, 255, 255, 0.1);
-}
 body[data-theme="dark"] .task-item:hover { border-color: #38bdf8; }
 body[data-theme="dark"] .progress-ring-track { stroke: rgba(255, 255, 255, 0.05); }
 body[data-theme="dark"] .progress-ring-circle { stroke: #3b82f6; }
-body[data-theme="dark"] .modal-content { 
-  background: rgba(30, 41, 59, 0.7);
-  border-color: rgba(255, 255, 255, 0.1); 
-}
-body[data-theme="dark"] .modal-header h2,
-body[data-theme="dark"] .setting-group label { color: #f8fafc; }
-body[data-theme="dark"] .custom-select { 
-  background: rgba(15, 23, 42, 0.6);
-  color: #f8fafc;
-  border-color: rgba(255, 255, 255, 0.1); 
-}
-body[data-theme="dark"] .custom-select option { background: #1e293b; color: #f8fafc; }
-body[data-theme="dark"] .add-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #f8fafc;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-body[data-theme="dark"] .done-btn, 
-body[data-theme="dark"] .remove-btn, 
-body[data-theme="dark"] .focus-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-body[data-theme="dark"] .done-btn:hover { background: #10b981; color: white; border-color: #10b981; }
-body[data-theme="dark"] .remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; }
 body[data-theme="dark"] .focus-btn:hover { background: #38bdf8; color: white; border-color: #38bdf8; }
-body[data-theme="dark"] .glass-tabs-container { background: rgba(30, 41, 59, 0.3); border-color: rgba(255, 255, 255, 0.05); }
-body[data-theme="dark"] .tab { color: #94a3b8; }
-body[data-theme="dark"] .tab.active { color: #ffffff; }
-body[data-theme="dark"] .active-bubble { background: rgba(255, 255, 255, 0.1); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
-body[data-theme="dark"] #current-phase { background: rgba(30, 41, 59, 0.8); color: #f8fafc; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-body[data-theme="dark"] .placeholder-box { color: #94a3b8; }
-body[data-theme="dark"] .start-btn { background-color: rgba(255, 255, 255, 0.1); color: #f8fafc; border-color: rgba(255, 255, 255, 0.2); }
-body[data-theme="dark"] .start-btn:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+body[data-theme="dark"] #current-phase { 
+  background: rgba(30, 41, 59, 0.8); 
+  color: var(--text-main); 
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+}
+
+/* --- HEIGHT SYNC FIX --- */
+.timer-header, .date-nav-full {
+  height: 56px !important; 
+  min-height: 56px !important;
+}
+
+/* --- PREVENT TASK PILLS FROM JUMPING HEIGHTS --- */
+.task-item {
+    min-height: 76px !important; 
+    height: 76px !important; /* Locks the height for all tasks */
+}
+
+/* --- DARK MODE TEXT FIXES --- */
+body[data-theme="dark"] #pomodoro-date-display, 
+body[data-theme="dark"] #habit-date-display {
+  color: #f8fafc !important;
+}
+
+/* Target the span that DOES NOT have a class (which is the task name) */
+body[data-theme="dark"] .task-item .task-info span:not([class]) {
+  color: #f8fafc !important; 
+}
+
+/* Force the delete modal title to adapt to dark mode */
+#confirm-message {
+  color: var(--text-main) !important;
+}
 
 /* ========================================== */
 /* 11. ADAPTIVE COLORS (Phase Colors) 🎨      */
-/* شامل: رنگ پس‌زمینه، دکمه‌ها و هاور تسک‌ها   */
 /* ========================================== */
 
-/* --- WORK MODE (قرمز/صورتی) --- */
+/* --- WORK MODE --- */
 body.phase-work { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%); }
 body.phase-work .progress-ring-circle { stroke: #f43f5e; }
 body.phase-work .time-display { color: #f43f5e; }
 body.phase-work .active-bubble { background-color: #f43f5e; }
 body.phase-work .tab.active { color: white; }
-/* دکمه‌های اصلی و استارت */
 body.phase-work .start-btn, body.phase-work .add-btn { background-color: #f43f5e; color: white; border: none; }
-/* هاور تسک متناسب با فاز */
 body.phase-work .task-item:hover { border-color: #f43f5e; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); }
 
-/* --- SHORT BREAK (سبز نعنایی) --- */
+/* --- SHORT BREAK --- */
 body.phase-short { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
 body.phase-short .progress-ring-circle { stroke: #14b8a6; }
 body.phase-short .time-display { color: #14b8a6; }
@@ -681,7 +639,7 @@ body.phase-short .tab.active { color: white; }
 body.phase-short .start-btn, body.phase-short .add-btn { background-color: #14b8a6; color: white; border: none; }
 body.phase-short .task-item:hover { border-color: #14b8a6; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2); }
 
-/* --- LONG BREAK (آبی آسمانی) --- */
+/* --- LONG BREAK --- */
 body.phase-long { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
 body.phase-long .progress-ring-circle { stroke: #3b82f6; }
 body.phase-long .time-display { color: #3b82f6; }
@@ -690,7 +648,7 @@ body.phase-long .tab.active { color: white; }
 body.phase-long .start-btn, body.phase-long .add-btn { background-color: #3b82f6; color: white; border: none; }
 body.phase-long .task-item:hover { border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
 
-/* --- STOPWATCH (بنفش) --- */
+/* --- STOPWATCH --- */
 body.phase-stopwatch { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
 body.phase-stopwatch .progress-ring-circle { stroke: #8b5cf6; }
 body.phase-stopwatch .time-display { color: #8b5cf6; }
@@ -699,12 +657,11 @@ body.phase-stopwatch .tab.active { color: white; }
 body.phase-stopwatch .start-btn, body.phase-stopwatch .add-btn { background-color: #8b5cf6; color: white; border: none; }
 body.phase-stopwatch .task-item:hover { border-color: #8b5cf6; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); }
 
-/* --- DARK MODE OVERRIDES --- */
-/* (رنگ‌ها کمی نئونی‌تر می‌شوند ولی پس‌زمینه دکمه‌ها حفظ می‌شود) */
-body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn { background-color: #fb7185; color: #0f172a; }
-body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { background-color: #2dd4bf; color: #0f172a; }
-body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn { background-color: #60a5fa; color: #0f172a; }
-body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { background-color: #a78bfa; color: #0f172a; }
+/* --- DARK MODE OVERRIDES (Only phase-specific buttons need updating) --- */
+body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn { background-color: #fb7185; color: #0f172a; border: none; }
+body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
+body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn { background-color: #60a5fa; color: #0f172a; border: none; }
+body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { background-color: #a78bfa; color: #0f172a; border: none; }
 
 /* ========================================== */
 /* 12. OTHER SECTIONS (Placeholder Style)     */
@@ -721,10 +678,9 @@ body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phas
   width: 100%;
   padding: 50px;
   text-align: center;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 50px;
 }
-body[data-theme="dark"] .placeholder-box { color: #94a3b8; }
 
 /* --- TOAST NOTIFICATIONS --- */
 #toast-container {
@@ -736,22 +692,22 @@ body[data-theme="dark"] .placeholder-box { color: #94a3b8; }
   display: flex;
   flex-direction: column;
   gap: 10px;
-  pointer-events: none; /* کلیک از توش رد بشه */
+  pointer-events: none;
   width: auto;
   align-items: center;
 }
 
 .toast {
-  background: rgba(40, 45, 60, 0.75); 
+  background: var(--modal-bg); 
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: white;
+  color: var(--text-main);
   padding: 10px 20px;
   border-radius: 50px;
   font-size: 0.9rem;
   font-weight: 500;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -760,50 +716,24 @@ body[data-theme="dark"] .placeholder-box { color: #94a3b8; }
   animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-@keyframes toastIn {
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
+@keyframes toastIn { to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(-10px) scale(0.95); } }
 
-@keyframes toastOut {
-  to { opacity: 0; transform: translateY(-10px) scale(0.95); }
-}
-
-/* رنگ آیکون‌ها یا حاشیه پایین برای تمایز */
-.toast.success { border-bottom: 2px solid #10b981; }
+.toast.success { border-bottom: 2px solid var(--success-color); }
 .toast.warning { border-bottom: 2px solid #f59e0b; }
-.toast.info { border-bottom: 2px solid rgba(255, 255, 255, 0.3); }
-
-/* ========================================== */
-/* DARK MODE FIXES (Force Dark Background)    */
-/* ========================================== */
-
-/* این کد رو حتماً آخر فایل بذار تا اولویت داشته باشه */
-body[data-theme="dark"],
-body[data-theme="dark"].phase-work,
-body[data-theme="dark"].phase-short,
-body[data-theme="dark"].phase-long,
-body[data-theme="dark"].phase-stopwatch {
-  /* بازگشت به همون تم جذاب و عمیقِ اولیه */
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-}
-
-/* اصلاح رنگ دکمه استارت در دارک مود (که رنگی و تو پُر باشه) */
-body[data-theme="dark"].phase-work .start-btn { background-color: #fb7185; color: #0f172a; border: none; }
-body[data-theme="dark"].phase-short .start-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
-body[data-theme="dark"].phase-long .start-btn { background-color: #60a5fa; color: #0f172a; border: none; }
-body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; color: #0f172a; border: none; }
+.toast.info { border-bottom: 2px solid var(--glass-border); }
 
 /* --- FILTER NAV (Mini Version of Top Nav) --- */
 .filter-nav-container {
   position: relative;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg);
   border-radius: 40px;
   padding: 4px;
   width: 100%;
   margin-bottom: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--glass-border);
 }
 
 .filter-scroll-area {
@@ -811,9 +741,9 @@ body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; 
   overflow-x: auto;
   flex: 1;
   gap: 5px;
-  scrollbar-width: none; /* مخفی کردن اسکرول */
+  scrollbar-width: none;
   padding-right: 10px;
-  z-index: 1; /* روی حباب قرار بگیرد */
+  z-index: 1;
 }
 .filter-scroll-area::-webkit-scrollbar { display: none; }
 
@@ -822,7 +752,7 @@ body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; 
   border: none;
   padding: 8px 16px;
   border-radius: 30px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -831,41 +761,40 @@ body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; 
 }
 
 .filter-btn.active {
-  color: white;
+  color: white; /* Will be overridden by active bubble below it, so text must be white */
 }
 
-/* حباب متحرک فیلتر */
 .filter-bubble {
   position: absolute;
   top: 4px;
   left: 4px;
   height: calc(100% - 8px);
-  background: #2b2d42; /* پیش‌فرض */
+  background: var(--text-main);
   border-radius: 30px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  width: 0; /* با JS تنظیم می‌شود */
+  width: 0;
 }
 
 .add-tag-filter-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: var(--text-muted);
   padding: 5px;
   cursor: pointer;
-  border-left: 1px solid rgba(255,255,255,0.3);
+  border-left: 1px solid var(--glass-border);
   margin-left: 5px;
   display: flex;
   align-items: center;
 }
-.add-tag-filter-btn:hover { color: #2b2d42; }
+.add-tag-filter-btn:hover { color: var(--text-main); }
 
 /* --- DATE HEADERS --- */
 .date-header {
   width: 100%;
   font-size: 0.8rem;
   font-weight: bold;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 15px 0 8px 0;
   padding-left: 10px;
   text-transform: uppercase;
@@ -880,19 +809,20 @@ body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; 
   width: 90px;
   background: transparent;
   border: none;
-  border-right: 1px solid rgba(255,255,255,0.3);
+  border-right: 1px solid var(--glass-border);
   padding: 0 10px;
   font-size: 0.85rem;
-  color: #334155;
+  color: var(--text-main);
   outline: none;
 }
+
 .tags-list-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
 }
-/* استایل پایه تگ */
+
 .tag-chip {
   padding: 6px 14px;
   border-radius: 20px;
@@ -903,37 +833,24 @@ body[data-theme="dark"].phase-stopwatch .start-btn { background-color: #a78bfa; 
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e2e8f0;
-  color: #475569;
+  background: var(--btn-bg);
+  color: var(--text-main);
 }
 
-/* حالت حذف (در مودال Manage Tags) */
 .tag-chip.deletable:hover {
   background: #fee2e2;
-  border-color: #ef4444;
-  color: #ef4444;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
   text-decoration: line-through;
 }
 
-/* حالت انتخاب (در مودال Edit Tag) - درخواستت برای رنگ زرد */
 .tag-chip.selectable:hover {
-  background: #fef3c7; /* زرد روشن */
-  border-color: #f59e0b; /* زرد پررنگ */
+  background: #fef3c7;
+  border-color: #f59e0b;
   color: #d97706;
-  transform: scale(1.05); /* کمی بزرگ شدن به جای خط خوردن */
+  transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
 }
-
-/* دارک مود تگ‌ها */
-body[data-theme="dark"] .tag-chip { background: rgba(255,255,255,0.1); color: #cbd5e1; }
-
-/* --- DARK MODE UPDATES --- */
-body[data-theme="dark"] .filter-nav-container { background: rgba(30, 41, 59, 0.4); border-color: rgba(255,255,255,0.1); }
-body[data-theme="dark"] .filter-btn { color: #94a3b8; }
-body[data-theme="dark"] .filter-btn.active { color: #ffffff; }
-body[data-theme="dark"] .tag-input { color: #f8fafc; }
-body[data-theme="dark"] .add-tag-filter-btn { color: #94a3b8; }
-body[data-theme="dark"] .date-header { color: #64748b; }
 
 /* --- FILTER NAV REVISED --- */
 .filter-nav-wrapper {
@@ -945,8 +862,8 @@ body[data-theme="dark"] .date-header { color: #64748b; }
 }
 
 .manage-tags-btn {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -954,19 +871,17 @@ body[data-theme="dark"] .date-header { color: #64748b; }
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #64748b;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.2s;
 }
 .manage-tags-btn:hover {
-  background: white;
-  color: #2b2d42;
-  transform: scale(1.1);
+  background: var(--btn-hover);
+  color: var(--text-main);
 }
 
-/* ناحیه اسکرول شونده */
 .filter-scroll-area {
-  position: relative; /* برای اینکه حباب نسبت به این حرکت کند */
+  position: relative;
   display: flex;
   align-items: center;
   overflow-x: auto;
@@ -974,9 +889,9 @@ body[data-theme="dark"] .date-header { color: #64748b; }
   gap: 5px;
   scrollbar-width: none;
   padding: 5px;
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--glass-bg);
   border-radius: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--glass-border);
 }
 .filter-scroll-area::-webkit-scrollbar { display: none; }
 
@@ -985,40 +900,45 @@ body[data-theme="dark"] .date-header { color: #64748b; }
   border: none;
   padding: 8px 16px;
   border-radius: 30px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
   transition: color 0.3s;
-  z-index: 2; /* روی حباب */
+  z-index: 2;
   position: relative;
 }
 
 .filter-btn.active {
-  color: white;
+  color: white; 
 }
 
-/* حباب داخل اسکرول */
 .filter-bubble {
   position: absolute;
   top: 5px;
   left: 5px;
   height: calc(100% - 10px);
-  background: #2b2d42;
+  background: var(--text-main);
   border-radius: 30px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   pointer-events: none;
 }
 
-/* --- ADD TASK AREA FIX --- */
+/* Phase-specific overrides */
+body.phase-work .filter-bubble, body.phase-work .manage-tags-btn:hover { background-color: #f43f5e; color: white; border-color: #f43f5e; }
+body.phase-short .filter-bubble, body.phase-short .manage-tags-btn:hover { background-color: #14b8a6; color: white; border-color: #14b8a6; }
+body.phase-long .filter-bubble, body.phase-long .manage-tags-btn:hover { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+body.phase-stopwatch .filter-bubble, body.phase-stopwatch .manage-tags-btn:hover { background-color: #8b5cf6; color: white; border-color: #8b5cf6; }
+
+/* --- ADD TASK AREA --- */
 .add-task-area {
   display: flex;
   width: 100%;
-  padding: 6px; /* پدینگ یکدست */
+  padding: 6px;
   align-items: center;
-  gap: 8px; /* فاصله بین المان‌ها */
+  gap: 8px;
 }
 
 .task-input {
@@ -1027,85 +947,39 @@ body[data-theme="dark"] .date-header { color: #64748b; }
   border: none;
   font-size: 1rem;
   outline: none;
-  color: #334155;
-  min-width: 0; /* جلوگیری از بیرون زدگی */
+  color: var(--text-main);
+  min-width: 0;
 }
 
-.add-btn {
-  flex-shrink: 0; /* جلوگیری از تغییر سایز دکمه */
-  padding: 10px 25px;
-}
+.add-btn { flex-shrink: 0; padding: 10px 25px; }
 
 /* --- ADD TAG ROW IN MODAL --- */
-.add-tag-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
+.add-tag-row { display: flex; gap: 10px; margin-bottom: 10px; }
 
-/* --- CONFIRM MODAL TEXT --- */
 #confirm-message {
   font-size: 1.1rem;
-}
-body[data-theme="dark"] #confirm-message { color: white; }
-
-/* --- ADAPTIVE COLORS FIX (Including new elements) --- */
-/* Work */
-body.phase-work .filter-bubble, 
-body.phase-work .manage-tags-btn:hover { background-color: #f43f5e; color: white; border-color: #f43f5e; }
-
-/* Short Break */
-body.phase-short .filter-bubble, 
-body.phase-short .manage-tags-btn:hover { background-color: #14b8a6; color: white; border-color: #14b8a6; }
-
-/* Long Break */
-body.phase-long .filter-bubble, 
-body.phase-long .manage-tags-btn:hover { background-color: #3b82f6; color: white; border-color: #3b82f6; }
-
-/* Stopwatch */
-body.phase-stopwatch .filter-bubble, 
-body.phase-stopwatch .manage-tags-btn:hover { background-color: #8b5cf6; color: white; border-color: #8b5cf6; }
-
-/* Dark mode fix for filter nav */
-body[data-theme="dark"] .manage-tags-btn { color: #94a3b8; border-color: rgba(255,255,255,0.1); }
-body[data-theme="dark"] .filter-scroll-area { background: rgba(30, 41, 59, 0.4); border-color: rgba(255,255,255,0.1); }
-
-/* اصلاح رنگ متن تسک در دارک مود */
-body[data-theme="dark"] .task-item {
-    color: #f1f5f9; /* سفید یخی */
-}
-body[data-theme="dark"] .task-info span {
-    color: #f1f5f9;
-}
-/* دکمه‌ها در دارک مود */
-body[data-theme="dark"] .done-btn, 
-body[data-theme="dark"] .remove-btn, 
-body[data-theme="dark"] .focus-btn,
-body[data-theme="dark"] .edit-tag-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #94a3b8;
+  color: var(--text-main);
 }
 
 /* --- COMPACT TASK ACTIONS --- */
 .task-actions {
   display: flex;
-  gap: 6px; /* فاصله کمتر */
-  opacity: 0.6; /* در حالت عادی کمرنگ */
+  gap: 6px;
+  opacity: 0.6;
   transition: opacity 0.2s;
 }
 
 .task-item:hover .task-actions {
-  opacity: 1; /* با هاور پررنگ میشه */
+  opacity: 1;
 }
 
 .done-btn, .remove-btn, .focus-btn, .edit-tag-btn {
-  width: 28px; /* کوچک‌تر */
+  width: 28px;
   height: 28px;
-  border-radius: 8px; /* کمی مربعی‌تر و مدرن */
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  background: rgba(255, 255, 255, 0.2);
-  color: #64748b;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-muted);
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -1113,46 +987,32 @@ body[data-theme="dark"] .edit-tag-btn {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.done-btn:hover { background: #10b981; color: white; border-color: #10b981; transform: translateY(-2px); }
-.remove-btn:hover { background: #ef4444; color: white; border-color: #ef4444; transform: translateY(-2px); }
-/* دکمه فوکوس (همون آبی بمونه) */
-.focus-btn:hover { 
-  background: #3b82f6; 
-  color: white; 
-  border-color: #3b82f6; 
-  transform: translateY(-2px); 
-}
+/* Hovers (Works natively in Light & Dark Mode) */
+.done-btn:hover { background: var(--success-color); color: white; border-color: var(--success-color); transform: translateY(-2px); }
+.remove-btn:hover { background: var(--danger-color); color: white; border-color: var(--danger-color); transform: translateY(-2px); }
+.focus-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; transform: translateY(-2px); }
+.edit-tag-btn:hover { background: #f59e0b; color: white; border-color: #f59e0b; transform: translateY(-2px); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
 
-/* دکمه ادیت تگ (زرد/نارنجی جذاب) 🏷️ */
-.edit-tag-btn:hover { 
-  background: #f59e0b; /* رنگ Amber هماهنگ با تگ‌ها */
-  color: white; 
-  border-color: #f59e0b; 
-  transform: translateY(-2px); 
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-}
-
-/* آیکون‌ها رو کمی کوچک‌تر کنیم */
 .task-actions svg { width: 16px; height: 16px; }
 
 /* --- CUSTOM TAG DROPDOWN (GLASSMORPHISM) --- */
 .custom-dropdown {
   position: absolute;
-  bottom: 120%; /* باز شدن به سمت بالا برای جلوگیری از رفتن زیر صفحه */
+  bottom: 120%;
   left: 0;
   width: 150px;
   max-height: 115px;
   overflow-y: auto;
   border-radius: 15px;
   z-index: 1000;
-  display: none; /* پیش‌فرض مخفی */
+  display: none;
   flex-direction: column;
   padding: 5px;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--modal-bg);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .custom-dropdown.show {
@@ -1165,16 +1025,16 @@ body[data-theme="dark"] .edit-tag-btn {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* اسکرول‌بار ظریف برای منوی کشویی */
 .custom-dropdown::-webkit-scrollbar { width: 10px; }
-.custom-dropdown::-webkit-scrollbar-track { 
-  background: transparent; 
-}
+.custom-dropdown::-webkit-scrollbar-track { background: transparent; }
 .custom-dropdown::-webkit-scrollbar-thumb { 
   background: rgba(0,0,0,0.2); 
   border-radius: 10px;
   border: 3px solid transparent;
   background-clip: content-box;
+}
+body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb { 
+  background: rgba(255,255,255,0.25); 
 }
 
 .dropdown-item {
@@ -1183,47 +1043,27 @@ body[data-theme="dark"] .edit-tag-btn {
   border-radius: 10px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #475569;
+  color: var(--text-muted);
   transition: all 0.2s;
   display: flex;
   align-items: center;
 }
 
-/* کوچک کردن آیکون‌های داخل منو */
-.dropdown-item svg {
-  width: 12px !important;
-  height: 12px !important;
-}
+.dropdown-item svg { width: 12px !important; height: 12px !important; }
 
 .dropdown-item:hover {
-  background: rgba(0, 0, 0, 0.05);
-  color: #2b2d42;
+  background: var(--btn-bg);
+  color: var(--text-main);
   transform: translateX(3px);
 }
 
-/* دارک مود منوی کشویی */
-body[data-theme="dark"] .custom-dropdown {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb { 
-  background: rgba(255,255,255,0.25); 
-  background-clip: content-box; 
-}
-body[data-theme="dark"] .dropdown-item { color: #94a3b8; }
-body[data-theme="dark"] .dropdown-item:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-
-/* 🌟 فیکس نهایی: حذف رنگ مزاحم اتوفیل کروم در اینپوت‌ها */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
-input:-webkit-autofill:active{
-    -webkit-box-shadow: 0 0 0 30px transparent inset !important;
-    transition: background-color 5000s ease-in-out 0s;
-    -webkit-text-fill-color: #334155 !important;
-}
-body[data-theme="dark"] input:-webkit-autofill {
-    -webkit-text-fill-color: #f8fafc !important;
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: var(--text-main) !important;
 }
 
 /* --- DATE HEADER & SORT BUTTON --- */
@@ -1232,19 +1072,18 @@ body[data-theme="dark"] input:-webkit-autofill {
   width: 100%;
   font-size: 0.8rem;
   font-weight: bold;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin: 15px 0 8px 0;
   padding-left: 5px;
   text-transform: uppercase;
   letter-spacing: 1px;
   display: flex;
   align-items: center;
-  gap: 8px; /* فاصله بین دکمه، تاریخ و خط */
+  gap: 8px; 
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* خط افقی بین تاریخ و دکمه سورت */
 .date-header-line {
   flex-grow: 1;
   height: 1px;
@@ -1263,7 +1102,7 @@ body[data-theme="dark"] input:-webkit-autofill {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px; /* راحت‌تر کلیک بشه */
+  padding: 4px;
   border-radius: 6px;
   opacity: 0.7;
   transition: all 0.2s;
@@ -1271,27 +1110,14 @@ body[data-theme="dark"] input:-webkit-autofill {
 
 .sort-btn-inline:hover {
   opacity: 1;
-  color: #2b2d42;
-  background: rgba(0, 0, 0, 0.05); /* یک هاله ملایم موقع هاور */
+  color: var(--text-main);
+  background: var(--btn-bg);
 }
 
-body[data-theme="dark"] .sort-btn-inline:hover { 
-  color: #f8fafc; 
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* برای اینکه آیتمِ فعال تو منو مشخص باشه */
-.dropdown-item.active-sort {
-  color: #3b82f6;
-  background: rgba(59, 130, 246, 0.1);
-}
-body[data-theme="dark"] .dropdown-item.active-sort {
-  color: #60a5fa;
-  background: rgba(96, 165, 250, 0.15);
-}
+.dropdown-item.active-sort { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+body[data-theme="dark"] .dropdown-item.active-sort { color: #60a5fa; background: rgba(96, 165, 250, 0.15); }
 
 /* ================= HABITS SPECIFIC UI ================= */
-
 .habit-icon-circle {
   width: 44px; height: 44px;
   border-radius: 14px;
@@ -1299,200 +1125,310 @@ body[data-theme="dark"] .dropdown-item.active-sort {
   flex-shrink: 0; margin-right: 12px;
 }
 
-#habit-date-display { color: #2b2d42; }
+#habit-date-display { color: var(--text-main); }
 
-/* استایل شعله */
 .streak-flame {
   display: flex; align-items: center; gap: 4px;
-  color: #94a3b8; font-weight: bold; font-size: 0.85rem;
+  color: var(--text-muted); font-weight: bold; font-size: 0.85rem;
 }
 .streak-flame.active {
-  color: #f97316; /* نارنجی شعله */
+  color: #f97316;
   text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);
 }
 
-/* شبکه انتخاب رنگ و آیکون در مودال */
 .picker-grid { display: flex; gap: 12px; margin-top: 5px; }
 .color-option {
   width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
   border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 .color-option:hover { transform: scale(1.1); }
-.color-option.selected { border: 3px solid #2b2d42; transform: scale(1.15); }
+.color-option.selected { border: 3px solid var(--text-main); transform: scale(1.15); }
 
 .icon-option {
   width: 36px; height: 36px; border-radius: 10px;
-  background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.5);
+  background: var(--btn-bg); border: 1px solid var(--glass-border);
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; color: #64748b; transition: all 0.2s;
+  cursor: pointer; color: var(--text-muted); transition: all 0.2s;
 }
-.icon-option:hover { background: rgba(255, 255, 255, 0.8); color: #2b2d42; }
-.icon-option.selected { background: #2b2d42; color: white; border-color: #2b2d42; box-shadow: 0 4px 10px rgba(43, 45, 66, 0.2); }
-
-/* --- DARK MODE FIXES FOR HABITS --- */
-body[data-theme="dark"] #habit-date-display { color: #f8fafc; }
-body[data-theme="dark"] .color-option.selected { border-color: #f8fafc; }
-body[data-theme="dark"] .icon-option { background: rgba(0, 0, 0, 0.2); border-color: rgba(255, 255, 255, 0.1); color: #94a3b8;}
-body[data-theme="dark"] .icon-option:hover { background: rgba(255, 255, 255, 0.1); color: #f8fafc;}
-body[data-theme="dark"] .icon-option.selected { background: #3b82f6; color: white; border-color: #3b82f6; }
+.icon-option:hover { background: var(--btn-hover); color: var(--text-main); }
+.icon-option.selected { background: var(--text-main); color: var(--bg-main); border-color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
 /* ================= HABITS THEME & FIXES ================= */
-
-/* تم اختصاصی تب عادت‌ها (آرام‌بخش و متمرکز روی رشد) */
 body.phase-habits {
-  background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); /* سبز/لیمویی ملایم */
-}
-/* اگر دارک‌مود بود، همون دارک‌مودِ جذابِ سایتت رو حفظ می‌کنه */
-body[data-theme="dark"].phase-habits {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
 }
 
-body.phase-habits .active-bubble {
-  background-color: #10b981; /* حباب سبز زمردی */
+/* 🌟 FORCE DARK MODE BACKGROUND OVER HABITS */
+body[data-theme="dark"].phase-habits {
+  background: var(--bg-main) !important;
 }
+
+body.phase-habits .active-bubble { background-color: #10b981; }
 body.phase-habits .tab.active { color: white; }
 
-/* مطمئن شیم متن تاریخ تو دارک‌مود سفیده */
-body[data-theme="dark"] #habit-date-display { color: #f8fafc !important; }
+.habit-settings-btn, #prev-day-btn, #next-day-btn { color: var(--text-muted); }
+.habit-settings-btn:hover, #prev-day-btn:hover, #next-day-btn:hover { color: var(--text-main); }
+body.phase-habits .date-nav-btn:hover { color: #10b981; }
 
-/* اصلاح رنگ آیکون‌ها تو دارک مود */
-body[data-theme="dark"] .habit-settings-btn,
-body[data-theme="dark"] #prev-day-btn,
-body[data-theme="dark"] #next-day-btn {
-    color: #94a3b8;
-}
-body[data-theme="dark"] .habit-settings-btn:hover,
-body[data-theme="dark"] #prev-day-btn:hover,
-body[data-theme="dark"] #next-day-btn:hover {
-    color: #f8fafc;
-}
-
-/* ================= HABITS THEME HARMONY & FIXES ================= */
-
-/* هاورِ کارت‌های عادت همرنگ با تم سبز بشه */
 body.phase-habits .habit-item:hover { border-color: #10b981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
 body.phase-habits .icon-btn:hover { color: #10b981; }
 body.phase-habits .done-btn:hover { background: #10b981; color: white; border-color: #10b981; }
 
-/* 🌟 دکمه‌های دایره‌ای (دقیقاً هم‌جنس با شیشه‌های اطرافش) */
 .theme-circle-btn {
-  width: 44px; 
-  height: 44px;
-  border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  /* 🌟 حالا کاملاً شیشه‌ای شد */
-  background: rgba(255, 255, 255, 0.25); 
+  background: var(--glass-bg); 
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  color: #2b2d42;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 .theme-circle-btn:hover {
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(1.08);
-  color: #10b981; /* آیکونش سبز میشه */
-  border-color: #10b981;
+  background: var(--btn-hover);
+  color: #10b981; border-color: #10b981;
 }
 
-/* حلقه پیشرفت در داشبورد */
 .overview-ring { stroke-linecap: round; transition: stroke-dashoffset 1.5s ease-out; }
 
-/* انیمیشن و استایل متن‌های انگیزشی */
 .habit-quote-text {
-  font-size: 1rem; font-style: italic; color: #475569;
+  font-size: 1rem; font-style: italic; color: var(--text-muted);
   transition: opacity 0.8s ease-in-out; opacity: 1;
 }
 .habit-quote-text.fade-out { opacity: 0; }
 
+/* --- DATE SELECTOR FIXES --- */
+.date-selector-btn {
+  font-size: 1.1rem; margin: 0; min-width: 90px; text-align: center;
+  color: var(--text-main); font-weight: bold; cursor: pointer; padding: 0; 
+  background: transparent !important; transition: transform 0.2s ease, color 0.2s ease;
+  user-select: none; border: none !important; box-shadow: none !important;
+}
+.date-selector-btn:hover { transform: scale(1.05); color: #10b981; }
 
-/* ================= DARK MODE FIXES FOR HABITS ================= */
-
-body[data-theme="dark"] .theme-circle-btn {
-  background: rgba(30, 41, 59, 0.4); /* شیشه‌ای تاریک */
-  color: #94a3b8;
-  border-color: rgba(255, 255, 255, 0.1);
+.day-option {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--btn-bg); border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: bold; cursor: pointer; color: var(--text-muted);
+    transition: all 0.2s;
 }
-body[data-theme="dark"] .theme-circle-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #2dd4bf;
-  border-color: #2dd4bf;
-}
+.day-option.selected { background: var(--text-main); color: var(--bg-main); border-color: var(--text-main); }
 
-/* اصلاح هاور فلش‌های تاریخ در دارک مود (سبز بمونه، سفید نشه) */
-body[data-theme="dark"].phase-habits .date-nav-btn:hover {
-  color: #2dd4bf !important; /* سبز فیروزه‌ای */
+#habit-category-dropdown {
+  width: max-content !important;
+  min-width: 100%;
+  padding-right: 15px; 
+  white-space: nowrap; 
 }
 
-/* اصلاح خوانایی قطعیِ متن‌های داشبورد سمت چپ در دارک مود */
-body[data-theme="dark"] .dashboard-title-text,
-body[data-theme="dark"] .dashboard-stats-text strong {
-  color: #f8fafc !important; /* سفید روشن */
+/* ========================================== */
+/* 13. HABITS THEME HARMONY & DASHBOARD       */
+/* ========================================== */
+
+.theme-circle-btn {
+  width: 44px; 
+  height: 44px;
+  border-radius: 50%;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  background: var(--glass-bg); 
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
-body[data-theme="dark"] .locked-task-label svg {
-  color: #94a3b8; /* آیکونِ کنارِ Overview طوسی روشن باشه */
+
+.theme-circle-btn:hover {
+  background: var(--btn-hover);
+  color: var(--success-color);
+  border-color: var(--success-color);
 }
-body[data-theme="dark"] .dashboard-stats-text {
-  color: #94a3b8 !important; /* "habits completed" طوسی روشن */
+
+.overview-ring { 
+  stroke-linecap: round; 
+  transition: stroke-dashoffset 1.5s ease-out; 
 }
-body[data-theme="dark"] .habit-quote-text {
-  color: #cbd5e1 !important; /* نقل قول خوانا و ملایم */
-}
-body[data-theme="dark"] #habit-overview-dashboard .time-display {
-  color: #2dd4bf !important; 
-}
+
 body[data-theme="dark"] .overview-ring {
   stroke: #2dd4bf !important;
 }
 
-/* 🌟 دکمه انتخاب تاریخ (بدون کادر، تغییر رنگ هوشمند متن) */
+.habit-quote-text {
+  font-size: 1rem; 
+  font-style: italic; 
+  color: var(--text-muted);
+  transition: opacity 0.8s ease-in-out; 
+  opacity: 1;
+}
+
+.habit-quote-text.fade-out { 
+  opacity: 0; 
+}
+
+.dashboard-title-text,
+.dashboard-stats-text strong {
+  color: var(--text-main) !important; 
+}
+
+.locked-task-label svg {
+  color: var(--text-muted); 
+}
+
+.dashboard-stats-text {
+  color: var(--text-muted) !important;
+}
+
+#habit-overview-dashboard .time-display {
+  color: var(--text-main);
+}
+body[data-theme="dark"] #habit-overview-dashboard .time-display {
+  color: #2dd4bf !important; 
+}
+
+/* ========================================== */
+/* 14. DATE SELECTOR & PICKERS                */
+/* ========================================== */
+
 .date-selector-btn {
   font-size: 1.1rem;
   margin: 0;
   min-width: 90px;
   text-align: center;
-  color: #2b2d42;
+  color: var(--text-main) !important;
   font-weight: bold;
   cursor: pointer;
-  padding: 0; /* حذف پدینگ */
-  background: transparent !important; /* حذف کامل پس‌زمینه */
+  padding: 0; 
+  background: transparent !important; 
+  border: none !important;
+  box-shadow: none !important;
   transition: transform 0.2s ease, color 0.2s ease;
   user-select: none;
 }
+
 .date-selector-btn:hover {
   transform: scale(1.05);
-  color: #10b981; /* تو تب عادت‌ها سبز میشه */
+  color: var(--success-color) !important; 
 }
 
-body.phase-habits .date-selector-btn:hover { color: #10b981 !important; }
+body[data-theme="dark"] .date-selector-btn:hover {
+  color: #2dd4bf !important; 
+  background: transparent !important;
+}
 
-/* 🌟 استایل روزهای Custom در مودال */
 .day-option {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.5);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; font-weight: bold; cursor: pointer; color: #64748b;
-    transition: all 0.2s;
-}
-.day-option.selected { background: #2b2d42; color: white; border-color: #2b2d42; }
-
-body[data-theme="dark"] .day-option { background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1); color: #94a3b8; }
-body[data-theme="dark"] .day-option.selected { background: #3b82f6; color: white; border-color: #3b82f6; }
-
-/* 🌟 فیکس لاغریِ پاپ‌آپ کتگوری در مودال */
-#habit-category-dropdown {
-  width: max-content !important;
-  min-width: 100%;
-  padding-right: 15px; /* برای اینکه متن به لبه نچسبه */
+  width: 32px; 
+  height: 32px; 
+  border-radius: 50%;
+  background: var(--btn-bg); 
+  border: 1px solid var(--glass-border);
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: 0.85rem; 
+  font-weight: bold; 
+  cursor: pointer; 
+  color: var(--text-muted);
+  transition: all 0.2s;
 }
 
-/* 🌟 فیکس رنگ هاور تاریخ در دارک مود */
-body[data-theme="dark"] .date-selector-btn { 
-  color: #f8fafc !important; 
+.day-option.selected { 
+  background: var(--text-main); 
+  color: var(--bg-main); 
+  border-color: var(--text-main); 
 }
-body[data-theme="dark"] .date-selector-btn:hover,
-body[data-theme="dark"].phase-habits .date-selector-btn:hover { 
-  color: #2dd4bf !important; /* سبز فیروزه‌ای دارک مود که به زور اعمال میشه */
-  background: rgba(255, 255, 255, 0.1) !important;
+
+/* ========================================== */
+/* 15. UNIFIED DROPDOWNS (Category & Goal)    */
+/* ========================================== */
+
+#habit-category-wrapper, #habit-frequency-wrapper {
+  position: relative !important; 
+}
+
+#habit-category-dropdown, #habit-frequency-dropdown {
+  top: calc(100% + 8px) !important; 
+  bottom: auto !important;
+  left: 0 !important;
+  width: 100% !important; 
+  max-height: 180px !important;
+  padding: 5px !important;
+  z-index: 99999 !important;
+}
+
+#habit-category-dropdown .dropdown-item, #habit-frequency-dropdown .dropdown-item {
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  margin-bottom: 2px !important;
+}
+
+/* ========================================== */
+/* 16. ANIMATIONS & MICRO-INTERACTIONS        */
+/* ========================================== */
+
+@keyframes popSuccess {
+  0% { transform: scale(1); color: var(--text-main); }
+  50% { transform: scale(1.15); color: var(--success-color); }
+  100% { transform: scale(1); color: var(--success-color); }
+}
+
+.pop-success-anim {
+  animation: popSuccess 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+#habit-overview-dashboard .time-display {
+  display: inline-block; /* Required for transform scaling to work */
+  transition: color 0.3s ease;
+}
+
+/* --- Circle Buttons (Zero scaling, exact phase colors) --- */
+.theme-circle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    padding: 0;
+    outline: none !important; /* Kills the black border bug */
+}
+
+.theme-circle-btn:focus {
+    outline: none !important;
+}
+
+/* Exact matching hex codes from your phase buttons */
+body.phase-work .theme-circle-btn:hover { background-color: #f43f5e; color: #fff; border-color: #f43f5e; }
+body.phase-short .theme-circle-btn:hover { background-color: #14b8a6; color: #fff; border-color: #14b8a6; }
+body.phase-long .theme-circle-btn:hover { background-color: #3b82f6; color: #fff; border-color: #3b82f6; }
+body.phase-stopwatch .theme-circle-btn:hover { background-color: #8b5cf6; color: #fff; border-color: #8b5cf6; }
+
+/* --- Fixed Sort Dropdown Positioning --- */
+.sort-wrapper {
+    position: relative; /* Acts as the anchor for the dropdown */
+}
+
+#sort-dropdown {
+    top: calc(100% + 8px) !important;
+    right: 0 !important;
+    left: auto !important;
+    bottom: auto !important;
+}
+
+/* --- Habit Quick Add Button Theme --- */
+#quick-add-habit-btn {
+    background-color: #10b981; /* Green theme */
+    color: #fff;
+}
+#quick-add-habit-btn:hover {
+    background-color: #059669;
 }
