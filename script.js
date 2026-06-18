@@ -41,7 +41,7 @@ function setupGlobalShortcuts() {
         // Prevent triggering shortcuts when typing in inputs
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
         
-        // Spacebar to toggle timer
+        // Space key to toggle timer
         if (event.code === 'Space') { 
             event.preventDefault(); 
             toggleTimer(); 

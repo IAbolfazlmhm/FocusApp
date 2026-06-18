@@ -1,0 +1,52 @@
+/* ========================================== */
+/* RESET & BASE STYLES                        */
+/* ========================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+body, .timer-section, .tasks-section, .glass-pill, .modal-content, 
+.task-item, .progress-ring-track, .progress-ring-circle, 
+.start-btn, .add-btn, .active-bubble {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.preload * {
+    transition: none !important;
+}
+
+button:focus, input:focus, .tab:focus, .custom-select:focus {
+  outline: none !important;
+}
+
+/* Remove ugly auto-fill background from Chrome */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px transparent inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: var(--text-main) !important;
+}
+
+/* Global Animations */
+@keyframes popSuccess {
+  0% { transform: scale(1); color: var(--text-main); }
+  50% { transform: scale(1.15); color: var(--success-color); }
+  100% { transform: scale(1); color: var(--success-color); }
+}
+
+.pop-success-anim {
+  animation: popSuccess 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

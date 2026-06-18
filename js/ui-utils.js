@@ -114,6 +114,21 @@ export function setupTabs() {
             document.body.classList.remove('phase-habits');
         }
       }
+
+      const pomodoroSettings = document.getElementById('pomodoro-settings-wrapper');
+      const modeSelect = document.getElementById('mode-select');
+      
+      // Hide Timer Settings & Mode Select when not on Pomodoro tab
+      if (pomodoroSettings) pomodoroSettings.style.display = index === 0 ? 'block' : 'none';
+      // Trigger bubble recalculation if switching to Habits tab (index 1)
+      if (index === 1) {
+          document.dispatchEvent(new Event('habitsTabOpened'));
+      }
+      if (modeSelect) {
+          const modeWrapper = modeSelect.closest('.setting-group');
+          if (modeWrapper) modeWrapper.style.display = index === 0 ? 'flex' : 'none';
+      }
+      
     });
   });
 
