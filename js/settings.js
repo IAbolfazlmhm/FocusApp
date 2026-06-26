@@ -85,19 +85,39 @@ export function loadSettings() {
   if (savedSettings) {
     const settings = JSON.parse(savedSettings);
     
-    if (modeSelect) modeSelect.value = settings.mode;
+    // Helper to visually update the custom display text
+    const syncDisplay = (inputId, displayId, dropdownId) => {
+        const input = document.getElementById(inputId);
+        const display = document.getElementById(displayId);
+        const dropdown = document.getElementById(dropdownId);
+        if (input && display && dropdown) {
+            const activeItem = dropdown.querySelector(`.dropdown-item[data-val="${input.value}"]`);
+            if (activeItem) display.value = activeItem.textContent;
+        }
+    };
+
+    if (modeSelect) { 
+        modeSelect.value = settings.mode; 
+        syncDisplay('mode-select', 'mode-display', 'mode-dropdown'); 
+    }
     
     const workDur = document.getElementById('work-duration');
-    if (workDur) workDur.value = settings.workDuration;
+    if (workDur) { 
+        workDur.value = settings.workDuration; 
+        syncDisplay('work-duration', 'duration-display', 'duration-dropdown'); 
+    }
+    
+    const soundSelect = document.getElementById('sound-select');
+    if (soundSelect) { 
+        soundSelect.value = settings.sound; 
+        syncDisplay('sound-select', 'sound-display', 'sound-dropdown'); 
+    }
     
     const breaksToggle = document.getElementById('breaks-toggle');
     if (breaksToggle) breaksToggle.checked = settings.breaksEnabled;
     
     const autoStartToggle = document.getElementById('autostart-breaks-toggle');
     if (autoStartToggle) autoStartToggle.checked = settings.autoStart;
-    
-    const soundSelect = document.getElementById('sound-select');
-    if (soundSelect) soundSelect.value = settings.sound;
     
     const soundToggle = document.getElementById('sound-toggle');
     if (soundToggle) soundToggle.checked = settings.haptics;
@@ -138,7 +158,19 @@ export function setupSettingsEvents() {
     const closeSettingsBtn = document.getElementById('close-settings');
     const saveSettingsBtn = document.getElementById('save-settings');
 
-    if (settingsBtn) settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
+    // Catch event from other tabs to reload settings securely
+    document.addEventListener('reloadSettingsUI', () => {
+        if (typeof loadSettings === 'function') loadSettings();
+    });
+
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', () => {
+        // BUG FIX: Reset visually to the true saved state in case of unsaved clicks
+        if (typeof loadSettings === 'function') loadSettings();
+        if (settingsModal) settingsModal.classList.add('show');
+      });
+    }
+    
     if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('show'));
     
     if (settingsModal) {
@@ -166,4 +198,39 @@ export function setupSettingsEvents() {
           settingsModal.classList.remove('show'); 
         });
     }
+
+    // --- CUSTOM DROPDOWN ENGINE ---
+    function setupCustomDropdown(wrapperId, displayId, inputId, dropdownId) {
+        const wrapper = document.getElementById(wrapperId);
+        const display = document.getElementById(displayId);
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(dropdownId);
+
+        if (!wrapper || !display || !dropdown) return;
+
+        display.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdown.classList.toggle('show');
+        });
+
+        dropdown.querySelectorAll('.dropdown-item').forEach(item => {
+            item.addEventListener('click', () => {
+                display.value = item.textContent;
+                input.value = item.getAttribute('data-val');
+                dropdown.classList.remove('show');
+
+                // Trigger a generic change event so other functions update
+                const event = new Event('change');
+                input.dispatchEvent(event);
+            });
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) dropdown.classList.remove('show');
+        });
+    }
+
+    setupCustomDropdown('mode-wrapper', 'mode-display', 'mode-select', 'mode-dropdown');
+    setupCustomDropdown('duration-wrapper', 'duration-display', 'work-duration', 'duration-dropdown');
+    setupCustomDropdown('sound-wrapper', 'sound-display', 'sound-select', 'sound-dropdown');
 }

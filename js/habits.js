@@ -312,6 +312,8 @@ export function setupHabitsEvents() {
     const dateDisplayBtn = document.getElementById('habit-date-display');
     const nativeDatePicker = document.getElementById('native-date-picker');
 
+    
+
     // 1. Open Native Picker on Click
     if (dateDisplayBtn && nativeDatePicker) {
         dateDisplayBtn.addEventListener('click', () => {
@@ -585,6 +587,8 @@ export function setupHabitsEvents() {
     if (habitSettingsBtn && settingsModal) {
         habitSettingsBtn.addEventListener('click', () => {
             playUI('click');
+            // BUG FIX: Revert unsaved changes when opening from Habits!
+            document.dispatchEvent(new Event('reloadSettingsUI')); 
             settingsModal.classList.add('show');
         });
     }
@@ -688,14 +692,46 @@ export function setupHabitsEvents() {
 
     if (manageAddCategoryBtn) {
         manageAddCategoryBtn.addEventListener('click', () => {
+            if (!manageNewCategoryInput) return;
             const newCat = manageNewCategoryInput.value.trim();
+            
+            // Empty Warning
+            if (!newCat) {
+                showToast('Please enter a valid category name.', 'warning');
+                return;
+            }
+
             if (newCat && !savedHabitCategories.includes(newCat)) {
                 savedHabitCategories.push(newCat);
                 localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
                 manageNewCategoryInput.value = '';
                 renderCategoriesManagement();
-                renderHabitCategories(); // Update top bar
-                showToast(`Category ${newCat} added`, 'success');
+                renderHabitCategories(); 
+                showToast(`Category added`, 'success');
+            }
+        });
+    }
+
+    // Allow 'Enter' key to add categories (FAIL-SAFE VERSION)
+    const catInput = document.getElementById('manage-new-category-input');
+    const catBtn = document.getElementById('manage-add-category-btn');
+    if (catInput && catBtn) {
+        catInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                catBtn.click();
+            }
+        });
+    }
+
+    // Allow 'Enter' key to save the main habit modal (FAIL-SAFE VERSION)
+    const hInput = document.getElementById('habit-name-input');
+    const hSaveBtn = document.getElementById('save-habit-btn');
+    if (hInput && hSaveBtn) {
+        hInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                hSaveBtn.click();
             }
         });
     }
@@ -854,17 +890,17 @@ export function updateHabitProgress() {
         }
     }
 
-    // 2. Animate the Percentage Number
-    const percentageText = document.querySelector('#habit-overview-dashboard .time-display');
+    // 2. Animate the Percentage Number (Bulletproof Version)
+    const percentageText = document.querySelector('#habit-detail-panel .time-display');
     if (percentageText) {
         const prevVal = parseInt(percentageText.dataset.currentVal || 0);
+        // CRITICAL: Update the target immediately so rapid clicks don't break the tracking
+        percentageText.dataset.currentVal = percentage; 
         
-        // Only trigger animation if the value actually changed
         if (prevVal !== percentage) {
-            animatePercentage(percentageText, prevVal, percentage, 1200); // 1.2 seconds
-            percentageText.dataset.currentVal = percentage; // Save current state for next time
+            animatePercentage(percentageText, prevVal, percentage, 800); // Faster, smoother duration
         } else if (percentageText.textContent === '') {
-             percentageText.textContent = `${percentage}%`; // Initial load fallback
+            percentageText.textContent = `${percentage}%`;
         }
     }
 
@@ -873,38 +909,48 @@ export function updateHabitProgress() {
     if (statsText) {
         statsText.textContent = `${completed}/${total} Completed`;
     }
+
+    // Update streaks UI
+    if (typeof renderTopStreaks === 'function') renderTopStreaks();
 }
 
 // ==========================================
 // ANIMATION FUNCTION
 // ==========================================
 export function animatePercentage(element, start, end, duration) {
-    let startTimestamp = null;
+    // BUG FIX: Cancel previous animation loop if user clicks quickly
+    if (element.animationId) {
+        window.cancelAnimationFrame(element.animationId);
+    }
+    
+    // Snap immediately if there's no change needed
+    if (start === end) {
+        element.textContent = `${end}%`;
+        return;
+    }
 
+    let startTimestamp = null;
     const step = (timestamp) => {
         if (!startTimestamp) startTimestamp = timestamp;
-        // Calculate progress (0 to 1)
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         
-        // Ease-Out Quart formula for a smooth slowdown at the end
+        // Smooth easing curve
         const easeProgress = 1 - Math.pow(1 - progress, 4);
         const currentVal = Math.floor(easeProgress * (end - start) + start);
         
         element.textContent = `${currentVal}%`;
         
         if (progress < 1) {
-            window.requestAnimationFrame(step);
+            element.animationId = window.requestAnimationFrame(step);
         } else {
-            element.textContent = `${end}%`; // Lock exactly to the target
-            
-            // Trigger a success "pop" if they hit 100%
+            element.textContent = `${end}%`; 
             if (end === 100) {
                 element.classList.add('pop-success-anim');
                 setTimeout(() => element.classList.remove('pop-success-anim'), 600);
             }
         }
     };
-    window.requestAnimationFrame(step);
+    element.animationId = window.requestAnimationFrame(step);
 }
 
 // ==========================================
@@ -913,15 +959,25 @@ export function animatePercentage(element, start, end, duration) {
 function processQuickAddHabit() {
     const input = document.getElementById('quick-habit-input');
     const name = input.value.trim();
-    if (!name) return;
+    
+    if (!name) {
+        showToast('Please enter a valid habit name.', 'warning');
+        return;
+    }
+
+    // Pick Random Color & Icon
+    const colors = ['#3b82f6', '#10b981', '#f43f5e', '#8b5cf6', '#f59e0b'];
+    const iconKeys = Object.keys(habitIconsDict);
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    const randomIcon = iconKeys[Math.floor(Math.random() * iconKeys.length)];
 
     const newHabit = {
         id: Date.now(),
         name: name,
         category: 'Uncategorized',
         frequency: 'everyday',
-        color: '#10b981', // Clean default green
-        icon: 'activity', // Clean default icon
+        color: randomColor, 
+        icon: randomIcon, 
         logs: {},
         createdAt: new Date(new Date().setHours(0,0,0,0)).toISOString()
     };
@@ -1042,3 +1098,74 @@ document.addEventListener('habitsTabOpened', () => {
         bubble.style.transition = '';
     }
 });
+
+// --- TOP STREAKS & DEEP LINKING EXPORT ---
+export function setHabitDate(dateObj) {
+    const newDate = new Date(dateObj);
+    newDate.setHours(0,0,0,0);
+    
+    // BUG FIX: We MUST use the setter function from state.js!
+    setCurrentHabitDate(newDate); 
+    
+    const display = document.getElementById('habit-date-display');
+    if (display) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const diffDays = Math.ceil((newDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) display.textContent = 'Today';
+        else if (diffDays === -1) display.textContent = 'Yesterday';
+        else if (diffDays === 1) display.textContent = 'Tomorrow';
+        else display.textContent = newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    renderHabits();
+    if (typeof updateDailyOverview === 'function') updateDailyOverview();
+}
+
+export function renderTopStreaks() {
+    const list = document.getElementById('top-streaks-list');
+    if (!list) return;
+
+    const habitsWithStreaks = habits.map(h => ({ ...h, currentStreak: typeof calculateStreak === 'function' ? calculateStreak(h) : 0 }));
+    habitsWithStreaks.sort((a, b) => b.currentStreak - a.currentStreak);
+    
+    // Grab top 3
+    const top3 = habitsWithStreaks.filter(h => h.currentStreak > 0).slice(0, 3);
+
+    list.innerHTML = '';
+    
+    // ALWAYS render 3 slots to permanently lock the layout height
+    for (let i = 0; i < 3; i++) {
+        const pill = document.createElement('div');
+        pill.className = 'stat-row'; 
+        pill.style.padding = '8px 15px';
+        pill.style.height = '48px'; // Lock the height of the pill
+        
+        if (top3[i]) {
+            const h = top3[i];
+            pill.innerHTML = `
+                <div class="stat-icon" style="color: ${h.color || '#10b981'}; background: ${h.color ? h.color+'20' : 'rgba(16,185,129,0.15)'}; width: 32px; height: 32px;">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${habitIconsDict[h.icon] || habitIconsDict['activity']}</svg>
+                </div>
+                <div class="stat-details" style="flex: 1; min-width: 0;">
+                    <span class="stat-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; color: var(--text-main);">${h.name}</span>
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <span class="stat-value" style="font-size: 0.95rem; color: #f97316;">${h.currentStreak} 🔥</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Empty transparent placeholder
+            pill.style.background = 'transparent';
+            pill.style.border = '1px dashed var(--glass-border)';
+            pill.style.opacity = '0.5';
+            pill.innerHTML = `
+                <div class="stat-icon" style="background: transparent; width: 32px; height: 32px;"></div>
+                <div class="stat-details" style="flex: 1;">
+                    <span class="stat-label" style="color: var(--text-muted);">Empty</span>
+                </div>
+            `;
+        }
+        list.appendChild(pill);
+    }
+}

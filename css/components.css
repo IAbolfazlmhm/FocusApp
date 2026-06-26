@@ -28,7 +28,8 @@ svg.phase-icon { width: 16px; height: 16px; margin-bottom: -3px; margin-right: 5
   color: var(--text-muted); transition: transform 0.2s, color 0.2s;
   display: flex; justify-content: center; align-items: center; padding: 8px;
 }
-.icon-btn:hover { transform: scale(1.1); color: var(--text-main); }
+/* BUG FIX: Settings gear and arrows now hover in the phase theme color */
+.icon-btn:hover { transform: scale(1.1); color: var(--theme-color) !important; }
 
 .theme-circle-btn {
     width: 38px; height: 38px; border-radius: 50%;
@@ -90,7 +91,7 @@ input:checked + .slider:before { transform: translateX(26px); }
 }
 
 /* --- DROPDOWNS --- */
-.custom-dropdown { position: absolute; bottom: 120%; left: 0; width: 150px; max-height: 115px; overflow-y: auto; border-radius: 15px; z-index: 1000; display: none; flex-direction: column; padding: 5px; background: var(--modal-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
+.custom-dropdown { position: absolute; bottom: 120%; left: 0; width: 150px; min-height: 100%; max-height: 150px; overflow-y: auto; border-radius: 15px; z-index: 1000; display: none; flex-direction: column; padding: 5px; background: var(--modal-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); }
 .custom-dropdown.show { display: flex; animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 @keyframes popIn { from { opacity: 0; transform: translateY(10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .custom-dropdown::-webkit-scrollbar { width: 10px; }
@@ -116,3 +117,11 @@ body[data-theme="dark"] .dropdown-item.active-sort { color: #60a5fa; background:
 /* --- DROPDOWN POSITION FIXES --- */
 .sort-wrapper { position: relative; }
 #sort-dropdown, #habit-sort-dropdown { top: calc(100% + 8px) !important; right: 0 !important; left: auto !important; bottom: auto !important; }
+
+/* --- CONFIRM MODAL DARK MODE FIXES --- */
+#confirm-message { color: var(--text-main); transition: color 0.3s; }
+body[data-theme="dark"] #confirm-message { color: #f8fafc; }
+
+.cancel-btn:hover { background: var(--glass-bg) !important; transform: translateY(-2px); }
+body[data-theme="dark"] .cancel-btn { background: rgba(255, 255, 255, 0.05) !important; color: #f8fafc !important; }
+body[data-theme="dark"] .cancel-btn:hover { background: rgba(255, 255, 255, 0.1) !important; }

@@ -171,16 +171,19 @@ export function renderTasks() {
 
   // 2. Filter by Date (Only show tasks for the date selected in the top bar)
   if (typeof currentPomodoroDate !== 'undefined') {
-      const targetTime = currentPomodoroDate.getTime();
-      filtered = filtered.filter(task => {
-          const taskDate = new Date(task.createdAt);
-          taskDate.setHours(0, 0, 0, 0);
-          return taskDate.getTime() === targetTime;
-      });
-  }
+    const targetDateString = currentPomodoroDate.toDateString(); // "Fri Oct 27 2023"
+    filtered = filtered.filter(task => {
+        const taskDateString = new Date(task.createdAt).toDateString();
+        return taskDateString === targetDateString;
+    });
+}
 
   // 3. Sort using the new Top Bar logic
   filtered.sort((a, b) => {
+      // 1. Primary Sort: Completed tasks ALWAYS sink to the bottom
+      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+
+      // 2. Secondary Sort: User's choice
       let val = 0;
       if (currentSort === 'newest') val = a.createdAt - b.createdAt; 
       else if (currentSort === 'az') val = a.text.localeCompare(b.text);
@@ -427,6 +430,12 @@ export function setupTaskEvents() {
     manageAddTagBtn.addEventListener('click', () => {
         if (!manageNewTagInput) return;
         const newTagName = manageNewTagInput.value.trim();
+        
+        if (!newTagName) {
+            showToast('Please enter a valid tag name.', 'warning');
+            return;
+        }
+
         if (newTagName && !savedTags.includes(newTagName)) {
             savedTags.push(newTagName.charAt(0).toUpperCase() + newTagName.slice(1));
             saveTasks();
@@ -539,13 +548,17 @@ export function setupTaskEvents() {
       if (!quickModalTagInput) return;
       const newTagRaw = quickModalTagInput.value.trim();
       
+      if (!newTagRaw) {
+          showToast('Please enter a valid tag name.', 'warning');
+          return;
+      }
+      
       if (newTagRaw) {
           const newTag = newTagRaw.charAt(0).toUpperCase() + newTagRaw.slice(1);
-          
           if (!savedTags.includes(newTag)) {
               savedTags.push(newTag);
               saveTasks();
-              renderFilters(); // Updates top bar automatically
+              renderFilters(); 
               
               const tagsManagementList = document.getElementById('tags-management-list');
               if (tagsManagementList && tagsManagementList.innerHTML !== '') {
@@ -747,4 +760,24 @@ function setTaskTag(tag) {
         }
     }
     if (editTagModal) editTagModal.classList.remove('show');
+}
+
+// --- DEEP LINKING EXPORT ---
+export function setTaskDate(dateObj) {
+    currentPomodoroDate = new Date(dateObj);
+    currentPomodoroDate.setHours(0,0,0,0);
+    
+    // Safely update the Pomodoro Date text manually
+    const display = document.getElementById('pomodoro-date-display');
+    if (display) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const diffDays = Math.ceil((currentPomodoroDate - today) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === 0) display.textContent = 'Today';
+        else if (diffDays === -1) display.textContent = 'Yesterday';
+        else if (diffDays === 1) display.textContent = 'Tomorrow';
+        else display.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+    renderTasks();
 }

@@ -3,6 +3,7 @@ import { loadSettings, setupSettingsEvents, applySettingsToTimer } from './js/se
 import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from './js/timer.js';
 import { renderFilters, renderTasks, initConfirmModal, setupTaskEvents } from './js/tasks.js';
 import { renderHabits, setupHabitsEvents, initHabitQuotes } from './js/habits.js';
+import { renderProgressDashboard, setupProgressEvents } from './js/progress.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     // 1. Settings Initialization
@@ -22,6 +23,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // 4. Habits Initialization
     setupHabitsEvents();
+    setupProgressEvents();
     renderHabits();
     if (typeof initHabitQuotes === 'function') initHabitQuotes();
 
@@ -59,3 +61,26 @@ function setupGlobalShortcuts() {
         }
     });
 }
+
+// Global Input Sanitizer (No symbols allowed)
+document.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+        // Save cursor position so typing in the middle of a word doesn't jump to the end
+        const cursorPosition = e.target.selectionStart;
+        // Old: e.target.value = e.target.value.replace(/[^\p{L}\p{N}\s]/gu, '');
+        // New: Allow letters, numbers, spaces, and basic punctuation
+        e.target.value = e.target.value.replace(/[^\p{L}\p{N}\s.,!#()\-]/gu, '');
+        e.target.setSelectionRange(cursorPosition, cursorPosition);
+    }
+});
+
+// --- GLOBAL EVENT DISPATCHER ---
+// Captures clicks on any interactive button and triggers a global sync
+document.addEventListener('click', (e) => {
+    // If the user completes a habit or task, tell the Progress tab to update
+    if (e.target.closest('.done-btn') || e.target.closest('.habit-item') || e.target.closest('.task-item')) {
+        setTimeout(() => {
+            document.dispatchEvent(new Event('dataUpdated'));
+        }, 100); // 100ms delay ensures localStorage saves first
+    }
+});

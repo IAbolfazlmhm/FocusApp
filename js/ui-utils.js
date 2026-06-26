@@ -99,8 +99,7 @@ export function setupTabs() {
       
       if (index === 0) {
         if (pomodoroView) pomodoroView.style.display = 'flex'; 
-        document.body.classList.remove('phase-habits');
-        
+        document.body.classList.remove('phase-habits', 'phase-progress');
         const event = new CustomEvent('updateColors');
         document.dispatchEvent(event);
       } else {
@@ -108,10 +107,14 @@ export function setupTabs() {
         if (index === 1 && habitsView) {
             habitsView.style.display = 'flex';
             document.body.classList.add('phase-habits');
+            document.body.classList.remove('phase-progress');
         }
         if (index === 2 && progressView) {
             progressView.style.display = 'flex';
             document.body.classList.remove('phase-habits');
+            document.body.classList.add('phase-progress');
+            // Clean event broadcast to tell the Progress tab to update its data
+            document.dispatchEvent(new Event('progressTabOpened')); 
         }
       }
 
@@ -128,7 +131,6 @@ export function setupTabs() {
           const modeWrapper = modeSelect.closest('.setting-group');
           if (modeWrapper) modeWrapper.style.display = index === 0 ? 'flex' : 'none';
       }
-      
     });
   });
 
