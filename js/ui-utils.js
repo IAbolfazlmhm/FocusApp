@@ -84,6 +84,7 @@ export function setupTabs() {
       playUI('click');
       
       localStorage.setItem('focusActiveTab', index);
+      document.dispatchEvent(new Event('tabChanged'));
       
       tabs.forEach(t => t.classList.remove('active')); 
       tab.classList.add('active'); 

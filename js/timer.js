@@ -96,7 +96,15 @@ export function updateDisplay() {
     if (activeTask) activeTaskName = activeTask.text;
   }
   
-  document.title = `${formattedTime} - ${activeTaskName}`;
+  const activeTab = localStorage.getItem('focusActiveTab');
+  if (!activeTab || activeTab === '0') {
+    let activeTaskName = 'Focus App';
+    if (focusedTaskId !== null && tasks) {
+      const activeTask = tasks.find(t => t.id === focusedTaskId);
+      if (activeTask) activeTaskName = activeTask.text;
+    }
+    document.title = `${activeTaskName} - ${formattedTime}`;
+  }
 }
 
 export function updatePhaseText() {
@@ -371,4 +379,9 @@ export function setupTimerEvents() {
     }
     updateDisplay();
   });
+
+  document.addEventListener('tabChanged', () => {
+        const activeTab = localStorage.getItem('focusActiveTab');
+        if (!activeTab || activeTab === '0') updateDisplay();
+    });
 }

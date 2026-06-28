@@ -738,6 +738,10 @@ export function setupHabitsEvents() {
 
     // Initial Display
     updateHabitDateDisplay();
+
+    document.addEventListener('tabChanged', () => {
+        if (localStorage.getItem('focusActiveTab') === '1') updateHabitProgress();
+    });
 }
 
 export function initHabitQuotes() {
@@ -912,6 +916,9 @@ export function updateHabitProgress() {
 
     // Update streaks UI
     if (typeof renderTopStreaks === 'function') renderTopStreaks();
+
+    const activeTab = localStorage.getItem('focusActiveTab');
+    if (activeTab === '1') document.title = `Focus App - Habits (${completed}/${total})`;
 }
 
 // ==========================================

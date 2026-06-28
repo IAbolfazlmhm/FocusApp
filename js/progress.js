@@ -89,6 +89,8 @@ export function renderProgressDashboard() {
     updateLeftPanelUI(currentStats, prevStats, bounds);
     renderFocusHeatmap(bounds.start, bounds.end, currentTasks);
     renderHabitHeatmap(bounds.start, bounds.end, currentHabits);
+
+    if (localStorage.getItem('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
 }
 
 // ==========================================
@@ -603,5 +605,9 @@ export function setupProgressEvents() {
         if (setModal && e.target === setModal) setModal.classList.remove('show');
         if (repModal && e.target === repModal) repModal.classList.remove('show');
         if (customRangeModal && e.target === customRangeModal) customRangeModal.classList.remove('show');
+    });
+
+    document.addEventListener('tabChanged', () => {
+        if (localStorage.getItem('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
     });
 }
