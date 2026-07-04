@@ -202,47 +202,55 @@ export function renderTasks() {
       const taskDiv = document.createElement('div');
       taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
       
-      let tagHTML = '';
-      if (task.tag) {
-          if (typeof window.getTagObj === 'function') {
-              const tagObj = window.getTagObj(task.tag);
-              const bg = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.15) : 'transparent';
-              const border = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.3) : 'transparent';
-              tagHTML = `<span class="task-tag" style="background:${bg}; color:${tagObj.color}; border-color:${border};">#${task.tag}</span>`;
-          } else {
-              tagHTML = `<span class="task-tag">#${task.tag}</span>`;
-          }
-      }
+      // Rock-Solid Tag Badge (Now with Max-Width and Ellipsis Truncation!)
+        let tagHTML = '';
+        if (task.tag) {
+            if (typeof window.getTagObj === 'function') {
+                const tagObj = window.getTagObj(task.tag);
+                const bg = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.15) : 'transparent';
+                const border = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.3) : 'transparent';
+                tagHTML = `<span class="task-tag" title="${task.tag}" style="background:${bg}; color:${tagObj.color}; border: 1px solid ${border}; padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; height: max-content; line-height: 1;">#${task.tag}</span>`;
+            } else {
+                tagHTML = `<span class="task-tag" title="${task.tag}" style="background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; height: max-content; line-height: 1;">#${task.tag}</span>`;
+            }
+        }
 
-      // Determine which button to show: Focus (if today) vs Reschedule (if past/future)
-      let actionButtons = '';
-      if (!isToday && !task.completed) {
-          actionButtons = `
-            <button class="focus-btn reschedule-btn" title="Move to Today">
-                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-            </button>
-          `;
-      } else {
-          actionButtons = `
-            <button class="focus-btn focus-action" title="Focus">
-                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-            </button>
-          `;
-      }
+        let actionButtons = '';
+        if (!isToday && !task.completed) {
+            actionButtons = `
+              <button class="focus-btn reschedule-btn" title="Move to Today">
+                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+              </button>
+            `;
+        } else {
+            actionButtons = `
+              <button class="focus-btn focus-action" title="Focus">
+                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              </button>
+            `;
+        }
 
-      taskDiv.innerHTML = `
-        <div class="task-info">
-          ${tagHTML}
-          <span>${task.text}</span>
-          <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
-        </div>
-        <div class="task-actions">
-          <button class="edit-tag-btn" title="Edit Tag">${iconTag}</button>
-          ${actionButtons}
-          <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-          <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-        </div>
-      `;
+        taskDiv.style.cursor = 'pointer'; 
+        taskDiv.dataset.id = task.id; 
+
+        // BUG FIX: flex-wrap: nowrap prevents layout breaking, tabular-nums stops time from wiggling
+        taskDiv.innerHTML = `
+          <div class="task-info" style="display: flex; flex-direction: column; justify-content: center; gap: 8px; flex: 1; min-width: 0; padding-right: 15px;">
+            
+            <span class="task-name" title="${task.text}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${task.text}</span>
+            
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+              ${tagHTML}
+              <span class="task-time-badge" id="badge-${task.id}" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; white-space: nowrap; flex: 0 0 auto; display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums;">${formatTaskTime(task.timeSpent)}</span>
+            </div>
+
+          </div>
+          <div class="task-actions">
+            ${actionButtons}
+            <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+            <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+          </div>
+        `;
 
       // Wire up the dynamic buttons
       const focusBtn = taskDiv.querySelector('.focus-action');
@@ -261,7 +269,6 @@ export function renderTasks() {
 
       taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
       taskDiv.querySelector('.remove-btn').addEventListener('click', () => customConfirm("Delete this task?", () => removeTask(task.id)));
-      if(taskDiv.querySelector('.edit-tag-btn')) taskDiv.querySelector('.edit-tag-btn').addEventListener('click', () => openEditTagModal(task.id));
 
       taskListContainer.appendChild(taskDiv);
   });
@@ -390,6 +397,124 @@ function checkAutoPause() {
 // TAG MANAGEMENT & EDIT MODALS
 // ==========================================
 export function setupTaskEvents() {
+  // --- TASK EDITING MODAL LOGIC ---
+    let currentlyEditingTaskId = null;
+
+    if (taskListContainer) {
+        taskListContainer.addEventListener('click', (e) => {
+            // Ignore clicks on action buttons
+            if (e.target.closest('button') || e.target.closest('.task-actions')) return;
+
+            const taskItem = e.target.closest('.task-item');
+            if (taskItem) {
+                const id = parseInt(taskItem.dataset.id);
+                openEditTaskModal(id);
+            }
+        });
+    }
+
+    function openEditTaskModal(id) {
+        const task = tasks.find(t => t.id === id);
+        if (!task) return;
+
+        currentlyEditingTaskId = id;
+        
+        const nameInput = document.getElementById('edit-task-name-input');
+        if (nameInput) nameInput.value = task.text;
+
+        const tagList = document.getElementById('edit-task-tag-list');
+        if (tagList) {
+            tagList.innerHTML = `<button class="tag-select-btn ${!task.tag ? 'selected' : ''}" data-tag="">None</button>`;
+            
+            savedTags.forEach(tag => {
+                const isSelected = task.tag === tag ? 'selected' : '';
+                tagList.innerHTML += `<button class="tag-select-btn ${isSelected}" data-tag="${tag}">${tag}</button>`;
+            });
+
+            tagList.querySelectorAll('.tag-select-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    tagList.querySelectorAll('.tag-select-btn').forEach(b => b.classList.remove('selected'));
+                    e.target.classList.add('selected');
+                });
+            });
+        }
+
+        const modal = document.getElementById('edit-tag-modal');
+        if (modal) {
+            modal.classList.add('show');
+            if (nameInput) setTimeout(() => nameInput.focus(), 100);
+        }
+    }
+
+    const saveEditBtn = document.getElementById('save-task-edit-btn');
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', () => {
+            if (!currentlyEditingTaskId) return;
+            
+            const task = tasks.find(t => t.id === currentlyEditingTaskId);
+            if (task) {
+                const nameInput = document.getElementById('edit-task-name-input');
+                const newName = nameInput.value.trim();
+                
+                if (!newName) {
+                    if (typeof showToast === 'function') showToast('Task name cannot be empty.', 'warning');
+                    return;
+                }
+
+                const selectedTag = document.querySelector('#edit-task-tag-list .tag-select-btn.selected');
+                const newTag = selectedTag ? selectedTag.dataset.tag : '';
+
+                task.text = newName;
+                task.tag = newTag === '' ? null : newTag;
+                
+                saveTasks();
+                renderTasks();
+                if (typeof renderFilters === 'function') renderFilters(); 
+                
+                // Update dynamic title if the active task was edited
+                if (typeof focusedTaskId !== 'undefined' && focusedTaskId === task.id) {
+                    const event = new Event('tabChanged');
+                    document.dispatchEvent(event);
+                }
+            }
+            
+            document.getElementById('edit-tag-modal').classList.remove('show');
+            currentlyEditingTaskId = null;
+        });
+    }
+
+    const editModal = document.getElementById('edit-tag-modal');
+    const editNameInput = document.getElementById('edit-task-name-input');
+    const closeEditModalBtn = document.getElementById('close-edit-tag-modal');
+
+    // Press Enter to save
+    if (editNameInput && saveEditBtn) {
+        editNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveEditBtn.click();
+            }
+        });
+    }
+
+    // Click background overlay to close
+    if (editModal) {
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.classList.remove('show');
+                currentlyEditingTaskId = null;
+            }
+        });
+    }
+
+    // Close button
+    if (closeEditModalBtn) {
+        closeEditModalBtn.addEventListener('click', () => {
+            editModal.classList.remove('show');
+            currentlyEditingTaskId = null;
+        });
+    }
+
   if (addBtn) addBtn.addEventListener('click', addTask);
   
   if (taskInput) {
@@ -444,12 +569,6 @@ export function setupTaskEvents() {
             manageNewTagInput.value = '';
             showToast('Tag added', 'success');
         }
-    });
-  }
-
-  if (closeEditTagBtn) {
-    closeEditTagBtn.addEventListener('click', () => {
-      if (editTagModal) editTagModal.classList.remove('show');
     });
   }
 
@@ -724,42 +843,6 @@ function renderTagsManagement() {
     });
     tagsManagementList.appendChild(chip);
   });
-}
-
-function openEditTagModal(taskId) {
-    editingTaskId = taskId;
-    if (!editTagList || !editTagModal) return;
-    
-    editTagList.innerHTML = '';
-    
-    const noTagBtn = document.createElement('div');
-    noTagBtn.className = 'tag-chip selectable'; 
-    noTagBtn.textContent = '❌ No Tag';
-    noTagBtn.onclick = () => setTaskTag(null);
-    editTagList.appendChild(noTagBtn);
-
-    savedTags.forEach(tag => {
-        const btn = document.createElement('div');
-        btn.className = 'tag-chip selectable'; 
-        btn.textContent = `#${tag}`;
-        btn.onclick = () => setTaskTag(tag);
-        editTagList.appendChild(btn);
-    });
-
-    editTagModal.classList.add('show');
-}
-
-function setTaskTag(tag) {
-    const task = tasks.find(t => t.id === editingTaskId);
-    if (task) {
-        task.tag = tag;
-        saveTasks();
-        renderTasks();
-        if (currentFilter !== 'all' && currentFilter !== 'active' && currentFilter !== 'completed') {
-             renderTasks(); 
-        }
-    }
-    if (editTagModal) editTagModal.classList.remove('show');
 }
 
 // --- DEEP LINKING EXPORT ---

@@ -99,9 +99,16 @@ export function updateDisplay() {
   const activeTab = localStorage.getItem('focusActiveTab');
   if (!activeTab || activeTab === '0') {
     let activeTaskName = 'Focus App';
-    if (focusedTaskId !== null && tasks) {
+    // Assuming tasks array is imported or available globally
+    if (typeof focusedTaskId !== 'undefined' && focusedTaskId !== null && typeof tasks !== 'undefined') {
       const activeTask = tasks.find(t => t.id === focusedTaskId);
-      if (activeTask) activeTaskName = activeTask.text;
+      if (activeTask) {
+        activeTaskName = activeTask.text;
+        // BUG FIX: Truncate long task names in the browser tab!
+        if (activeTaskName.length > 10) {
+          activeTaskName = activeTaskName.substring(0, 10) + '...';
+        }
+      }
     }
     document.title = `${activeTaskName} - ${formattedTime}`;
   }

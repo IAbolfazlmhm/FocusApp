@@ -157,3 +157,11 @@ body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-wor
 body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
 body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn { background-color: #60a5fa; color: #0f172a; border: none; }
 body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { background-color: #a78bfa; color: #0f172a; border: none; }
+
+/* Make the task pill indicate it is clickable */
+.task-item { cursor: pointer; }
+
+/* --- EDIT TASK MODAL TAGS --- */
+.tag-select-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 5px 12px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+.tag-select-btn:hover { border-color: var(--theme-color); transform: translateY(-1px); }
+.tag-select-btn.selected { background: var(--theme-color); color: #ffffff; border-color: var(--theme-color); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }

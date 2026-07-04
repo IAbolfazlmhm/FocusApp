@@ -245,30 +245,50 @@ export function renderHabits() {
             habitDiv.style.opacity = '0.5';
         }
 
+        // --- RESTORED ORIGINAL VARIABLES ---
         const bgRgba = hexToRgba(habit.color || '#3b82f6', 0.15);
         const iconSvgContent = habitIconsDict[habit.icon] || `<circle cx="12" cy="12" r="10"/>`;
 
+        // 1. Generate Category Pill (with ellipsis and optical padding fix)
+        let catHTML = '';
+        if (habit.category && habit.category !== 'Uncategorized') {
+            catHTML = `<span class="habit-category-badge" title="${habit.category}" style="background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; line-height: 1;">${habit.category}</span>`;
+        }
+
+        habitDiv.style.cursor = 'pointer';
+
+        // 2. Pristine 2-Row Layout WITH Original Streak SVG
         habitDiv.innerHTML = `
+          <div class="habit-info" style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 15px;">
+            
+            <!-- Left Side: Original Icon Wrapper -->
             <div class="habit-icon-circle" style="background: ${bgRgba}; color: ${habit.color};">
                 <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconSvgContent}</svg>
             </div>
-            
-            <div class="task-info" style="cursor: pointer; flex: 1;">
-                <span>${habit.name}</span>
-                <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
-                    <span class="task-time-badge">${habit.category}</span>
-                    <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="Current Streak">
-                        <svg class="ui-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-                        <span>${currentStreak}</span>
-                    </div>
+
+            <!-- Right Side: Text Stack -->
+            <div style="display: flex; flex-direction: column; justify-content: center; gap: 6px; flex: 1; min-width: 0;">
+              
+              <!-- Top Row: Habit Name -->
+              <span class="habit-name" title="${habit.name}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${habit.name}</span>
+              
+              <!-- Bottom Row: Category & Original Streak SVG -->
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+                ${catHTML}
+                <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="Current Streak" style="flex: 0 0 auto;">
+                    <svg class="ui-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+                    <span style="font-variant-numeric: tabular-nums;">${currentStreak}</span>
                 </div>
+              </div>
+              
             </div>
-            
-            <div class="task-actions">
-                <button class="remove-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-                <button class="focus-btn skip-habit-btn" title="Skip Today"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
-                <button class="done-btn done-habit-btn" title="Done!"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-            </div>
+          </div>
+          
+          <div class="task-actions" style="flex-shrink: 0;">
+            <button class="remove-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <button class="focus-btn skip-habit-btn" title="Skip Today"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+            <button class="done-btn done-habit-btn" title="Done!"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+          </div>
         `;
         
         habitListContainer.appendChild(habitDiv);
