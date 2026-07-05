@@ -56,11 +56,10 @@ function getLocalDateStr(dateObj) {
     return `${year}-${month}-${day}`; 
 }
 
-// Parser 2: For Habits (Replicates the Midnight UTC shift used in habits.js)
+// Parser 2: For Habits (Synced with day.js to match habits.js exactly)
 function getHabitLogKey(dateObj) {
-    const d = new Date(dateObj);
-    d.setHours(0,0,0,0);
-    return d.toISOString().split('T')[0];
+    // BUG FIX: Completely removes the buggy .toISOString() UTC shift
+    return dayjs(dateObj).format('YYYY-MM-DD');
 }
 
 // ==========================================

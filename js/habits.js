@@ -8,20 +8,9 @@ import { showToast } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
 
 // ==========================================
-// DAY.JS DATE HELPERS (Legacy Safe)
+// BULLETPROOF DATE HELPER
 // ==========================================
-export function getHabitStatus(habit, dateObj) {
-    if (!habit.logs) return null;
-
-    // 1. The correct local date key using Day.js
-    const localKey = dayjs(dateObj).format('YYYY-MM-DD');
-    
-    // 2. The old buggy UTC key (just in case the data was saved before our fix)
-    const legacyKey = dateObj.toISOString().split('T')[0];
-
-    // Return the local one if it exists, otherwise check the legacy one
-    return habit.logs[localKey] || habit.logs[legacyKey] || null;
-}
+export const getDateKey = (dateObj) => dayjs(dateObj).format('YYYY-MM-DD');
 
 // ==========================================
 // DOM ELEMENTS
@@ -159,7 +148,7 @@ export function renderHabits() {
     habitListContainer.innerHTML = '';
 
     const activeHabits = habits.filter(habit => isHabitActiveOnDate(habit, currentHabitDate));
-    const dateStr = currentHabitDate.toISOString().split('T')[0];
+    const dateStr = getDateKey(currentHabitDate);
 
     // Safely Apply Filtering
     let filteredHabits = activeHabits.filter(h => {
@@ -591,7 +580,7 @@ export function setupHabitsEvents() {
             if (!habitItem) return;
 
             const habitId = parseInt(habitItem.dataset.id);
-            const dateStr = currentHabitDate.toISOString().split('T')[0];
+            const dateStr = getDateKey(currentHabitDate);
             
             // Done
             if (e.target.closest('.done-habit-btn')) {
@@ -803,7 +792,7 @@ export function setupHabitsEvents() {
         playUI('trash'); 
         
         const habit = habits.find(h => h.id === habitToDeleteId);
-        const dateStr = getLocalDateStr(currentHabitDate);
+        const dateStr = getDateKey(currentHabitDate);
         
         if (habit) {
             if (!habit.logs) habit.logs = {};
@@ -961,33 +950,31 @@ export function isHabitActiveOnDate(habit, targetDate) {
 }
 
 // ==========================================
-// STREAK CALCULATION FUNCTION
+// STREAK CALCULATION FUNCTION (Pure Day.js)
 // ==========================================
 export function calculateStreak(habit) {
     let streak = 0;
-    let d = new Date();
-    d.setHours(0, 0, 0, 0);
     
-    const creationDate = new Date(habit.createdAt || habit.id);
-    creationDate.setHours(0, 0, 0, 0);
+    // Day.js locks onto exactly midnight in your local timezone
+    let d = dayjs().startOf('day'); 
+    const creationDate = dayjs(habit.createdAt || habit.id).startOf('day');
 
-    while (d >= creationDate) {
-        if (isHabitActiveOnDate(habit, d)) {
-            const dateKey = d.toISOString().split('T')[0];
+    while (d.isAfter(creationDate) || d.isSame(creationDate, 'day')) {
+        
+        if (isHabitActiveOnDate(habit, d.toDate())) {
+            const dateKey = d.format('YYYY-MM-DD'); // Perfect local string
             const status = habit.logs && habit.logs[dateKey];
             
             if (status === 'done') {
                 streak++;
-            } else if (status === 'skipped') {
-                // Skip does not break the streak, but adds nothing
+            } else if (status === 'skipped' || status === 'hidden') {
+                // Skips and hidden days do not break the streak
             } else {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                // Break streak if it's past days and not done. Give today a pass.
-                if (d.getTime() !== today.getTime()) break;
+                // If it's empty, and it is NOT today, the streak is broken
+                if (!d.isSame(dayjs(), 'day')) break; 
             }
         }
-        d.setDate(d.getDate() - 1);
+        d = d.subtract(1, 'day'); // Day.js flawlessly steps back in time
     }
     return streak;
 }
@@ -1000,7 +987,7 @@ export function updateHabitProgress() {
     const total = activeHabits.length;
     let completed = 0;
 
-    const dateStr = currentHabitDate.toISOString().split('T')[0];
+    const dateStr = getDateKey(currentHabitDate);
 
     activeHabits.forEach(habit => {
         if (habit.logs && habit.logs[dateStr] === 'done') {
