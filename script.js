@@ -4,6 +4,7 @@ import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from
 import { renderFilters, renderTasks, initConfirmModal, setupTaskEvents } from './js/tasks.js';
 import { renderHabits, setupHabitsEvents, initHabitQuotes } from './js/habits.js';
 import { renderProgressDashboard, setupProgressEvents } from './js/progress.js';
+import { playUI } from './js/audio.js';
 
 window.addEventListener('DOMContentLoaded', () => {
     // 1. Settings Initialization
@@ -82,5 +83,28 @@ document.addEventListener('click', (e) => {
         setTimeout(() => {
             document.dispatchEvent(new Event('dataUpdated'));
         }, 100); // 100ms delay ensures localStorage saves first
+    }
+});
+
+// --- GLOBAL SOUND HAPTICS ---
+// Automatically plays the 'click' sound for all interactive elements across every tab and modal
+document.addEventListener('click', (e) => {
+    // 1. Identify what the user clicked (or the button wrapping what they clicked)
+    const trigger = e.target.closest('button, .filter-btn, .tab, .dropdown-item, .tag-select-btn, .habit-item, .slider, .color-option, .icon-option');
+
+    if (trigger) {
+        // 2. Ignore buttons that already have custom sounds wired up in their specific files
+        const isSpecialButton = trigger.closest('.done-btn') || 
+                                trigger.closest('.remove-btn') || 
+                                trigger.closest('.start-btn') ||
+                                trigger.closest('.done-habit-btn');
+        
+        if (!isSpecialButton) {
+            // You may need to import playUI at the top of script.js if it isn't already there!
+            // import { playUI } from './js/audio.js';
+            if (typeof playUI === 'function') {
+                playUI('click');
+            }
+        }
     }
 });

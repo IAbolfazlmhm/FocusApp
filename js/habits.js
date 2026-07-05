@@ -8,6 +8,22 @@ import { showToast } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
 
 // ==========================================
+// DAY.JS DATE HELPERS (Legacy Safe)
+// ==========================================
+export function getHabitStatus(habit, dateObj) {
+    if (!habit.logs) return null;
+
+    // 1. The correct local date key using Day.js
+    const localKey = dayjs(dateObj).format('YYYY-MM-DD');
+    
+    // 2. The old buggy UTC key (just in case the data was saved before our fix)
+    const legacyKey = dateObj.toISOString().split('T')[0];
+
+    // Return the local one if it exists, otherwise check the legacy one
+    return habit.logs[localKey] || habit.logs[legacyKey] || null;
+}
+
+// ==========================================
 // DOM ELEMENTS
 // ==========================================
 const habitListContainer = document.getElementById('habit-list-container');
@@ -148,6 +164,7 @@ export function renderHabits() {
     // Safely Apply Filtering
     let filteredHabits = activeHabits.filter(h => {
         const status = (h.logs && h.logs[dateStr]) ? h.logs[dateStr] : null;
+        if (status === 'hidden') return false;
         if (currentHabitFilter === 'active') return status !== 'done' && status !== 'skipped';
         if (currentHabitFilter === 'done') return status === 'done';
         if (currentHabitFilter !== 'all') return h.category === currentHabitFilter;
@@ -285,7 +302,7 @@ export function renderHabits() {
           </div>
           
           <div class="task-actions" style="flex-shrink: 0;">
-            <button class="remove-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <button class="remove-btn advanced-delete-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             <button class="focus-btn skip-habit-btn" title="Skip Today"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
             <button class="done-btn done-habit-btn" title="Done!"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
           </div>
@@ -586,18 +603,6 @@ export function setupHabitsEvents() {
                 toggleHabitLog(habitId, dateStr, 'skipped');
                 playUI('click');
             }
-            // Delete
-            else if (e.target.closest('.remove-btn')) {
-                customConfirm("Are you sure you want to delete this habit permanently?", () => {
-                    const index = habits.findIndex(h => h.id === habitId);
-                    if(index > -1) {
-                        habits.splice(index, 1);
-                        localStorage.setItem('focusHabits', JSON.stringify(habits));
-                        renderHabits();
-                        if (typeof renderHabitCategories === 'function') renderHabitCategories();
-                    }
-                });
-            }
         });
     }
 
@@ -739,6 +744,7 @@ export function setupHabitsEvents() {
         catInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
+                playUI('click'); // BUG FIX: Explicit sound
                 catBtn.click();
             }
         });
@@ -751,6 +757,7 @@ export function setupHabitsEvents() {
         hInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
+                playUI('click'); // BUG FIX: Explicit sound
                 hSaveBtn.click();
             }
         });
@@ -762,6 +769,107 @@ export function setupHabitsEvents() {
     document.addEventListener('tabChanged', () => {
         if (localStorage.getItem('focusActiveTab') === '1') updateHabitProgress();
     });
+
+    // --- ADVANCED HABIT DELETION LOGIC ---
+    let habitToDeleteId = null;
+    const deleteModal = document.getElementById('delete-habit-modal');
+
+    // Helper function to safely save habits locally
+    const saveHabitsLocal = () => {
+        localStorage.setItem('focusHabits', JSON.stringify(habits));
+        // Tell the rest of the app (like the Progress tab) that data changed
+        document.dispatchEvent(new Event('dataUpdated'));
+    };
+
+    // 1. Open the Modal (And Play Sound!)
+    if (habitListContainer) {
+        habitListContainer.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.advanced-delete-btn');
+            if (deleteBtn) {
+                const habitItem = e.target.closest('.habit-item');
+                if (habitItem) {
+                    habitToDeleteId = parseInt(habitItem.dataset.id);
+                    if (deleteModal) deleteModal.classList.add('show');
+                    playUI('click'); // BUG FIX: Play sound when trash can is clicked!
+                }
+            }
+        });
+    }
+
+    // 2. Remove Today's Habit Completely
+    document.getElementById('delete-habit-today-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation(); // BUG FIX: Stops the global 'click' sound!
+        if (!habitToDeleteId) return;
+        playUI('trash'); 
+        
+        const habit = habits.find(h => h.id === habitToDeleteId);
+        const dateStr = getLocalDateStr(currentHabitDate);
+        
+        if (habit) {
+            if (!habit.logs) habit.logs = {};
+            habit.logs[dateStr] = 'hidden'; // BUG FIX: Mark as completely hidden for today
+            
+            saveHabitsLocal(); 
+            renderHabits();
+            if (typeof updateHabitProgress === 'function') updateHabitProgress(); 
+            
+            showToast("Habit removed from today.", "success", true);
+        }
+        closeDeleteModal();
+    });
+
+    // 3. Stop Tracking (Keep History)
+    document.getElementById('delete-habit-future-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation(); // BUG FIX: Stops the global 'click' sound!
+        if (!habitToDeleteId) return;
+        playUI('trash'); 
+        
+        const habit = habits.find(h => h.id === habitToDeleteId);
+        
+        if (habit) {
+            const yesterday = new Date(currentHabitDate);
+            yesterday.setHours(0, 0, 0, 0);
+            yesterday.setMilliseconds(-1);
+            
+            habit.endDate = yesterday.getTime();
+            saveHabitsLocal(); 
+            renderHabits();
+            if (typeof updateHabitProgress === 'function') updateHabitProgress();
+            showToast("Habit archived. History preserved.", "success", true);
+        }
+        closeDeleteModal();
+    });
+
+    // 4. Delete All History (Nuke it)
+    document.getElementById('delete-habit-all-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation(); // BUG FIX: Stops the global 'click' sound!
+        if (!habitToDeleteId) return;
+        playUI('trash'); 
+        
+        const updatedHabits = habits.filter(h => h.id !== habitToDeleteId);
+        habits.length = 0; 
+        updatedHabits.forEach(h => habits.push(h));
+        
+        saveHabitsLocal(); 
+        renderHabits();
+        if (typeof updateHabitProgress === 'function') updateHabitProgress();
+        showToast("Habit and all history deleted.", "success", true);
+        closeDeleteModal();
+    });
+    
+    // 5. Close Handlers (Cancel)
+    function closeDeleteModal() {
+        if (deleteModal) deleteModal.classList.remove('show');
+        habitToDeleteId = null;
+    }
+
+    document.getElementById('close-delete-habit-modal')?.addEventListener('click', closeDeleteModal);
+    
+    if (deleteModal) {
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) closeDeleteModal();
+        });
+    }
 }
 
 export function initHabitQuotes() {
@@ -822,6 +930,11 @@ export function isHabitActiveOnDate(habit, targetDate) {
     // Prevent rendering before the habit was actually created
     if (target < creationDate) return false;
 
+    // BUG FIX (STEP 4): If the habit was "Stopped", hide it on any days AFTER the stop date!
+    if (habit.endDate && target.getTime() > habit.endDate) {
+        return false;
+    }
+
     const dayOfWeek = target.getDay(); 
     const freq = habit.frequency || 'everyday';
 
@@ -854,7 +967,7 @@ export function calculateStreak(habit) {
     let streak = 0;
     let d = new Date();
     d.setHours(0, 0, 0, 0);
-
+    
     const creationDate = new Date(habit.createdAt || habit.id);
     creationDate.setHours(0, 0, 0, 0);
 
@@ -1026,6 +1139,7 @@ if (quickHabitInput) {
     quickHabitInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
+            playUI('click'); // BUG FIX: Explicit sound
             processQuickAddHabit();
         }
     });
@@ -1174,10 +1288,10 @@ export function renderTopStreaks() {
                 <div class="stat-icon" style="color: ${h.color || '#10b981'}; background: ${h.color ? h.color+'20' : 'rgba(16,185,129,0.15)'}; width: 32px; height: 32px;">
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${habitIconsDict[h.icon] || habitIconsDict['activity']}</svg>
                 </div>
-                <div class="stat-details" style="flex: 1; min-width: 0;">
-                    <span class="stat-label" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; color: var(--text-main);">${h.name}</span>
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <span class="stat-value" style="font-size: 0.95rem; color: #f97316;">${h.currentStreak} 🔥</span>
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <div class="streak-flame active" style="flex: 0 0 auto; display: flex; align-items: center; gap: 4px; color: #f97316; font-size: 0.95rem; font-weight: bold;">
+                        <svg class="ui-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+                        <span style="font-variant-numeric: tabular-nums;">${h.currentStreak}</span>
                     </div>
                 </div>
             `;

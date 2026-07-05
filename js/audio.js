@@ -3,6 +3,8 @@
 // ==========================================
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// Keep track of when each sound was last played
+const lastPlayedTimes = {};
 
 export function playUI(type) {
   const soundToggle = document.getElementById('sound-toggle');
@@ -15,6 +17,12 @@ export function playUI(type) {
   oscillator.connect(gainNode);
   gainNode.connect(audioCtx.destination);
   const now = audioCtx.currentTime;
+
+  const nowClicked = Date.now();
+  if (lastPlayedTimes[type] && (nowClicked - lastPlayedTimes[type] < 50)) {
+    return; // It hasn't been 50ms yet, ignore this duplicate request!
+  }
+  lastPlayedTimes[type] = nowClicked;
   
   if (type === 'click') {
     oscillator.type = 'sine'; 

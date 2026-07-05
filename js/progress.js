@@ -382,27 +382,44 @@ function openDailyReport(dateObj) {
         if (!habitFound) html += `<p style="color:var(--text-muted); font-size:0.85rem;">No habits scheduled.</p>`;
     }
 
-    html += `
-        <div style="display: flex; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
-            <button class="add-btn" id="goto-focus-btn" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 10px;">Go to Focus</button>
-            <button class="add-btn" id="goto-habits-btn" style="flex: 1; background: #10b981; color: white; border: none; padding: 10px;">Go to Habits</button>
-        </div>
-    `;
+    // BUG FIX: Only show buttons for active sections
+    let buttonsHTML = '';
+    if (showPomodoro) {
+        buttonsHTML += `<button class="add-btn" id="goto-focus-btn" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 10px;">Go to Focus</button>`;
+    }
+    if (showHabits) {
+        buttonsHTML += `<button class="add-btn" id="goto-habits-btn" style="flex: 1; background: #10b981; color: white; border: none; padding: 10px;">Go to Habits</button>`;
+    }
+
+    if (buttonsHTML !== '') {
+        html += `
+            <div style="display: flex; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+                ${buttonsHTML}
+            </div>
+        `;
+    }
 
     body.innerHTML = html;
     modal.classList.add('show');
 
-    document.getElementById('goto-focus-btn').addEventListener('click', () => {
-        document.getElementById('close-report-modal').click();
-        document.querySelectorAll('.tab')[0].click(); 
-        setTaskDate(dateObj);
-    });
+    // Safely attach event listeners only if the buttons exist
+    const gotoFocusBtn = document.getElementById('goto-focus-btn');
+    if (gotoFocusBtn) {
+        gotoFocusBtn.addEventListener('click', () => {
+            document.getElementById('close-report-modal').click();
+            document.querySelectorAll('.tab')[0].click(); 
+            setTaskDate(dateObj);
+        });
+    }
 
-    document.getElementById('goto-habits-btn').addEventListener('click', () => {
-        document.getElementById('close-report-modal').click();
-        document.querySelectorAll('.tab')[1].click(); 
-        setHabitDate(dateObj);
-    });
+    const gotoHabitsBtn = document.getElementById('goto-habits-btn');
+    if (gotoHabitsBtn) {
+        gotoHabitsBtn.addEventListener('click', () => {
+            document.getElementById('close-report-modal').click();
+            document.querySelectorAll('.tab')[1].click(); 
+            setHabitDate(dateObj);
+        });
+    }
 }
 
 // ==========================================
@@ -535,8 +552,14 @@ export function setupProgressEvents() {
                 }
                 
                 const diffDays = Math.ceil(Math.abs(customEndDate - customStartDate) / (1000 * 60 * 60 * 24)) + 1;
-                if (diffDays > 60) {
-                    showToast("Please select a range of 60 days or less.", "warning");
+                
+                // BUG FIX: Dynamic limit based on available vertical space!
+                const maxAllowedDays = (showPomodoro && showHabits) ? 60 : 100;
+                
+                if (diffDays > maxAllowedDays) {
+                    if (typeof showToast === 'function') {
+                        showToast(`Please select a range of ${maxAllowedDays} days or less.`, "warning");
+                    }
                     return;
                 }
                 
@@ -592,6 +615,19 @@ export function setupProgressEvents() {
             
             const mainSaveBtn = document.getElementById('save-settings');
             if (mainSaveBtn) mainSaveBtn.click();
+
+            // BUG FIX: Protect the layout! If both tabs are now ON, and they have a massive custom range active, shrink it.
+            if (showPomodoro && showHabits && timeRange === 'custom') {
+                const diffDays = Math.ceil(Math.abs(customEndDate - customStartDate) / (1000 * 60 * 60 * 24)) + 1;
+                if (diffDays > 60) {
+                    // Forcefully shrink the start date to be exactly 60 days from the end date
+                    customStartDate = new Date(customEndDate);
+                    customStartDate.setDate(customStartDate.getDate() - 59); 
+                    if (typeof showToast === 'function') {
+                        showToast("Range automatically adjusted to 60 days to fit both charts.", "warning");
+                    }
+                }
+            }
 
             renderProgressDashboard();
             setModal.classList.remove('show');

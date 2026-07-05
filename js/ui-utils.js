@@ -13,7 +13,7 @@ export const icons = {
 // ==========================================
 // TOAST NOTIFICATIONS
 // ==========================================
-export function showToast(message, type = 'info') {
+export function showToast(message, type = 'info', silent = false) {
   const container = document.getElementById('toast-container');
   if (!container) return;
   
@@ -38,7 +38,7 @@ export function showToast(message, type = 'info') {
   toast.innerHTML = icon ? `${icon} <span>${message}</span>` : `<span>${message}</span>`;
   container.appendChild(toast);
 
-  if (type !== 'info') {
+  if (type !== 'info' && !silent) {
       const soundToggle = document.getElementById('sound-toggle');
       if (!soundToggle || soundToggle.checked) {
           if (type === 'success') playUI('success');

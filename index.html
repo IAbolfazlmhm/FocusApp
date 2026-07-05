@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Focus App</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 </head>
 <body class="preload">
 
@@ -688,6 +689,26 @@
                 <button class="close-btn" id="close-report-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="modal-body" id="report-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="delete-habit-modal">
+        <div class="modal-content glass-effect" style="max-width: 400px; text-align: center;">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h2 style="color: var(--danger-color);">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Delete Habit
+                </h2>
+                <button class="close-btn" id="close-delete-habit-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="add-btn" id="delete-habit-today-btn" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);">Clear Today's Record</button>
+                <button class="add-btn" id="delete-habit-future-btn" style="background: var(--warning-color); color: white; border: none;">Stop Tracking (Keep History)</button>
+                <button class="add-btn" id="delete-habit-all-btn" style="background: var(--danger-color); color: white; border: none;">Delete All History</button>
             </div>
         </div>
     </div>
