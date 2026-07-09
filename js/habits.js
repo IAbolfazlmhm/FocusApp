@@ -4,7 +4,7 @@ import {
 } from './state.js';
 
 import { playUI } from './audio.js';
-import { showToast } from './ui-utils.js';
+import { showToast, escapeHTML } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
 
 // ==========================================
@@ -127,7 +127,7 @@ function showHabitCategoryDropdown() {
     }
     
     habitCategoryDropdown.innerHTML = filteredCats.map(cat => 
-        `<div class="dropdown-item">${cat}</div>`
+        `<div class="dropdown-item">${escapeHTML(cat)}</div>`
     ).join('');
     
     habitCategoryDropdown.classList.add('show');
@@ -258,7 +258,7 @@ export function renderHabits() {
         // 1. Generate Category Pill (with ellipsis and optical padding fix)
         let catHTML = '';
         if (habit.category && habit.category !== 'Uncategorized') {
-            catHTML = `<span class="habit-category-badge" title="${habit.category}" style="background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; line-height: 1;">${habit.category}</span>`;
+            catHTML = `<span class="habit-category-badge" title="${escapeHTML(habit.category)}" style="background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; line-height: 1;">${escapeHTML(habit.category)}</span>`;
         }
 
         habitDiv.style.cursor = 'pointer';
@@ -276,7 +276,7 @@ export function renderHabits() {
             <div style="display: flex; flex-direction: column; justify-content: center; gap: 6px; flex: 1; min-width: 0;">
               
               <!-- Top Row: Habit Name -->
-              <span class="habit-name" title="${habit.name}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${habit.name}</span>
+              <span class="habit-name" title="${escapeHTML(habit.name)}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${escapeHTML(habit.name)}</span>
               
               <!-- Bottom Row: Category & Original Streak SVG -->
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
@@ -1168,7 +1168,7 @@ export function renderHabitCategories() {
     buttonsHTML += `<button class="filter-btn ${currentFilter === 'done' ? 'active' : ''}" data-filter="done">Done</button>`;
     
     uniqueCategories.forEach(cat => {
-        buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${cat}">${cat}</button>`;
+        buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${escapeHTML(cat)}">${escapeHTML(cat)}</button>`;
     });
 
     filterContainer.innerHTML = bubbleHTML + buttonsHTML;

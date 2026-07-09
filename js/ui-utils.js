@@ -1,6 +1,23 @@
 import { playUI } from './audio.js';
 
 // ==========================================
+// SECURITY: HTML ESCAPING
+// ==========================================
+// Any user-typed string (task name, habit name, tag, category, etc.) MUST
+// be passed through this before it is interpolated into an innerHTML
+// template. This turns "<img src=x onerror=...>" into inert text instead
+// of a tag the browser will parse and execute.
+export function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ==========================================
 // SVG ICONS DICTIONARY
 // ==========================================
 export const icons = {
@@ -35,7 +52,13 @@ export function showToast(message, type = 'info', silent = false) {
   if (type === 'success') icon = '<span style="color:#10b981">✔</span>'; 
   if (type === 'warning') icon = '<span style="color:#f59e0b">⚠️</span>'; 
 
-  toast.innerHTML = icon ? `${icon} <span>${message}</span>` : `<span>${message}</span>`;
+  // Icon is always one of our own hardcoded strings above (safe). The
+  // message can contain user-typed text (e.g. a tag name), so it's inserted
+  // as a text node via a separate span, never through innerHTML.
+  toast.innerHTML = icon;
+  const msgSpan = document.createElement('span');
+  msgSpan.textContent = message;
+  toast.appendChild(msgSpan);
   container.appendChild(toast);
 
   if (type !== 'info' && !silent) {

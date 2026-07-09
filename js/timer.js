@@ -45,7 +45,14 @@ export function loadTimerState() {
   const saved = localStorage.getItem('focusTimerState');
   if (!saved) return false;
 
-  const state = JSON.parse(saved);
+  let state;
+  try {
+    state = JSON.parse(saved);
+  } catch (err) {
+    console.warn('Corrupted focusTimerState in localStorage, discarding.', err);
+    localStorage.removeItem('focusTimerState');
+    return false;
+  }
   const FOUR_HOURS = 4 * 60 * 60 * 1000; 
 
   // Invalidate state if it's older than 4 hours

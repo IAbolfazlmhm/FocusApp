@@ -2,6 +2,19 @@ import { formatTaskTime, setTaskDate } from './tasks.js';
 import { setHabitDate, isHabitActiveOnDate } from './habits.js';
 import { showToast } from './ui-utils.js';
 
+// Guards against corrupted localStorage crashing the dashboard render.
+function safeParseLS(key, fallback) {
+  const raw = localStorage.getItem(key);
+  if (raw === null) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed === null || parsed === undefined ? fallback : parsed;
+  } catch (err) {
+    console.warn(`Corrupted data in localStorage["${key}"], resetting to default.`, err);
+    return fallback;
+  }
+}
+
 // Global Progress State
 let timeRange = 'weekly'; 
 let refDate = new Date();
@@ -66,8 +79,8 @@ function getHabitLogKey(dateObj) {
 // CORE RENDER FUNCTION
 // ==========================================
 export function renderProgressDashboard() {
-    const currentTasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
-    const currentHabits = JSON.parse(localStorage.getItem('focusHabits')) || [];
+    const currentTasks = safeParseLS('focusTasks', []);
+    const currentHabits = safeParseLS('focusHabits', []);
 
     const bounds = getDateBounds(refDate, timeRange);
     
@@ -344,8 +357,8 @@ function openDailyReport(dateObj) {
     const body = document.getElementById('report-modal-body');
     if (!modal) return;
 
-    const currentTasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
-    const currentHabits = JSON.parse(localStorage.getItem('focusHabits')) || [];
+    const currentTasks = safeParseLS('focusTasks', []);
+    const currentHabits = safeParseLS('focusHabits', []);
 
     const localDateStr = getLocalDateStr(dateObj);
     const habitLogKey = getHabitLogKey(dateObj);

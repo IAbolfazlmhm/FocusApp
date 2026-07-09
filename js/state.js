@@ -1,4 +1,24 @@
 // ==========================================
+// SAFE STORAGE READ
+// ==========================================
+// Without this, one corrupted/tampered localStorage key throws inside
+// JSON.parse at module-load time. Since every other module imports from
+// state.js, that single throw kills the whole app at startup (blank white
+// screen, nothing recoverable without the user manually clearing storage).
+// safeParse guarantees state.js always finishes loading with sane defaults.
+function safeParse(key, fallback) {
+  const raw = localStorage.getItem(key);
+  if (raw === null) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed === null || parsed === undefined ? fallback : parsed;
+  } catch (err) {
+    console.warn(`Corrupted data in localStorage["${key}"], resetting to default.`, err);
+    return fallback;
+  }
+}
+
+// ==========================================
 // APP INITIAL STATE (GLOBAL VARIABLES)
 // ==========================================
 
@@ -11,16 +31,16 @@ export let currentPhase = 'work';
 export let completedSessions = 0; 
 
 // --- TASKS STATE ---
-export let tasks = JSON.parse(localStorage.getItem('focusTasks')) || [];
-export let focusedTaskId = JSON.parse(localStorage.getItem('focusedTaskId')) || null;
-export let savedTags = JSON.parse(localStorage.getItem('focusTagsList')) || ['Work', 'Study', 'Personal'];
+export let tasks = safeParse('focusTasks', []);
+export let focusedTaskId = safeParse('focusedTaskId', null);
+export let savedTags = safeParse('focusTagsList', ['Work', 'Study', 'Personal']);
 export let currentFilter = 'all';
 export let currentSort = 'newest'; 
 export let sortOrder = 'desc'; 
 
 // --- HABITS STATE ---
-export let habits = JSON.parse(localStorage.getItem('focusHabits')) || [];
-export let savedHabitCategories = JSON.parse(localStorage.getItem('focusHabitCategories')) || ['Health', 'Learning', 'Productivity', 'Mindfulness'];
+export let habits = safeParse('focusHabits', []);
+export let savedHabitCategories = safeParse('focusHabitCategories', ['Health', 'Learning', 'Productivity', 'Mindfulness']);
 export let currentHabitDate = new Date();
 currentHabitDate.setHours(0, 0, 0, 0);
 

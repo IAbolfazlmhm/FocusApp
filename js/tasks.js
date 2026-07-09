@@ -7,7 +7,7 @@ export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
 import { playUI } from './audio.js';
-import { showToast, icons } from './ui-utils.js';
+import { showToast, icons, escapeHTML } from './ui-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -237,7 +237,7 @@ export function renderTasks() {
         taskDiv.innerHTML = `
           <div class="task-info" style="display: flex; flex-direction: column; justify-content: center; gap: 8px; flex: 1; min-width: 0; padding-right: 15px;">
             
-            <span class="task-name" title="${task.text}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${task.text}</span>
+            <span class="task-name" title="${escapeHTML(task.text)}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${escapeHTML(task.text)}</span>
             
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
               ${tagHTML}
@@ -428,7 +428,7 @@ export function setupTaskEvents() {
             
             savedTags.forEach(tag => {
                 const isSelected = task.tag === tag ? 'selected' : '';
-                tagList.innerHTML += `<button class="tag-select-btn ${isSelected}" data-tag="${tag}">${tag}</button>`;
+                tagList.innerHTML += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}">${escapeHTML(tag)}</button>`;
             });
 
             tagList.querySelectorAll('.tag-select-btn').forEach(btn => {
@@ -594,7 +594,7 @@ export function setupTaskEvents() {
     }
     
     customTagDropdown.innerHTML = filteredTags.map(tag => 
-        `<div class="dropdown-item">#${tag}</div>`
+        `<div class="dropdown-item">#${escapeHTML(tag)}</div>`
     ).join('');
     
     customTagDropdown.classList.add('show');

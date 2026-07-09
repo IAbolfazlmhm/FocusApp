@@ -83,7 +83,13 @@ export function applySettingsToTimer() {
 export function loadSettings() {
   const savedSettings = localStorage.getItem('focusSettings');
   if (savedSettings) {
-    const settings = JSON.parse(savedSettings);
+    let settings;
+    try {
+      settings = JSON.parse(savedSettings);
+    } catch (err) {
+      console.warn('Corrupted focusSettings in localStorage, ignoring and using defaults.', err);
+      return;
+    }
     
     // Helper to visually update the custom display text
     const syncDisplay = (inputId, displayId, dropdownId) => {
