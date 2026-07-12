@@ -1,11 +1,28 @@
 import { 
   habits, savedHabitCategories, currentHabitDate,
-  setCurrentHabitDate 
+  setCurrentHabitDate, setHabits, setSavedHabitCategories
 } from './state.js';
 
 import { playUI } from './audio.js';
 import { showToast, escapeHTML } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
+
+// ==========================================
+// CENTRALIZED PERSISTENCE
+// ==========================================
+// Previously, "localStorage.setItem('focusHabits', JSON.stringify(habits))"
+// was copy-pasted at 6 different call sites across this file. That meant
+// every future change to habits had to remember to duplicate this line
+// again, and a missed spot would silently desync what's on screen from
+// what's saved. Centralizing it here means there is exactly one place
+// that knows how habits get persisted.
+export function saveHabits() {
+  localStorage.setItem('focusHabits', JSON.stringify(habits));
+}
+
+export function saveHabitCategories() {
+  localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
+}
 
 // ==========================================
 // BULLETPROOF DATE HELPER
@@ -190,52 +207,13 @@ export function renderHabits() {
         return;
     }
 
-    // Habit Item Click (to Edit)
-    habitListContainer.addEventListener('click', (e) => {
-        const habitItem = e.target.closest('.habit-item');
-        if (!habitItem) return;
-
-        // If they clicked the actions (Done/Skip/Delete), let the existing logic run.
-        if (e.target.closest('.task-actions')) return; 
-
-        // Otherwise, they clicked the card to edit:
-        const habitId = parseInt(habitItem.dataset.id);
-        const habitToEdit = habits.find(h => h.id === habitId);
-        
-        if (habitToEdit) {
-            editingHabitId = habitId;
-            document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit Habit';
-            
-            document.getElementById('habit-name-input').value = habitToEdit.name || '';
-            document.getElementById('habit-category-input').value = habitToEdit.category || '';
-            
-            const fVal = habitToEdit.frequency || 'everyday';
-            document.getElementById('habit-frequency-value').value = fVal;
-            const displayMap = { 'everyday':'Every Day', 'weekly':'Once a Week', 'custom':'Custom Days...' };
-            document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
-            
-            colorOptions.forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.color === habitToEdit.color) opt.classList.add('selected');
-            });
-            iconOptions.forEach(opt => {
-                opt.classList.remove('selected');
-                if (opt.dataset.icon === habitToEdit.icon) opt.classList.add('selected');
-            });
-
-            if (fVal === 'custom') {
-                document.getElementById('custom-days-picker').style.display = 'flex';
-                dayOptions.forEach(d => {
-                    d.classList.remove('selected');
-                    if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day))) d.classList.add('selected');
-                });
-            } else {
-                document.getElementById('custom-days-picker').style.display = 'none';
-            }
-
-            document.getElementById('habit-modal').classList.add('show');
-        }
-    });
+    // Habit Item Click (to Edit) — attached once in setupHabitsEvents(), not here.
+    // (Previously this whole listener lived inside renderHabits(), which runs
+    // after nearly every action — add, complete, delete, skip. Since the
+    // container element itself is never recreated, only its children, every
+    // re-render was stacking ANOTHER click listener on the same container.
+    // After enough actions, a single click on a habit would fire the "open
+    // edit modal" logic multiple times in a row.)
 
     filteredHabits.forEach(habit => {
         const currentStreak = calculateStreak(habit);
@@ -308,6 +286,59 @@ export function renderHabits() {
 // ==========================================
 export function setupHabitsEvents() {
     updateDateDisplayUI();
+
+    // Habit Item Click (to Edit) — attached once here, not inside renderHabits(),
+    // so it never accumulates across re-renders. Delegation on the container
+    // still works correctly even though the habit cards inside get replaced
+    // on every render.
+    if (habitListContainer) {
+        habitListContainer.addEventListener('click', (e) => {
+            const habitItem = e.target.closest('.habit-item');
+            if (!habitItem) return;
+
+            // If they clicked the actions (Done/Skip/Delete), let the existing logic run.
+            if (e.target.closest('.task-actions')) return; 
+
+            // Otherwise, they clicked the card to edit:
+            const habitId = parseInt(habitItem.dataset.id);
+            const habitToEdit = habits.find(h => h.id === habitId);
+            
+            if (habitToEdit) {
+                editingHabitId = habitId;
+                document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit Habit';
+                
+                document.getElementById('habit-name-input').value = habitToEdit.name || '';
+                document.getElementById('habit-category-input').value = habitToEdit.category || '';
+                
+                const fVal = habitToEdit.frequency || 'everyday';
+                document.getElementById('habit-frequency-value').value = fVal;
+                const displayMap = { 'everyday':'Every Day', 'weekly':'Once a Week', 'biweekly':'Every 2 Weeks', 'custom':'Custom Days...' };
+                document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
+                
+                colorOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (opt.dataset.color === habitToEdit.color) opt.classList.add('selected');
+                });
+                iconOptions.forEach(opt => {
+                    opt.classList.remove('selected');
+                    if (opt.dataset.icon === habitToEdit.icon) opt.classList.add('selected');
+                });
+
+                if (fVal === 'custom') {
+                    document.getElementById('custom-days-picker').style.display = 'flex';
+                    dayOptions.forEach(d => {
+                        d.classList.remove('selected');
+                        if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day))) d.classList.add('selected');
+                    });
+                } else {
+                    document.getElementById('custom-days-picker').style.display = 'none';
+                }
+
+                document.getElementById('habit-modal').classList.add('show');
+            }
+        });
+    }
+
     // --- DATE NAVIGATION LOGIC ---
     const prevDayBtn = document.getElementById('prev-day-btn');
     const nextDayBtn = document.getElementById('next-day-btn');
@@ -554,15 +585,15 @@ export function setupHabitsEvents() {
                     // Setting createdAt slightly in the past allows immediate scheduling
                     createdAt: new Date(new Date().setHours(0,0,0,0)).toISOString()
                 };
-                habits.push(newHabit);
+                setHabits([...habits, newHabit]);
                 
                 if (category && category.trim() !== '' && category !== 'Uncategorized' && !savedHabitCategories.includes(category)) {
-                    savedHabitCategories.push(category);
-                    localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
+                    setSavedHabitCategories([...savedHabitCategories, category]);
+                    saveHabitCategories();
                 }
             }
         
-            localStorage.setItem('focusHabits', JSON.stringify(habits));
+            saveHabits();
             
             if (habitModal) habitModal.classList.remove('show');
             playUI('success');
@@ -680,8 +711,8 @@ export function setupHabitsEvents() {
                     // Move habits to Uncategorized if their category is deleted
                     habits.forEach(h => { if (h.category === cat) h.category = 'Uncategorized'; });
                     
-                    localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
-                    localStorage.setItem('focusHabits', JSON.stringify(habits));
+                    saveHabitCategories();
+                    saveHabits();
                     
                     if (currentHabitFilter === cat) currentHabitFilter = 'all';
                     
@@ -716,8 +747,8 @@ export function setupHabitsEvents() {
             }
 
             if (newCat && !savedHabitCategories.includes(newCat)) {
-                savedHabitCategories.push(newCat);
-                localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
+                setSavedHabitCategories([...savedHabitCategories, newCat]);
+                saveHabitCategories();
                 manageNewCategoryInput.value = '';
                 renderCategoriesManagement();
                 renderHabitCategories(); 
@@ -765,7 +796,7 @@ export function setupHabitsEvents() {
 
     // Helper function to safely save habits locally
     const saveHabitsLocal = () => {
-        localStorage.setItem('focusHabits', JSON.stringify(habits));
+        saveHabits();
         // Tell the rest of the app (like the Progress tab) that data changed
         document.dispatchEvent(new Event('dataUpdated'));
     };
@@ -836,8 +867,7 @@ export function setupHabitsEvents() {
         playUI('trash'); 
         
         const updatedHabits = habits.filter(h => h.id !== habitToDeleteId);
-        habits.length = 0; 
-        updatedHabits.forEach(h => habits.push(h));
+        setHabits(updatedHabits);
         
         saveHabitsLocal(); 
         renderHabits();
@@ -901,7 +931,7 @@ export function toggleHabitLog(habitId, dateKey, status) {
     habit.logs[dateKey] = status;
   }
 
-  localStorage.setItem('focusHabits', JSON.stringify(habits));
+  saveHabits();
   renderHabits();
 }
 
@@ -941,9 +971,19 @@ export function isHabitActiveOnDate(habit, targetDate) {
 
     if (daysMap[freq] !== undefined) return daysMap[freq] === dayOfWeek;
 
-    if (freq === 'weekly' || freq === 'biweekly') {
+    if (freq === 'weekly') {
         const createdDay = creationDate.getDay();
         return createdDay === dayOfWeek;
+    }
+
+    if (freq === 'biweekly') {
+        const createdDay = creationDate.getDay();
+        if (createdDay !== dayOfWeek) return false;
+        // Same day-of-week as weekly, but only on every OTHER occurrence:
+        // count full weeks elapsed since creation and require an even count.
+        const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+        const weeksSinceCreation = Math.round((target.getTime() - creationDate.getTime()) / msPerWeek);
+        return weeksSinceCreation % 2 === 0;
     }
 
     return true; 
@@ -1109,8 +1149,8 @@ function processQuickAddHabit() {
         createdAt: new Date(new Date().setHours(0,0,0,0)).toISOString()
     };
 
-    habits.push(newHabit);
-    localStorage.setItem('focusHabits', JSON.stringify(habits));
+    setHabits([...habits, newHabit]);
+    saveHabits();
     
     input.value = ''; 
     renderHabits();

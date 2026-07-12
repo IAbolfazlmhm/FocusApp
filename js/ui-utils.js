@@ -109,8 +109,9 @@ export function setupTabs() {
       localStorage.setItem('focusActiveTab', index);
       document.dispatchEvent(new Event('tabChanged'));
       
-      tabs.forEach(t => t.classList.remove('active')); 
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); }); 
       tab.classList.add('active'); 
+      tab.setAttribute('aria-selected', 'true');
       updateBubble(tab); 
       
       const pomodoroView = document.getElementById('pomodoro-view');

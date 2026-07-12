@@ -107,7 +107,7 @@ export function renderFilters() {
   `;
   
   savedTags.forEach(tag => {
-    html += `<button class="filter-btn ${currentFilter === tag ? 'active' : ''}" data-filter="${tag}">#${tag}</button>`;
+    html += `<button class="filter-btn ${currentFilter === tag ? 'active' : ''}" data-filter="${escapeHTML(tag)}">#${escapeHTML(tag)}</button>`;
   });
 
   filterListEl.innerHTML = html;
@@ -324,7 +324,7 @@ export function addTask() {
   }
 
   if (tag && !savedTags.includes(tag)) {
-    savedTags.push(tag);
+    setSavedTags([...savedTags, tag]);
   }
 
   // Create task for the currently viewed date, but keep the current time for sorting
@@ -332,14 +332,15 @@ export function addTask() {
   const now = new Date();
   taskDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
-  tasks.push({ 
+  setTasks([...tasks, { 
     id: Date.now(), 
     text, 
     tag, 
     completed: false, 
     timeSpent: 0, 
+    timeByDate: {}, 
     createdAt: taskDate.getTime() 
-  });
+  }]);
 
   playUI('click'); 
   saveTasks(); 
@@ -562,7 +563,7 @@ export function setupTaskEvents() {
         }
 
         if (newTagName && !savedTags.includes(newTagName)) {
-            savedTags.push(newTagName.charAt(0).toUpperCase() + newTagName.slice(1));
+            setSavedTags([...savedTags, newTagName.charAt(0).toUpperCase() + newTagName.slice(1)]);
             saveTasks();
             renderTagsManagement();
             renderFilters();
@@ -638,10 +639,11 @@ export function setupTaskEvents() {
   }
 
   function selectQuickTag(tag) {
+      pendingQuickTag = tag;
       if (quickTagModal) quickTagModal.classList.remove('show');
       if (taskInput) taskInput.focus();
       
-      if (tag) showToast(`Tag #${tag} selected`, 'success');
+      if (tag) showToast(`Tag #${escapeHTML(tag)} selected`, 'success');
   }
 
   if (advancedTaskBtn) {
@@ -675,7 +677,7 @@ export function setupTaskEvents() {
       if (newTagRaw) {
           const newTag = newTagRaw.charAt(0).toUpperCase() + newTagRaw.slice(1);
           if (!savedTags.includes(newTag)) {
-              savedTags.push(newTag);
+              setSavedTags([...savedTags, newTag]);
               saveTasks();
               renderFilters(); 
               

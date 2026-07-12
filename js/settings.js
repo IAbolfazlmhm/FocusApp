@@ -7,6 +7,8 @@ import {
   updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState 
 } from './timer.js';
 
+import { showToast } from './ui-utils.js';
+
 // ==========================================
 // DOM ELEMENTS
 // ==========================================
@@ -164,6 +166,106 @@ export function setupSettingsEvents() {
     const closeSettingsBtn = document.getElementById('close-settings');
     const saveSettingsBtn = document.getElementById('save-settings');
 
+    // --- EXPORT / IMPORT DATA ---
+    // Everything lives only in this browser's localStorage, which can be
+    // wiped by clearing site data, private browsing, or a browser reset.
+    // This lets someone save a real file they control, and restore it later
+    // (even in a different browser/computer).
+    const DATA_KEYS = [
+        'focusTasks', 'focusedTaskId', 'focusTagsList',
+        'focusHabits', 'focusHabitCategories',
+        'focusSettings', 'focusTimerState'
+    ];
+
+    const exportDataBtn = document.getElementById('export-data-btn');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', () => {
+            const data = {};
+            DATA_KEYS.forEach(key => {
+                const raw = localStorage.getItem(key);
+                if (raw === null) return;
+                try {
+                    data[key] = JSON.parse(raw);
+                } catch (err) {
+                    console.warn(`Skipping corrupted key "${key}" during export.`, err);
+                }
+            });
+
+            const exportBundle = {
+                _focusAppExport: true,
+                exportedAt: new Date().toISOString(),
+                data
+            };
+
+            const blob = new Blob([JSON.stringify(exportBundle, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const dateStamp = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `focusapp-backup-${dateStamp}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+
+            showToast('Backup file downloaded.', 'success');
+        });
+    }
+
+    const importDataBtn = document.getElementById('import-data-btn');
+    const importDataInput = document.getElementById('import-data-input');
+    if (importDataBtn && importDataInput) {
+        importDataBtn.addEventListener('click', () => importDataInput.click());
+
+        importDataInput.addEventListener('change', () => {
+            const file = importDataInput.files && importDataInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                let parsed;
+                try {
+                    parsed = JSON.parse(reader.result);
+                } catch (err) {
+                    showToast('That file is not valid JSON.', 'warning');
+                    return;
+                }
+
+                const payload = parsed && parsed._focusAppExport ? parsed.data : parsed;
+                if (!payload || typeof payload !== 'object') {
+                    showToast('That file doesn\'t look like a FocusApp backup.', 'warning');
+                    return;
+                }
+
+                const confirmed = confirm(
+                    'This will REPLACE your current tasks, habits, and settings with the contents of this file. This cannot be undone. Continue?'
+                );
+                if (!confirmed) return;
+
+                let importedCount = 0;
+                DATA_KEYS.forEach(key => {
+                    if (Object.prototype.hasOwnProperty.call(payload, key)) {
+                        localStorage.setItem(key, JSON.stringify(payload[key]));
+                        importedCount++;
+                    }
+                });
+
+                if (importedCount === 0) {
+                    showToast('No recognizable data found in that file.', 'warning');
+                    return;
+                }
+
+                showToast('Data imported — reloading...', 'success');
+                // A reload is the simplest reliable way to get every module
+                // (tasks, habits, timer, progress) to pick up the newly
+                // written localStorage instead of trying to patch each
+                // module's already-initialized in-memory state live.
+                setTimeout(() => location.reload(), 800);
+            };
+            reader.readAsText(file);
+        });
+    }
+
     // Catch event from other tabs to reload settings securely
     document.addEventListener('reloadSettingsUI', () => {
         if (typeof loadSettings === 'function') loadSettings();
@@ -194,8 +296,31 @@ export function setupSettingsEvents() {
 
     if (saveSettingsBtn) {
         saveSettingsBtn.addEventListener('click', () => {
+          // Read what was saved BEFORE this save, so we can tell whether
+          // anything that actually affects a running timer (mode/duration)
+          // changed. Previously, applySettingsToTimer() ran unconditionally
+          // here, which meant toggling something unrelated like dark mode
+          // or the notification sound would wipe an in-progress session
+          // (reset time left, phase, and completed session count to zero).
+          let previous = null;
+          try {
+            const raw = localStorage.getItem('focusSettings');
+            previous = raw ? JSON.parse(raw) : null;
+          } catch (err) {
+            console.warn('Corrupted focusSettings when diffing for timer reset, treating as changed.', err);
+          }
+
           saveSettings(); 
-          applySettingsToTimer();
+
+          const newMode = modeSelect ? modeSelect.value : 'pomodoro';
+          const newDuration = document.getElementById('work-duration') ? document.getElementById('work-duration').value : 25;
+          const timerRelevantSettingsChanged = !previous
+            || previous.mode !== newMode
+            || String(previous.workDuration) !== String(newDuration);
+
+          if (timerRelevantSettingsChanged) {
+            applySettingsToTimer();
+          }
           
           const darkModeToggle = document.getElementById('dark-mode-toggle');
           if (darkModeToggle && darkModeToggle.checked) document.body.setAttribute('data-theme','dark');

@@ -1,14 +1,22 @@
 import { formatTaskTime, setTaskDate } from './tasks.js';
 import { setHabitDate, isHabitActiveOnDate } from './habits.js';
-import { showToast } from './ui-utils.js';
+import { showToast, escapeHTML } from './ui-utils.js';
 
 // Guards against corrupted localStorage crashing the dashboard render.
+// Both callers here always expect an array (focusTasks/focusHabits), and
+// valid JSON that isn't an array (e.g. "{}") would otherwise slip through
+// and throw later on the first .filter()/.forEach() call.
 function safeParseLS(key, fallback) {
   const raw = localStorage.getItem(key);
   if (raw === null) return fallback;
   try {
     const parsed = JSON.parse(raw);
-    return parsed === null || parsed === undefined ? fallback : parsed;
+    if (parsed === null || parsed === undefined) return fallback;
+    if (!Array.isArray(parsed)) {
+      console.warn(`localStorage["${key}"] was valid JSON but not an array, resetting to default.`);
+      return fallback;
+    }
+    return parsed;
   } catch (err) {
     console.warn(`Corrupted data in localStorage["${key}"], resetting to default.`, err);
     return fallback;
@@ -122,13 +130,34 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
 
         if (showPomodoro) {
             currentTasks.forEach(t => {
+                // TIME: attribute focus minutes to the day they were actually
+                // earned (timeByDate), not the task's creation day. Tasks
+                // created before this tracking existed have no timeByDate at
+                // all — for those only, fall back to the old behavior
+                // (all-time total credited to createdAt) so their existing
+                // historical numbers aren't silently zeroed out.
+                const dayTimeSeconds = t.timeByDate
+                    ? (t.timeByDate[localDateStr] || 0)
+                    : (getLocalDateStr(t.createdAt) === localDateStr ? (t.timeSpent || 0) : 0);
+                dailyFocus += Math.floor(dayTimeSeconds / 60);
+
+                // CREATED: still the day the task was made.
                 if (getLocalDateStr(t.createdAt) === localDateStr) {
-                    dailyFocus += Math.floor((t.timeSpent || 0) / 60);
                     totalTasksCreated++;
-                    if (t.completed) {
-                        dailyTasksDone++;
-                        totalTasksCompleted++;
-                    }
+                }
+
+                // COMPLETED: the day it was actually marked done (completedAt),
+                // not the day it was created. Legacy tasks completed before
+                // completedAt existed fall back to createdAt so they don't
+                // silently stop counting anywhere.
+                const completedOnThisDay = t.completed && (
+                    t.completedAt
+                        ? getLocalDateStr(t.completedAt) === localDateStr
+                        : getLocalDateStr(t.createdAt) === localDateStr
+                );
+                if (completedOnThisDay) {
+                    dailyTasksDone++;
+                    totalTasksCompleted++;
                 }
             });
         }
@@ -258,8 +287,18 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
         let doneTasks = 0;
         
         currentTasks.forEach(t => {
+            const dayTimeSeconds = t.timeByDate
+                ? (t.timeByDate[dateStr] || 0)
+                : (getLocalDateStr(t.createdAt) === dateStr ? (t.timeSpent || 0) : 0);
+            mins += Math.floor(dayTimeSeconds / 60);
+
+            // totalTasks/doneTasks are a matched pair used only for this
+            // tile's completion-rate color — both stay scoped to "created
+            // that day" so the rate can never read as more than 100%. The
+            // day-accurate completion count itself is fixed in
+            // calculateStats() above, which isn't a rate and has no such
+            // constraint.
             if (getLocalDateStr(t.createdAt) === dateStr) {
-                mins += Math.floor((t.timeSpent || 0) / 60);
                 totalTasks++;
                 if (t.completed) doneTasks++;
             }
@@ -369,12 +408,24 @@ function openDailyReport(dateObj) {
 
     if (showPomodoro) {
         html += `<div class="report-section-title">Focus Tasks</div>`;
-        const dayTasks = currentTasks.filter(t => getLocalDateStr(t.createdAt) === localDateStr);
+        // A task belongs on this day's report if it was CREATED that day,
+        // OR if focus time was actually logged for it that day (timeByDate) —
+        // previously only createdAt was checked, so working on an
+        // older task today wouldn't show up in today's report at all.
+        const dayTasks = currentTasks.filter(t => 
+            getLocalDateStr(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
+        );
         if (dayTasks.length === 0) html += `<p style="color:var(--text-muted); font-size:0.85rem;">No tasks recorded.</p>`;
         dayTasks.forEach(t => {
-            const timeBadge = formatTaskTime(t.timeSpent);
-            if (t.completed) html += `<div class="report-item success"><span><strike>${t.text}</strike></span> <span>${timeBadge}</span></div>`;
-            else html += `<div class="report-item failed"><span>${t.text}</span> <span>${timeBadge}</span></div>`;
+            // Show THIS day's time, not the task's all-time total — legacy
+            // tasks with no timeByDate fall back to their full total since
+            // that's all we ever recorded for them.
+            const dayTimeSeconds = t.timeByDate
+                ? (t.timeByDate[localDateStr] || 0)
+                : (t.timeSpent || 0);
+            const timeBadge = formatTaskTime(dayTimeSeconds);
+            if (t.completed) html += `<div class="report-item success"><span><strike>${escapeHTML(t.text)}</strike></span> <span>${timeBadge}</span></div>`;
+            else html += `<div class="report-item failed"><span>${escapeHTML(t.text)}</span> <span>${timeBadge}</span></div>`;
         });
     }
 
@@ -386,9 +437,9 @@ function openDailyReport(dateObj) {
             if (dateObj.getTime() >= created && isHabitActiveOnDate(h, dateObj)) {
                 habitFound = true;
                 const status = h.logs && h.logs[habitLogKey];
-                if (status === 'done') html += `<div class="report-item success"><span>${h.name}</span> <span style="font-size:0.75rem;">Done</span></div>`;
-                else if (status === 'skipped') html += `<div class="report-item skipped"><span>${h.name}</span> <span style="font-size:0.75rem;">Skipped</span></div>`;
-                else html += `<div class="report-item failed"><span>${h.name}</span> <span style="font-size:0.75rem;">Missed</span></div>`;
+                if (status === 'done') html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span style="font-size:0.75rem;">Done</span></div>`;
+                else if (status === 'skipped') html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span style="font-size:0.75rem;">Skipped</span></div>`;
+                else html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span style="font-size:0.75rem;">Missed</span></div>`;
             }
         });
         if (!habitFound) html += `<p style="color:var(--text-muted); font-size:0.85rem;">No habits scheduled.</p>`;

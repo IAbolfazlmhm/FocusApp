@@ -15,37 +15,51 @@
       const savedTimer = localStorage.getItem('focusTimerState');
       const savedSettings = localStorage.getItem('focusSettings');
       
+      // This runs before the page paints, purely to avoid a flash of the
+      // wrong theme/phase color. It's a separate, minimal read from the
+      // same localStorage keys state.js also reads (safely) later — so if
+      // parsing fails here, we just skip the pre-paint styling for this
+      // load rather than let it throw and skip past the code below it.
       if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        if (settings.darkMode) document.body.setAttribute('data-theme', 'dark');
+        try {
+          const settings = JSON.parse(savedSettings);
+          if (settings.darkMode) document.body.setAttribute('data-theme', 'dark');
+        } catch (err) {
+          console.warn('Corrupted focusSettings in localStorage, skipping pre-paint theme.', err);
+        }
       }
       
       if (savedTimer) {
-        const state = JSON.parse(savedTimer);
-        if (state.timeLeft === 0 && state.totalTime === 0) {
-        } else {
-            if (state.currentPhase === 'work') document.body.classList.add('phase-work');
-            else if (state.currentPhase === 'shortBreak') document.body.classList.add('phase-short');
-            else if (state.currentPhase === 'longBreak') document.body.classList.add('phase-long');
+        try {
+          const state = JSON.parse(savedTimer);
+          if (state.timeLeft === 0 && state.totalTime === 0) {
+          } else {
+              if (state.currentPhase === 'work') document.body.classList.add('phase-work');
+              else if (state.currentPhase === 'shortBreak') document.body.classList.add('phase-short');
+              else if (state.currentPhase === 'longBreak') document.body.classList.add('phase-long');
+          }
+        } catch (err) {
+          console.warn('Corrupted focusTimerState in localStorage, skipping pre-paint phase color.', err);
         }
       }
     })();
   </script>
 
-  <div id="toast-container"></div>
+  <div id="toast-container" role="status" aria-live="polite"></div>
 
   <div class="header-container">
-    <nav class="glass-tabs-container">
+    <nav class="glass-tabs-container" role="tablist" aria-label="App sections">
       <div class="active-bubble"></div>
-      <button class="tab active">Pomodoro</button>
-      <button class="tab">Habits</button>
-      <button class="tab">Progress</button>
+      <button class="tab active" role="tab" aria-selected="true" id="tab-pomodoro" aria-controls="pomodoro-view">Pomodoro</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-habits" aria-controls="habits-view">Habits</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-progress" aria-controls="progress-view">Progress</button>
     </nav>
   </div>
 
   <main class="container">
+    <h1 class="sr-only">FocusApp — Pomodoro Timer, Tasks, and Habit Tracker</h1>
 
-    <div id="pomodoro-view" class="view-section active-view">
+    <div id="pomodoro-view" class="view-section active-view" role="tabpanel" aria-labelledby="tab-pomodoro">
       
       <section class="timer-section">
         <div class="timer-header glass-pill">
@@ -53,7 +67,7 @@
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
             Focus: <strong id="current-task-name">Nothing</strong>
           </span>
-          <button class="icon-btn settings-btn" title="Settings">
+          <button class="icon-btn settings-btn" title="Settings" aria-label="Settings">
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
           </button>
         </div>
@@ -72,7 +86,7 @@
         </div>
 
         <div class="timer-controls glass-pill">
-          <button class="icon-btn reset-btn" id="reset-btn" title="Reset (Double click for deep reset)">
+          <button class="icon-btn reset-btn" id="reset-btn" title="Reset (Double click for deep reset)" aria-label="Reset (Double click for deep reset)">
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           </button>
           
@@ -80,7 +94,7 @@
              <span class="btn-text">Start</span>
           </button>
           
-          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase">
+          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase">
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
         </div>
@@ -98,7 +112,7 @@
             </div>
 
             <div class="filter-row-unified" style="display: flex; align-items: center; gap: 10px; width: 100%;">
-              <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags">
+              <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags">
                 <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
               </button>
               
@@ -107,7 +121,7 @@
               </div>
 
               <div style="position: relative;">
-                <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks">
+                <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks">
                   <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
                 </button>
                 <div id="sort-dropdown" class="custom-dropdown glass-effect" style="width: 140px; display: none;">
@@ -141,7 +155,7 @@
           
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div style="position: relative; display: flex; align-items: center;">
-            <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" style="width: 38px; height: 38px; flex-shrink: 0; padding: 0;">
+            <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" style="width: 38px; height: 38px; flex-shrink: 0; padding: 0;" aria-label="Set Tag">
               <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
             </button>
           </div>
@@ -153,7 +167,7 @@
 
     </div> 
 
-    <div id="habits-view" class="view-section" style="display: none;">
+    <div id="habits-view" class="view-section" style="display: none;" role="tabpanel" aria-labelledby="tab-habits">
       
       <section class="timer-section" id="habit-detail-panel" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
         
@@ -162,7 +176,7 @@
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             <strong class="dashboard-title-text">Daily Overview</strong>
           </span>
-          <button class="icon-btn habit-settings-btn" title="Habit Settings" style="flex-shrink: 0; margin-left: 10px;">
+          <button class="icon-btn habit-settings-btn" title="Habit Settings" style="flex-shrink: 0; margin-left: 10px;" aria-label="Habit Settings">
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
           </button>
         </div>
@@ -208,7 +222,7 @@
             </div>
 
             <div class="filter-row-unified" style="display: flex; align-items: center; gap: 10px; width: 100%;">
-                <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories">
+                <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories">
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
                 </button>
                 
@@ -217,7 +231,7 @@
                 </div>
 
                 <div class="sort-wrapper">
-                    <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits">
+                    <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits">
                         <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
                     </button>
                     <div id="habit-sort-dropdown" class="custom-dropdown glass-effect" style="width: 140px; display: none;">
@@ -246,7 +260,7 @@
           </div>
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
-            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" style="width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0;">
+            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" style="width: 38px; height: 38px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 0;" aria-label="Detailed Habit Settings">
                 <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
             </button>
             <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" style="flex: 1;" maxlength="30">
@@ -259,7 +273,7 @@
     <!-- ========================================== -->
     <!-- TAB 3: PROGRESS DASHBOARD                  -->
     <!-- ========================================== -->
-    <div id="progress-view" class="view-section" style="display: none;">
+    <div id="progress-view" class="view-section" style="display: none;" role="tabpanel" aria-labelledby="tab-progress">
         
         <section class="timer-section" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
             
@@ -268,7 +282,7 @@
                     <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
                     <strong class="dashboard-title-text" id="left-panel-title">This Week</strong>
                 </span>
-                <button class="icon-btn" id="prog-settings-btn" title="Dashboard Settings" style="flex-shrink: 0; margin-left: 10px;">
+                <button class="icon-btn" id="prog-settings-btn" title="Dashboard Settings" style="flex-shrink: 0; margin-left: 10px;" aria-label="Dashboard Settings">
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
                 </button>
             </div>
@@ -394,7 +408,7 @@
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
           Settings
         </h2>
-        <button class="close-btn" id="close-settings" title="Close">
+        <button class="close-btn" id="close-settings" title="Close" aria-label="Close">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -452,6 +466,18 @@
             </div>
           </div>
         </div>
+
+        <div class="setting-group" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
+          <label style="display:block; margin-bottom: 8px;">Your Data</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
+            Everything is stored only in this browser. Clearing site data, private browsing, or a browser reset can erase it — export a backup you can restore later.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="theme-outline-btn" id="export-data-btn" style="flex:1;" aria-label="Export all data as a JSON file">Export Data</button>
+            <button type="button" class="theme-outline-btn" id="import-data-btn" style="flex:1;" aria-label="Import data from a JSON file">Import Data</button>
+          </div>
+          <input type="file" id="import-data-input" accept="application/json" style="display:none;">
+        </div>
         <button class="save-settings-btn" id="save-settings">Save & Apply</button>
       </div>
     </div>
@@ -461,7 +487,7 @@
     <div class="modal-content glass-effect">
         <div class="modal-header">
             <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Manage Tags</h2>
-            <button class="close-btn" id="close-tags-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <button class="close-btn" id="close-tags-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="modal-body">
             <div class="add-tag-row">
@@ -492,7 +518,7 @@
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
                     Edit Task
                 </h2>
-                <button class="close-btn" id="close-edit-tag-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="close-btn" id="close-edit-tag-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="modal-body">
                 <div class="setting-group" style="margin-bottom: 15px;">
@@ -513,7 +539,7 @@
     <div class="modal-content glass-effect" style="max-width: 420px;">
         <div class="modal-header">
             <h2 id="habit-modal-title"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit</h2>
-            <button class="close-btn" id="close-habit-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <button class="close-btn" id="close-habit-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         
         <div class="modal-body">
@@ -598,7 +624,7 @@
     <div class="modal-content glass-effect">
       <div class="modal-header">
         <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Set Task Tag</h2>
-        <button class="close-btn" id="close-quick-tag-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <button class="close-btn" id="close-quick-tag-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
@@ -615,7 +641,7 @@
     <div class="modal-content glass-effect">
         <div class="modal-header">
             <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Manage Categories</h2>
-            <button class="close-btn" id="close-categories-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            <button class="close-btn" id="close-categories-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="modal-body">
             <div class="add-tag-row">
@@ -633,7 +659,7 @@
         <div class="modal-content glass-effect">
             <div class="modal-header">
                 <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Custom Range</h2>
-                <button class="close-btn" id="close-custom-range"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="close-btn" id="close-custom-range" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="modal-body">
                 <div class="setting-group">
@@ -653,7 +679,7 @@
         <div class="modal-content glass-effect">
             <div class="modal-header">
                 <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Settings</h2>
-                <button class="close-btn" id="close-prog-settings"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="close-btn" id="close-prog-settings" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="modal-body">
                 <div class="setting-group toggle-group">
@@ -687,7 +713,7 @@
         <div class="modal-content glass-effect" style="max-width: 380px;">
             <div class="modal-header" style="margin-bottom: 10px;">
                 <h2 id="report-date-title">Report</h2>
-                <button class="close-btn" id="close-report-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="close-btn" id="close-report-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="modal-body" id="report-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
             </div>
@@ -701,7 +727,7 @@
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     Delete Habit
                 </h2>
-                <button class="close-btn" id="close-delete-habit-modal"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="close-btn" id="close-delete-habit-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>

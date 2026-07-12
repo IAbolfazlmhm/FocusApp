@@ -26,9 +26,45 @@ body, .timer-section, .tasks-section, .glass-pill, .modal-content,
     transition: none !important;
 }
 
-button:focus, input:focus, .tab:focus, .custom-select:focus {
-  outline: none !important;
+/* Remove the mouse-click focus ring (looks messy on rounded pill buttons),
+   but keep it for keyboard users via :focus-visible. Removing it for
+   EVERYONE (as `outline: none` on plain :focus did before) makes the app
+   unusable via keyboard/Tab navigation and fails a basic accessibility
+   requirement (WCAG 2.4.7). */
+button:focus, .tab:focus {
+  outline: none;
 }
+
+button:focus-visible, .tab:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Text inputs are different from buttons: browsers show :focus-visible on
+   them for BOTH mouse clicks and keyboard, not keyboard-only (typing into
+   a field always needs a visible focus cue, regardless of how you got
+   there). A hard rectangular outline clashes with our rounded glass-pill
+   shapes, especially on borderless inputs like .task-input where it draws
+   a box that doesn't match the pill it sits inside. A soft glow that
+   follows each element's own border-radius reads as "focused" without
+   fighting the UI. */
+input:focus, .custom-select:focus {
+  outline: none;
+}
+
+.custom-select:focus-visible {
+  outline: none;
+  border-color: var(--theme-color, #3b82f6);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color, #3b82f6) 25%, transparent);
+}
+
+/* .task-input has no border of its own (it sits inside a .glass-pill
+   container), so instead of ringing the input we glow the pill around it
+   via :focus-within — that's the shape the user actually sees. */
+.add-task-area.glass-pill:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color, #3b82f6) 25%, transparent);
+}
+
 
 /* Remove ugly auto-fill background from Chrome */
 input:-webkit-autofill,
@@ -40,7 +76,20 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: var(--text-main) !important;
 }
 
-/* Global Animations */
+/* Visually hides content while keeping it readable by screen readers.
+   Do NOT use display:none/visibility:hidden here — those hide it from
+   screen readers too, defeating the point. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 @keyframes popSuccess {
   0% { transform: scale(1); color: var(--text-main); }
   50% { transform: scale(1.15); color: var(--success-color); }

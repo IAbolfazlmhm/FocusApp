@@ -63,14 +63,24 @@ function setupGlobalShortcuts() {
     });
 }
 
-// Global Input Sanitizer (No symbols allowed)
+// Global Input Sanitizer
+// This used to whitelist a fixed set of "allowed" characters (letters,
+// numbers, spaces, plus a short punctuation list) as an XSS defense —
+// meaning apostrophes, colons, quotes, slashes, ampersands, question
+// marks, etc. all got silently stripped while you typed. That was
+// solving the problem in the wrong place: character-whitelisting on
+// input fights normal language (you couldn't type "Don't" or "9am-5pm:
+// meeting") and is easy to get wrong either direction.
+// The correct place to defend against XSS is at render time — every
+// place task/habit/tag/category text gets shown now goes through
+// escapeHTML() (see ui-utils.js), which neutralizes `< > & " '` no
+// matter what was typed. So here we only block the two characters that
+// have no legitimate use in a task/habit name and would otherwise let
+// someone start typing a fake HTML tag — everything else is left alone.
 document.addEventListener('input', (e) => {
     if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
-        // Save cursor position so typing in the middle of a word doesn't jump to the end
         const cursorPosition = e.target.selectionStart;
-        // Old: e.target.value = e.target.value.replace(/[^\p{L}\p{N}\s]/gu, '');
-        // New: Allow letters, numbers, spaces, and basic punctuation
-        e.target.value = e.target.value.replace(/[^\p{L}\p{N}\s.,!#()\-]/gu, '');
+        e.target.value = e.target.value.replace(/[<>]/g, '');
         e.target.setSelectionRange(cursorPosition, cursorPosition);
     }
 });

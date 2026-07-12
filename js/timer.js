@@ -18,6 +18,32 @@ const timeDisplay = document.getElementById('time-left');
 const startBtn = document.getElementById('start-btn');
 const circle = document.querySelector('.progress-ring-circle');
 
+// ==========================================
+// DRIFT-CORRECTED TICK ANCHOR
+// ==========================================
+// setInterval(..., 1000) does NOT fire exactly every 1000ms — background
+// tab throttling, a slow device, or a GC pause all make it drift, so a
+// naive "subtract 1 every tick" approach can make a 25-minute session
+// finish meaningfully early or late. Instead we record a real-world
+// timestamp + the timeLeft at that moment, then compute timeLeft on every
+// tick from actual elapsed wall-clock time. If a tick fires late, the next
+// one self-corrects instead of accumulating error.
+let tickAnchorTime = null;
+let tickAnchorTimeLeft = 0;
+let tickLastElapsedSeconds = 0; // elapsed seconds since anchor, as of the last tick
+
+// Same YYYY-MM-DD local-date format progress.js's getLocalDateStr() uses,
+// duplicated here rather than imported to avoid a circular import between
+// timer.js and progress.js. Used to record WHICH day focus time was
+// actually earned on, instead of only a single all-time total.
+function localDateKey(dateObj = new Date()) {
+  const d = new Date(dateObj);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // Calculate circle circumference for progress animation
 const radius = circle ? circle.r.baseVal.value : 110;
 const circumference = radius * 2 * Math.PI;
@@ -263,6 +289,11 @@ export function toggleTimer() {
       startBtn.querySelector('.btn-text').textContent = 'Start';
       startBtn.classList.remove('pause');
     }
+    
+    // Ticks now only persist every few seconds (see below), so pausing
+    // needs its own explicit save — otherwise up to a few seconds of
+    // progress could be lost if the page is reloaded right after pausing.
+    saveTimerState();
   } else {
     // Start timer
     setIsRunning(true);
@@ -272,13 +303,37 @@ export function toggleTimer() {
       startBtn.classList.add('pause');
     }
     
+    // Anchor drift-correction to right now, at whatever timeLeft currently is
+    // (this covers both a fresh start and a resume-from-pause correctly).
+    tickAnchorTime = Date.now();
+    tickAnchorTimeLeft = timeLeft;
+    tickLastElapsedSeconds = 0;
+    
     const interval = setInterval(() => {
+      // Real elapsed time since the anchor, NOT "however many ticks fired" —
+      // this is what makes the timer self-correct if a tick fires late
+      // (backgrounded tab, slow device, etc.) instead of drifting further
+      // behind with every missed/delayed tick.
+      const nowElapsedSeconds = Math.floor((Date.now() - tickAnchorTime) / 1000);
+      const deltaSeconds = Math.max(0, nowElapsedSeconds - tickLastElapsedSeconds);
+      tickLastElapsedSeconds = nowElapsedSeconds;
+
       // Task time tracking logic
-      if (focusedTaskId !== null && tasks) {
+      if (deltaSeconds > 0 && focusedTaskId !== null && tasks) {
         if ((modeSelect && modeSelect.value === 'stopwatch') || currentPhase === 'work') {
           const activeTask = tasks.find(t => t.id === focusedTaskId);
           if (activeTask) {
-            activeTask.timeSpent++; 
+            activeTask.timeSpent += deltaSeconds; 
+            // Also record which DAY this time was earned on. Previously only
+            // the all-time total existed, and the dashboard attributed 100%
+            // of it to the task's createdAt date — so time spent focusing
+            // today on a task you created yesterday silently showed up
+            // under yesterday instead. timeByDate fixes that going forward
+            // (existing totals from before this change stay as-is; there's
+            // no way to retroactively know which past day they belong to).
+            if (!activeTask.timeByDate) activeTask.timeByDate = {};
+            const todayKey = localDateKey();
+            activeTask.timeByDate[todayKey] = (activeTask.timeByDate[todayKey] || 0) + deltaSeconds;
             saveTasks(); 
             const badge = document.getElementById(`badge-${activeTask.id}`);
             if (badge) badge.innerHTML = formatTaskTime(activeTask.timeSpent);
@@ -288,7 +343,7 @@ export function toggleTimer() {
       
       // Stopwatch or Pomodoro mode checks
       if (modeSelect && modeSelect.value === 'stopwatch') {
-        setTimeLeft(timeLeft + 1); 
+        setTimeLeft(tickAnchorTimeLeft + nowElapsedSeconds); 
         updateDisplay();
         
         if (circle) {
@@ -296,12 +351,12 @@ export function toggleTimer() {
           circle.style.strokeDashoffset = offset;
         }
       } else {
-        setTimeLeft(timeLeft - 1); 
+        setTimeLeft(Math.max(0, tickAnchorTimeLeft - nowElapsedSeconds)); 
         updateDisplay(); 
         updateCircle(); 
         
         // Phase completion logic
-        if (timeLeft === 0) {
+        if (timeLeft <= 0) {
           clearInterval(timerId); 
           setTimerId(null);
           setIsRunning(false);
@@ -319,7 +374,14 @@ export function toggleTimer() {
           }
         }
       }
-      saveTimerState(); 
+      // Every tick used to write to localStorage — once per second while
+      // any timer runs, whether or not anything meaningful changed. Since
+      // pause/phase-change/tab-hide (below) all save immediately anyway,
+      // the tick only needs to save periodically as a safety net for long
+      // uninterrupted runs.
+      if (nowElapsedSeconds % 5 === 0) {
+        saveTimerState();
+      }
     }, 1000);
     
     setTimerId(interval);
@@ -333,6 +395,15 @@ export function setupTimerEvents() {
   const startBtn = document.getElementById('start-btn');
   const resetBtn = document.getElementById('reset-btn');
   const skipBtn = document.getElementById('skip-btn');
+
+  // Backgrounding the tab, switching apps, or closing the tab all fire this.
+  // Since ticks only save every ~5s now, this is what guarantees a reload
+  // right after switching away never loses more than an instant of progress.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && isRunning) {
+      saveTimerState();
+    }
+  });
 
   if (startBtn) startBtn.addEventListener('click', toggleTimer);
   if (resetBtn) {
