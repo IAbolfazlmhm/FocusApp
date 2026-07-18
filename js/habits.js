@@ -6,6 +6,7 @@ import {
 import { playUI } from './audio.js';
 import { showToast, escapeHTML } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
+import { writeJSON, readRaw } from './storage.js';
 
 // ==========================================
 // CENTRALIZED PERSISTENCE
@@ -17,11 +18,11 @@ import { customConfirm } from './tasks.js';
 // what's saved. Centralizing it here means there is exactly one place
 // that knows how habits get persisted.
 export function saveHabits() {
-  localStorage.setItem('focusHabits', JSON.stringify(habits));
+  writeJSON('focusHabits', habits);
 }
 
 export function saveHabitCategories() {
-  localStorage.setItem('focusHabitCategories', JSON.stringify(savedHabitCategories));
+  writeJSON('focusHabitCategories', savedHabitCategories);
 }
 
 // ==========================================
@@ -199,8 +200,8 @@ export function renderHabits() {
 
     if (!filteredHabits || filteredHabits.length === 0) {
         habitListContainer.innerHTML = `
-            <div style="display: flex; flex-direction: column; align-items: center; color: #94a3b8; opacity: 0.7; margin-top: 40px;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 50px; height: 50px; margin-bottom: 10px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 <p>No habits scheduled for this day.</p>
             </div>
         `;
@@ -236,39 +237,39 @@ export function renderHabits() {
         // 1. Generate Category Pill (with ellipsis and optical padding fix)
         let catHTML = '';
         if (habit.category && habit.category !== 'Uncategorized') {
-            catHTML = `<span class="habit-category-badge" title="${escapeHTML(habit.category)}" style="background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; line-height: 1;">${escapeHTML(habit.category)}</span>`;
+            catHTML = `<span class="habit-category-badge" title="${escapeHTML(habit.category)}">${escapeHTML(habit.category)}</span>`;
         }
 
         habitDiv.style.cursor = 'pointer';
 
         // 2. Pristine 2-Row Layout WITH Original Streak SVG
         habitDiv.innerHTML = `
-          <div class="habit-info" style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 15px;">
+          <div class="habit-info">
             
             <!-- Left Side: Original Icon Wrapper -->
-            <div class="habit-icon-circle" style="background: ${bgRgba}; color: ${habit.color};">
+            <div class="habit-icon-circle" style="--habit-bg:${bgRgba}; --habit-color:${habit.color};">
                 <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconSvgContent}</svg>
             </div>
 
             <!-- Right Side: Text Stack -->
-            <div style="display: flex; flex-direction: column; justify-content: center; gap: 6px; flex: 1; min-width: 0;">
+            <div class="habit-details">
               
               <!-- Top Row: Habit Name -->
-              <span class="habit-name" title="${escapeHTML(habit.name)}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${escapeHTML(habit.name)}</span>
+              <span class="habit-name" title="${escapeHTML(habit.name)}">${escapeHTML(habit.name)}</span>
               
               <!-- Bottom Row: Category & Original Streak SVG -->
-              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: nowrap;">
+              <div class="habit-meta-row">
                 ${catHTML}
-                <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="Current Streak" style="flex: 0 0 auto;">
-                    <svg class="ui-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-                    <span style="font-variant-numeric: tabular-nums;">${currentStreak}</span>
+                <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="Current Streak">
+                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+                    <span>${currentStreak}</span>
                 </div>
               </div>
               
             </div>
           </div>
           
-          <div class="task-actions" style="flex-shrink: 0;">
+          <div class="task-actions">
             <button class="remove-btn advanced-delete-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             <button class="focus-btn skip-habit-btn" title="Skip Today"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
             <button class="done-btn done-habit-btn" title="Done!"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
@@ -787,7 +788,7 @@ export function setupHabitsEvents() {
     updateHabitDateDisplay();
 
     document.addEventListener('tabChanged', () => {
-        if (localStorage.getItem('focusActiveTab') === '1') updateHabitProgress();
+        if (readRaw('focusActiveTab') === '1') updateHabitProgress();
     });
 
     // --- ADVANCED HABIT DELETION LOGIC ---
@@ -1077,7 +1078,7 @@ export function updateHabitProgress() {
     // Update streaks UI
     if (typeof renderTopStreaks === 'function') renderTopStreaks();
 
-    const activeTab = localStorage.getItem('focusActiveTab');
+    const activeTab = readRaw('focusActiveTab');
     if (activeTab === '1') document.title = `Focus App - Habits (${completed}/${total})`;
 }
 
@@ -1305,32 +1306,28 @@ export function renderTopStreaks() {
     // ALWAYS render 3 slots to permanently lock the layout height
     for (let i = 0; i < 3; i++) {
         const pill = document.createElement('div');
-        pill.className = 'stat-row'; 
-        pill.style.padding = '8px 15px';
-        pill.style.height = '48px'; // Lock the height of the pill
+        pill.className = 'stat-row fixed-height'; 
         
         if (top3[i]) {
             const h = top3[i];
             pill.innerHTML = `
-                <div class="stat-icon" style="color: ${h.color || '#10b981'}; background: ${h.color ? h.color+'20' : 'rgba(16,185,129,0.15)'}; width: 32px; height: 32px;">
+                <div class="stat-icon mini" style="color: ${h.color || '#10b981'}; background: ${h.color ? h.color+'20' : 'rgba(16,185,129,0.15)'};">
                     <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${habitIconsDict[h.icon] || habitIconsDict['activity']}</svg>
                 </div>
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div class="streak-flame active" style="flex: 0 0 auto; display: flex; align-items: center; gap: 4px; color: #f97316; font-size: 0.95rem; font-weight: bold;">
-                        <svg class="ui-icon" style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-                        <span style="font-variant-numeric: tabular-nums;">${h.currentStreak}</span>
+                <div class="stat-row-right">
+                    <div class="streak-flame active lg">
+                        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+                        <span>${h.currentStreak}</span>
                     </div>
                 </div>
             `;
         } else {
             // Empty transparent placeholder
-            pill.style.background = 'transparent';
-            pill.style.border = '1px dashed var(--glass-border)';
-            pill.style.opacity = '0.5';
+            pill.classList.add('empty-slot');
             pill.innerHTML = `
-                <div class="stat-icon" style="background: transparent; width: 32px; height: 32px;"></div>
-                <div class="stat-details" style="flex: 1;">
-                    <span class="stat-label" style="color: var(--text-muted);">Empty</span>
+                <div class="stat-icon mini" style="background: transparent;"></div>
+                <div class="stat-details">
+                    <span class="stat-label">Empty</span>
                 </div>
             `;
         }

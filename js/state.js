@@ -1,57 +1,38 @@
-// ==========================================
-// SAFE STORAGE READ
-// ==========================================
-// Without this, one corrupted/tampered localStorage key throws inside
-// JSON.parse at module-load time. Since every other module imports from
-// state.js, that single throw kills the whole app at startup (blank white
-// screen, nothing recoverable without the user manually clearing storage).
-// safeParse guarantees state.js always finishes loading with sane defaults.
-//
-// expectedType checks the SHAPE too, not just "is this valid JSON" — e.g.
-// `localStorage.setItem('focusTasks', '{}')` is perfectly valid JSON, but
-// every module that reads `tasks` immediately calls `.filter()`/`.find()`
-// on it, which throws on a plain object. Pass 'array' for anything that
-// gets iterated as a list.
-function safeParse(key, fallback, expectedType = null) {
-  const raw = localStorage.getItem(key);
-  if (raw === null) return fallback;
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed === null || parsed === undefined) return fallback;
-    if (expectedType === 'array' && !Array.isArray(parsed)) {
-      console.warn(`localStorage["${key}"] was valid JSON but not an array, resetting to default.`);
-      return fallback;
-    }
-    return parsed;
-  } catch (err) {
-    console.warn(`Corrupted data in localStorage["${key}"], resetting to default.`, err);
-    return fallback;
-  }
-}
+import { readJSON } from './storage.js';
 
 // ==========================================
 // APP INITIAL STATE (GLOBAL VARIABLES)
 // ==========================================
+// NOTE ON THIS PATTERN: these are module-level `let` exports with a
+// matching setter function for each one (e.g. `timeLeft` + `setTimeLeft`).
+// That's needed because reassigning an imported binding directly
+// (`timeLeft = 5`) only rebinds the LOCAL copy in whatever file does it —
+// other modules that imported `timeLeft` would never see the change. The
+// setter functions run inside this module, where the reassignment is real.
+// It works, but it is effectively a global-variables pattern with extra
+// steps. If this app grows further, consider replacing this file with a
+// single mutable `state` object (`state.timeLeft`, mutated in place) or a
+// tiny pub/sub store — either removes the need for a setter per field.
 
 // --- TIMER STATE ---
-export let totalTime = 25 * 60; 
-export let timeLeft = totalTime; 
-export let timerId = null; 
+export let totalTime = 25 * 60;
+export let timeLeft = totalTime;
+export let timerId = null;
 export let isRunning = false;
-export let currentPhase = 'work'; 
-export let completedSessions = 0; 
+export let currentPhase = 'work';
+export let completedSessions = 0;
 
 // --- TASKS STATE ---
-export let tasks = safeParse('focusTasks', [], 'array');
-export let focusedTaskId = safeParse('focusedTaskId', null);
-export let savedTags = safeParse('focusTagsList', ['Work', 'Study', 'Personal'], 'array');
+export let tasks = readJSON('focusTasks', [], 'array');
+export let focusedTaskId = readJSON('focusedTaskId', null);
+export let savedTags = readJSON('focusTagsList', ['Work', 'Study', 'Personal'], 'array');
 export let currentFilter = 'all';
-export let currentSort = 'newest'; 
-export let sortOrder = 'desc'; 
+export let currentSort = 'newest';
+export let sortOrder = 'desc';
 
 // --- HABITS STATE ---
-export let habits = safeParse('focusHabits', [], 'array');
-export let savedHabitCategories = safeParse('focusHabitCategories', ['Health', 'Learning', 'Productivity', 'Mindfulness'], 'array');
+export let habits = readJSON('focusHabits', [], 'array');
+export let savedHabitCategories = readJSON('focusHabitCategories', ['Health', 'Learning', 'Productivity', 'Mindfulness'], 'array');
 export let currentHabitDate = new Date();
 currentHabitDate.setHours(0, 0, 0, 0);
 

@@ -2,6 +2,7 @@ import {
   tasks, focusedTaskId, savedTags, currentFilter, currentSort, sortOrder,
   setTasks, setFocusedTaskId, setSavedTags, setCurrentFilter, setCurrentSort, setSortOrder 
 } from './state.js';
+import { writeJSON } from './storage.js';
 
 export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
@@ -43,9 +44,9 @@ const iconTag = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="cu
 // CORE HELPERS
 // ==========================================
 export function saveTasks() { 
-  localStorage.setItem('focusTasks', JSON.stringify(tasks)); 
-  localStorage.setItem('focusedTaskId', JSON.stringify(focusedTaskId)); 
-  localStorage.setItem('focusTagsList', JSON.stringify(savedTags));
+  writeJSON('focusTasks', tasks);
+  writeJSON('focusedTaskId', focusedTaskId);
+  writeJSON('focusTagsList', savedTags);
 }
 
 export function formatTaskTime(totalSeconds) { 
@@ -209,9 +210,9 @@ export function renderTasks() {
                 const tagObj = window.getTagObj(task.tag);
                 const bg = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.15) : 'transparent';
                 const border = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.3) : 'transparent';
-                tagHTML = `<span class="task-tag" title="${task.tag}" style="background:${bg}; color:${tagObj.color}; border: 1px solid ${border}; padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; height: max-content; line-height: 1;">#${task.tag}</span>`;
+                tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}" style="--tag-bg:${bg}; --tag-color:${tagObj.color}; --tag-border:${border};">#${escapeHTML(task.tag)}</span>`;
             } else {
-                tagHTML = `<span class="task-tag" title="${task.tag}" style="background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; flex: 0 0 auto; display: inline-block; height: max-content; line-height: 1;">#${task.tag}</span>`;
+                tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}">#${escapeHTML(task.tag)}</span>`;
             }
         }
 
@@ -233,15 +234,19 @@ export function renderTasks() {
         taskDiv.style.cursor = 'pointer'; 
         taskDiv.dataset.id = task.id; 
 
-        // BUG FIX: flex-wrap: nowrap prevents layout breaking, tabular-nums stops time from wiggling
+        // Layout/spacing for this card lives in .task-info, .task-name,
+        // .task-tag-row, .task-tag, .task-time-badge (see pomodoro.css) —
+        // flex-wrap:nowrap on the tag row and tabular-nums on the time
+        // badge (which prevent layout breaking and the digits wiggling)
+        // are part of those classes now, not repeated inline every render.
         taskDiv.innerHTML = `
-          <div class="task-info" style="display: flex; flex-direction: column; justify-content: center; gap: 8px; flex: 1; min-width: 0; padding-right: 15px;">
+          <div class="task-info">
             
-            <span class="task-name" title="${escapeHTML(task.text)}" style="font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${escapeHTML(task.text)}</span>
+            <span class="task-name" title="${escapeHTML(task.text)}">${escapeHTML(task.text)}</span>
             
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;">
+            <div class="task-tag-row">
               ${tagHTML}
-              <span class="task-time-badge" id="badge-${task.id}" style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; white-space: nowrap; flex: 0 0 auto; display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums;">${formatTaskTime(task.timeSpent)}</span>
+              <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
             </div>
 
           </div>
@@ -287,8 +292,8 @@ export function renderTasks() {
   if (filtered.length === 0) {
     let msg = "No tasks yet. Take a deep breath and start planning!";
     taskListContainer.innerHTML = `
-      <div class="empty-state" style="display: flex; flex-direction: column; align-items: center; justify-content: center; color: #94a3b8; margin-top: 40px; opacity: 0.7;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 60px; height: 60px; margin-bottom: 10px;"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+      <div class="empty-state lg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
         <p>${msg}</p>
       </div>`;
   }

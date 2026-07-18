@@ -6,6 +6,12 @@ import {
 
 import { playAlarm } from './audio.js';
 import { showToast, icons } from './ui-utils.js';
+import { readJSON, writeJSON, readRaw } from './storage.js';
+
+// Task-name length shown in the browser tab title, kept short since tab
+// width is limited. Centralized as a constant so it's easy to find/tune
+// instead of a bare "10" buried in updateDisplay().
+const TAB_TITLE_TASK_NAME_MAX_LENGTH = 24;
 
 // Note: These will be exported from tasks.js in the next steps. 
 // We import them here to maintain modularity.
@@ -64,21 +70,13 @@ export function saveTimerState() {
     completedSessions, 
     lastSaved: Date.now() 
   };
-  localStorage.setItem('focusTimerState', JSON.stringify(state));
+  writeJSON('focusTimerState', state);
 }
 
 export function loadTimerState() {
-  const saved = localStorage.getItem('focusTimerState');
-  if (!saved) return false;
+  const state = readJSON('focusTimerState', null);
+  if (!state) return false;
 
-  let state;
-  try {
-    state = JSON.parse(saved);
-  } catch (err) {
-    console.warn('Corrupted focusTimerState in localStorage, discarding.', err);
-    localStorage.removeItem('focusTimerState');
-    return false;
-  }
   const FOUR_HOURS = 4 * 60 * 60 * 1000; 
 
   // Invalidate state if it's older than 4 hours
@@ -122,28 +120,25 @@ export function updateDisplay() {
   const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   
   timeDisplay.textContent = formattedTime;
-  
+
+  // FIX: this used to compute activeTaskName once here, then recompute it
+  // a second time inside the block below with looser (redundant) typeof
+  // checks — the first computation was dead code that never got used.
+  // Now there's a single lookup, reused for both the tab title (below) and
+  // the truncation length is a shared constant instead of a bare "10".
   let activeTaskName = 'Focus App';
   if (focusedTaskId !== null && tasks) {
     const activeTask = tasks.find(t => t.id === focusedTaskId);
     if (activeTask) activeTaskName = activeTask.text;
   }
-  
-  const activeTab = localStorage.getItem('focusActiveTab');
+
+  const activeTab = readRaw('focusActiveTab');
   if (!activeTab || activeTab === '0') {
-    let activeTaskName = 'Focus App';
-    // Assuming tasks array is imported or available globally
-    if (typeof focusedTaskId !== 'undefined' && focusedTaskId !== null && typeof tasks !== 'undefined') {
-      const activeTask = tasks.find(t => t.id === focusedTaskId);
-      if (activeTask) {
-        activeTaskName = activeTask.text;
-        // BUG FIX: Truncate long task names in the browser tab!
-        if (activeTaskName.length > 10) {
-          activeTaskName = activeTaskName.substring(0, 10) + '...';
-        }
-      }
+    let tabTitleTaskName = activeTaskName;
+    if (tabTitleTaskName.length > TAB_TITLE_TASK_NAME_MAX_LENGTH) {
+      tabTitleTaskName = tabTitleTaskName.substring(0, TAB_TITLE_TASK_NAME_MAX_LENGTH) + '...';
     }
-    document.title = `${activeTaskName} - ${formattedTime}`;
+    document.title = `${tabTitleTaskName} - ${formattedTime}`;
   }
 }
 
@@ -466,7 +461,7 @@ export function setupTimerEvents() {
   });
 
   document.addEventListener('tabChanged', () => {
-        const activeTab = localStorage.getItem('focusActiveTab');
+        const activeTab = readRaw('focusActiveTab');
         if (!activeTab || activeTab === '0') updateDisplay();
     });
 }

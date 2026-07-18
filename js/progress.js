@@ -1,27 +1,14 @@
 import { formatTaskTime, setTaskDate } from './tasks.js';
 import { setHabitDate, isHabitActiveOnDate } from './habits.js';
 import { showToast, escapeHTML } from './ui-utils.js';
+import { readJSON, readRaw } from './storage.js';
 
-// Guards against corrupted localStorage crashing the dashboard render.
-// Both callers here always expect an array (focusTasks/focusHabits), and
-// valid JSON that isn't an array (e.g. "{}") would otherwise slip through
-// and throw later on the first .filter()/.forEach() call.
-function safeParseLS(key, fallback) {
-  const raw = localStorage.getItem(key);
-  if (raw === null) return fallback;
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed === null || parsed === undefined) return fallback;
-    if (!Array.isArray(parsed)) {
-      console.warn(`localStorage["${key}"] was valid JSON but not an array, resetting to default.`);
-      return fallback;
-    }
-    return parsed;
-  } catch (err) {
-    console.warn(`Corrupted data in localStorage["${key}"], resetting to default.`, err);
-    return fallback;
-  }
-}
+// FIX: this used to be its own copy of the same safe-parse logic that
+// lives in storage.js (readJSON) — duplicated because this file needed
+// "must be an array" validation and state.js's original safeParse wasn't
+// shared code yet. Now that storage.js exports readJSON with the same
+// 'array' type check, this local copy is redundant; call sites below use
+// readJSON('focusTasks', [], 'array') directly instead.
 
 // Global Progress State
 let timeRange = 'weekly'; 
@@ -87,8 +74,8 @@ function getHabitLogKey(dateObj) {
 // CORE RENDER FUNCTION
 // ==========================================
 export function renderProgressDashboard() {
-    const currentTasks = safeParseLS('focusTasks', []);
-    const currentHabits = safeParseLS('focusHabits', []);
+    const currentTasks = readJSON('focusTasks', [], 'array');
+    const currentHabits = readJSON('focusHabits', [], 'array');
 
     const bounds = getDateBounds(refDate, timeRange);
     
@@ -110,7 +97,7 @@ export function renderProgressDashboard() {
     renderFocusHeatmap(bounds.start, bounds.end, currentTasks);
     renderHabitHeatmap(bounds.start, bounds.end, currentHabits);
 
-    if (localStorage.getItem('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
+    if (readRaw('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
 }
 
 // ==========================================
@@ -311,7 +298,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
         let completionRate = totalTasks === 0 ? 0 : (doneTasks / totalTasks);
         
         // Dynamic Tooltip
-        let tooltipHTML = `<span style="color:#94a3b8; font-size:0.65rem; text-transform:uppercase; letter-spacing:1px;">${displayDate}</span><br/>`;
+        let tooltipHTML = `<span class="report-date-label">${displayDate}</span><br/>`;
         if (totalTasks > 0) tooltipHTML += `${doneTasks}/${totalTasks} tasks done (${Math.round(completionRate*100)}%)<br/>${mins}m focus time`;
         else if (mins > 0) tooltipHTML += `0 tasks, ${mins}m focus time`;
         else tooltipHTML += `No activity`;
@@ -364,7 +351,7 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
         block.className = 'heatmap-block';
         const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
         
-        let tooltipHTML = `<span style="color:#94a3b8; font-size:0.65rem; text-transform:uppercase; letter-spacing:1px;">${displayDate}</span><br/>`;
+        let tooltipHTML = `<span class="report-date-label">${displayDate}</span><br/>`;
         if (activeCount > 0) {
             const completionRate = Math.round((doneCount / activeCount) * 100);
             tooltipHTML += `${doneCount}/${activeCount} habits done (${completionRate}%)`;
@@ -396,8 +383,8 @@ function openDailyReport(dateObj) {
     const body = document.getElementById('report-modal-body');
     if (!modal) return;
 
-    const currentTasks = safeParseLS('focusTasks', []);
-    const currentHabits = safeParseLS('focusHabits', []);
+    const currentTasks = readJSON('focusTasks', [], 'array');
+    const currentHabits = readJSON('focusHabits', [], 'array');
 
     const localDateStr = getLocalDateStr(dateObj);
     const habitLogKey = getHabitLogKey(dateObj);
@@ -415,7 +402,7 @@ function openDailyReport(dateObj) {
         const dayTasks = currentTasks.filter(t => 
             getLocalDateStr(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
         );
-        if (dayTasks.length === 0) html += `<p style="color:var(--text-muted); font-size:0.85rem;">No tasks recorded.</p>`;
+        if (dayTasks.length === 0) html += `<p class="report-empty-msg">No tasks recorded.</p>`;
         dayTasks.forEach(t => {
             // Show THIS day's time, not the task's all-time total — legacy
             // tasks with no timeByDate fall back to their full total since
@@ -430,33 +417,33 @@ function openDailyReport(dateObj) {
     }
 
     if (showHabits) {
-        html += `<div class="report-section-title" style="margin-top:20px;">Habits</div>`;
+        html += `<div class="report-section-title spaced">Habits</div>`;
         let habitFound = false;
         currentHabits.forEach(h => {
             const created = new Date(h.createdAt || h.id).setHours(0,0,0,0);
             if (dateObj.getTime() >= created && isHabitActiveOnDate(h, dateObj)) {
                 habitFound = true;
                 const status = h.logs && h.logs[habitLogKey];
-                if (status === 'done') html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span style="font-size:0.75rem;">Done</span></div>`;
-                else if (status === 'skipped') html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span style="font-size:0.75rem;">Skipped</span></div>`;
-                else html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span style="font-size:0.75rem;">Missed</span></div>`;
+                if (status === 'done') html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Done</span></div>`;
+                else if (status === 'skipped') html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Skipped</span></div>`;
+                else html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Missed</span></div>`;
             }
         });
-        if (!habitFound) html += `<p style="color:var(--text-muted); font-size:0.85rem;">No habits scheduled.</p>`;
+        if (!habitFound) html += `<p class="report-empty-msg">No habits scheduled.</p>`;
     }
 
     // BUG FIX: Only show buttons for active sections
     let buttonsHTML = '';
     if (showPomodoro) {
-        buttonsHTML += `<button class="add-btn" id="goto-focus-btn" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 10px;">Go to Focus</button>`;
+        buttonsHTML += `<button class="add-btn report-goto-btn focus" id="goto-focus-btn">Go to Focus</button>`;
     }
     if (showHabits) {
-        buttonsHTML += `<button class="add-btn" id="goto-habits-btn" style="flex: 1; background: #10b981; color: white; border: none; padding: 10px;">Go to Habits</button>`;
+        buttonsHTML += `<button class="add-btn report-goto-btn habits" id="goto-habits-btn">Go to Habits</button>`;
     }
 
     if (buttonsHTML !== '') {
         html += `
-            <div style="display: flex; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);">
+            <div class="report-actions">
                 ${buttonsHTML}
             </div>
         `;
@@ -707,6 +694,6 @@ export function setupProgressEvents() {
     });
 
     document.addEventListener('tabChanged', () => {
-        if (localStorage.getItem('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
+        if (readRaw('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
     });
 }

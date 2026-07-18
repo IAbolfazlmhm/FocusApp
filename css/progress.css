@@ -22,6 +22,11 @@ body[data-theme="dark"] body.phase-progress .dropdown-item.active-sort { color: 
 /* --- LAYOUT & SIZING (Scrollbar fix) --- */
 .progress-hero { display: flex; justify-content: center; width: 100%; margin-bottom: 10px; }
 .stat-row { display: flex; align-items: center; gap: 12px; background: var(--glass-bg); padding: 8px 15px; border-radius: 20px; border: 1px solid var(--glass-border); transition: transform 0.2s; }
+/* Always-3-slots "top streaks" widget locks a fixed height so the layout
+   doesn't jump around as habits gain/lose streaks. */
+.stat-row.fixed-height { height: 48px; }
+.stat-row.empty-slot { background: transparent; border: 1px dashed var(--glass-border); opacity: 0.5; }
+.stat-row-right { display: flex; align-items: center; justify-content: space-between; }
 .stat-row:hover { transform: translateX(5px); }
 .stat-icon { width: 36px; height: 36px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .stat-details { display: flex; flex-direction: column; flex: 1; }
@@ -49,6 +54,8 @@ body[data-theme="dark"] body.phase-progress .dropdown-item.active-sort { color: 
 
 /* Kill the empty popup on the Legend items */
 .heatmap-legend .heatmap-block { pointer-events: none !important; }
+.heatmap-legend .heatmap-block { width: 12px; height: 12px; cursor: default; }
+.heatmap-legend .legend-label { font-size: 0.7rem; color: var(--text-muted); font-weight: bold; }
 
 /* Habit Colors (Green) */
 .habit-level-1 { background: rgba(16, 185, 129, 0.3); border-color: rgba(16, 185, 129, 0.4); }
@@ -81,3 +88,28 @@ body[data-theme="dark"] .heatmap-block:not(.focus-level-1):not(.focus-level-2):n
 .report-item.success { border-left: 4px solid var(--success-color); }
 .report-item.skipped { border-left: 4px solid var(--text-muted); opacity: 0.7; }
 .report-item.failed { border-left: 4px solid var(--danger-color); }
+
+/* Small uppercase date label shown in heatmap tooltips. */
+.report-date-label { color: #94a3b8; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
+/* "No tasks recorded." / "No habits scheduled." placeholder text. */
+.report-empty-msg { color: var(--text-muted); font-size: 0.85rem; }
+/* Extra top margin before the second (Habits) section title in the report. */
+.report-section-title.spaced { margin-top: 20px; }
+/* The small "Done"/"Skipped"/"Missed" label on each habit report row. */
+.report-status-label { font-size: 0.75rem; }
+
+/* "Go to Focus" / "Go to Habits" buttons at the bottom of the report modal.
+   These use fixed brand colors (not --theme-color) on purpose — they're
+   links to a specific OTHER section, so they should look like that
+   section's identity regardless of which tab/phase the modal was opened
+   from, the same way the rest of the app already uses fixed phase colors. */
+.report-actions { display: flex; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border); }
+.report-goto-btn { flex: 1; color: white; border: none; padding: 10px; }
+/* Specificity note: body.phase-work .add-btn (etc.) has specificity 0,2,1
+   (the `body` element selector counts too) which beats a plain 2-class
+   selector here — these buttons would silently change color with the
+   current Pomodoro phase instead of staying fixed. Using all three classes
+   actually present on the button (.add-btn.report-goto-btn.focus = 0,3,0)
+   correctly outranks it regardless of load order. */
+.add-btn.report-goto-btn.focus { background: #3b82f6; }
+.add-btn.report-goto-btn.habits { background: #10b981; }

@@ -3,10 +3,32 @@
 /* ========================================== */
 
 /* --- HABITS SPECIFIC UI --- */
-.habit-icon-circle { width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px; }
+.habit-icon-circle {
+  width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-right: 12px;
+  /* Per-habit color is genuinely dynamic data, set from JS via these two
+     custom properties instead of a full inline style block. */
+  background: var(--habit-bg, rgba(59, 130, 246, 0.15));
+  color: var(--habit-color, #3b82f6);
+}
 #habit-date-display { color: var(--text-main); }
-.streak-flame { display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-weight: bold; font-size: 0.85rem; }
+
+/* Left column: icon circle + name/category/streak text stack. */
+.habit-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 15px; }
+.habit-details { display: flex; flex-direction: column; justify-content: center; gap: 6px; flex: 1; min-width: 0; }
+.habit-name { font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+.habit-meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; }
+
+.habit-category-badge { background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: fit-content; max-width: 120px; flex: 0 0 auto; display: inline-block; line-height: 1; }
+
+.streak-flame { display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-weight: bold; font-size: 0.85rem; flex: 0 0 auto; }
+.streak-flame .ui-icon { width: 14px; height: 14px; }
+.streak-flame span { font-variant-numeric: tabular-nums; }
 .streak-flame.active { color: #f97316; text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3); }
+/* Slightly larger variant used in the "top streaks" mini pills. */
+.streak-flame.lg { font-size: 0.95rem; }
+
+.stat-icon.mini { width: 32px; height: 32px; }
 
 .picker-grid { display: flex; gap: 12px; margin-top: 5px; }
 .color-option { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }

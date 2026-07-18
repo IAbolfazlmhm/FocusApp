@@ -1,4 +1,4 @@
-import { setupTabs } from './js/ui-utils.js';
+import { setupTabs, setupModalAccessibility } from './js/ui-utils.js';
 import { loadSettings, setupSettingsEvents, applySettingsToTimer } from './js/settings.js';
 import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from './js/timer.js';
 import { renderFilters, renderTasks, initConfirmModal, setupTaskEvents } from './js/tasks.js';
@@ -30,6 +30,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // 5. UI & Navigation
     setupTabs();
+    setupModalAccessibility();
     setupGlobalShortcuts();
 });
 
@@ -50,14 +51,18 @@ function setupGlobalShortcuts() {
             toggleTimer(); 
         }
         
-        // Escape to close any open modals
+        // Escape to close any open modals.
+        // FIX: this used to hardcode 4 modal IDs, but index.html has more
+        // than that (categories-modal, custom-range-modal,
+        // progress-settings-modal, daily-report-modal, delete-habit-modal,
+        // quick-add-modal, etc.) — any modal not in that list was stuck
+        // open until its own close button was clicked. Querying every
+        // element with the shared .modal-overlay class means a newly added
+        // modal gets Escape-to-close for free, with nothing to remember to
+        // update here.
         if (event.code === 'Escape') {
-            const modalIds = ['settings-modal', 'tags-modal', 'habit-modal', 'edit-tag-modal'];
-            modalIds.forEach(id => {
-                const modal = document.getElementById(id);
-                if (modal && modal.classList.contains('show')) {
-                    modal.classList.remove('show');
-                }
+            document.querySelectorAll('.modal-overlay.show').forEach(modal => {
+                modal.classList.remove('show');
             });
         }
     });

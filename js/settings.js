@@ -8,6 +8,7 @@ import {
 } from './timer.js';
 
 import { showToast } from './ui-utils.js';
+import { readJSON, writeJSON, readRaw } from './storage.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -83,16 +84,8 @@ export function applySettingsToTimer() {
 }
 
 export function loadSettings() {
-  const savedSettings = localStorage.getItem('focusSettings');
-  if (savedSettings) {
-    let settings;
-    try {
-      settings = JSON.parse(savedSettings);
-    } catch (err) {
-      console.warn('Corrupted focusSettings in localStorage, ignoring and using defaults.', err);
-      return;
-    }
-    
+  const settings = readJSON('focusSettings', null);
+  if (settings) {
     // Helper to visually update the custom display text
     const syncDisplay = (inputId, displayId, dropdownId) => {
         const input = document.getElementById(inputId);
@@ -158,7 +151,7 @@ export function saveSettings() {
     darkMode: document.getElementById('dark-mode-toggle') ? document.getElementById('dark-mode-toggle').checked : false,
     haptics: document.getElementById('sound-toggle') ? document.getElementById('sound-toggle').checked : true
   };
-  localStorage.setItem('focusSettings', JSON.stringify(settings));
+  writeJSON('focusSettings', settings);
 }
 
 export function setupSettingsEvents() {
@@ -182,13 +175,9 @@ export function setupSettingsEvents() {
         exportDataBtn.addEventListener('click', () => {
             const data = {};
             DATA_KEYS.forEach(key => {
-                const raw = localStorage.getItem(key);
-                if (raw === null) return;
-                try {
-                    data[key] = JSON.parse(raw);
-                } catch (err) {
-                    console.warn(`Skipping corrupted key "${key}" during export.`, err);
-                }
+                if (localStorage.getItem(key) === null) return;
+                const value = readJSON(key, undefined);
+                if (value !== undefined) data[key] = value;
             });
 
             const exportBundle = {
@@ -245,7 +234,7 @@ export function setupSettingsEvents() {
                 let importedCount = 0;
                 DATA_KEYS.forEach(key => {
                     if (Object.prototype.hasOwnProperty.call(payload, key)) {
-                        localStorage.setItem(key, JSON.stringify(payload[key]));
+                        writeJSON(key, payload[key]);
                         importedCount++;
                     }
                 });
@@ -302,13 +291,7 @@ export function setupSettingsEvents() {
           // here, which meant toggling something unrelated like dark mode
           // or the notification sound would wipe an in-progress session
           // (reset time left, phase, and completed session count to zero).
-          let previous = null;
-          try {
-            const raw = localStorage.getItem('focusSettings');
-            previous = raw ? JSON.parse(raw) : null;
-          } catch (err) {
-            console.warn('Corrupted focusSettings when diffing for timer reset, treating as changed.', err);
-          }
+          const previous = readJSON('focusSettings', null);
 
           saveSettings(); 
 

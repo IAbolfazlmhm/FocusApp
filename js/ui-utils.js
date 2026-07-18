@@ -1,4 +1,5 @@
 import { playUI } from './audio.js';
+import { readRaw, writeRaw } from './storage.js';
 
 // ==========================================
 // SECURITY: HTML ESCAPING
@@ -93,7 +94,7 @@ export function setupTabs() {
   window.addEventListener('load', () => {
     document.body.classList.remove('preload');
     
-    const savedTabIndex = localStorage.getItem('focusActiveTab') || 0;
+    const savedTabIndex = readRaw('focusActiveTab', 0);
     
     if (tabs[savedTabIndex]) {
         setTimeout(() => {
@@ -106,7 +107,7 @@ export function setupTabs() {
     tab.addEventListener('click', () => { 
       playUI('click');
       
-      localStorage.setItem('focusActiveTab', index);
+      writeRaw('focusActiveTab', index);
       document.dispatchEvent(new Event('tabChanged'));
       
       tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); }); 
@@ -162,5 +163,78 @@ export function setupTabs() {
   window.addEventListener('resize', () => {
      const activeTab = document.querySelector('.tab.active');
      if (activeTab) updateBubble(activeTab);
+  });
+}
+
+// ==========================================
+// MODAL ACCESSIBILITY (FOCUS TRAP + FOCUS RETURN)
+// ==========================================
+// FIX: modals are opened from ~15 different call sites across tasks.js,
+// habits.js, progress.js, and settings.js, each just doing
+// `someModal.classList.add('show')`. Rather than editing every one of
+// those sites (and every future one) to add focus handling, this watches
+// the whole document for the .show class appearing/disappearing on any
+// .modal-overlay and reacts generically:
+//  - on open: remembers what had focus, moves focus into the modal, and
+//    traps Tab/Shift+Tab inside it so keyboard users can't tab out to the
+//    page underneath
+//  - on close: returns focus to whatever triggered the modal
+// This covers every modal, including ones added later, with no per-modal
+// wiring required.
+let lastFocusedBeforeModal = null;
+
+function getFocusableElements(container) {
+  return Array.from(
+    container.querySelectorAll(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )
+  ).filter(el => el.offsetParent !== null);
+}
+
+function trapTabKey(event, modal) {
+  if (event.key !== 'Tab') return;
+  const focusable = getFocusableElements(modal);
+  if (focusable.length === 0) return;
+
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+export function setupModalAccessibility() {
+  const activeTraps = new WeakMap();
+
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    const observer = new MutationObserver(() => {
+      const isOpen = modal.classList.contains('show');
+
+      if (isOpen && !activeTraps.has(modal)) {
+        lastFocusedBeforeModal = document.activeElement;
+
+        const focusable = getFocusableElements(modal);
+        if (focusable.length > 0) focusable[0].focus();
+
+        const handler = (event) => trapTabKey(event, modal);
+        modal.addEventListener('keydown', handler);
+        activeTraps.set(modal, handler);
+      } else if (!isOpen && activeTraps.has(modal)) {
+        modal.removeEventListener('keydown', activeTraps.get(modal));
+        activeTraps.delete(modal);
+
+        if (lastFocusedBeforeModal && document.body.contains(lastFocusedBeforeModal)) {
+          lastFocusedBeforeModal.focus();
+        }
+        lastFocusedBeforeModal = null;
+      }
+    });
+
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
   });
 }

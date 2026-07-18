@@ -66,11 +66,35 @@
 /* --- TASK ITEMS (CARDS) --- */
 .task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; width: 100%; margin-bottom: 12px; border: 2px solid var(--glass-border); border-radius: 50px; background: var(--glass-bg); backdrop-filter: blur(10px); transition: all 0.3s ease; order: 2; min-height: 76px; }
 .task-item:hover { border-color: #8ecae6; box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2); }
-.task-info { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; flex: 1; min-width: 0; }
-.task-info span:first-child { font-weight: 500; color: var(--text-main); word-break: break-word; white-space: normal; width: 100%; }
-.task-time-badge { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; background: transparent; padding: 0; margin-top: 4px; display: flex; align-items: center; opacity: 0.8; }
 
-.task-actions { display: flex; gap: 6px; opacity: 0.6; transition: opacity 0.2s; }
+/* Left side of a task card: name on top, tag + time badge below. This used
+   to be ".task-info" with a conflicting CSS rule (align-items:flex-start,
+   gap:5px) that every task-item template silently overrode via inline
+   styles (flex-direction:column, gap:8px) — the class rule never actually
+   took effect, it just sat there as dead/misleading CSS. */
+.task-info { display: flex; flex-direction: column; justify-content: center; gap: 8px; flex: 1; min-width: 0; padding-right: 15px; }
+.task-name { font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+
+/* Row holding the tag pill + time badge side by side. */
+.task-tag-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+
+/* Per-tag color (background/text/border) is the one thing that's genuinely
+   per-instance data, not a fixed style — set via CSS custom properties
+   from JS (--tag-bg/--tag-color/--tag-border) instead of a full inline
+   style block, with sane defaults if a tag has no custom color. */
+.task-tag {
+  padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  width: fit-content; max-width: 120px; flex: 0 0 auto;
+  display: inline-block; height: max-content; line-height: 1;
+  background: var(--tag-bg, var(--glass-bg));
+  color: var(--tag-color, var(--text-muted));
+  border: 1px solid var(--tag-border, var(--glass-border));
+}
+
+.task-time-badge { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; white-space: nowrap; flex: 0 0 auto; display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+
+.task-actions { display: flex; gap: 6px; opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0; }
 .task-item:hover .task-actions { opacity: 1; }
 .done-btn, .remove-btn, .focus-btn, .edit-tag-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--btn-bg); color: var(--text-muted); cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
 .done-btn:hover { background: var(--success-color); color: white; border-color: var(--success-color); transform: translateY(-2px); }
@@ -81,7 +105,7 @@
 
 .task-item.active-focus { order: 1; border-color: var(--text-main); background-color: var(--glass-bg); border-left: 6px solid var(--text-main); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
 .task-item.completed { background-color: var(--btn-bg); opacity: 0.55; border-color: var(--glass-border); }
-.task-item.completed .task-info span { text-decoration: none; }
+.task-item.completed .task-name { text-decoration: none; }
 body.phase-work .task-item.completed { background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.15); }
 body.phase-short .task-item.completed { background: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.15); }
 body.phase-long .task-item.completed { background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); }
@@ -151,7 +175,6 @@ body.phase-stopwatch .task-item:hover { border-color: #8b5cf6; box-shadow: 0 4px
 /* --- DARK MODE UI FIXES --- */
 body[data-theme="dark"] .progress-ring-track { stroke: rgba(255, 255, 255, 0.05); }
 body[data-theme="dark"] #current-phase { background: rgba(30, 41, 59, 0.8); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-body[data-theme="dark"] .task-item .task-info span:not([class]) { color: #f8fafc !important; }
 
 body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn { background-color: #fb7185; color: #0f172a; border: none; }
 body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
