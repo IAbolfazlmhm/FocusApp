@@ -6,7 +6,7 @@ import {
 
 import { playAlarm } from './audio.js';
 import { showToast, icons } from './ui-utils.js';
-import { readJSON, writeJSON, readRaw } from './storage.js';
+import { readJSON, writeJSON, readRaw, remove } from './storage.js';
 
 // Task-name length shown in the browser tab title, kept short since tab
 // width is limited. Centralized as a constant so it's easy to find/tune
@@ -81,7 +81,7 @@ export function loadTimerState() {
 
   // Invalidate state if it's older than 4 hours
   if (Date.now() - state.lastSaved > FOUR_HOURS) { 
-    localStorage.removeItem('focusTimerState'); 
+    remove('focusTimerState'); 
     return false; 
   }
   

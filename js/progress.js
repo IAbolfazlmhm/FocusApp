@@ -1,5 +1,5 @@
 import { formatTaskTime, setTaskDate } from './tasks.js';
-import { setHabitDate, isHabitActiveOnDate } from './habits.js';
+import { setHabitDate, isHabitActiveOnDate, getDateKey } from './habits.js';
 import { showToast, escapeHTML } from './ui-utils.js';
 import { readJSON, readRaw } from './storage.js';
 
@@ -64,11 +64,11 @@ function getLocalDateStr(dateObj) {
     return `${year}-${month}-${day}`; 
 }
 
-// Parser 2: For Habits (Synced with day.js to match habits.js exactly)
-function getHabitLogKey(dateObj) {
-    // BUG FIX: Completely removes the buggy .toISOString() UTC shift
-    return dayjs(dateObj).format('YYYY-MM-DD');
-}
+// Parser 2: For Habits (delegates to habits.js's getDateKey so both files
+// can never drift apart on how a "day" is defined). This used to be its
+// own `dayjs(dateObj).format('YYYY-MM-DD')` call — removed along with the
+// dayjs CDN dependency; see the FIX note on getDateKey() in habits.js.
+const getHabitLogKey = getDateKey;
 
 // ==========================================
 // CORE RENDER FUNCTION

@@ -9,6 +9,7 @@ import {
 
 import { showToast } from './ui-utils.js';
 import { readJSON, writeJSON, readRaw } from './storage.js';
+import { customConfirm } from './tasks.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -175,7 +176,10 @@ export function setupSettingsEvents() {
         exportDataBtn.addEventListener('click', () => {
             const data = {};
             DATA_KEYS.forEach(key => {
-                if (localStorage.getItem(key) === null) return;
+                // readJSON already returns the `undefined` fallback for a
+                // missing key, so there's no need for a separate direct
+                // localStorage.getItem() check first — this keeps every
+                // storage read in the app routed through storage.js.
                 const value = readJSON(key, undefined);
                 if (value !== undefined) data[key] = value;
             });
@@ -226,30 +230,35 @@ export function setupSettingsEvents() {
                     return;
                 }
 
-                const confirmed = confirm(
-                    'This will REPLACE your current tasks, habits, and settings with the contents of this file. This cannot be undone. Continue?'
-                );
-                if (!confirmed) return;
+                // FIX: this used to call the browser's native confirm() —
+                // a jarring, unstyled dialog in an app that otherwise has
+                // its own themed confirm modal (customConfirm, already
+                // used everywhere else for deletions). Swapped in here so
+                // import behaves consistently with the rest of the app.
+                customConfirm(
+                    'This will REPLACE your current tasks, habits, and settings with the contents of this file. This cannot be undone. Continue?',
+                    () => {
+                        let importedCount = 0;
+                        DATA_KEYS.forEach(key => {
+                            if (Object.prototype.hasOwnProperty.call(payload, key)) {
+                                writeJSON(key, payload[key]);
+                                importedCount++;
+                            }
+                        });
 
-                let importedCount = 0;
-                DATA_KEYS.forEach(key => {
-                    if (Object.prototype.hasOwnProperty.call(payload, key)) {
-                        writeJSON(key, payload[key]);
-                        importedCount++;
+                        if (importedCount === 0) {
+                            showToast('No recognizable data found in that file.', 'warning');
+                            return;
+                        }
+
+                        showToast('Data imported — reloading...', 'success');
+                        // A reload is the simplest reliable way to get every module
+                        // (tasks, habits, timer, progress) to pick up the newly
+                        // written localStorage instead of trying to patch each
+                        // module's already-initialized in-memory state live.
+                        setTimeout(() => location.reload(), 800);
                     }
-                });
-
-                if (importedCount === 0) {
-                    showToast('No recognizable data found in that file.', 'warning');
-                    return;
-                }
-
-                showToast('Data imported — reloading...', 'success');
-                // A reload is the simplest reliable way to get every module
-                // (tasks, habits, timer, progress) to pick up the newly
-                // written localStorage instead of trying to patch each
-                // module's already-initialized in-memory state live.
-                setTimeout(() => location.reload(), 800);
+                );
             };
             reader.readAsText(file);
         });

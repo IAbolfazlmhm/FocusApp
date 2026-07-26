@@ -4,9 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Focus App</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/pomodoro.css">
+  <link rel="stylesheet" href="css/habits.css">
+  <link rel="stylesheet" href="css/progress.css">
   <link rel="icon" href="Stopwatch.png" type="image/x-icon">
-  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 </head>
 <body class="preload">
 
@@ -78,7 +83,7 @@
         </div>
 
         <div class="timer-circle">
-          <svg class="progress-ring" width="250" height="250">
+          <svg class="progress-ring" viewBox="0 0 250 250" width="250" height="250">
             <circle class="progress-ring-track" stroke-width="8" fill="transparent" r="110" cx="125" cy="125"/>
             <circle class="progress-ring-circle" stroke-width="10" fill="transparent" r="110" cx="125" cy="125"/>
           </svg>
@@ -190,7 +195,7 @@
 
         <div class="progress-hero tight">
             <div class="timer-circle mini">
-                <svg class="progress-ring" width="180" height="180" id="habit-overview-ring">
+                <svg class="progress-ring" viewBox="0 0 180 180" width="180" height="180" id="habit-overview-ring">
                   <circle class="progress-ring-track" cx="90" cy="90" r="80" fill="transparent" stroke-width="12"/>
                   <circle class="progress-ring-circle overview-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #10b981; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
                 </svg>
@@ -293,7 +298,7 @@
 
             <div class="progress-hero tight">
                 <div class="timer-circle mini">
-                    <svg class="progress-ring" width="180" height="180">
+                    <svg class="progress-ring" viewBox="0 0 180 180" width="180" height="180">
                         <circle class="progress-ring-track" cx="90" cy="90" r="80" fill="transparent" stroke-width="12"/>
                         <circle class="progress-ring-circle" id="hero-consistency-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #8b5cf6; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
                     </svg>
@@ -577,7 +582,7 @@
 
             <div class="setting-group" id="custom-days-picker" style="display: none; margin-bottom: 20px;">
                 <label>Select Days</label>
-                <div class="picker-grid" style="justify-content: space-between;">
+                <div class="picker-grid" id="custom-days-grid">
                     <div class="day-option" data-day="1">M</div>
                     <div class="day-option" data-day="2">T</div>
                     <div class="day-option" data-day="3">W</div>

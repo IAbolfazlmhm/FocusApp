@@ -85,9 +85,23 @@ body.phase-habits .theme-circle-btn:hover { background-color: #10b981; color: #f
    deliberately excluded here — including it caused two same-specificity
    rules to fight over it, and the older, non-themed one was silently
    winning since it appears later in the file. Firefox uses
-   scrollbar-color/width; WebKit browsers need the ::-webkit- pseudo-elements. */
+   scrollbar-color/width; WebKit browsers need the ::-webkit- pseudo-elements.
+
+   The thumb is transparent until the modal is hovered/focused-within, so
+   it stays out of the way as an "always-on" bar and only appears when
+   someone is actually about to scroll — closer to the fading overlay
+   scrollbars native apps use than a permanently-visible bar.
+   (An earlier version of this also added a mask-image fade to the whole
+   modal's top/bottom edge — removed, since that faded the modal's actual
+   content/title on every modal, including ones that don't even scroll,
+   which was never the intent. Only the scrollbar itself is styled here.) */
 .modal-content {
   scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+.modal-content:hover,
+.modal-content:focus-within {
   scrollbar-color: var(--theme-color, #3b82f6) transparent;
 }
 .modal-content::-webkit-scrollbar {
@@ -97,8 +111,13 @@ body.phase-habits .theme-circle-btn:hover { background-color: #10b981; color: #f
   background: transparent;
 }
 .modal-content::-webkit-scrollbar-thumb {
-  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 50%, transparent);
+  background-color: transparent;
   border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+.modal-content:hover::-webkit-scrollbar-thumb,
+.modal-content:focus-within::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 50%, transparent);
 }
 .modal-content::-webkit-scrollbar-thumb:hover {
   background-color: var(--theme-color, #3b82f6);
@@ -155,6 +174,46 @@ body[data-theme="dark"] .dropdown-item.active-sort { color: #60a5fa; background:
 .tag-chip.deletable:hover { background: #fee2e2; border-color: var(--danger-color); color: var(--danger-color); text-decoration: line-through; }
 .tag-chip.selectable:hover { background: #fef3c7; border-color: #f59e0b; color: #d97706; transform: scale(1.05); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2); }
 
+/* Tag color picker (Manage Tags modal) */
+.tag-chip.manageable { gap: 8px; padding: 6px 10px 6px 6px; }
+.tag-chip.manageable .tag-chip-label { pointer-events: none; }
+.tag-chip.manageable:hover .tag-chip-label { text-decoration: line-through; }
+.tag-color-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+}
+/* Native color inputs render a swatch inside padding by default in
+   Chromium/WebKit — strip that so the circular border above is the only
+   visible edge and the color fills the whole circle. */
+.tag-color-swatch::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
+.tag-color-swatch::-webkit-color-swatch { border: none; border-radius: 50%; }
+.tag-color-swatch::-moz-color-swatch { border: none; border-radius: 50%; }
+.tag-color-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.tag-color-reset:hover { background: rgba(0, 0, 0, 0.15); color: var(--text-main); }
+
 /* --- MODAL ROW FIXES --- */
 .add-tag-row { display: flex; gap: 10px; margin-bottom: 10px; }
 #confirm-message { color: var(--text-main) !important; font-size: 1.1rem; }
@@ -177,7 +236,15 @@ body[data-theme="dark"] .cancel-btn:hover { background: rgba(255, 255, 255, 0.1)
    Added to replace one-off inline `style="..."` attributes that were
    repeated across index.html. Keeping these here (rather than inline)
    means a change to spacing/sizing only needs to happen in one place. */
-.flex-1 { flex: 1; }
+/* FIX: flex items default to min-width:auto, not 0 — for a plain flex
+   item like the Export/Import buttons that's harmless, but for a text
+   <input> (three places use flex-1 exactly this way: the "add new
+   tag"/"add new category" rows, each next to an Add button) the browser's
+   own intrinsic minimum content width for an input wins over flex-shrink,
+   so the input refused to shrink past ~190-230px on a narrow phone —
+   pushing its neighboring button, and the whole modal, into horizontal
+   overflow. min-width:0 lets it actually shrink to fit. */
+.flex-1 { flex: 1; min-width: 0; }
 
 /* Shared "nothing here" message (used by both the task list and habit
    list when there's nothing to show for the selected day/filter) — was

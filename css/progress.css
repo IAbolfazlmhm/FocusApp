@@ -16,8 +16,13 @@ body.phase-progress .tab.active { color: white; }
 body.phase-progress .dropdown-item:hover { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; transform: translateX(3px); }
 body.phase-progress .dropdown-item.active-sort { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
 
-body[data-theme="dark"] body.phase-progress .dropdown-item:hover { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
-body[data-theme="dark"] body.phase-progress .dropdown-item.active-sort { color: #a78bfa; background: rgba(167, 139, 250, 0.15); }
+/* FIX: these two rules had "body[data-theme=\"dark\"] body.phase-progress"
+   — a body element nested inside another body element, which can never
+   exist in a real DOM, so both rules were 100% dead: the purple dropdown
+   hover/active-sort colors silently never applied in dark mode, always
+   falling back to the light-mode color above them instead. */
+body[data-theme="dark"].phase-progress .dropdown-item:hover { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
+body[data-theme="dark"].phase-progress .dropdown-item.active-sort { color: #a78bfa; background: rgba(167, 139, 250, 0.15); }
 
 /* --- LAYOUT & SIZING (Scrollbar fix) --- */
 .progress-hero { display: flex; justify-content: center; width: 100%; margin-bottom: 10px; }

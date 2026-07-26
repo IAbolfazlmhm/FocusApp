@@ -20,7 +20,13 @@ body[data-theme="dark"] {
   /* 🌙 Dark Mode Overrides */
   --bg-main: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   --glass-bg: rgba(30, 41, 59, 0.6);
-  --modal-bg: rgba(30, 41, 59, 0.95);
+  /* FIX: this was 0.95 — almost fully opaque, so `backdrop-filter: blur()`
+     on .modal-content had nothing translucent to blur; every modal in
+     dark mode rendered as a flat solid card instead of the glass look
+     light mode gets (--modal-bg there is 0.65). Matched to a similar
+     translucency ratio as light mode, just darker, so the blur is
+     visible again while text (near-white on dark) stays easily legible. */
+  --modal-bg: rgba(30, 41, 59, 0.55);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   --text-main: #f8fafc;

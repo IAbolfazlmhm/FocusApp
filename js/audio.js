@@ -2,27 +2,46 @@
 // AUDIO ENGINE MODULE
 // ==========================================
 
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// Created lazily on first use (see getAudioCtx below), not at module load —
+// creating an AudioContext before any user gesture has happened triggers a
+// harmless-but-noisy "AudioContext was not allowed to start" warning in the
+// console on every page load, in every browser that enforces autoplay
+// policies. Deferring construction to the first actual click/keypress means
+// there's always been a user gesture by the time it's created.
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
 // Keep track of when each sound was last played
 const lastPlayedTimes = {};
 
 export function playUI(type) {
   const soundToggle = document.getElementById('sound-toggle');
   if (soundToggle && !soundToggle.checked) return;
-  
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  
-  const oscillator = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-  oscillator.connect(gainNode);
-  gainNode.connect(audioCtx.destination);
-  const now = audioCtx.currentTime;
 
+  // FIX: this debounce check used to run AFTER creating and wiring up the
+  // oscillator/gainNode below, so a rapid double-click (or fast repeated
+  // keyboard input) allocated and connected a full pair of Web Audio nodes
+  // for every ignored duplicate call, only to throw them away unused.
+  // Checking first avoids that pointless node creation entirely.
   const nowClicked = Date.now();
   if (lastPlayedTimes[type] && (nowClicked - lastPlayedTimes[type] < 50)) {
     return; // It hasn't been 50ms yet, ignore this duplicate request!
   }
   lastPlayedTimes[type] = nowClicked;
+
+  const audioCtx = getAudioCtx();
+
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  const now = audioCtx.currentTime;
   
   if (type === 'click') {
     oscillator.type = 'sine'; 
@@ -52,8 +71,8 @@ export function playUI(type) {
 }
 
 export function playAlarm(type) {
-  if (audioCtx.state === 'suspended') audioCtx.resume();
   if (type === 'mute') return;
+  const audioCtx = getAudioCtx();
   
   const now = audioCtx.currentTime;
   

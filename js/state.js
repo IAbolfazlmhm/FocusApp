@@ -26,6 +26,11 @@ export let completedSessions = 0;
 export let tasks = readJSON('focusTasks', [], 'array');
 export let focusedTaskId = readJSON('focusedTaskId', null);
 export let savedTags = readJSON('focusTagsList', ['Work', 'Study', 'Personal'], 'array');
+// Custom user-picked colors, keyed by tag name (e.g. { "Work": "#3b82f6" }).
+// A tag with no entry here just falls back to its deterministic hash color
+// (see getTagColor in ui-utils.js) — this only needs to store the tags
+// someone has actually chosen to override.
+export let tagColors = readJSON('focusTagColors', {});
 export let currentFilter = 'all';
 export let currentSort = 'newest';
 export let sortOrder = 'desc';
@@ -49,6 +54,7 @@ export function setCompletedSessions(val) { completedSessions = val; }
 export function setTasks(val) { tasks = val; }
 export function setFocusedTaskId(val) { focusedTaskId = val; }
 export function setSavedTags(val) { savedTags = val; }
+export function setTagColors(val) { tagColors = val; }
 export function setCurrentFilter(val) { currentFilter = val; }
 export function setCurrentSort(val) { currentSort = val; }
 export function setSortOrder(val) { sortOrder = val; }

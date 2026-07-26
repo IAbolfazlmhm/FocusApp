@@ -30,7 +30,33 @@
 
 .stat-icon.mini { width: 32px; height: 32px; }
 
-.picker-grid { display: flex; gap: 12px; margin-top: 5px; }
+/* FIX: no flex-wrap here before — on a narrow phone, the 7-circle custom
+   day-of-week picker (justify-content: space-between, no wrap) had
+   nowhere to go but shrink each circle via the default flex-shrink,
+   squeezing already-small 32px tap targets down further on the
+   smallest screens. Wrapping instead keeps every swatch/day-circle at a
+   comfortable, consistent tap size regardless of viewport width. */
+.picker-grid { display: flex; gap: 12px; margin-top: 5px; flex-wrap: wrap; }
+/* Was an inline style="justify-content: space-between" on this specific
+   grid in index.html — moved here so the mobile override below (which
+   centers it once it wraps to two rows) can actually take effect; an
+   inline style attribute always wins over an external stylesheet rule,
+   media query or not. */
+#custom-days-grid { justify-content: space-between; }
+
+/* The 7-day picker's justify-content:space-between above only reads well
+   as a single full row, which is what it stays on wider screens. Once
+   .picker-grid's flex-wrap sends the overflow days to a second row on a
+   narrow phone, space-between stretches that leftover couple of days to
+   the far edges instead of grouping them together — centering reads
+   better once it's two rows. (This has to live after the rule above,
+   not just inside a media query in another file — same #id specificity
+   means whichever rule is later in the loaded stylesheet order wins
+   regardless of a media query matching, and habits.css loads after
+   layout.css.) */
+@media (max-width: 420px) {
+  #custom-days-grid { justify-content: center; }
+}
 .color-option { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 .color-option:hover { transform: scale(1.1); }
 .color-option.selected { border: 3px solid var(--text-main); transform: scale(1.15); }

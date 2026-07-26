@@ -1,6 +1,6 @@
 import { 
-  tasks, focusedTaskId, savedTags, currentFilter, currentSort, sortOrder,
-  setTasks, setFocusedTaskId, setSavedTags, setCurrentFilter, setCurrentSort, setSortOrder 
+  tasks, focusedTaskId, savedTags, tagColors, currentFilter, currentSort, sortOrder,
+  setTasks, setFocusedTaskId, setSavedTags, setTagColors, setCurrentFilter, setCurrentSort, setSortOrder 
 } from './state.js';
 import { writeJSON } from './storage.js';
 
@@ -8,13 +8,12 @@ export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
 import { playUI } from './audio.js';
-import { showToast, icons, escapeHTML } from './ui-utils.js';
+import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea } from './ui-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
 // ==========================================
 const taskInput = document.querySelector('.task-input');
-const tagInput = document.getElementById('new-task-tag');
 const addBtn = document.querySelector('.add-btn');
 const taskListContainer = document.querySelector('.task-list-container');
 const tasksSection = document.querySelector('.tasks-section');
@@ -30,9 +29,6 @@ const manageTagsBtn = document.getElementById('manage-tags-btn');
 // Modal Elements
 const confirmModal = document.getElementById('confirm-modal');
 const confirmMsg = document.getElementById('confirm-message');
-const editTagModal = document.getElementById('edit-tag-modal');
-const editTagList = document.getElementById('edit-tag-list');
-const closeEditTagBtn = document.getElementById('close-edit-tag');
 
 let confirmCallback = null;
 let editingTaskId = null;
@@ -47,6 +43,7 @@ export function saveTasks() {
   writeJSON('focusTasks', tasks);
   writeJSON('focusedTaskId', focusedTaskId);
   writeJSON('focusTagsList', savedTags);
+  writeJSON('focusTagColors', tagColors);
 }
 
 export function formatTaskTime(totalSeconds) { 
@@ -54,17 +51,6 @@ export function formatTaskTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60); 
   const s = totalSeconds % 60; 
   return `${icons.clock} ${m}m ${s}s`; 
-}
-
-function getRelativeDate(timestamp) {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  
-  if (date.toDateString() === now.toDateString()) return 'Today';
-  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-  return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
 // ==========================================
@@ -151,7 +137,17 @@ function updateFilterBubble() {
   if (activeBtn && bubble) {
     bubble.style.width = `${activeBtn.offsetWidth}px`;
     bubble.style.left = `${activeBtn.offsetLeft}px`;
-    activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    // FIX: this used to be activeBtn.scrollIntoView({ block: 'nearest', ... }).
+    // filterListEl only scrolls horizontally (overflow-x: auto), so
+    // scrollIntoView's vertical "nearest" component had nowhere to resolve
+    // except the page itself — if this row wasn't fully inside the
+    // viewport (routine on mobile, where the timer panel above it can
+    // push it near/past the fold), the browser would scroll the whole
+    // page down to satisfy it. That ran on every load/refresh, since
+    // renderFilters() (which calls this) runs on initial setup, not just
+    // on click. Scrolling filterListEl directly keeps this entirely
+    // inside its own horizontal strip and can never move the page.
+    centerButtonInScrollArea(filterListEl, activeBtn);
   }
 }
 
@@ -206,14 +202,13 @@ export function renderTasks() {
       // Rock-Solid Tag Badge (Now with Max-Width and Ellipsis Truncation!)
         let tagHTML = '';
         if (task.tag) {
-            if (typeof window.getTagObj === 'function') {
-                const tagObj = window.getTagObj(task.tag);
-                const bg = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.15) : 'transparent';
-                const border = window.hexToRgba ? window.hexToRgba(tagObj.color, 0.3) : 'transparent';
-                tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}" style="--tag-bg:${bg}; --tag-color:${tagObj.color}; --tag-border:${border};">#${escapeHTML(task.tag)}</span>`;
-            } else {
-                tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}">#${escapeHTML(task.tag)}</span>`;
-            }
+            // Tags now get a color from one of two places: a color the user
+            // explicitly picked in "Manage Tags" (tagColors, set below in
+            // renderTagsManagement), or — if they never bothered — a
+            // deterministic hash color so it's still visually consistent
+            // without requiring any setup.
+            const tagColor = getTagColor(task.tag, tagColors[task.tag]);
+            tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}" style="--tag-color:${tagColor.solid}; --tag-bg:${tagColor.bg}; --tag-border:${tagColor.border};">#${escapeHTML(task.tag)}</span>`;
         }
 
         let actionButtons = '';
@@ -233,6 +228,14 @@ export function renderTasks() {
 
         taskDiv.style.cursor = 'pointer'; 
         taskDiv.dataset.id = task.id; 
+        // FIX: the card opens an edit modal on click, but had no keyboard
+        // equivalent — a keyboard-only user could tab past it and never
+        // reach the edit action at all. tabindex + role="button" + the
+        // Enter/Space handler below (delegated, added once in
+        // setupTaskEvents) makes it behave like a real button.
+        taskDiv.tabIndex = 0;
+        taskDiv.setAttribute('role', 'button');
+        taskDiv.setAttribute('aria-label', `Edit task: ${task.text}`);
 
         // Layout/spacing for this card lives in .task-info, .task-name,
         // .task-tag-row, .task-tag, .task-time-badge (see pomodoro.css) —
@@ -306,8 +309,9 @@ export function addTask() {
   if (!taskInput) return;
   const text = taskInput.value.trim();
   
-  // Use the pending tag from the gear icon, OR the dedicated tag input
-  let tagRaw = pendingQuickTag || (tagInput ? tagInput.value.trim() : '');
+  // Tag comes from the gear icon (quick-tag modal) — the app's only tag
+  // input UI now that the old inline tag field has been removed.
+  const tagRaw = pendingQuickTag || '';
   const tag = tagRaw ? tagRaw.charAt(0).toUpperCase() + tagRaw.slice(1) : null;
 
   if (!text) { 
@@ -323,13 +327,13 @@ export function addTask() {
       advancedBtn.style.borderColor = '';
   }
 
-  if (!text) { 
-    showToast('Please enter a valid task.', 'warning'); 
-    return; 
-  }
-
-  if (tag && !savedTags.includes(tag)) {
-    setSavedTags([...savedTags, tag]);
+  // FIX: compare case-insensitively so "work" typed after "Work" already
+  // exists reuses the existing tag instead of creating a visually
+  // duplicate ("Work" and "WORK" both existing as separate tags).
+  const existingTag = tag ? savedTags.find(t => t.toLowerCase() === tag.toLowerCase()) : null;
+  const finalTag = existingTag || tag;
+  if (finalTag && !existingTag) {
+    setSavedTags([...savedTags, finalTag]);
   }
 
   // Create task for the currently viewed date, but keep the current time for sorting
@@ -338,9 +342,9 @@ export function addTask() {
   taskDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
   setTasks([...tasks, { 
-    id: Date.now(), 
+    id: generateId(), 
     text, 
-    tag, 
+    tag: finalTag, 
     completed: false, 
     timeSpent: 0, 
     timeByDate: {}, 
@@ -413,8 +417,21 @@ export function setupTaskEvents() {
 
             const taskItem = e.target.closest('.task-item');
             if (taskItem) {
-                const id = parseInt(taskItem.dataset.id);
+                const id = taskItem.dataset.id;
                 openEditTaskModal(id);
+            }
+        });
+
+        // Keyboard equivalent of the click handler above, so Tab + Enter/Space
+        // can open the edit modal the same way a mouse click does.
+        taskListContainer.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            if (e.target.closest('button') || e.target.closest('.task-actions')) return;
+
+            const taskItem = e.target.closest('.task-item');
+            if (taskItem) {
+                e.preventDefault();
+                openEditTaskModal(taskItem.dataset.id);
             }
         });
     }
@@ -529,12 +546,6 @@ export function setupTaskEvents() {
     });
   }
   
-  if (tagInput) {
-    tagInput.addEventListener('keypress', e => { 
-      if (e.key === 'Enter') addTask(); 
-    });
-  }
-
   if (manageTagsBtn) {
     manageTagsBtn.addEventListener('click', () => {
       if (tagsModal) tagsModal.classList.add('show');
@@ -567,13 +578,16 @@ export function setupTaskEvents() {
             return;
         }
 
-        if (newTagName && !savedTags.includes(newTagName)) {
+        const alreadyExists = savedTags.some(t => t.toLowerCase() === newTagName.toLowerCase());
+        if (!alreadyExists) {
             setSavedTags([...savedTags, newTagName.charAt(0).toUpperCase() + newTagName.slice(1)]);
             saveTasks();
             renderTagsManagement();
             renderFilters();
             manageNewTagInput.value = '';
             showToast('Tag added', 'success');
+        } else {
+            showToast('That tag already exists.', 'warning');
         }
     });
   }
@@ -584,35 +598,6 @@ export function setupTaskEvents() {
           toggleFocus(e.detail.id);
       }
   });
-
-  // --- ADD TO BOTTOM OF setupTaskEvents() in js/tasks.js ---
-  const customTagDropdown = document.getElementById('custom-tag-dropdown');
-  
-  function showCustomDropdown() {
-    if (!tagInput || !customTagDropdown) return;
-    const val = tagInput.value.toLowerCase().trim();
-    
-    const filteredTags = savedTags.filter(t => t.toLowerCase().includes(val));
-    
-    if (filteredTags.length === 0) {
-        customTagDropdown.classList.remove('show');
-        return;
-    }
-    
-    customTagDropdown.innerHTML = filteredTags.map(tag => 
-        `<div class="dropdown-item">#${escapeHTML(tag)}</div>`
-    ).join('');
-    
-    customTagDropdown.classList.add('show');
-    
-    customTagDropdown.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', () => {
-            tagInput.value = item.textContent.replace('#', ''); 
-            customTagDropdown.classList.remove('show');
-            if (taskInput) taskInput.focus(); 
-        });
-    });
-  }
 
   // --- GEAR ICON (QUICK TAG MODAL) LOGIC ---
   const advancedTaskBtn = document.getElementById('advanced-task-btn');
@@ -680,8 +665,9 @@ export function setupTaskEvents() {
       }
       
       if (newTagRaw) {
-          const newTag = newTagRaw.charAt(0).toUpperCase() + newTagRaw.slice(1);
-          if (!savedTags.includes(newTag)) {
+          const existing = savedTags.find(t => t.toLowerCase() === newTagRaw.toLowerCase());
+          const newTag = existing || (newTagRaw.charAt(0).toUpperCase() + newTagRaw.slice(1));
+          if (!existing) {
               setSavedTags([...savedTags, newTag]);
               saveTasks();
               renderFilters(); 
@@ -829,9 +815,58 @@ function renderTagsManagement() {
   
   savedTags.forEach(tag => {
     const chip = document.createElement('div');
-    chip.className = 'tag-chip deletable';
-    chip.textContent = `#${tag}`;
-    
+    chip.className = 'tag-chip deletable manageable';
+
+    const currentColor = getTagColor(tag, tagColors[tag]);
+
+    // Native <input type="color"> — small, no extra CSS component to
+    // build, works on every platform's own color picker UI, and is fully
+    // keyboard/screen-reader operable out of the box.
+    const swatch = document.createElement('input');
+    swatch.type = 'color';
+    swatch.className = 'tag-color-swatch';
+    swatch.value = currentColor.hex;
+    swatch.title = `Choose a color for #${tag}`;
+    swatch.setAttribute('aria-label', `Color for tag ${tag}`);
+    swatch.addEventListener('input', (e) => {
+      // Stop this from also triggering the chip's own click→delete handler.
+      e.stopPropagation();
+    });
+    swatch.addEventListener('change', (e) => {
+      setTagColors({ ...tagColors, [tag]: e.target.value });
+      saveTasks();
+      renderTasks();
+      renderTagsManagement();
+    });
+    swatch.addEventListener('click', (e) => e.stopPropagation());
+
+    const label = document.createElement('span');
+    label.className = 'tag-chip-label';
+    label.textContent = `#${tag}`;
+
+    chip.appendChild(swatch);
+    chip.appendChild(label);
+
+    // Only a custom color needs a way back to "no override" — the hash
+    // default has nothing to reset away from.
+    if (tagColors[tag]) {
+      const resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.className = 'tag-color-reset';
+      resetBtn.title = `Reset #${tag} to its default color`;
+      resetBtn.setAttribute('aria-label', `Reset color for tag ${tag}`);
+      resetBtn.innerHTML = icons.reset || '↺';
+      resetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const { [tag]: _removed, ...rest } = tagColors;
+        setTagColors(rest);
+        saveTasks();
+        renderTasks();
+        renderTagsManagement();
+      });
+      chip.appendChild(resetBtn);
+    }
+
     chip.addEventListener('click', () => {
       customConfirm(`Delete tag "${tag}"?`, () => {
         setSavedTags(savedTags.filter(t => t !== tag));
@@ -842,6 +877,14 @@ function renderTagsManagement() {
 
         if (currentFilter === tag) setCurrentFilter('all');
         
+        // Custom colors are keyed by tag name — clear the override too so
+        // a brand new, unrelated tag with the same name later doesn't
+        // silently inherit an old color from a tag that no longer exists.
+        if (tagColors[tag]) {
+          const { [tag]: _removed, ...rest } = tagColors;
+          setTagColors(rest);
+        }
+
         saveTasks();
         renderTagsManagement();
         renderFilters();

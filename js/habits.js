@@ -4,7 +4,7 @@ import {
 } from './state.js';
 
 import { playUI } from './audio.js';
-import { showToast, escapeHTML } from './ui-utils.js';
+import { showToast, escapeHTML, generateId, centerButtonInScrollArea } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
 import { writeJSON, readRaw } from './storage.js';
 
@@ -28,7 +28,22 @@ export function saveHabitCategories() {
 // ==========================================
 // BULLETPROOF DATE HELPER
 // ==========================================
-export const getDateKey = (dateObj) => dayjs(dateObj).format('YYYY-MM-DD');
+// FIX: this used to be `dayjs(dateObj).format('YYYY-MM-DD')`, pulling in
+// the whole dayjs library (loaded from a CDN <script> tag in index.html)
+// just for local-date formatting. That's a third-party network
+// dependency and a global (`dayjs`) the module relies on implicitly
+// without declaring it — if that CDN request is blocked, slow, or the
+// tag ever gets removed, every habit feature silently breaks with a
+// "dayjs is not defined" error. This does the exact same YYYY-MM-DD
+// local-date formatting timer.js and tasks.js already do elsewhere in
+// the app, with zero dependencies and zero network requests.
+export function getDateKey(dateObj) {
+  const d = new Date(dateObj);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 // ==========================================
 // DOM ELEMENTS
@@ -45,7 +60,6 @@ const saveHabitBtn = document.getElementById('save-habit-btn');
 
 const colorOptions = document.querySelectorAll('.color-option');
 const iconOptions = document.querySelectorAll('.icon-option');
-const freqInput = document.getElementById('habit-frequency-input');
 const customDaysPicker = document.getElementById('custom-days-picker');
 const dayOptions = document.querySelectorAll('.day-option');
 
@@ -241,6 +255,12 @@ export function renderHabits() {
         }
 
         habitDiv.style.cursor = 'pointer';
+        // FIX: same gap as task cards — clicking a card opens the edit
+        // modal but there was no keyboard equivalent. See setupHabitsEvents()
+        // below for the matching keydown handler.
+        habitDiv.tabIndex = 0;
+        habitDiv.setAttribute('role', 'button');
+        habitDiv.setAttribute('aria-label', `Edit habit: ${habit.name}`);
 
         // 2. Pristine 2-Row Layout WITH Original Streak SVG
         habitDiv.innerHTML = `
@@ -292,6 +312,44 @@ export function setupHabitsEvents() {
     // so it never accumulates across re-renders. Delegation on the container
     // still works correctly even though the habit cards inside get replaced
     // on every render.
+    function openHabitEditModal(habitId) {
+        const habitToEdit = habits.find(h => h.id === habitId);
+
+        if (habitToEdit) {
+            editingHabitId = habitId;
+            document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit Habit';
+
+            document.getElementById('habit-name-input').value = habitToEdit.name || '';
+            document.getElementById('habit-category-input').value = habitToEdit.category || '';
+
+            const fVal = habitToEdit.frequency || 'everyday';
+            document.getElementById('habit-frequency-value').value = fVal;
+            const displayMap = { 'everyday':'Every Day', 'weekly':'Once a Week', 'biweekly':'Every 2 Weeks', 'custom':'Custom Days...' };
+            document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
+
+            colorOptions.forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.color === habitToEdit.color) opt.classList.add('selected');
+            });
+            iconOptions.forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.icon === habitToEdit.icon) opt.classList.add('selected');
+            });
+
+            if (fVal === 'custom') {
+                document.getElementById('custom-days-picker').style.display = 'flex';
+                dayOptions.forEach(d => {
+                    d.classList.remove('selected');
+                    if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day, 10))) d.classList.add('selected');
+                });
+            } else {
+                document.getElementById('custom-days-picker').style.display = 'none';
+            }
+
+            document.getElementById('habit-modal').classList.add('show');
+        }
+    }
+
     if (habitListContainer) {
         habitListContainer.addEventListener('click', (e) => {
             const habitItem = e.target.closest('.habit-item');
@@ -301,42 +359,19 @@ export function setupHabitsEvents() {
             if (e.target.closest('.task-actions')) return; 
 
             // Otherwise, they clicked the card to edit:
-            const habitId = parseInt(habitItem.dataset.id);
-            const habitToEdit = habits.find(h => h.id === habitId);
-            
-            if (habitToEdit) {
-                editingHabitId = habitId;
-                document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit Habit';
-                
-                document.getElementById('habit-name-input').value = habitToEdit.name || '';
-                document.getElementById('habit-category-input').value = habitToEdit.category || '';
-                
-                const fVal = habitToEdit.frequency || 'everyday';
-                document.getElementById('habit-frequency-value').value = fVal;
-                const displayMap = { 'everyday':'Every Day', 'weekly':'Once a Week', 'biweekly':'Every 2 Weeks', 'custom':'Custom Days...' };
-                document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
-                
-                colorOptions.forEach(opt => {
-                    opt.classList.remove('selected');
-                    if (opt.dataset.color === habitToEdit.color) opt.classList.add('selected');
-                });
-                iconOptions.forEach(opt => {
-                    opt.classList.remove('selected');
-                    if (opt.dataset.icon === habitToEdit.icon) opt.classList.add('selected');
-                });
+            openHabitEditModal(habitItem.dataset.id);
+        });
 
-                if (fVal === 'custom') {
-                    document.getElementById('custom-days-picker').style.display = 'flex';
-                    dayOptions.forEach(d => {
-                        d.classList.remove('selected');
-                        if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day))) d.classList.add('selected');
-                    });
-                } else {
-                    document.getElementById('custom-days-picker').style.display = 'none';
-                }
+        // Keyboard equivalent of the click handler above (see the
+        // tabIndex/role="button" added to each card in renderHabits()).
+        habitListContainer.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const habitItem = e.target.closest('.habit-item');
+            if (!habitItem) return;
+            if (e.target.closest('.task-actions')) return;
 
-                document.getElementById('habit-modal').classList.add('show');
-            }
+            e.preventDefault();
+            openHabitEditModal(habitItem.dataset.id);
         });
     }
 
@@ -535,7 +570,13 @@ export function setupHabitsEvents() {
             const nameInput = document.getElementById('habit-name-input');
             const name = nameInput ? nameInput.value.trim() : '';
             let categoryRaw = habitCategoryInput ? habitCategoryInput.value.trim() : '';
-            const category = categoryRaw === '' ? 'Uncategorized' : categoryRaw;
+            // FIX: reuse an existing category's exact casing if one matches
+            // case-insensitively, so typing "health" when "Health" already
+            // exists doesn't create a second, visually duplicate category.
+            const existingCategory = categoryRaw
+                ? savedHabitCategories.find(c => c.toLowerCase() === categoryRaw.toLowerCase())
+                : null;
+            const category = categoryRaw === '' ? 'Uncategorized' : (existingCategory || categoryRaw);
             const freqValueInput = document.getElementById('habit-frequency-value');
             const frequency = freqValueInput ? freqValueInput.value : 'everyday';
             
@@ -575,7 +616,7 @@ export function setupHabitsEvents() {
             } else {
                 // Create brand new habit
                 const newHabit = {
-                    id: Date.now(),
+                    id: generateId(),
                     name: name,
                     category: category,
                     frequency: frequency,
@@ -611,7 +652,7 @@ export function setupHabitsEvents() {
             const habitItem = e.target.closest('.habit-item');
             if (!habitItem) return;
 
-            const habitId = parseInt(habitItem.dataset.id);
+            const habitId = habitItem.dataset.id;
             const dateStr = getDateKey(currentHabitDate);
             
             // Done
@@ -747,13 +788,16 @@ export function setupHabitsEvents() {
                 return;
             }
 
-            if (newCat && !savedHabitCategories.includes(newCat)) {
+            const alreadyExists = savedHabitCategories.some(c => c.toLowerCase() === newCat.toLowerCase());
+            if (!alreadyExists) {
                 setSavedHabitCategories([...savedHabitCategories, newCat]);
                 saveHabitCategories();
                 manageNewCategoryInput.value = '';
                 renderCategoriesManagement();
                 renderHabitCategories(); 
                 showToast(`Category added`, 'success');
+            } else {
+                showToast('That category already exists.', 'warning');
             }
         });
     }
@@ -809,7 +853,7 @@ export function setupHabitsEvents() {
             if (deleteBtn) {
                 const habitItem = e.target.closest('.habit-item');
                 if (habitItem) {
-                    habitToDeleteId = parseInt(habitItem.dataset.id);
+                    habitToDeleteId = habitItem.dataset.id;
                     if (deleteModal) deleteModal.classList.add('show');
                     playUI('click'); // BUG FIX: Play sound when trash can is clicked!
                 }
@@ -926,6 +970,8 @@ export function toggleHabitLog(habitId, dateKey, status) {
   const habit = habits.find(h => h.id === habitId);
   if (!habit) return;
 
+  if (!habit.logs) habit.logs = {};
+
   if (habit.logs[dateKey] === status) {
     delete habit.logs[dateKey];
   } else {
@@ -991,31 +1037,37 @@ export function isHabitActiveOnDate(habit, targetDate) {
 }
 
 // ==========================================
-// STREAK CALCULATION FUNCTION (Pure Day.js)
+// STREAK CALCULATION FUNCTION (Plain JS)
 // ==========================================
 export function calculateStreak(habit) {
     let streak = 0;
-    
-    // Day.js locks onto exactly midnight in your local timezone
-    let d = dayjs().startOf('day'); 
-    const creationDate = dayjs(habit.createdAt || habit.id).startOf('day');
 
-    while (d.isAfter(creationDate) || d.isSame(creationDate, 'day')) {
-        
-        if (isHabitActiveOnDate(habit, d.toDate())) {
-            const dateKey = d.format('YYYY-MM-DD'); // Perfect local string
+    // FIX: previously built on dayjs for midnight-locking and date-walking.
+    // Rewritten with plain Date + the same getDateKey() used everywhere
+    // else in the app, so streaks keep working even if the dayjs CDN
+    // script is blocked, slow, or removed — same logic, zero dependency.
+    let d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const creationDate = new Date(habit.createdAt || habit.id);
+    creationDate.setHours(0, 0, 0, 0);
+    const todayKey = getDateKey(new Date());
+
+    while (d.getTime() >= creationDate.getTime()) {
+
+        if (isHabitActiveOnDate(habit, d)) {
+            const dateKey = getDateKey(d);
             const status = habit.logs && habit.logs[dateKey];
-            
+
             if (status === 'done') {
                 streak++;
             } else if (status === 'skipped' || status === 'hidden') {
                 // Skips and hidden days do not break the streak
             } else {
                 // If it's empty, and it is NOT today, the streak is broken
-                if (!d.isSame(dayjs(), 'day')) break; 
+                if (dateKey !== todayKey) break;
             }
         }
-        d = d.subtract(1, 'day'); // Day.js flawlessly steps back in time
+        d.setDate(d.getDate() - 1);
     }
     return streak;
 }
@@ -1140,7 +1192,7 @@ function processQuickAddHabit() {
     const randomIcon = iconKeys[Math.floor(Math.random() * iconKeys.length)];
 
     const newHabit = {
-        id: Date.now(),
+        id: generateId(),
         name: name,
         category: 'Uncategorized',
         frequency: 'everyday',
@@ -1173,25 +1225,15 @@ if (quickHabitInput) {
     });
 }
 
-// ==========================================
-// Habit Filter Bubble Logic
-// ==========================================
-function updateHabitFilterBubble(activeButton) {
-    const bubble = document.getElementById('habit-filter-bubble');
-    if (!activeButton || !bubble) return;
-    
-    bubble.style.width = `${activeButton.offsetWidth}px`;
-    bubble.style.left = `${activeButton.offsetLeft}px`;
-}
-// Attach to filter buttons:
-document.querySelectorAll('#habit-filter-container .filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('#habit-filter-container .filter-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        updateHabitFilterBubble(this);
-        // Add your filtering logic here
-    });
-});
+// FIX: removed a dead `updateHabitFilterBubble()` function + a top-level
+// `document.querySelectorAll('#habit-filter-container .filter-btn')...`
+// listener block that used to sit here. Both ran once at module import
+// time, before renderHabitCategories() (called later, at the bottom of
+// this file) ever populates #habit-filter-container — so the
+// querySelectorAll always matched zero elements and this code never did
+// anything. The real, working version of this exact logic already lives
+// inside renderHabitCategories() below, which re-attaches listeners every
+// time the filter buttons are actually re-rendered.
 
 export function renderHabitCategories() {
     const filterContainer = document.getElementById('habit-filter-container');
@@ -1226,8 +1268,11 @@ export function renderHabitCategories() {
                 bubble.style.left = `${this.offsetLeft}px`;
             }
             
-            // Auto-scroll the container to keep the active item in view
-            this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            // Auto-scroll the container to keep the active item in view.
+            // (See centerButtonInScrollArea's comment in ui-utils.js for
+            // why this replaced scrollIntoView — same page-scroll-on-load
+            // bug as the task filter row.)
+            centerButtonInScrollArea(filterContainer, this);
             
             // NOTE: Add your habit filtering logic here based on this.dataset.filter later!
             currentHabitFilter = this.dataset.filter;
@@ -1245,7 +1290,7 @@ export function renderHabitCategories() {
             bubble.style.left = `${activeBtn.offsetLeft}px`;
             void bubble.offsetWidth; // Force CSS refresh
             bubble.style.transition = ''; // Turn animation back on
-            activeBtn.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'center' });
+            centerButtonInScrollArea(filterContainer, activeBtn);
         }
     }, 50);
 }
