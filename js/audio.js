@@ -72,6 +72,17 @@ export function playUI(type) {
 
 export function playAlarm(type) {
   if (type === 'mute') return;
+
+  // FIX: previously only the alarm-sound dropdown itself could silence this
+  // (by being set to "Mute"). The separate "Sound Effects" toggle already
+  // gates playUI() above but was never checked here, so turning off Sound
+  // Effects in Settings muted UI clicks but not the end-of-session alarm —
+  // two toggles a user reasonably expects to be the same "sound on/off"
+  // switch. Checking the toggle here makes it one real source of truth,
+  // independent of and in addition to the per-sound "Mute" option.
+  const soundToggle = document.getElementById('sound-toggle');
+  if (soundToggle && !soundToggle.checked) return;
+
   const audioCtx = getAudioCtx();
   
   const now = audioCtx.currentTime;

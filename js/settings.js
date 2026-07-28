@@ -1,6 +1,7 @@
 import { 
   timerId, isRunning, 
-  setTimeLeft, setTotalTime, setCurrentPhase, setCompletedSessions 
+  setTimeLeft, setTotalTime, setCurrentPhase, setCompletedSessions,
+  setIsRunning, setTimerId
 } from './state.js';
 
 import { 
@@ -29,10 +30,17 @@ export function applySettingsToTimer() {
   const selectedDuration = workDurationInput ? workDurationInput.value : 25;
   
   if (isRunning) {
-    // We import timerId and isRunning as read-only from state, 
-    // so we assume timer.js handles the actual pause logic, 
-    // but here we just force clear it locally for settings application.
+    // FIX: this used to clearInterval() directly without ever updating
+    // isRunning/timerId in state.js — the interval really stopped and the
+    // button visibly reset to "Start", but isRunning stayed stuck at true.
+    // toggleTimer()'s next call checks `if (isRunning)` first, saw the
+    // stale true, and took the PAUSE branch instead of START, so the first
+    // Start click after saving mid-session settings was a silent no-op.
+    // Calling the real setters here keeps state.js truthful, so the next
+    // Start click actually starts the timer.
     clearInterval(timerId); 
+    setTimerId(null);
+    setIsRunning(false);
   }
   
   if (startBtn) {
