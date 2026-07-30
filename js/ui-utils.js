@@ -344,12 +344,143 @@ function trapTabKey(event, modal) {
   }
 }
 
+// --- ACCESSIBLE DROPDOWN MECHANICS (shared by every custom "select"-style dropdown) ---
+// FIX: none of this app's custom dropdowns could be opened, navigated, or
+// closed via keyboard at all — confirmed by grepping the whole codebase
+// for keydown/keyup/keypress near any dropdown trigger (zero matches
+// outside the modal Tab-trap), and there's no <form> anywhere in the page,
+// so Enter did nothing on the readonly-input triggers either. That's a
+// WCAG 2.1.1 (Level A) failure, not a polish gap.
+//
+// This function is the shared, single implementation of the *mechanics*
+// every "select"-style custom dropdown needs: open/close, roving-focus
+// arrow navigation between options, Enter/Space/Escape/Home/End, and the
+// ARIA that announces it as a listbox. It deliberately does NOT own what
+// happens when an option is picked — each call site keeps its own
+// existing per-item click handler (which already sets whatever display
+// text/hidden value/side effects it needs); a keyboard Enter/Space here
+// just calls that same option's real .click(), so selection logic is
+// never duplicated or reimplemented.
+export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInputId }) {
+  const wrapper = document.getElementById(wrapperId);
+  const trigger = document.getElementById(triggerId);
+  const dropdown = document.getElementById(dropdownId);
+  if (!wrapper || !trigger || !dropdown) return;
+
+  const valueInput = valueInputId ? document.getElementById(valueInputId) : null;
+  const getItems = () => Array.from(dropdown.querySelectorAll('.dropdown-item'));
+  const isOpen = () => dropdown.classList.contains('show');
+
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+  dropdown.setAttribute('role', 'listbox');
+  getItems().forEach(item => { item.setAttribute('role', 'option'); item.tabIndex = -1; });
+
+  // Keep aria-selected in sync with the hidden value input's own "change"
+  // event, which every one of these dropdowns already dispatches after a
+  // selection — reusing that existing contract instead of hooking into
+  // each site's own click handler.
+  function syncSelectedState() {
+    if (!valueInput) return;
+    getItems().forEach(item => {
+      item.setAttribute('aria-selected', String(item.dataset.val === valueInput.value));
+    });
+  }
+  syncSelectedState();
+  if (valueInput) valueInput.addEventListener('change', syncSelectedState);
+
+  // Keep aria-expanded truthful no matter which path closes the dropdown
+  // (an item's own click handler, an outside click, Escape, etc.) — same
+  // MutationObserver pattern already used above for modal .show/inert sync.
+  new MutationObserver(() => {
+    trigger.setAttribute('aria-expanded', String(isOpen()));
+  }).observe(dropdown, { attributes: true, attributeFilter: ['class'] });
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+
+  trigger.addEventListener('keydown', (e) => {
+    if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
+      e.preventDefault();
+      dropdown.classList.add('show');
+      const items = getItems();
+      if (items.length) items[e.key === 'ArrowUp' ? items.length - 1 : 0].focus();
+    } else if (e.key === 'Escape' && isOpen()) {
+      e.preventDefault();
+      dropdown.classList.remove('show');
+    }
+  });
+
+  dropdown.addEventListener('keydown', (e) => {
+    const items = getItems();
+    const currentIndex = items.indexOf(document.activeElement);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[Math.min(currentIndex + 1, items.length - 1)]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[Math.max(currentIndex - 1, 0)]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      document.activeElement?.click(); // reuses the call site's own selection logic
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      dropdown.classList.remove('show');
+      trigger.focus();
+    } else if (e.key === 'Tab') {
+      dropdown.classList.remove('show');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrapper.contains(e.target)) dropdown.classList.remove('show');
+  });
+}
+
 export function setupModalAccessibility() {
   const activeTraps = new WeakMap();
 
   document.querySelectorAll('.modal-overlay').forEach(modal => {
+    // FIX: closed modals were only hidden with `opacity: 0;
+    // pointer-events: none;` (see .modal-overlay in components.css) —
+    // never `display: none`. That hides them visually and blocks clicks,
+    // but does NOT remove them from the keyboard Tab order: a keyboard
+    // user tabbing through the page could land on a button/input inside a
+    // modal that's invisible and unclickable, with no visual sign of
+    // where focus went. `inert` fixes this at the browser level, removing
+    // the whole subtree from Tab order (and screen-reader traversal)
+    // whenever the modal isn't open — set once here on load, then kept in
+    // sync by the same MutationObserver that already watches `.show`, so
+    // every modal is covered with no per-call-site changes required.
+    modal.inert = !modal.classList.contains('show');
+
+    // FIX: the focus trap and Tab-order fixes above make modals correct
+    // to navigate, but a screen reader had no way to know one had even
+    // opened, or what to call it. role="dialog" + aria-modal="true"
+    // announce that context; aria-labelledby points at the modal's own
+    // heading so its name is announced too, reusing the heading that's
+    // already there instead of duplicating its text into a new attribute.
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+
+    const heading = modal.querySelector('h2, h3');
+    if (heading && !modal.hasAttribute('aria-labelledby')) {
+      if (!heading.id) heading.id = `${modal.id}-title`;
+      modal.setAttribute('aria-labelledby', heading.id);
+    }
+
     const observer = new MutationObserver(() => {
       const isOpen = modal.classList.contains('show');
+      modal.inert = !isOpen;
 
       if (isOpen && !activeTraps.has(modal)) {
         lastFocusedBeforeModal = document.activeElement;

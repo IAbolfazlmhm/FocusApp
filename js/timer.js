@@ -7,6 +7,7 @@ import {
 import { playAlarm } from './audio.js';
 import { showToast, icons } from './ui-utils.js';
 import { readJSON, writeJSON, readRaw, remove } from './storage.js';
+import { getLocalDateKey } from './date-utils.js';
 
 // Task-name length shown in the browser tab title, kept short since tab
 // width is limited. Centralized as a constant so it's easy to find/tune
@@ -38,17 +39,9 @@ let tickAnchorTime = null;
 let tickAnchorTimeLeft = 0;
 let tickLastElapsedSeconds = 0; // elapsed seconds since anchor, as of the last tick
 
-// Same YYYY-MM-DD local-date format progress.js's getLocalDateStr() uses,
-// duplicated here rather than imported to avoid a circular import between
-// timer.js and progress.js. Used to record WHICH day focus time was
-// actually earned on, instead of only a single all-time total.
-function localDateKey(dateObj = new Date()) {
-  const d = new Date(dateObj);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+// getLocalDateKey() (date-utils.js) provides the shared YYYY-MM-DD local-
+// date format used here and in progress.js — previously two separately
+// duplicated copies of the same logic, extracted into one shared module.
 
 // Calculate circle circumference for progress animation
 const radius = circle ? circle.r.baseVal.value : 110;
@@ -191,15 +184,26 @@ export function updatePhaseColors() {
 // ==========================================
 // CORE TIMER LOGIC
 // ==========================================
-export function resetTimer() {
-  clearInterval(timerId); 
+// Every place that stops the timer needs the same 4 things done together:
+// clear the interval, null out timerId, flip isRunning false, and reset
+// the Start/Pause button back to "Start". The 6 call sites below (plus a
+// further, incomplete copy that used to live in settings.js) each
+// repeated this by hand — which is exactly how the isRunning-desync bug
+// got introduced there in the first place. One shared function means
+// there's only one place this logic can go wrong, not seven.
+export function stopTimer() {
+  clearInterval(timerId);
   setTimerId(null);
-  setIsRunning(false); 
-  
+  setIsRunning(false);
+
   if (startBtn) {
     startBtn.querySelector('.btn-text').textContent = 'Start';
     startBtn.classList.remove('pause');
   }
+}
+
+export function resetTimer() {
+  stopTimer();
   
   const modeSelect = document.getElementById('mode-select');
   
@@ -276,14 +280,7 @@ export function toggleTimer() {
 
   if (isRunning) {
     // Pause timer
-    clearInterval(timerId); 
-    setTimerId(null);
-    setIsRunning(false);
-    
-    if (startBtn) {
-      startBtn.querySelector('.btn-text').textContent = 'Start';
-      startBtn.classList.remove('pause');
-    }
+    stopTimer();
     
     // Ticks now only persist every few seconds (see below), so pausing
     // needs its own explicit save — otherwise up to a few seconds of
@@ -327,7 +324,7 @@ export function toggleTimer() {
             // (existing totals from before this change stay as-is; there's
             // no way to retroactively know which past day they belong to).
             if (!activeTask.timeByDate) activeTask.timeByDate = {};
-            const todayKey = localDateKey();
+            const todayKey = getLocalDateKey();
             activeTask.timeByDate[todayKey] = (activeTask.timeByDate[todayKey] || 0) + deltaSeconds;
             saveTasks(); 
             const badge = document.getElementById(`badge-${activeTask.id}`);
@@ -352,14 +349,7 @@ export function toggleTimer() {
         
         // Phase completion logic
         if (timeLeft <= 0) {
-          clearInterval(timerId); 
-          setTimerId(null);
-          setIsRunning(false);
-          
-          if (startBtn) {
-            startBtn.querySelector('.btn-text').textContent = 'Start';
-            startBtn.classList.remove('pause');
-          }
+          stopTimer();
           
           playAlarm(soundSelect ? soundSelect.value : 'bell');
           switchPhase();
@@ -406,11 +396,7 @@ export function setupTimerEvents() {
     resetBtn.addEventListener('dblclick', function() {
       const modeSelect = document.getElementById('mode-select');
       if (modeSelect && modeSelect.value === 'pomodoro') {
-        clearInterval(timerId);
-        setIsRunning(false);
-        setTimerId(null);
-        startBtn.querySelector('.btn-text').textContent = 'Start';
-        startBtn.classList.remove('pause');
+        stopTimer();
         setCurrentPhase('work');
         setCompletedSessions(0);
         updatePhaseText();
@@ -434,13 +420,7 @@ export function setupTimerEvents() {
       event.preventDefault(); 
       const modeSelect = document.getElementById('mode-select');
       if (modeSelect && modeSelect.value === 'pomodoro') {
-        clearInterval(timerId); 
-        setIsRunning(false);
-        setTimerId(null);
-        if (startBtn) {
-          startBtn.querySelector('.btn-text').textContent = 'Start';
-          startBtn.classList.remove('pause');
-        }
+        stopTimer();
         switchPhase(); 
       }
     });
@@ -449,13 +429,7 @@ export function setupTimerEvents() {
   // Listen for auto-pause triggers from the Tasks module
   document.addEventListener('checkAutoPauseTimer', () => {
     if (focusedTaskId === null && isRunning) {
-      clearInterval(timerId); 
-      setIsRunning(false);
-      setTimerId(null);
-      if (startBtn) {
-        startBtn.querySelector('.btn-text').textContent = 'Start';
-        startBtn.classList.remove('pause');
-      }
+      stopTimer();
     }
     updateDisplay();
   });

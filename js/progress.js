@@ -1,7 +1,8 @@
 import { formatTaskTime, setTaskDate } from './tasks.js';
 import { setHabitDate, isHabitActiveOnDate, getDateKey } from './habits.js';
-import { showToast, escapeHTML } from './ui-utils.js';
+import { showToast, escapeHTML, setupSelectDropdown } from './ui-utils.js';
 import { readJSON, readRaw } from './storage.js';
+import { getLocalDateKey } from './date-utils.js';
 
 // FIX: this used to be its own copy of the same safe-parse logic that
 // lives in storage.js (readJSON) — duplicated because this file needed
@@ -55,14 +56,10 @@ function attachSmartTooltip(block) {
 // DUAL-ENGINE DATE PARSERS (The Bug Fixes)
 // ==========================================
 
-// Parser 1: For Pomodoro (Matches exact local creation time)
-function getLocalDateStr(dateObj) {
-    const d = new Date(dateObj);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`; 
-}
+// Parser 1: For Pomodoro (Matches exact local creation time) — provided
+// by the shared getLocalDateKey() (date-utils.js); previously its own
+// separately-duplicated copy of the same logic that also lived in
+// timer.js.
 
 // Parser 2: For Habits (delegates to habits.js's getDateKey so both files
 // can never drift apart on how a "day" is defined). This used to be its
@@ -110,7 +107,7 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
 
     let d = new Date(startDate);
     while (d <= endDate) {
-        const localDateStr = getLocalDateStr(d);
+        const localDateStr = getLocalDateKey(d);
         const habitLogKey = getHabitLogKey(d);
 
         let dailyFocus = 0, dailyTasksDone = 0, dailyHabitsExpected = 0, dailyHabitsDone = 0;
@@ -125,11 +122,11 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
                 // historical numbers aren't silently zeroed out.
                 const dayTimeSeconds = t.timeByDate
                     ? (t.timeByDate[localDateStr] || 0)
-                    : (getLocalDateStr(t.createdAt) === localDateStr ? (t.timeSpent || 0) : 0);
+                    : (getLocalDateKey(t.createdAt) === localDateStr ? (t.timeSpent || 0) : 0);
                 dailyFocus += Math.floor(dayTimeSeconds / 60);
 
                 // CREATED: still the day the task was made.
-                if (getLocalDateStr(t.createdAt) === localDateStr) {
+                if (getLocalDateKey(t.createdAt) === localDateStr) {
                     totalTasksCreated++;
                 }
 
@@ -139,8 +136,8 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
                 // silently stop counting anywhere.
                 const completedOnThisDay = t.completed && (
                     t.completedAt
-                        ? getLocalDateStr(t.completedAt) === localDateStr
-                        : getLocalDateStr(t.createdAt) === localDateStr
+                        ? getLocalDateKey(t.completedAt) === localDateStr
+                        : getLocalDateKey(t.createdAt) === localDateStr
                 );
                 if (completedOnThisDay) {
                     dailyTasksDone++;
@@ -268,7 +265,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
     const days = getDaysArray(startDate, endDate);
 
     days.forEach(d => {
-        const dateStr = getLocalDateStr(d);
+        const dateStr = getLocalDateKey(d);
         let mins = 0;
         let totalTasks = 0;
         let doneTasks = 0;
@@ -276,7 +273,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
         currentTasks.forEach(t => {
             const dayTimeSeconds = t.timeByDate
                 ? (t.timeByDate[dateStr] || 0)
-                : (getLocalDateStr(t.createdAt) === dateStr ? (t.timeSpent || 0) : 0);
+                : (getLocalDateKey(t.createdAt) === dateStr ? (t.timeSpent || 0) : 0);
             mins += Math.floor(dayTimeSeconds / 60);
 
             // totalTasks/doneTasks are a matched pair used only for this
@@ -285,7 +282,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
             // day-accurate completion count itself is fixed in
             // calculateStats() above, which isn't a rate and has no such
             // constraint.
-            if (getLocalDateStr(t.createdAt) === dateStr) {
+            if (getLocalDateKey(t.createdAt) === dateStr) {
                 totalTasks++;
                 if (t.completed) doneTasks++;
             }
@@ -386,7 +383,7 @@ function openDailyReport(dateObj) {
     const currentTasks = readJSON('focusTasks', [], 'array');
     const currentHabits = readJSON('focusHabits', [], 'array');
 
-    const localDateStr = getLocalDateStr(dateObj);
+    const localDateStr = getLocalDateKey(dateObj);
     const habitLogKey = getHabitLogKey(dateObj);
 
     title.textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
@@ -400,7 +397,7 @@ function openDailyReport(dateObj) {
         // previously only createdAt was checked, so working on an
         // older task today wouldn't show up in today's report at all.
         const dayTasks = currentTasks.filter(t => 
-            getLocalDateStr(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
+            getLocalDateKey(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
         );
         if (dayTasks.length === 0) html += `<p class="report-empty-msg">No tasks recorded.</p>`;
         dayTasks.forEach(t => {
@@ -557,11 +554,6 @@ export function setupProgressEvents() {
     const customRangeModal = document.getElementById('custom-range-modal');
 
     if (rangeBtn && rangeDropdown) {
-        rangeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            rangeDropdown.style.display = rangeDropdown.style.display === 'block' ? 'none' : 'block';
-        });
-
         rangeDropdown.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', () => {
                 const selectedRange = item.dataset.range;
@@ -576,9 +568,11 @@ export function setupProgressEvents() {
                     if (rangeDisplay) rangeDisplay.textContent = item.textContent;
                     renderProgressDashboard();
                 }
-                rangeDropdown.style.display = 'none';
+                rangeDropdown.classList.remove('show');
             });
         });
+
+        setupSelectDropdown({ wrapperId: 'prog-range-wrapper', triggerId: 'prog-range-btn', dropdownId: 'prog-range-dropdown' });
     }
 
     const applyCustomBtn = document.getElementById('apply-custom-range');
@@ -685,9 +679,6 @@ export function setupProgressEvents() {
     }
 
     document.addEventListener('click', (e) => {
-        if (rangeBtn && rangeDropdown && !rangeBtn.contains(e.target) && !rangeDropdown.contains(e.target)) {
-            rangeDropdown.style.display = 'none';
-        }
         if (setModal && e.target === setModal) setModal.classList.remove('show');
         if (repModal && e.target === repModal) repModal.classList.remove('show');
         if (customRangeModal && e.target === customRangeModal) customRangeModal.classList.remove('show');

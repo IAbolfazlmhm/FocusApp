@@ -8,7 +8,7 @@ export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
 import { playUI } from './audio.js';
-import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea } from './ui-utils.js';
+import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown } from './ui-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -756,15 +756,15 @@ export function setupTaskEvents() {
     }
 
   // --- Sort Button Logic ---
+  // Opening, closing, keyboard navigation, and ARIA now live in the shared
+  // setupSelectDropdown() (ui-utils.js). This also switches the dropdown
+  // from a raw inline style.display toggle onto the .show class the CSS
+  // already defines for every .custom-dropdown (including its popIn
+  // animation), which this dropdown was previously bypassing.
   const taskSortBtn = document.getElementById('task-sort-btn');
   const sortDropdown = document.getElementById('sort-dropdown');
 
   if (taskSortBtn && sortDropdown) {
-      taskSortBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          sortDropdown.style.display = sortDropdown.style.display === 'block' ? 'none' : 'block';
-      });
-
       sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
           item.addEventListener('click', () => {
             const clickedSort = item.getAttribute('data-sort');
@@ -786,16 +786,12 @@ export function setupTaskEvents() {
             item.querySelector('.sort-dir').textContent = sortOrder === 'asc' ? '↑' : '↓';
             
             playUI('click');
-            sortDropdown.style.display = 'none';
+            sortDropdown.classList.remove('show');
             renderTasks();
           });
       });
 
-      document.addEventListener('click', (e) => {
-          if (!taskSortBtn.contains(e.target) && !sortDropdown.contains(e.target)) {
-              sortDropdown.style.display = 'none';
-          }
-      });
+      setupSelectDropdown({ wrapperId: 'task-sort-wrapper', triggerId: 'task-sort-btn', dropdownId: 'sort-dropdown' });
   }
 
   // Listen for new tags added from the gear icon to update the modal

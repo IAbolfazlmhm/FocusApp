@@ -1,14 +1,12 @@
 import { 
-  timerId, isRunning, 
-  setTimeLeft, setTotalTime, setCurrentPhase, setCompletedSessions,
-  setIsRunning, setTimerId
+  setTimeLeft, setTotalTime, setCurrentPhase, setCompletedSessions
 } from './state.js';
 
 import { 
-  updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState 
+  updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState, stopTimer 
 } from './timer.js';
 
-import { showToast } from './ui-utils.js';
+import { showToast, setupSelectDropdown } from './ui-utils.js';
 import { readJSON, writeJSON, readRaw } from './storage.js';
 import { customConfirm } from './tasks.js';
 
@@ -18,7 +16,6 @@ import { customConfirm } from './tasks.js';
 const settingsModal = document.getElementById('settings-modal');
 const modeSelect = document.getElementById('mode-select');
 const pomodoroWrapper = document.getElementById('pomodoro-settings-wrapper');
-const startBtn = document.getElementById('start-btn');
 const circle = document.querySelector('.progress-ring-circle');
 
 // ==========================================
@@ -29,25 +26,15 @@ export function applySettingsToTimer() {
   const workDurationInput = document.getElementById('work-duration');
   const selectedDuration = workDurationInput ? workDurationInput.value : 25;
   
-  if (isRunning) {
-    // FIX: this used to clearInterval() directly without ever updating
-    // isRunning/timerId in state.js — the interval really stopped and the
-    // button visibly reset to "Start", but isRunning stayed stuck at true.
-    // toggleTimer()'s next call checks `if (isRunning)` first, saw the
-    // stale true, and took the PAUSE branch instead of START, so the first
-    // Start click after saving mid-session settings was a silent no-op.
-    // Calling the real setters here keeps state.js truthful, so the next
-    // Start click actually starts the timer.
-    clearInterval(timerId); 
-    setTimerId(null);
-    setIsRunning(false);
-  }
-  
-  if (startBtn) {
-    const btnText = startBtn.querySelector('.btn-text');
-    if (btnText) btnText.textContent = 'Start';
-    startBtn.classList.remove('pause');
-  }
+  // Stops any in-progress interval and resets the Start/Pause button, via
+  // the same shared helper every stop-path in timer.js now uses — this is
+  // what used to be a separate, incomplete local copy of this logic (see
+  // git history / the report this was flagged in), which is exactly how
+  // the isRunning-desync bug happened in the first place. stopTimer() is
+  // safe to call even when nothing is running (clearing a null interval
+  // and re-setting "Start" text are both harmless no-ops in that case),
+  // so no isRunning check is needed here anymore.
+  stopTimer();
   
   const tracker = document.getElementById('session-tracker');
   const skipBtn = document.getElementById('skip-btn');
@@ -331,18 +318,18 @@ export function setupSettingsEvents() {
     }
 
     // --- CUSTOM DROPDOWN ENGINE ---
+    // Selection assignment (what happens when an option is picked) stays
+    // here, since it's specific to this call site. Opening, closing,
+    // keyboard navigation, and ARIA now live in the shared
+    // setupSelectDropdown() (ui-utils.js) so all 4 "select-replacement"
+    // dropdowns in the app get identical, keyboard-accessible behavior
+    // from one implementation instead of four.
     function setupCustomDropdown(wrapperId, displayId, inputId, dropdownId) {
-        const wrapper = document.getElementById(wrapperId);
         const display = document.getElementById(displayId);
         const input = document.getElementById(inputId);
         const dropdown = document.getElementById(dropdownId);
 
-        if (!wrapper || !display || !dropdown) return;
-
-        display.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('show');
-        });
+        if (!display || !input || !dropdown) return;
 
         dropdown.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', () => {
@@ -356,9 +343,7 @@ export function setupSettingsEvents() {
             });
         });
 
-        document.addEventListener('click', (e) => {
-            if (!wrapper.contains(e.target)) dropdown.classList.remove('show');
-        });
+        setupSelectDropdown({ wrapperId, triggerId: displayId, dropdownId, valueInputId: inputId });
     }
 
     setupCustomDropdown('mode-wrapper', 'mode-display', 'mode-select', 'mode-dropdown');

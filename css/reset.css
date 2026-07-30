@@ -58,6 +58,18 @@ input:focus, .custom-select:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color, #3b82f6) 25%, transparent);
 }
 
+/* Dropdown options now receive real keyboard focus (roving tabindex) while
+   arrow-navigating a custom dropdown, so they need the same visible-only-
+   for-keyboard treatment as buttons above. */
+.dropdown-item:focus {
+  outline: none;
+}
+
+.dropdown-item:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: -2px;
+}
+
 /* .task-input has no border of its own (it sits inside a .glass-pill
    container), so instead of ringing the input we glow the pill around it
    via :focus-within — that's the shape the user actually sees. */

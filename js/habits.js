@@ -4,7 +4,7 @@ import {
 } from './state.js';
 
 import { playUI } from './audio.js';
-import { showToast, escapeHTML, generateId, centerButtonInScrollArea } from './ui-utils.js';
+import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown } from './ui-utils.js';
 import { customConfirm } from './tasks.js';
 import { writeJSON, readRaw } from './storage.js';
 
@@ -158,8 +158,12 @@ function showHabitCategoryDropdown() {
         return;
     }
     
+    // FIX: options here are regenerated on every keystroke (innerHTML =
+    // below), so role/tabindex must be part of the template itself rather
+    // than set once at setup time — unlike the app's other dropdowns,
+    // whose static item lists only need that done once.
     habitCategoryDropdown.innerHTML = filteredCats.map(cat => 
-        `<div class="dropdown-item">${escapeHTML(cat)}</div>`
+        `<div class="dropdown-item" role="option" tabindex="-1">${escapeHTML(cat)}</div>`
     ).join('');
     
     habitCategoryDropdown.classList.add('show');
@@ -168,6 +172,7 @@ function showHabitCategoryDropdown() {
         item.addEventListener('click', () => {
             habitCategoryInput.value = item.textContent; 
             habitCategoryDropdown.classList.remove('show');
+            habitCategoryInput.focus();
         });
     });
 }
@@ -512,6 +517,62 @@ export function setupHabitsEvents() {
             if (this.value === 'Uncategorized') this.value = ''; // Clear default easily
             showHabitCategoryDropdown();
         });
+
+        // FIX: this dropdown's options regenerate on every keystroke, so
+        // it doesn't fit the shared setupSelectDropdown() (ui-utils.js)
+        // used by the app's other 7 dropdowns — that assumes a stable
+        // option list and a trigger the dropdown opens FROM. Here the
+        // list is already opened by 'input'/'focus' above, so it gets its
+        // own small keyboard layer instead, attached once to the input
+        // and the dropdown container (both persist across re-renders).
+        if (habitCategoryDropdown) {
+            habitCategoryDropdown.setAttribute('role', 'listbox');
+            habitCategoryInput.setAttribute('role', 'combobox');
+            habitCategoryInput.setAttribute('aria-autocomplete', 'list');
+            habitCategoryInput.setAttribute('aria-controls', 'habit-category-dropdown');
+            habitCategoryInput.setAttribute('aria-expanded', 'false');
+
+            new MutationObserver(() => {
+                habitCategoryInput.setAttribute('aria-expanded', String(habitCategoryDropdown.classList.contains('show')));
+            }).observe(habitCategoryDropdown, { attributes: true, attributeFilter: ['class'] });
+
+            habitCategoryInput.addEventListener('keydown', (e) => {
+                if (!habitCategoryDropdown.classList.contains('show')) return;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    habitCategoryDropdown.querySelector('.dropdown-item')?.focus();
+                } else if (e.key === 'Escape') {
+                    habitCategoryDropdown.classList.remove('show');
+                }
+            });
+
+            habitCategoryDropdown.addEventListener('keydown', (e) => {
+                const items = Array.from(habitCategoryDropdown.querySelectorAll('.dropdown-item'));
+                const currentIndex = items.indexOf(document.activeElement);
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    items[Math.min(currentIndex + 1, items.length - 1)]?.focus();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (currentIndex <= 0) habitCategoryInput.focus();
+                    else items[currentIndex - 1]?.focus();
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    items[0]?.focus();
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    items[items.length - 1]?.focus();
+                } else if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    document.activeElement?.click();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    habitCategoryDropdown.classList.remove('show');
+                    habitCategoryInput.focus();
+                }
+            });
+        }
     }
 
     // Close category dropdown if clicking outside
@@ -522,17 +583,16 @@ export function setupHabitsEvents() {
     });
 
     // --- CUSTOM FREQUENCY DROPDOWN LOGIC ---
-    const freqWrapper = document.getElementById('habit-frequency-wrapper');
+    // Opening, closing, keyboard navigation, and ARIA now live in the
+    // shared setupSelectDropdown() (ui-utils.js) — this block keeps only
+    // the selection assignment specific to this dropdown (display text,
+    // hidden value, and showing/hiding the custom-days picker).
     const freqInputDisplay = document.getElementById('habit-frequency-input-display');
     const freqValue = document.getElementById('habit-frequency-value');
     const freqDropdown = document.getElementById('habit-frequency-dropdown');
     const customDaysPicker = document.getElementById('custom-days-picker');
 
     if (freqInputDisplay && freqDropdown) {
-        freqInputDisplay.addEventListener('click', () => {
-            freqDropdown.classList.toggle('show');
-        });
-
         freqDropdown.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', () => {
                 const val = item.getAttribute('data-val');
@@ -548,13 +608,15 @@ export function setupHabitsEvents() {
                 }
             });
         });
+
+        setupSelectDropdown({
+            wrapperId: 'habit-frequency-wrapper',
+            triggerId: 'habit-frequency-input-display',
+            dropdownId: 'habit-frequency-dropdown',
+            valueInputId: 'habit-frequency-value'
+        });
     }
 
-    document.addEventListener('click', (e) => {
-        if (freqWrapper && freqDropdown && !freqWrapper.contains(e.target)) {
-            freqDropdown.classList.remove('show');
-        }
-    });
 
     // Custom Days Interaction
     dayOptions.forEach(day => {
@@ -681,15 +743,15 @@ export function setupHabitsEvents() {
     }
 
     // --- HABIT SORT BUTTON LOGIC ---
+    // Opening, closing, keyboard navigation, and ARIA now live in the
+    // shared setupSelectDropdown() (ui-utils.js). This also switches the
+    // dropdown from a raw inline style.display toggle onto the .show
+    // class the CSS already defines for every .custom-dropdown (including
+    // its popIn animation), which this dropdown was previously bypassing.
     const habitSortBtn = document.getElementById('habit-sort-btn');
     const habitSortDropdown = document.getElementById('habit-sort-dropdown');
-    
-    if (habitSortBtn && habitSortDropdown) {
-        habitSortBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            habitSortDropdown.style.display = habitSortDropdown.style.display === 'block' ? 'none' : 'block';
-        });
 
+    if (habitSortBtn && habitSortDropdown) {
         habitSortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
             item.addEventListener('click', () => {
                 const clickedSort = item.getAttribute('data-sort');
@@ -709,16 +771,12 @@ export function setupHabitsEvents() {
                 item.querySelector('.sort-dir').textContent = habitSortOrder === 'asc' ? '↑' : '↓';
                 
                 playUI('click');
-                habitSortDropdown.style.display = 'none';
+                habitSortDropdown.classList.remove('show');
                 renderHabits();
             });
         });
 
-        document.addEventListener('click', (e) => {
-            if (!habitSortBtn.contains(e.target) && !habitSortDropdown.contains(e.target)) {
-                habitSortDropdown.style.display = 'none';
-            }
-        });
+        setupSelectDropdown({ wrapperId: 'habit-sort-wrapper', triggerId: 'habit-sort-btn', dropdownId: 'habit-sort-dropdown' });
     }
 
     // --- CATEGORY MANAGEMENT LOGIC ---
