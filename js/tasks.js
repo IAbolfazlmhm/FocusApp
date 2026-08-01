@@ -1,6 +1,6 @@
-import { 
+import {
   tasks, focusedTaskId, savedTags, tagColors, currentFilter, currentSort, sortOrder,
-  setTasks, setFocusedTaskId, setSavedTags, setTagColors, setCurrentFilter, setCurrentSort, setSortOrder 
+  setTasks, setFocusedTaskId, setSavedTags, setTagColors, setCurrentFilter, setCurrentSort, setSortOrder
 } from './state.js';
 import { writeJSON } from './storage.js';
 
@@ -34,18 +34,18 @@ const iconTag = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="cu
 // ==========================================
 // CORE HELPERS
 // ==========================================
-export function saveTasks() { 
+export function saveTasks() {
   writeJSON('focusTasks', tasks);
   writeJSON('focusedTaskId', focusedTaskId);
   writeJSON('focusTagsList', savedTags);
   writeJSON('focusTagColors', tagColors);
 }
 
-export function formatTaskTime(totalSeconds) { 
-  if (totalSeconds === 0) return ''; 
-  const m = Math.floor(totalSeconds / 60); 
-  const s = totalSeconds % 60; 
-  return `${icons.clock} ${m}m ${s}s`; 
+export function formatTaskTime(totalSeconds) {
+  if (totalSeconds === 0) return '';
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${icons.clock} ${m}m ${s}s`;
 }
 
 // ==========================================
@@ -61,7 +61,7 @@ export function renderFilters() {
     <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active">Active</button>
     <button class="filter-btn ${currentFilter === 'completed' ? 'active' : ''}" data-filter="completed">Done</button>
   `;
-  
+
   savedTags.forEach(tag => {
     html += `<button class="filter-btn ${currentFilter === tag ? 'active' : ''}" data-filter="${escapeHTML(tag)}">#${escapeHTML(tag)}</button>`;
   });
@@ -83,18 +83,18 @@ export function renderFilters() {
   });
 
   filterListEl.scrollLeft = scrollPos;
-  
+
   // Prevent animation glitch on initial load/refresh
   const bubble = filterListEl.querySelector('.filter-bubble');
   if (bubble) {
-      bubble.style.transition = 'none'; 
-      updateFilterBubble();             
-      
-      const event = new CustomEvent('updateColors');
-      document.dispatchEvent(event);
-      
-      void bubble.offsetWidth; // Force reflow
-      bubble.style.transition = ''; 
+    bubble.style.transition = 'none';
+    updateFilterBubble();
+
+    const event = new CustomEvent('updateColors');
+    document.dispatchEvent(event);
+
+    void bubble.offsetWidth; // Force reflow
+    bubble.style.transition = '';
   }
 }
 
@@ -102,7 +102,7 @@ function updateFilterBubble() {
   if (!filterListEl) return;
   const activeBtn = filterListEl.querySelector('.filter-btn.active');
   const bubble = filterListEl.querySelector('.filter-bubble');
-  
+
   if (activeBtn && bubble) {
     bubble.style.width = `${activeBtn.offsetWidth}px`;
     bubble.style.left = `${activeBtn.offsetLeft}px`;
@@ -127,7 +127,7 @@ window.groupSortStates = window.groupSortStates || {};
 
 export function renderTasks() {
   if (!taskListContainer) return;
-  taskListContainer.innerHTML = ''; 
+  taskListContainer.innerHTML = '';
 
   // 1. Filter by Tag/Status
   let filtered = tasks;
@@ -139,24 +139,24 @@ export function renderTasks() {
   if (typeof currentPomodoroDate !== 'undefined') {
     const targetDateString = currentPomodoroDate.toDateString(); // "Fri Oct 27 2023"
     filtered = filtered.filter(task => {
-        const taskDateString = new Date(task.createdAt).toDateString();
-        return taskDateString === targetDateString;
+      const taskDateString = new Date(task.createdAt).toDateString();
+      return taskDateString === targetDateString;
     });
-}
+  }
 
   // 3. Sort using the new Top Bar logic
   filtered.sort((a, b) => {
-      // 1. Primary Sort: Completed tasks ALWAYS sink to the bottom
-      if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    // 1. Primary Sort: Completed tasks ALWAYS sink to the bottom
+    if (a.completed !== b.completed) return a.completed ? 1 : -1;
 
-      // 2. Secondary Sort: User's choice
-      let val = 0;
-      if (currentSort === 'newest') val = a.createdAt - b.createdAt; 
-      else if (currentSort === 'az') val = a.text.localeCompare(b.text);
-      else if (currentSort === 'tag') val = (a.tag || '').localeCompare(b.tag || '');
-      else if (currentSort === 'time') val = a.timeSpent - b.timeSpent;
+    // 2. Secondary Sort: User's choice
+    let val = 0;
+    if (currentSort === 'newest') val = a.createdAt - b.createdAt;
+    else if (currentSort === 'az') val = a.text.localeCompare(b.text);
+    else if (currentSort === 'tag') val = (a.tag || '').localeCompare(b.tag || '');
+    else if (currentSort === 'time') val = a.timeSpent - b.timeSpent;
 
-      return sortOrder === 'asc' ? val : -val;
+    return sortOrder === 'asc' ? val : -val;
   });
 
   // 4. Render the Tasks (With Reschedule/Focus Logic)
@@ -165,89 +165,89 @@ export function renderTasks() {
   const isToday = currentPomodoroDate.getTime() === actualToday.getTime();
 
   filtered.forEach(task => {
-      const taskDiv = document.createElement('div');
-      taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
-      
-      // Rock-Solid Tag Badge (Now with Max-Width and Ellipsis Truncation!)
-        let tagHTML = '';
-        if (task.tag) {
-            // Tags now get a color from one of two places: a color the user
-            // explicitly picked in "Manage Tags" (tagColors, set below in
-            // renderTagsManagement), or — if they never bothered — a
-            // deterministic hash color so it's still visually consistent
-            // without requiring any setup.
-            const tagColor = getTagColor(task.tag, tagColors[task.tag]);
-            tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}" style="--tag-color:${tagColor.solid}; --tag-bg:${tagColor.bg}; --tag-border:${tagColor.border};">#${escapeHTML(task.tag)}</span>`;
-        }
+    const taskDiv = document.createElement('div');
+    taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
 
-        let actionButtons = '';
-        if (!isToday && !task.completed) {
-            actionButtons = `
-              <button class="focus-btn reschedule-btn" title="Move to Today">
-                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
-              </button>
-            `;
-        } else {
-            actionButtons = `
-              <button class="focus-btn focus-action" title="Focus">
-                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-              </button>
-            `;
-        }
+    // Rock-Solid Tag Badge (Now with Max-Width and Ellipsis Truncation!)
+    let tagHTML = '';
+    if (task.tag) {
+      // Tags now get a color from one of two places: a color the user
+      // explicitly picked in "Manage Tags" (tagColors, set below in
+      // renderTagsManagement), or — if they never bothered — a
+      // deterministic hash color so it's still visually consistent
+      // without requiring any setup.
+      const tagColor = getTagColor(task.tag, tagColors[task.tag]);
+      tagHTML = `<span class="task-tag" title="${escapeHTML(task.tag)}" style="--tag-color:${tagColor.solid}; --tag-bg:${tagColor.bg}; --tag-border:${tagColor.border};">#${escapeHTML(task.tag)}</span>`;
+    }
 
-        taskDiv.style.cursor = 'pointer'; 
-        taskDiv.dataset.id = task.id; 
-        // FIX: the card opens an edit modal on click, but had no keyboard
-        // equivalent — a keyboard-only user could tab past it and never
-        // reach the edit action at all. tabindex + role="button" + the
-        // Enter/Space handler below (delegated, added once in
-        // setupTaskEvents) makes it behave like a real button.
-        taskDiv.tabIndex = 0;
-        taskDiv.setAttribute('role', 'button');
-        taskDiv.setAttribute('aria-label', `Edit task: ${task.text}`);
+    let actionButtons = '';
+    if (!isToday && !task.completed) {
+      actionButtons = `
+        <button class="focus-btn reschedule-btn" title="Move to Today">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+        </button>
+      `;
+    } else {
+      actionButtons = `
+        <button class="focus-btn focus-action" title="Focus">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        </button>
+      `;
+    }
 
-        // Layout/spacing for this card lives in .task-info, .task-name,
-        // .task-tag-row, .task-tag, .task-time-badge (see pomodoro.css) —
-        // flex-wrap:nowrap on the tag row and tabular-nums on the time
-        // badge (which prevent layout breaking and the digits wiggling)
-        // are part of those classes now, not repeated inline every render.
-        taskDiv.innerHTML = `
-          <div class="task-info">
-            
-            <span class="task-name" title="${escapeHTML(task.text)}">${escapeHTML(task.text)}</span>
-            
-            <div class="task-tag-row">
-              ${tagHTML}
-              <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
-            </div>
+    taskDiv.style.cursor = 'pointer';
+    taskDiv.dataset.id = task.id;
+    // FIX: the card opens an edit modal on click, but had no keyboard
+    // equivalent — a keyboard-only user could tab past it and never
+    // reach the edit action at all. tabindex + role="button" + the
+    // Enter/Space handler below (delegated, added once in
+    // setupTaskEvents) makes it behave like a real button.
+    taskDiv.tabIndex = 0;
+    taskDiv.setAttribute('role', 'button');
+    taskDiv.setAttribute('aria-label', `Edit task: ${task.text}`);
 
-          </div>
-          <div class="task-actions">
-            ${actionButtons}
-            <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-            <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-          </div>
-        `;
+    // Layout/spacing for this card lives in .task-info, .task-name,
+    // .task-tag-row, .task-tag, .task-time-badge (see pomodoro.css) —
+    // flex-wrap:nowrap on the tag row and tabular-nums on the time
+    // badge (which prevent layout breaking and the digits wiggling)
+    // are part of those classes now, not repeated inline every render.
+    taskDiv.innerHTML = `
+      <div class="task-info">
+        
+        <span class="task-name" title="${escapeHTML(task.text)}">${escapeHTML(task.text)}</span>
+        
+        <div class="task-tag-row">
+          ${tagHTML}
+          <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
+        </div>
 
-      // Wire up the dynamic buttons
-      const focusBtn = taskDiv.querySelector('.focus-action');
-      if (focusBtn) focusBtn.addEventListener('click', () => toggleFocus(task.id));
+      </div>
+      <div class="task-actions">
+        ${actionButtons}
+        <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+    `;
 
-      const rescheduleBtn = taskDiv.querySelector('.reschedule-btn');
-      if (rescheduleBtn) {
-          rescheduleBtn.addEventListener('click', () => {
-              task.createdAt = Date.now(); // Updates timestamp to "Right Now"
-              playUI('success');
-              saveTasks();
-              renderTasks();
-              showToast('Task moved to Today!', 'success');
-          });
-      }
+    // Wire up the dynamic buttons
+    const focusBtn = taskDiv.querySelector('.focus-action');
+    if (focusBtn) focusBtn.addEventListener('click', () => toggleFocus(task.id));
 
-      taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
-      taskDiv.querySelector('.remove-btn').addEventListener('click', () => customConfirm("Delete this task?", () => removeTask(task.id)));
+    const rescheduleBtn = taskDiv.querySelector('.reschedule-btn');
+    if (rescheduleBtn) {
+      rescheduleBtn.addEventListener('click', () => {
+        task.createdAt = Date.now(); // Updates timestamp to "Right Now"
+        playUI('success');
+        saveTasks();
+        renderTasks();
+        showToast('Task moved to Today!', 'success');
+      });
+    }
 
-      taskListContainer.appendChild(taskDiv);
+    taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
+    taskDiv.querySelector('.remove-btn').addEventListener('click', () => customConfirm("Delete this task?", () => removeTask(task.id)));
+
+    taskListContainer.appendChild(taskDiv);
   });
 
   // 5. Handle UI states
@@ -260,7 +260,7 @@ export function renderTasks() {
     if (tasksSection) tasksSection.classList.remove('zen-mode');
     if (currentTaskNameEl) currentTaskNameEl.textContent = 'Nothing';
   }
-  
+
   if (filtered.length === 0) {
     let msg = "No tasks yet. Take a deep breath and start planning!";
     taskListContainer.innerHTML = `
@@ -277,23 +277,23 @@ export function renderTasks() {
 export function addTask() {
   if (!taskInput) return;
   const text = taskInput.value.trim();
-  
+
   // Tag comes from the gear icon (quick-tag modal) — the app's only tag
   // input UI now that the old inline tag field has been removed.
   const tagRaw = pendingQuickTag || '';
   const tag = tagRaw ? tagRaw.charAt(0).toUpperCase() + tagRaw.slice(1) : null;
 
-  if (!text) { 
-    showToast('Please enter a valid task.', 'warning'); 
-    return; 
+  if (!text) {
+    showToast('Please enter a valid task.', 'warning');
+    return;
   }
-  
+
   // Clear the pending tag and visual cue after adding
   pendingQuickTag = null;
   const advancedBtn = document.getElementById('advanced-task-btn');
   if (advancedBtn) {
-      advancedBtn.style.color = ''; 
-      advancedBtn.style.borderColor = '';
+    advancedBtn.style.color = '';
+    advancedBtn.style.borderColor = '';
   }
 
   // FIX: compare case-insensitively so "work" typed after "Work" already
@@ -320,49 +320,49 @@ export function addTask() {
     createdAt: taskDate.getTime() 
   }]);
 
-  playUI('click'); 
-  saveTasks(); 
-  renderFilters(); 
-  renderTasks(); 
-  
+  playUI('click');
+  saveTasks();
+  renderFilters();
+  renderTasks();
+
   if (taskInput) taskInput.value = '';
 }
 
 function removeTask(id) {
-  playUI('trash'); 
+  playUI('trash');
   setTasks(tasks.filter(t => t.id !== id));
   if (focusedTaskId === id) setFocusedTaskId(null);
-  saveTasks(); 
-  renderTasks(); 
+  saveTasks();
+  renderTasks();
   checkAutoPause();
 }
 
 function toggleCompleted(id) {
   const t = tasks.find(x => x.id === id);
-  if (t) { 
-    t.completed = !t.completed; 
-    t.completedAt = t.completed ? Date.now() : null; 
-    
-    if (t.completed) { 
-      playUI('success'); 
-      if (focusedTaskId === id) setFocusedTaskId(null); 
-    } 
-    saveTasks(); 
-    renderTasks(); 
-    checkAutoPause(); 
+  if (t) {
+    t.completed = !t.completed;
+    t.completedAt = t.completed ? Date.now() : null;
+
+    if (t.completed) {
+      playUI('success');
+      if (focusedTaskId === id) setFocusedTaskId(null);
+    }
+    saveTasks();
+    renderTasks();
+    checkAutoPause();
   }
 }
 
 function toggleFocus(id) {
   const t = tasks.find(x => x.id === id);
-  if (t && t.completed) { 
-    showToast('Task completed!', 'warning'); 
-    return; 
+  if (t && t.completed) {
+    showToast('Task completed!', 'warning');
+    return;
   }
   setFocusedTaskId(focusedTaskId === id ? null : id);
-  playUI('click'); 
-  saveTasks(); 
-  renderTasks(); 
+  playUI('click');
+  saveTasks();
+  renderTasks();
   checkAutoPause();
 }
 
@@ -377,144 +377,144 @@ function checkAutoPause() {
 // ==========================================
 export function setupTaskEvents() {
   // --- TASK EDITING MODAL LOGIC ---
-    let currentlyEditingTaskId = null;
+  let currentlyEditingTaskId = null;
 
-    if (taskListContainer) {
-        taskListContainer.addEventListener('click', (e) => {
-            // Ignore clicks on action buttons
-            if (e.target.closest('button') || e.target.closest('.task-actions')) return;
+  if (taskListContainer) {
+    taskListContainer.addEventListener('click', (e) => {
+      // Ignore clicks on action buttons
+      if (e.target.closest('button') || e.target.closest('.task-actions')) return;
 
-            const taskItem = e.target.closest('.task-item');
-            if (taskItem) {
-                const id = taskItem.dataset.id;
-                openEditTaskModal(id);
-            }
-        });
+      const taskItem = e.target.closest('.task-item');
+      if (taskItem) {
+        const id = taskItem.dataset.id;
+        openEditTaskModal(id);
+      }
+    });
 
-        // Keyboard equivalent of the click handler above, so Tab + Enter/Space
-        // can open the edit modal the same way a mouse click does.
-        taskListContainer.addEventListener('keydown', (e) => {
-            if (e.key !== 'Enter' && e.key !== ' ') return;
-            if (e.target.closest('button') || e.target.closest('.task-actions')) return;
+    // Keyboard equivalent of the click handler above, so Tab + Enter/Space
+    // can open the edit modal the same way a mouse click does.
+    taskListContainer.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (e.target.closest('button') || e.target.closest('.task-actions')) return;
 
-            const taskItem = e.target.closest('.task-item');
-            if (taskItem) {
-                e.preventDefault();
-                openEditTaskModal(taskItem.dataset.id);
-            }
-        });
-    }
-
-    function openEditTaskModal(id) {
-        const task = tasks.find(t => t.id === id);
-        if (!task) return;
-
-        currentlyEditingTaskId = id;
-        
-        const nameInput = document.getElementById('edit-task-name-input');
-        if (nameInput) nameInput.value = task.text;
-
-        const tagList = document.getElementById('edit-task-tag-list');
-        if (tagList) {
-            tagList.innerHTML = `<button class="tag-select-btn ${!task.tag ? 'selected' : ''}" data-tag="">None</button>`;
-            
-            savedTags.forEach(tag => {
-                const isSelected = task.tag === tag ? 'selected' : '';
-                tagList.innerHTML += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}">${escapeHTML(tag)}</button>`;
-            });
-
-            tagList.querySelectorAll('.tag-select-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    tagList.querySelectorAll('.tag-select-btn').forEach(b => b.classList.remove('selected'));
-                    e.target.classList.add('selected');
-                });
-            });
-        }
-
-        const modal = document.getElementById('edit-tag-modal');
-        if (modal) {
-            modal.classList.add('show');
-            if (nameInput) setTimeout(() => nameInput.focus(), 100);
-        }
-    }
-
-    const saveEditBtn = document.getElementById('save-task-edit-btn');
-    if (saveEditBtn) {
-        saveEditBtn.addEventListener('click', () => {
-            if (!currentlyEditingTaskId) return;
-            
-            const task = tasks.find(t => t.id === currentlyEditingTaskId);
-            if (task) {
-                const nameInput = document.getElementById('edit-task-name-input');
-                const newName = nameInput.value.trim();
-                
-                if (!newName) {
-                    if (typeof showToast === 'function') showToast('Task name cannot be empty.', 'warning');
-                    return;
-                }
-
-                const selectedTag = document.querySelector('#edit-task-tag-list .tag-select-btn.selected');
-                const newTag = selectedTag ? selectedTag.dataset.tag : '';
-
-                task.text = newName;
-                task.tag = newTag === '' ? null : newTag;
-                
-                saveTasks();
-                renderTasks();
-                if (typeof renderFilters === 'function') renderFilters(); 
-                
-                // Update dynamic title if the active task was edited
-                if (typeof focusedTaskId !== 'undefined' && focusedTaskId === task.id) {
-                    const event = new Event('tabChanged');
-                    document.dispatchEvent(event);
-                }
-            }
-            
-            document.getElementById('edit-tag-modal').classList.remove('show');
-            currentlyEditingTaskId = null;
-        });
-    }
-
-    const editModal = document.getElementById('edit-tag-modal');
-    const editNameInput = document.getElementById('edit-task-name-input');
-    const closeEditModalBtn = document.getElementById('close-edit-tag-modal');
-
-    // Press Enter to save
-    if (editNameInput && saveEditBtn) {
-        editNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                saveEditBtn.click();
-            }
-        });
-    }
-
-    // Click background overlay to close
-    if (editModal) {
-        editModal.addEventListener('click', (e) => {
-            if (e.target === editModal) {
-                editModal.classList.remove('show');
-                currentlyEditingTaskId = null;
-            }
-        });
-    }
-
-    // Close button
-    if (closeEditModalBtn) {
-        closeEditModalBtn.addEventListener('click', () => {
-            editModal.classList.remove('show');
-            currentlyEditingTaskId = null;
-        });
-    }
-
-  if (addBtn) addBtn.addEventListener('click', addTask);
-  
-  if (taskInput) {
-    taskInput.addEventListener('keypress', e => { 
-      if (e.key === 'Enter') addTask(); 
+      const taskItem = e.target.closest('.task-item');
+      if (taskItem) {
+        e.preventDefault();
+        openEditTaskModal(taskItem.dataset.id);
+      }
     });
   }
-  
+
+  function openEditTaskModal(id) {
+    const task = tasks.find(t => t.id === id);
+    if (!task) return;
+
+    currentlyEditingTaskId = id;
+
+    const nameInput = document.getElementById('edit-task-name-input');
+    if (nameInput) nameInput.value = task.text;
+
+    const tagList = document.getElementById('edit-task-tag-list');
+    if (tagList) {
+      tagList.innerHTML = `<button class="tag-select-btn ${!task.tag ? 'selected' : ''}" data-tag="">None</button>`;
+
+      savedTags.forEach(tag => {
+        const isSelected = task.tag === tag ? 'selected' : '';
+        tagList.innerHTML += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}">${escapeHTML(tag)}</button>`;
+      });
+
+      tagList.querySelectorAll('.tag-select-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          tagList.querySelectorAll('.tag-select-btn').forEach(b => b.classList.remove('selected'));
+          e.target.classList.add('selected');
+        });
+      });
+    }
+
+    const modal = document.getElementById('edit-tag-modal');
+    if (modal) {
+      modal.classList.add('show');
+      if (nameInput) setTimeout(() => nameInput.focus(), 100);
+    }
+  }
+
+  const saveEditBtn = document.getElementById('save-task-edit-btn');
+  if (saveEditBtn) {
+    saveEditBtn.addEventListener('click', () => {
+      if (!currentlyEditingTaskId) return;
+
+      const task = tasks.find(t => t.id === currentlyEditingTaskId);
+      if (task) {
+        const nameInput = document.getElementById('edit-task-name-input');
+        const newName = nameInput.value.trim();
+
+        if (!newName) {
+          if (typeof showToast === 'function') showToast('Task name cannot be empty.', 'warning');
+          return;
+        }
+
+        const selectedTag = document.querySelector('#edit-task-tag-list .tag-select-btn.selected');
+        const newTag = selectedTag ? selectedTag.dataset.tag : '';
+
+        task.text = newName;
+        task.tag = newTag === '' ? null : newTag;
+
+        saveTasks();
+        renderTasks();
+        if (typeof renderFilters === 'function') renderFilters();
+
+        // Update dynamic title if the active task was edited
+        if (typeof focusedTaskId !== 'undefined' && focusedTaskId === task.id) {
+          const event = new Event('tabChanged');
+          document.dispatchEvent(event);
+        }
+      }
+
+      document.getElementById('edit-tag-modal').classList.remove('show');
+      currentlyEditingTaskId = null;
+    });
+  }
+
+  const editModal = document.getElementById('edit-tag-modal');
+  const editNameInput = document.getElementById('edit-task-name-input');
+  const closeEditModalBtn = document.getElementById('close-edit-tag-modal');
+
+  // Press Enter to save
+  if (editNameInput && saveEditBtn) {
+    editNameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveEditBtn.click();
+      }
+    });
+  }
+
+  // Click background overlay to close
+  if (editModal) {
+    editModal.addEventListener('click', (e) => {
+      if (e.target === editModal) {
+        editModal.classList.remove('show');
+        currentlyEditingTaskId = null;
+      }
+    });
+  }
+
+  // Close button
+  if (closeEditModalBtn) {
+    closeEditModalBtn.addEventListener('click', () => {
+      editModal.classList.remove('show');
+      currentlyEditingTaskId = null;
+    });
+  }
+
+  if (addBtn) addBtn.addEventListener('click', addTask);
+
+  if (taskInput) {
+    taskInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') addTask();
+    });
+  }
+
   if (manageTagsBtn) {
     manageTagsBtn.addEventListener('click', () => {
       if (tagsModal) tagsModal.classList.add('show');
@@ -524,10 +524,10 @@ export function setupTaskEvents() {
 
   if (manageNewTagInput) {
     manageNewTagInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); 
-            if (manageAddTagBtn) manageAddTagBtn.click(); 
-        }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (manageAddTagBtn) manageAddTagBtn.click();
+      }
     });
   }
 
@@ -539,33 +539,33 @@ export function setupTaskEvents() {
 
   if (manageAddTagBtn) {
     manageAddTagBtn.addEventListener('click', () => {
-        if (!manageNewTagInput) return;
-        const newTagName = manageNewTagInput.value.trim();
-        
-        if (!newTagName) {
-            showToast('Please enter a valid tag name.', 'warning');
-            return;
-        }
+      if (!manageNewTagInput) return;
+      const newTagName = manageNewTagInput.value.trim();
 
-        const alreadyExists = savedTags.some(t => t.toLowerCase() === newTagName.toLowerCase());
-        if (!alreadyExists) {
-            setSavedTags([...savedTags, newTagName.charAt(0).toUpperCase() + newTagName.slice(1)]);
-            saveTasks();
-            renderTagsManagement();
-            renderFilters();
-            manageNewTagInput.value = '';
-            showToast('Tag added', 'success');
-        } else {
-            showToast('That tag already exists.', 'warning');
-        }
+      if (!newTagName) {
+        showToast('Please enter a valid tag name.', 'warning');
+        return;
+      }
+
+      const alreadyExists = savedTags.some(t => t.toLowerCase() === newTagName.toLowerCase());
+      if (!alreadyExists) {
+        setSavedTags([...savedTags, newTagName.charAt(0).toUpperCase() + newTagName.slice(1)]);
+        saveTasks();
+        renderTagsManagement();
+        renderFilters();
+        manageNewTagInput.value = '';
+        showToast('Tag added', 'success');
+      } else {
+        showToast('That tag already exists.', 'warning');
+      }
     });
   }
 
   // External trigger for focusing from timer
   document.addEventListener('autoFocusTask', (e) => {
-      if (e.detail && e.detail.id) {
-          toggleFocus(e.detail.id);
-      }
+    if (e.detail && e.detail.id) {
+      toggleFocus(e.detail.id);
+    }
   });
 
   // --- GEAR ICON (QUICK TAG MODAL) LOGIC ---
@@ -577,152 +577,152 @@ export function setupTaskEvents() {
   const quickModalTagInput = document.getElementById('quick-modal-tag-input');
 
   function renderQuickTagModal() {
-      if (!quickModalTagList) return;
-      quickModalTagList.innerHTML = '';
-      
-      // "No Tag" option
-      const noTagBtn = document.createElement('div');
-      noTagBtn.className = 'tag-chip selectable'; 
-      noTagBtn.textContent = '❌ No Tag';
-      noTagBtn.onclick = () => selectQuickTag(null);
-      quickModalTagList.appendChild(noTagBtn);
+    if (!quickModalTagList) return;
+    quickModalTagList.innerHTML = '';
 
-      // Existing Tags
-      savedTags.forEach(tag => {
-          const btn = document.createElement('div');
-          btn.className = 'tag-chip selectable'; 
-          btn.textContent = `#${tag}`;
-          btn.onclick = () => selectQuickTag(tag);
-          quickModalTagList.appendChild(btn);
-      });
+    // "No Tag" option
+    const noTagBtn = document.createElement('div');
+    noTagBtn.className = 'tag-chip selectable';
+    noTagBtn.textContent = '❌ No Tag';
+    noTagBtn.onclick = () => selectQuickTag(null);
+    quickModalTagList.appendChild(noTagBtn);
+
+    // Existing Tags
+    savedTags.forEach(tag => {
+      const btn = document.createElement('div');
+      btn.className = 'tag-chip selectable';
+      btn.textContent = `#${tag}`;
+      btn.onclick = () => selectQuickTag(tag);
+      quickModalTagList.appendChild(btn);
+    });
   }
 
   function selectQuickTag(tag) {
-      pendingQuickTag = tag;
-      if (quickTagModal) quickTagModal.classList.remove('show');
-      if (taskInput) taskInput.focus();
-      
-      if (tag) showToast(`Tag #${escapeHTML(tag)} selected`, 'success');
+    pendingQuickTag = tag;
+    if (quickTagModal) quickTagModal.classList.remove('show');
+    if (taskInput) taskInput.focus();
+
+    if (tag) showToast(`Tag #${escapeHTML(tag)} selected`, 'success');
   }
 
   if (advancedTaskBtn) {
-      advancedTaskBtn.addEventListener('click', () => {
-          playUI('click');
-          renderQuickTagModal();
-          if (quickTagModal) quickTagModal.classList.add('show');
-          if (quickModalTagInput) {
-              quickModalTagInput.value = '';
-              setTimeout(() => quickModalTagInput.focus(), 100);
-          }
-      });
+    advancedTaskBtn.addEventListener('click', () => {
+      playUI('click');
+      renderQuickTagModal();
+      if (quickTagModal) quickTagModal.classList.add('show');
+      if (quickModalTagInput) {
+        quickModalTagInput.value = '';
+        setTimeout(() => quickModalTagInput.focus(), 100);
+      }
+    });
   }
 
   if (closeQuickTagModal) {
-      closeQuickTagModal.addEventListener('click', () => {
-          if (quickTagModal) quickTagModal.classList.remove('show');
-      });
+    closeQuickTagModal.addEventListener('click', () => {
+      if (quickTagModal) quickTagModal.classList.remove('show');
+    });
   }
 
   // Handle adding new tag from inside the modal
   function addNewQuickTag() {
-      if (!quickModalTagInput) return;
-      const newTagRaw = quickModalTagInput.value.trim();
-      
-      if (!newTagRaw) {
-          showToast('Please enter a valid tag name.', 'warning');
-          return;
+    if (!quickModalTagInput) return;
+    const newTagRaw = quickModalTagInput.value.trim();
+
+    if (!newTagRaw) {
+      showToast('Please enter a valid tag name.', 'warning');
+      return;
+    }
+
+    if (newTagRaw) {
+      const existing = savedTags.find(t => t.toLowerCase() === newTagRaw.toLowerCase());
+      const newTag = existing || (newTagRaw.charAt(0).toUpperCase() + newTagRaw.slice(1));
+      if (!existing) {
+        setSavedTags([...savedTags, newTag]);
+        saveTasks();
+        renderFilters();
+
+        const tagsManagementList = document.getElementById('tags-management-list');
+        if (tagsManagementList && tagsManagementList.innerHTML !== '') {
+          const renderTagsEvent = new Event('refreshTagsManagement');
+          document.dispatchEvent(renderTagsEvent);
+        }
       }
-      
-      if (newTagRaw) {
-          const existing = savedTags.find(t => t.toLowerCase() === newTagRaw.toLowerCase());
-          const newTag = existing || (newTagRaw.charAt(0).toUpperCase() + newTagRaw.slice(1));
-          if (!existing) {
-              setSavedTags([...savedTags, newTag]);
-              saveTasks();
-              renderFilters(); 
-              
-              const tagsManagementList = document.getElementById('tags-management-list');
-              if (tagsManagementList && tagsManagementList.innerHTML !== '') {
-                  const renderTagsEvent = new Event('refreshTagsManagement');
-                  document.dispatchEvent(renderTagsEvent); 
-              }
-          }
-          selectQuickTag(newTag);
-      }
+      selectQuickTag(newTag);
+    }
   }
 
   if (quickModalAddBtn) {
-      quickModalAddBtn.addEventListener('click', addNewQuickTag);
+    quickModalAddBtn.addEventListener('click', addNewQuickTag);
   }
 
   if (quickModalTagInput) {
-      quickModalTagInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-              e.preventDefault();
-              addNewQuickTag();
-          }
-      });
+    quickModalTagInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addNewQuickTag();
+      }
+    });
   }
 
   if (quickTagModal) {
-      quickTagModal.addEventListener('click', (e) => {
-          if (e.target === quickTagModal) quickTagModal.classList.remove('show');
-      });
+    quickTagModal.addEventListener('click', (e) => {
+      if (e.target === quickTagModal) quickTagModal.classList.remove('show');
+    });
   }
 
   // --- Pomodoro Date Navigation & Calendar ---
-    const pomodoroDisplayBtn = document.getElementById('pomodoro-date-display');
-    const pomodoroDatePicker = document.getElementById('pomodoro-date-picker');
-    const pomodoroPrevDate = document.getElementById('pomodoro-prev-date');
-    const pomodoroNextDate = document.getElementById('pomodoro-next-date');
+  const pomodoroDisplayBtn = document.getElementById('pomodoro-date-display');
+  const pomodoroDatePicker = document.getElementById('pomodoro-date-picker');
+  const pomodoroPrevDate = document.getElementById('pomodoro-prev-date');
+  const pomodoroNextDate = document.getElementById('pomodoro-next-date');
 
-    // 1. Arrows
-    if (pomodoroPrevDate) {
-        pomodoroPrevDate.addEventListener('click', () => {
-            currentPomodoroDate.setDate(currentPomodoroDate.getDate() - 1);
-            updatePomodoroDateUI();
-            renderTasks();
-        });
-    }
-    if (pomodoroNextDate) {
-        pomodoroNextDate.addEventListener('click', () => {
-            currentPomodoroDate.setDate(currentPomodoroDate.getDate() + 1);
-            updatePomodoroDateUI();
-            renderTasks();
-        });
-    }
+  // 1. Arrows
+  if (pomodoroPrevDate) {
+    pomodoroPrevDate.addEventListener('click', () => {
+      currentPomodoroDate.setDate(currentPomodoroDate.getDate() - 1);
+      updatePomodoroDateUI();
+      renderTasks();
+    });
+  }
+  if (pomodoroNextDate) {
+    pomodoroNextDate.addEventListener('click', () => {
+      currentPomodoroDate.setDate(currentPomodoroDate.getDate() + 1);
+      updatePomodoroDateUI();
+      renderTasks();
+    });
+  }
 
-    // 2. Calendar Popup
-    if (pomodoroDisplayBtn && pomodoroDatePicker) {
-        pomodoroDisplayBtn.addEventListener('click', () => {
-            try { pomodoroDatePicker.showPicker(); } 
-            catch (e) { pomodoroDatePicker.click(); }
-        });
+  // 2. Calendar Popup
+  if (pomodoroDisplayBtn && pomodoroDatePicker) {
+    pomodoroDisplayBtn.addEventListener('click', () => {
+      try { pomodoroDatePicker.showPicker(); }
+      catch (e) { pomodoroDatePicker.click(); }
+    });
 
-        pomodoroDatePicker.addEventListener('change', (e) => {
-            if (!e.target.value) return;
-            // value is formatted as "YYYY-MM-DD"
-            const [year, month, day] = e.target.value.split('-').map(Number);
-            currentPomodoroDate = new Date(year, month - 1, day);
-            currentPomodoroDate.setHours(0, 0, 0, 0);
-            updatePomodoroDateUI();
-            renderTasks(); 
-        });
-    }
-    
-    // UI Updater for Pomodoro Date
-    function updatePomodoroDateUI() {
-        if (!pomodoroDisplayBtn) return;
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const diffTime = currentPomodoroDate.getTime() - today.getTime();
-        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays === 0) pomodoroDisplayBtn.textContent = 'Today';
-        else if (diffDays === -1) pomodoroDisplayBtn.textContent = 'Yesterday';
-        else if (diffDays === 1) pomodoroDisplayBtn.textContent = 'Tomorrow';
-        else pomodoroDisplayBtn.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
+  pomodoroDatePicker.addEventListener('change', (e) => {
+      if (!e.target.value) return;
+      // value is formatted as "YYYY-MM-DD"
+      const [year, month, day] = e.target.value.split('-').map(Number);
+      currentPomodoroDate = new Date(year, month - 1, day);
+      currentPomodoroDate.setHours(0, 0, 0, 0);
+      updatePomodoroDateUI();
+      renderTasks();
+    });
+  }
+
+  // UI Updater for Pomodoro Date
+  function updatePomodoroDateUI() {
+    if (!pomodoroDisplayBtn) return;
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diffTime = currentPomodoroDate.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) pomodoroDisplayBtn.textContent = 'Today';
+    else if (diffDays === -1) pomodoroDisplayBtn.textContent = 'Yesterday';
+    else if (diffDays === 1) pomodoroDisplayBtn.textContent = 'Tomorrow';
+    else pomodoroDisplayBtn.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
 
   // --- Sort Button Logic ---
   // Opening, closing, keyboard navigation, and ARIA now live in the shared
@@ -734,41 +734,41 @@ export function setupTaskEvents() {
   const sortDropdown = document.getElementById('sort-dropdown');
 
   if (taskSortBtn && sortDropdown) {
-      sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
-          item.addEventListener('click', () => {
-            const clickedSort = item.getAttribute('data-sort');
-            if (currentSort === clickedSort) {
-                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-            } else {
-                setCurrentSort(clickedSort);
-                setSortOrder((clickedSort === 'az' || clickedSort === 'tag') ? 'asc' : 'desc');
-            }
-            
-            // Clear old arrows and active states
-            sortDropdown.querySelectorAll('.dropdown-item').forEach(i => {
-                i.classList.remove('active-sort');
-                i.querySelector('.sort-dir').textContent = ''; 
-            });
-            
-            // Add active state and arrow to clicked item
-            item.classList.add('active-sort');
-            item.querySelector('.sort-dir').textContent = sortOrder === 'asc' ? '↑' : '↓';
-            
-            playUI('click');
-            sortDropdown.classList.remove('show');
-            renderTasks();
-          });
-      });
+    sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const clickedSort = item.getAttribute('data-sort');
+        if (currentSort === clickedSort) {
+          setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+          setCurrentSort(clickedSort);
+          setSortOrder((clickedSort === 'az' || clickedSort === 'tag') ? 'asc' : 'desc');
+        }
 
-      setupSelectDropdown({ wrapperId: 'task-sort-wrapper', triggerId: 'task-sort-btn', dropdownId: 'sort-dropdown' });
+        // Clear old arrows and active states
+        sortDropdown.querySelectorAll('.dropdown-item').forEach(i => {
+          i.classList.remove('active-sort');
+          i.querySelector('.sort-dir').textContent = '';
+        });
+
+        // Add active state and arrow to clicked item
+        item.classList.add('active-sort');
+        item.querySelector('.sort-dir').textContent = sortOrder === 'asc' ? '↑' : '↓';
+
+        playUI('click');
+        sortDropdown.classList.remove('show');
+        renderTasks();
+      });
+    });
+
+    setupSelectDropdown({ wrapperId: 'task-sort-wrapper', triggerId: 'task-sort-btn', dropdownId: 'sort-dropdown' });
   }
 
   // Listen for new tags added from the gear icon to update the modal
   document.addEventListener('refreshTagsManagement', () => {
-      // renderTagsManagement is defined at the bottom of tasks.js
-      if (typeof renderTagsManagement === 'function') {
-          renderTagsManagement();
-      }
+    // renderTagsManagement is defined at the bottom of tasks.js
+    if (typeof renderTagsManagement === 'function') {
+      renderTagsManagement();
+    }
   });
 }
 
@@ -777,7 +777,7 @@ export function setupTaskEvents() {
 function renderTagsManagement() {
   if (!tagsManagementList) return;
   tagsManagementList.innerHTML = '';
-  
+
   savedTags.forEach(tag => {
     const chip = document.createElement('div');
     chip.className = 'tag-chip deletable manageable';
@@ -862,20 +862,20 @@ function renderTagsManagement() {
 
 // --- DEEP LINKING EXPORT ---
 export function setTaskDate(dateObj) {
-    currentPomodoroDate = new Date(dateObj);
-    currentPomodoroDate.setHours(0,0,0,0);
-    
-    // Safely update the Pomodoro Date text manually
-    const display = document.getElementById('pomodoro-date-display');
-    if (display) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const diffDays = Math.ceil((currentPomodoroDate - today) / (1000 * 60 * 60 * 24));
-        
-        if (diffDays === 0) display.textContent = 'Today';
-        else if (diffDays === -1) display.textContent = 'Yesterday';
-        else if (diffDays === 1) display.textContent = 'Tomorrow';
-        else display.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-    renderTasks();
+  currentPomodoroDate = new Date(dateObj);
+  currentPomodoroDate.setHours(0,0,0,0);
+
+  // Safely update the Pomodoro Date text manually
+  const display = document.getElementById('pomodoro-date-display');
+  if (display) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const diffDays = Math.ceil((currentPomodoroDate - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) display.textContent = 'Today';
+    else if (diffDays === -1) display.textContent = 'Yesterday';
+    else if (diffDays === 1) display.textContent = 'Tomorrow';
+    else display.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  renderTasks();
 }

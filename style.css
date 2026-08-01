@@ -1,7 +1,8 @@
-/* No longer used — index.html now links css/*.css directly as parallel
+/*
+  No longer used — index.html now links css/*.css directly as parallel
   <link> tags in <head> instead of importing them through this file.
   This avoids the serial, blocking load that @import causes (each file
   only starts downloading after the previous one finishes). Kept as an
   empty file instead of deleted in case anything external still
-  references style.css by name.
+  references style.css by name. 
 */

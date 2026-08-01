@@ -39,9 +39,9 @@
           const state = JSON.parse(savedTimer);
           if (state.timeLeft === 0 && state.totalTime === 0) {
           } else {
-              if (state.currentPhase === 'work') document.body.classList.add('phase-work');
-              else if (state.currentPhase === 'shortBreak') document.body.classList.add('phase-short');
-              else if (state.currentPhase === 'longBreak') document.body.classList.add('phase-long');
+            if (state.currentPhase === 'work') document.body.classList.add('phase-work');
+            else if (state.currentPhase === 'shortBreak') document.body.classList.add('phase-short');
+            else if (state.currentPhase === 'longBreak') document.body.classList.add('phase-long');
           }
         } catch (err) {
           console.warn('Corrupted focusTimerState in localStorage, skipping pre-paint phase color.', err);
@@ -96,7 +96,7 @@
           </button>
           
           <button class="start-btn" id="start-btn">
-             <span class="btn-text">Start</span>
+            <span class="btn-text">Start</span>
           </button>
           
           <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase">
@@ -107,54 +107,54 @@
 
       <section class="tasks-section">
         <div class="section-top-wrapper">
-            <div class="date-nav-full glass-pill">
-                <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                <div class="date-display-toggle">
-                    <span id="pomodoro-date-display">Today</span>
-                    <input type="date" id="pomodoro-date-picker" class="native-date-input">
-                </div>
-                <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          <div class="date-nav-full glass-pill">
+            <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <div class="date-display-toggle">
+              <span id="pomodoro-date-display">Today</span>
+              <input type="date" id="pomodoro-date-picker" class="native-date-input">
+            </div>
+            <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          </div>
+
+          <div class="filter-row-unified">
+            <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags">
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </button>
+            
+            <div class="filter-scroll-area glass-pill dense" id="filter-list">
+              <div class="filter-bubble"></div>
             </div>
 
-            <div class="filter-row-unified">
-              <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags">
-                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            <div class="sort-wrapper" id="task-sort-wrapper">
+              <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks">
+                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
               </button>
+              <div id="sort-dropdown" class="custom-dropdown glass-effect w-140">
+                <div class="dropdown-item active-sort" data-sort="newest">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
+                  <span>Newest</span> <span class="sort-dir">↓</span>
+                </div>
+                <div class="dropdown-item" data-sort="time">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14M5 2h14M7 22V16l5-6-5-6V2M17 22V16l-5-6 5-6V2"/></svg> 
+                  <span>Time Spent</span> <span class="sort-dir"></span>
+                </div>
+                <div class="dropdown-item" data-sort="az">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
+                  <span>A-Z</span> <span class="sort-dir"></span>
+                </div>
+                <div class="dropdown-item" data-sort="tag">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
+                  <span>By Tag</span> <span class="sort-dir"></span>
+                </div>
+              </div>
+            </div>
               
-              <div class="filter-scroll-area glass-pill dense" id="filter-list">
-                <div class="filter-bubble"></div>
-              </div>
-
-              <div class="sort-wrapper" id="task-sort-wrapper">
-                <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks">
-                  <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
-                </button>
-                <div id="sort-dropdown" class="custom-dropdown glass-effect w-140">
-                  <div class="dropdown-item active-sort" data-sort="newest">
-                    <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
-                    <span>Newest</span> <span class="sort-dir">↓</span>
-                  </div>
-                  <div class="dropdown-item" data-sort="time">
-                    <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14M5 2h14M7 22V16l5-6-5-6V2M17 22V16l-5-6 5-6V2"/></svg> 
-                    <span>Time Spent</span> <span class="sort-dir"></span>
-                  </div>
-                  <div class="dropdown-item" data-sort="az">
-                    <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
-                    <span>A-Z</span> <span class="sort-dir"></span>
-                  </div>
-                  <div class="dropdown-item" data-sort="tag">
-                    <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
-                    <span>By Tag</span> <span class="sort-dir"></span>
-                  </div>
-              </div>
-            </div>
-                
-            </div>
+          </div>
         </div>
 
         <div class="task-list-container">
           <div id="guide-text" class="guide-text">
-              Your tasks will be grouped by date here...
+            Your tasks will be grouped by date here...
           </div>
         </div>
           
@@ -187,89 +187,89 @@
         </div>
 
         <div class="text-center">
-            <p style="font-size: 1rem; color: var(--text-main); margin-bottom: 5px;" class="dashboard-stats-text"><strong>0/0</strong></p>
-            <div style="min-height: 20px; display: flex; align-items: center; justify-content: center;">
-                <p id="motivational-quote" class="habit-quote-text" style="font-size: 0.85rem; margin: 0;">"Small steps every day."</p>
-            </div>
+          <p style="font-size: 1rem; color: var(--text-main); margin-bottom: 5px;" class="dashboard-stats-text"><strong>0/0</strong></p>
+          <div style="min-height: 20px; display: flex; align-items: center; justify-content: center;">
+            <p id="motivational-quote" class="habit-quote-text" style="font-size: 0.85rem; margin: 0;">"Small steps every day."</p>
+          </div>
         </div>
 
         <div class="progress-hero tight">
-            <div class="timer-circle mini">
-                <svg class="progress-ring" viewBox="0 0 180 180" width="180" height="180" id="habit-overview-ring">
-                  <circle class="progress-ring-track" cx="90" cy="90" r="80" fill="transparent" stroke-width="12"/>
-                  <circle class="progress-ring-circle overview-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #10b981; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
-                </svg>
-                <div class="ring-center-overlay">
-                    <span class="time-display mini" style="color: #10b981;">0%</span>
-                </div>
+          <div class="timer-circle mini">
+            <svg class="progress-ring" viewBox="0 0 180 180" width="180" height="180" id="habit-overview-ring">
+              <circle class="progress-ring-track" cx="90" cy="90" r="80" fill="transparent" stroke-width="12"/>
+              <circle class="progress-ring-circle overview-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #10b981; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
+            </svg>
+            <div class="ring-center-overlay">
+              <span class="time-display mini" style="color: #10b981;">0%</span>
             </div>
+          </div>
         </div>
 
         <div class="side-label-row">
-            <div class="vertical-side-label">
-                Top Streaks
-            </div>
-            <div id="top-streaks-list" class="side-label-stack">
-                </div>
+          <div class="vertical-side-label">
+            Top Streaks
+          </div>
+          <div id="top-streaks-list" class="side-label-stack">
+          </div>
         </div>
       </section>
 
       <section class="tasks-section" id="habit-list-panel" style="flex: 1; max-width: 450px;">
         
         <div class="section-top-wrapper">
-            <div class="date-nav-full glass-pill">
-                <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                <div class="date-display-toggle">
-                    <span id="habit-date-display">Today</span>
-                    <input type="date" id="native-date-picker" class="native-date-input">
-                </div>
-                <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          <div class="date-nav-full glass-pill">
+            <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <div class="date-display-toggle">
+              <span id="habit-date-display">Today</span>
+              <input type="date" id="native-date-picker" class="native-date-input">
+            </div>
+            <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          </div>
+
+          <div class="filter-row-unified">
+            <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories">
+              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            </button>
+              
+            <div class="filter-scroll-area glass-pill dense" id="habit-filter-container">
+              <div class="filter-bubble" id="habit-filter-bubble"></div>
             </div>
 
-            <div class="filter-row-unified">
-                <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories">
-                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-                </button>
-                
-                <div class="filter-scroll-area glass-pill dense" id="habit-filter-container">
-                    <div class="filter-bubble" id="habit-filter-bubble"></div>
+            <div class="sort-wrapper" id="habit-sort-wrapper">
+              <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits">
+                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
+              </button>
+              <div id="habit-sort-dropdown" class="custom-dropdown glass-effect w-140">
+                <div class="dropdown-item active-sort" data-sort="newest">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
+                  <span>Newest</span> <span class="sort-dir">↓</span>
                 </div>
-
-                <div class="sort-wrapper" id="habit-sort-wrapper">
-                    <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits">
-                        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
-                    </button>
-                    <div id="habit-sort-dropdown" class="custom-dropdown glass-effect w-140">
-                        <div class="dropdown-item active-sort" data-sort="newest">
-                            <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
-                            <span>Newest</span> <span class="sort-dir">↓</span>
-                        </div>
-                        <div class="dropdown-item" data-sort="az">
-                            <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
-                            <span>A-Z</span> <span class="sort-dir"></span>
-                        </div>
-                        <div class="dropdown-item" data-sort="category">
-                          <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
-                          <span>By Category</span> <span class="sort-dir"></span>
-                        </div>
-                        <div class="dropdown-item" data-sort="streak">
-                          <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg> 
-                          <span>By Streak</span> <span class="sort-dir"></span>
-                        </div>
-                    </div>
+                <div class="dropdown-item" data-sort="az">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
+                  <span>A-Z</span> <span class="sort-dir"></span>
                 </div>
+                <div class="dropdown-item" data-sort="category">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
+                  <span>By Category</span> <span class="sort-dir"></span>
+                </div>
+                <div class="dropdown-item" data-sort="streak">
+                  <svg class="ui-icon icon-inline-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg> 
+                  <span>By Streak</span> <span class="sort-dir"></span>
+                </div>
+              </div>
             </div>
+          </div>
         </div>
 
         <div class="task-list-container" id="habit-list-container" style="padding-bottom: 10px;">
           </div>
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
-            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings">
-                <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-            </button>
-            <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" maxlength="30">
-            <button class="add-btn" id="quick-add-habit-btn">Add</button>
+          <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          </button>
+          <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" maxlength="30">
+          <button class="add-btn" id="quick-add-habit-btn">Add</button>
         </div>
       </section>
 
@@ -280,129 +280,129 @@
     <!-- ========================================== -->
     <div id="progress-view" class="view-section" style="display: none;" role="tabpanel" aria-labelledby="tab-progress">
         
-        <section class="timer-section split-layout">
+      <section class="timer-section split-layout">
+          
+        <div class="timer-header glass-pill" style="margin-bottom: 0px;">
+          <span class="locked-task-label lg">
+            <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <strong class="dashboard-title-text" id="left-panel-title">This Week</strong>
+          </span>
+          <button class="icon-btn header-action" id="prog-settings-btn" aria-label="Dashboard Settings" title="Dashboard Settings">
+            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+          </button>
+        </div>
+
+        <div class="text-center">
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Your Stats</span>
+        </div>
+
+        <div class="progress-hero tight">
+          <div class="timer-circle mini">
+            <svg class="progress-ring" viewBox="0 0 180 180" width="180" height="180">
+              <circle class="progress-ring-track" cx="90" cy="90" r="80" fill="transparent" stroke-width="12"/>
+              <circle class="progress-ring-circle" id="hero-consistency-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #8b5cf6; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
+            </svg>
+            <div class="ring-center-overlay">
+              <span class="time-display mini" id="hero-score-value">0%</span>
+              <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Success</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-label-row">
+          <div class="vertical-side-label">
+            Overview
+          </div>
+          <div class="stat-stack side-label-stack">
+            <div class="stat-row">
+              <div class="stat-icon color-blue"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+              <div class="stat-details">
+                <span class="stat-label">Focus Time</span>
+                <div class="stat-value-row">
+                  <span class="stat-value" id="stat-total-focus">0h 0m</span>
+                  <span class="delta-badge" id="delta-focus"></span>
+                </div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-icon color-green"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+              <div class="stat-details">
+                <span class="stat-label">Items Completed</span>
+                <div class="stat-value-row">
+                  <span class="stat-value" id="stat-items-done">0</span>
+                  <span class="delta-badge" id="delta-items"></span>
+                </div>
+              </div>
+            </div>
+            <div class="stat-row">
+              <div class="stat-icon color-orange"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+              <div class="stat-details">
+                <span class="stat-label">Perfect Days</span>
+                <div class="stat-value-row">
+                  <span class="stat-value" id="stat-perfect-days">0</span>
+                  <span class="delta-badge" id="delta-perfect"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tasks-section" style="justify-content: flex-start; gap: 15px; overflow-y: hidden;">
+          
+        <div class="date-nav-full glass-pill no-margin-stacked">
+          <button class="icon-btn date-arrow" id="prog-prev-btn" title="Previous period" aria-label="Previous period"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             
-            <div class="timer-header glass-pill" style="margin-bottom: 0px;">
-                <span class="locked-task-label lg">
-                    <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    <strong class="dashboard-title-text" id="left-panel-title">This Week</strong>
-                </span>
-                <button class="icon-btn header-action" id="prog-settings-btn" aria-label="Dashboard Settings" title="Dashboard Settings">
-                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
-                </button>
+          <div class="sort-wrapper" id="prog-range-wrapper" style="flex: 1; text-align: center; position: relative;">
+            <button class="date-selector-btn" id="prog-range-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;">
+              <span id="prog-range-display">Weekly</span>
+              <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div id="prog-range-dropdown" class="custom-dropdown glass-effect centered">
+              <div class="dropdown-item" data-range="daily">Daily</div>
+              <div class="dropdown-item active-sort" data-range="weekly">Weekly</div>
+              <div class="dropdown-item" data-range="monthly">Monthly</div>
+              <div class="dropdown-item" data-range="custom">Custom Range...</div>
             </div>
-
-            <div class="text-center">
-                <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Your Stats</span>
-            </div>
-
-            <div class="progress-hero tight">
-                <div class="timer-circle mini">
-                    <svg class="progress-ring" viewBox="0 0 180 180" width="180" height="180">
-                        <circle class="progress-ring-track" cx="90" cy="90" r="80" fill="transparent" stroke-width="12"/>
-                        <circle class="progress-ring-circle" id="hero-consistency-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #8b5cf6; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
-                    </svg>
-                    <div class="ring-center-overlay">
-                        <span class="time-display mini" id="hero-score-value">0%</span>
-                        <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Success</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="side-label-row">
-                <div class="vertical-side-label">
-                    Overview
-                </div>
-                <div class="stat-stack side-label-stack">
-                    <div class="stat-row">
-                        <div class="stat-icon color-blue"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
-                        <div class="stat-details">
-                            <span class="stat-label">Focus Time</span>
-                            <div class="stat-value-row">
-                                <span class="stat-value" id="stat-total-focus">0h 0m</span>
-                                <span class="delta-badge" id="delta-focus"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-row">
-                        <div class="stat-icon color-green"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
-                        <div class="stat-details">
-                            <span class="stat-label">Items Completed</span>
-                            <div class="stat-value-row">
-                                <span class="stat-value" id="stat-items-done">0</span>
-                                <span class="delta-badge" id="delta-items"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="stat-row">
-                        <div class="stat-icon color-orange"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
-                        <div class="stat-details">
-                            <span class="stat-label">Perfect Days</span>
-                            <div class="stat-value-row">
-                                <span class="stat-value" id="stat-perfect-days">0</span>
-                                <span class="delta-badge" id="delta-perfect"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="tasks-section" style="justify-content: flex-start; gap: 15px; overflow-y: hidden;">
+          </div>
             
-            <div class="date-nav-full glass-pill no-margin-stacked">
-                <button class="icon-btn date-arrow" id="prog-prev-btn" title="Previous period" aria-label="Previous period"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
-                
-                <div class="sort-wrapper" id="prog-range-wrapper" style="flex: 1; text-align: center; position: relative;">
-                    <button class="date-selector-btn" id="prog-range-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;">
-                        <span id="prog-range-display">Weekly</span>
-                        <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    <div id="prog-range-dropdown" class="custom-dropdown glass-effect centered">
-                        <div class="dropdown-item" data-range="daily">Daily</div>
-                        <div class="dropdown-item active-sort" data-range="weekly">Weekly</div>
-                        <div class="dropdown-item" data-range="monthly">Monthly</div>
-                        <div class="dropdown-item" data-range="custom">Custom Range...</div>
-                    </div>
-                </div>
-                
-                <button class="icon-btn date-arrow" id="prog-next-btn" title="Next period" aria-label="Next period"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
-            </div>
+          <button class="icon-btn date-arrow" id="prog-next-btn" title="Next period" aria-label="Next period"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+        </div>
 
-            <div class="chart-block" id="prog-focus-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
-                <div class="date-header" style="margin-top: 0; font-size: 0.75rem; margin-bottom: 5px;">
-                    <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 
-                    Pomodoro
-                    <div class="date-header-line"></div>
-                </div>
-                <div class="heatmap-grid" id="focus-heatmap"></div>
-                <div class="heatmap-legend">
-                    <span class="legend-label">Less</span>
-                    <div class="heatmap-block"></div>
-                    <div class="heatmap-block focus-level-1"></div>
-                    <div class="heatmap-block focus-level-2"></div>
-                    <div class="heatmap-block focus-level-3"></div>
-                    <span class="legend-label">More</span>
-                </div>
-            </div>
+        <div class="chart-block" id="prog-focus-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
+          <div class="date-header" style="margin-top: 0; font-size: 0.75rem; margin-bottom: 5px;">
+            <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> 
+            Pomodoro
+            <div class="date-header-line"></div>
+          </div>
+          <div class="heatmap-grid" id="focus-heatmap"></div>
+          <div class="heatmap-legend">
+            <span class="legend-label">Less</span>
+            <div class="heatmap-block"></div>
+            <div class="heatmap-block focus-level-1"></div>
+            <div class="heatmap-block focus-level-2"></div>
+            <div class="heatmap-block focus-level-3"></div>
+            <span class="legend-label">More</span>
+          </div>
+        </div>
 
-            <div class="chart-block" id="prog-habit-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
-                <div class="date-header" style="margin-top: 0; font-size: 0.75rem; margin-bottom: 5px;">
-                    <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> 
-                    Habits
-                    <div class="date-header-line"></div>
-                </div>
-                <div class="heatmap-grid" id="habit-heatmap"></div>
-                <div class="heatmap-legend">
-                    <span class="legend-label">Less</span>
-                    <div class="heatmap-block"></div>
-                    <div class="heatmap-block habit-level-1"></div>
-                    <div class="heatmap-block habit-level-2"></div>
-                    <div class="heatmap-block habit-level-3"></div>
-                    <span class="legend-label">More</span>
-                </div>
-            </div>
-        </section>
+        <div class="chart-block" id="prog-habit-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
+          <div class="date-header" style="margin-top: 0; font-size: 0.75rem; margin-bottom: 5px;">
+            <svg class="ui-icon phase-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> 
+            Habits
+            <div class="date-header-line"></div>
+          </div>
+          <div class="heatmap-grid" id="habit-heatmap"></div>
+          <div class="heatmap-legend">
+            <span class="legend-label">Less</span>
+            <div class="heatmap-block"></div>
+            <div class="heatmap-block habit-level-1"></div>
+            <div class="heatmap-block habit-level-2"></div>
+            <div class="heatmap-block habit-level-3"></div>
+            <span class="legend-label">More</span>
+          </div>
+        </div>
+      </section>
     </div>
 
   </main> 
@@ -423,17 +423,17 @@
           <input type="text" id="mode-display" class="custom-select" value="Pomodoro Timer" readonly style="cursor: pointer;">
           <input type="hidden" id="mode-select" value="pomodoro">
           <div id="mode-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="pomodoro">Pomodoro Timer</div>
-              <div class="dropdown-item" data-val="stopwatch">Stopwatch (Count up)</div>
+            <div class="dropdown-item" data-val="pomodoro">Pomodoro Timer</div>
+            <div class="dropdown-item" data-val="stopwatch">Stopwatch (Count up)</div>
           </div>
         </div>
         <div class="setting-group toggle-group">
-            <label for="dark-mode-toggle">Dark mode</label>
-            <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider round"></span></label>
+          <label for="dark-mode-toggle">Dark mode</label>
+          <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
-            <label for="sound-toggle">Sound Effects (Haptics):</label>
-            <label class="switch"><input type="checkbox" id="sound-toggle" checked><span class="slider round"></span></label>
+          <label for="sound-toggle">Sound Effects (Haptics):</label>
+          <label class="switch"><input type="checkbox" id="sound-toggle" checked><span class="slider round"></span></label>
         </div>
 
         <div id="pomodoro-settings-wrapper">
@@ -442,11 +442,11 @@
             <input type="text" id="duration-display" class="custom-select" value="25 Minutes (Default)" readonly style="cursor: pointer;">
             <input type="hidden" id="work-duration" value="25">
             <div id="duration-dropdown" class="custom-dropdown glass-effect full-width">
-                <div class="dropdown-item" data-val="10">10 Minutes</div>
-                <div class="dropdown-item" data-val="15">15 Minutes</div>
-                <div class="dropdown-item" data-val="25">25 Minutes (Default)</div>
-                <div class="dropdown-item" data-val="45">45 Minutes</div>
-                <div class="dropdown-item" data-val="60">60 Minutes</div>
+              <div class="dropdown-item" data-val="10">10 Minutes</div>
+              <div class="dropdown-item" data-val="15">15 Minutes</div>
+              <div class="dropdown-item" data-val="25">25 Minutes (Default)</div>
+              <div class="dropdown-item" data-val="45">45 Minutes</div>
+              <div class="dropdown-item" data-val="60">60 Minutes</div>
             </div>
           </div>
 
@@ -464,10 +464,10 @@
             <input type="text" id="sound-display" class="custom-select" value="Soft Bell" readonly style="cursor: pointer;">
             <input type="hidden" id="sound-select" value="bell">
             <div id="sound-dropdown" class="custom-dropdown glass-effect full-width">
-                <div class="dropdown-item" data-val="mute">Mute (No Sound)</div>
-                <div class="dropdown-item" data-val="bell">Soft Bell</div>
-                <div class="dropdown-item" data-val="digital">Digital Beep</div>
-                <div class="dropdown-item" data-val="bird">Bird Chirp</div>
+              <div class="dropdown-item" data-val="mute">Mute (No Sound)</div>
+              <div class="dropdown-item" data-val="bell">Soft Bell</div>
+              <div class="dropdown-item" data-val="digital">Digital Beep</div>
+              <div class="dropdown-item" data-val="bird">Bird Chirp</div>
             </div>
           </div>
         </div>
@@ -490,138 +490,138 @@
 
   <div class="modal-overlay" id="tags-modal">
     <div class="modal-content glass-effect">
-        <div class="modal-header">
-            <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Manage Tags</h2>
-            <button class="close-btn" id="close-tags-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <div class="modal-header">
+        <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Manage Tags</h2>
+        <button class="close-btn" id="close-tags-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="add-tag-row">
+          <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select flex-1" maxlength="20">
+          <button id="manage-add-tag-btn" class="add-btn" style="padding: 8px 15px;">Add</button>
         </div>
-        <div class="modal-body">
-            <div class="add-tag-row">
-                <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select flex-1" maxlength="20">
-                <button id="manage-add-tag-btn" class="add-btn" style="padding: 8px 15px;">Add</button>
-            </div>
-            <hr class="modal-divider">
-            <div id="tags-management-list" class="tags-list-grid"></div>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px; text-align: center;">Click to delete.</p>
-        </div>
+        <hr class="modal-divider">
+        <div id="tags-management-list" class="tags-list-grid"></div>
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px; text-align: center;">Click to delete.</p>
+      </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="confirm-modal">
-        <div class="modal-content glass-effect" style="max-width: 320px; text-align: center; padding: 30px 20px;">
-            <h3 id="confirm-message" style="margin-bottom: 25px; font-size: 1.2rem; font-weight: bold;">Are you sure?</h3>
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button id="confirm-no-btn" class="add-btn cancel-btn" style="background: var(--btn-bg); color: var(--text-main); border: 1px solid var(--glass-border); flex: 1;">Cancel</button>
-                <button id="confirm-yes-btn" class="add-btn" style="background: var(--danger-color); color: white; border: none; flex: 1;">Yes, Delete</button>
-            </div>
-        </div>
+    <div class="modal-content glass-effect" style="max-width: 320px; text-align: center; padding: 30px 20px;">
+      <h3 id="confirm-message" style="margin-bottom: 25px; font-size: 1.2rem; font-weight: bold;">Are you sure?</h3>
+      <div style="display: flex; gap: 15px; justify-content: center;">
+        <button id="confirm-no-btn" class="add-btn cancel-btn" style="background: var(--btn-bg); color: var(--text-main); border: 1px solid var(--glass-border); flex: 1;">Cancel</button>
+        <button id="confirm-yes-btn" class="add-btn" style="background: var(--danger-color); color: white; border: none; flex: 1;">Yes, Delete</button>
+      </div>
     </div>
+  </div>
 
   <div class="modal-overlay" id="edit-tag-modal">
-        <div class="modal-content glass-effect" style="max-width: 380px;">
-            <div class="modal-header" style="margin-bottom: 15px;">
-                <h2>
-                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
-                    Edit Task
-                </h2>
-                <button class="close-btn" id="close-edit-tag-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-group" style="margin-bottom: 15px;">
-                    <label>Task Name</label>
-                    <input type="text" id="edit-task-name-input" class="custom-select" style="width: 100%;" maxlength="30" autocomplete="off">
-                </div>
-                <div class="setting-group" style="margin-bottom: 20px;">
-                    <label>Task Tag</label>
-                    <div id="edit-task-tag-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
-                        </div>
-                </div>
-                <button class="save-settings-btn" id="save-task-edit-btn">Save Changes</button>
-            </div>
+    <div class="modal-content glass-effect" style="max-width: 380px;">
+      <div class="modal-header" style="margin-bottom: 15px;">
+        <h2>
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
+          Edit Task
+        </h2>
+        <button class="close-btn" id="close-edit-tag-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group" style="margin-bottom: 15px;">
+          <label>Task Name</label>
+          <input type="text" id="edit-task-name-input" class="custom-select" style="width: 100%;" maxlength="30" autocomplete="off">
         </div>
+        <div class="setting-group" style="margin-bottom: 20px;">
+          <label>Task Tag</label>
+          <div id="edit-task-tag-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
+          </div>
+        </div>
+        <button class="save-settings-btn" id="save-task-edit-btn">Save Changes</button>
+      </div>
     </div>
+  </div>
 
   <div class="modal-overlay" id="habit-modal">
     <div class="modal-content glass-effect" style="max-width: 420px;">
-        <div class="modal-header">
-            <h2 id="habit-modal-title"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit</h2>
-            <button class="close-btn" id="close-habit-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-        </div>
+      <div class="modal-header">
+        <h2 id="habit-modal-title"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit</h2>
+        <button class="close-btn" id="close-habit-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
         
-        <div class="modal-body">
-            <div class="setting-group">
-                <label>Name</label>
-                <input type="text" id="habit-name-input" class="custom-select" placeholder="e.g., Drink Water, Read..." autocomplete="off" maxlength="30">
-            </div>
-
-            <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
-                <div class="setting-group" id="habit-category-wrapper" style="flex: 1; margin: 0; position: relative; min-width: 140px;">
-                    <label>Category</label>
-                    <input type="text" id="habit-category-input" class="custom-select" placeholder="e.g., Health" autocomplete="off" maxlength="20">
-                    <div id="habit-category-dropdown" class="custom-dropdown glass-effect full-width"></div>
-                </div>
-                <div class="setting-group" id="habit-frequency-wrapper" style="flex: 1; margin: 0; position: relative; min-width: 140px;">
-                  <label>Goal</label>
-                  <input type="text" id="habit-frequency-input-display" class="custom-select" value="Every Day" readonly style="cursor: pointer;">
-                  <input type="hidden" id="habit-frequency-value" value="everyday">
-                  
-                  <div id="habit-frequency-dropdown" class="custom-dropdown glass-effect full-width">
-                      <div class="dropdown-item" data-val="everyday">Every Day</div>
-                      <div class="dropdown-item" data-val="weekly">Once a Week</div>
-                      <div class="dropdown-item" data-val="biweekly">Every 2 Weeks</div>
-                      <div class="dropdown-item" data-val="monday">Every Monday</div>
-                      <div class="dropdown-item" data-val="tuesday">Every Tuesday</div>
-                      <div class="dropdown-item" data-val="wednesday">Every Wednesday</div>
-                      <div class="dropdown-item" data-val="thursday">Every Thursday</div>
-                      <div class="dropdown-item" data-val="friday">Every Friday</div>
-                      <div class="dropdown-item" data-val="saturday">Every Saturday</div>
-                      <div class="dropdown-item" data-val="sunday">Every Sunday</div>
-                      <div class="dropdown-item" data-val="custom">Custom Days...</div>
-                  </div>
-              </div>
-            </div>
-
-            <div class="setting-group" id="custom-days-picker" style="display: none; margin-bottom: 20px;">
-                <label>Select Days</label>
-                <div class="picker-grid" id="custom-days-grid">
-                    <div class="day-option" data-day="1">M</div>
-                    <div class="day-option" data-day="2">T</div>
-                    <div class="day-option" data-day="3">W</div>
-                    <div class="day-option" data-day="4">T</div>
-                    <div class="day-option" data-day="5">F</div>
-                    <div class="day-option" data-day="6">S</div>
-                    <div class="day-option" data-day="0">S</div>
-                </div>
-            </div>
-
-            <div class="setting-group">
-                <label>Color</label>
-                <div class="picker-grid" id="habit-color-picker">
-                    <div class="color-option selected" data-color="#3b82f6" style="background: #3b82f6;"></div>
-                    <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
-                    <div class="color-option" data-color="#f43f5e" style="background: #f43f5e;"></div>
-                    <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
-                    <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
-                </div>
-            </div>
-
-            <div class="setting-group">
-                <label>Icon</label>
-                <div class="picker-grid" id="habit-icon-picker" style="flex-wrap: wrap; gap: 10px;">
-                    <div class="icon-option selected" data-icon="book"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
-                    <div class="icon-option" data-icon="activity"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-                    <div class="icon-option" data-icon="droplet"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
-                    <div class="icon-option" data-icon="heart"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
-                    <div class="icon-option" data-icon="star"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
-                    <div class="icon-option" data-icon="coffee"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></div>
-                    <div class="icon-option" data-icon="moon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
-                    <div class="icon-option" data-icon="sun"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
-                    <div class="icon-option" data-icon="monitor"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
-                    <div class="icon-option" data-icon="music"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
-                </div>
-            </div>
-
-            <button class="save-settings-btn" id="save-habit-btn" style="margin-top: 15px;">Save Habit</button>
+      <div class="modal-body">
+        <div class="setting-group">
+          <label>Name</label>
+          <input type="text" id="habit-name-input" class="custom-select" placeholder="e.g., Drink Water, Read..." autocomplete="off" maxlength="30">
         </div>
+
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+          <div class="setting-group" id="habit-category-wrapper" style="flex: 1; margin: 0; position: relative; min-width: 140px;">
+            <label>Category</label>
+            <input type="text" id="habit-category-input" class="custom-select" placeholder="e.g., Health" autocomplete="off" maxlength="20">
+            <div id="habit-category-dropdown" class="custom-dropdown glass-effect full-width"></div>
+          </div>
+          <div class="setting-group" id="habit-frequency-wrapper" style="flex: 1; margin: 0; position: relative; min-width: 140px;">
+            <label>Goal</label>
+            <input type="text" id="habit-frequency-input-display" class="custom-select" value="Every Day" readonly style="cursor: pointer;">
+            <input type="hidden" id="habit-frequency-value" value="everyday">
+            
+            <div id="habit-frequency-dropdown" class="custom-dropdown glass-effect full-width">
+              <div class="dropdown-item" data-val="everyday">Every Day</div>
+              <div class="dropdown-item" data-val="weekly">Once a Week</div>
+              <div class="dropdown-item" data-val="biweekly">Every 2 Weeks</div>
+              <div class="dropdown-item" data-val="monday">Every Monday</div>
+              <div class="dropdown-item" data-val="tuesday">Every Tuesday</div>
+              <div class="dropdown-item" data-val="wednesday">Every Wednesday</div>
+              <div class="dropdown-item" data-val="thursday">Every Thursday</div>
+              <div class="dropdown-item" data-val="friday">Every Friday</div>
+              <div class="dropdown-item" data-val="saturday">Every Saturday</div>
+              <div class="dropdown-item" data-val="sunday">Every Sunday</div>
+              <div class="dropdown-item" data-val="custom">Custom Days...</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-group" id="custom-days-picker" style="display: none; margin-bottom: 20px;">
+          <label>Select Days</label>
+          <div class="picker-grid" id="custom-days-grid">
+            <div class="day-option" data-day="1">M</div>
+            <div class="day-option" data-day="2">T</div>
+            <div class="day-option" data-day="3">W</div>
+            <div class="day-option" data-day="4">T</div>
+            <div class="day-option" data-day="5">F</div>
+            <div class="day-option" data-day="6">S</div>
+            <div class="day-option" data-day="0">S</div>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>Color</label>
+          <div class="picker-grid" id="habit-color-picker">
+            <div class="color-option selected" data-color="#3b82f6" style="background: #3b82f6;"></div>
+            <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
+            <div class="color-option" data-color="#f43f5e" style="background: #f43f5e;"></div>
+            <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
+            <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label>Icon</label>
+          <div class="picker-grid" id="habit-icon-picker" style="flex-wrap: wrap; gap: 10px;">
+            <div class="icon-option selected" data-icon="book"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+            <div class="icon-option" data-icon="activity"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="icon-option" data-icon="droplet"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
+            <div class="icon-option" data-icon="heart"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+            <div class="icon-option" data-icon="star"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+            <div class="icon-option" data-icon="coffee"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></div>
+            <div class="icon-option" data-icon="moon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
+            <div class="icon-option" data-icon="sun"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+            <div class="icon-option" data-icon="monitor"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+            <div class="icon-option" data-icon="music"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
+          </div>
+        </div>
+
+        <button class="save-settings-btn" id="save-habit-btn" style="margin-top: 15px;">Save Habit</button>
+      </div>
     </div>
   </div>
 
@@ -644,106 +644,106 @@
 
   <div class="modal-overlay" id="categories-modal">
     <div class="modal-content glass-effect">
-        <div class="modal-header">
-            <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Manage Categories</h2>
-            <button class="close-btn" id="close-categories-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <div class="modal-header">
+        <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Manage Categories</h2>
+        <button class="close-btn" id="close-categories-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="add-tag-row">
+          <input type="text" id="manage-new-category-input" placeholder="New category name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
+          <button id="manage-add-category-btn" class="add-btn" style="padding: 8px 15px; background: #10b981; color: #FFF">Add</button>
         </div>
-        <div class="modal-body">
-            <div class="add-tag-row">
-                <input type="text" id="manage-new-category-input" placeholder="New category name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-                <button id="manage-add-category-btn" class="add-btn" style="padding: 8px 15px; background: #10b981; color: #FFF">Add</button>
-            </div>
-            <hr class="modal-divider">
-            <div id="categories-management-list" class="tags-list-grid"></div>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px; text-align: center;">Click to delete.</p>
-        </div>
+        <hr class="modal-divider">
+        <div id="categories-management-list" class="tags-list-grid"></div>
+        <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 15px; text-align: center;">Click to delete.</p>
+      </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="custom-range-modal">
-        <div class="modal-content glass-effect">
-            <div class="modal-header">
-                <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Custom Range</h2>
-                <button class="close-btn" id="close-custom-range" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-group">
-                    <label>Start Date</label>
-                    <input type="date" id="range-start-input" class="custom-select">
-                </div>
-                <div class="setting-group">
-                    <label>End Date</label>
-                    <input type="date" id="range-end-input" class="custom-select">
-                </div>
-                <button class="save-settings-btn" id="apply-custom-range">Apply Range</button>
-            </div>
+    <div class="modal-content glass-effect">
+      <div class="modal-header">
+        <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Custom Range</h2>
+        <button class="close-btn" id="close-custom-range" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group">
+          <label>Start Date</label>
+          <input type="date" id="range-start-input" class="custom-select">
         </div>
-    </div>
-
-    <div class="modal-overlay" id="progress-settings-modal">
-        <div class="modal-content glass-effect">
-            <div class="modal-header">
-                <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Settings</h2>
-                <button class="close-btn" id="close-prog-settings" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <div class="modal-body">
-                <div class="setting-group toggle-group">
-                    <label>Global Dark Mode</label>
-                    <label class="switch"><input type="checkbox" id="prog-dark-mode"><span class="slider round"></span></label>
-                </div>
-                <div class="setting-group toggle-group">
-                    <label>Sound Effects</label>
-                    <label class="switch"><input type="checkbox" id="prog-sound-toggle"><span class="slider round"></span></label>
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 15px 0;">
-                <div class="setting-group toggle-group">
-                    <label>Show Pomodoro Data</label>
-                    <label class="switch"><input type="checkbox" id="prog-toggle-focus" checked><span class="slider round"></span></label>
-                </div>
-                <div class="setting-group toggle-group">
-                    <label>Show Habits Data</label>
-                    <label class="switch"><input type="checkbox" id="prog-toggle-habits" checked><span class="slider round"></span></label>
-                </div>
-                <div class="setting-group toggle-group">
-                    <label>Show Comparisons (↑↓)</label>
-                    <label class="switch"><input type="checkbox" id="prog-toggle-compare" checked><span class="slider round"></span></label>
-                </div>
-                
-                <button class="save-settings-btn" id="save-prog-settings">Save & Apply</button>
-            </div>
+        <div class="setting-group">
+          <label>End Date</label>
+          <input type="date" id="range-end-input" class="custom-select">
         </div>
+        <button class="save-settings-btn" id="apply-custom-range">Apply Range</button>
+      </div>
     </div>
+  </div>
 
-    <div class="modal-overlay" id="daily-report-modal">
-        <div class="modal-content glass-effect" style="max-width: 380px;">
-            <div class="modal-header" style="margin-bottom: 10px;">
-                <h2 id="report-date-title">Report</h2>
-                <button class="close-btn" id="close-report-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            <div class="modal-body" id="report-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
-            </div>
+  <div class="modal-overlay" id="progress-settings-modal">
+    <div class="modal-content glass-effect">
+      <div class="modal-header">
+        <h2><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> Settings</h2>
+        <button class="close-btn" id="close-prog-settings" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group toggle-group">
+          <label>Global Dark Mode</label>
+          <label class="switch"><input type="checkbox" id="prog-dark-mode"><span class="slider round"></span></label>
         </div>
-    </div>
-
-    <div class="modal-overlay" id="delete-habit-modal">
-        <div class="modal-content glass-effect" style="max-width: 400px; text-align: center;">
-            <div class="modal-header" style="margin-bottom: 20px;">
-                <h2 style="color: var(--danger-color);">
-                    <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                    Delete Habit
-                </h2>
-                <button class="close-btn" id="close-delete-habit-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-            </div>
-            
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
-
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button class="add-btn" id="delete-habit-today-btn" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);">Clear Today's Record</button>
-                <button class="add-btn" id="delete-habit-future-btn" style="background: var(--warning-color); color: white; border: none;">Stop Tracking (Keep History)</button>
-                <button class="add-btn" id="delete-habit-all-btn" style="background: var(--danger-color); color: white; border: none;">Delete All History</button>
-            </div>
+        <div class="setting-group toggle-group">
+          <label>Sound Effects</label>
+          <label class="switch"><input type="checkbox" id="prog-sound-toggle"><span class="slider round"></span></label>
         </div>
+        <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 15px 0;">
+        <div class="setting-group toggle-group">
+          <label>Show Pomodoro Data</label>
+          <label class="switch"><input type="checkbox" id="prog-toggle-focus" checked><span class="slider round"></span></label>
+        </div>
+        <div class="setting-group toggle-group">
+          <label>Show Habits Data</label>
+          <label class="switch"><input type="checkbox" id="prog-toggle-habits" checked><span class="slider round"></span></label>
+        </div>
+        <div class="setting-group toggle-group">
+          <label>Show Comparisons (↑↓)</label>
+          <label class="switch"><input type="checkbox" id="prog-toggle-compare" checked><span class="slider round"></span></label>
+        </div>
+          
+        <button class="save-settings-btn" id="save-prog-settings">Save & Apply</button>
+      </div>
     </div>
+  </div>
+
+  <div class="modal-overlay" id="daily-report-modal">
+    <div class="modal-content glass-effect" style="max-width: 380px;">
+      <div class="modal-header" style="margin-bottom: 10px;">
+        <h2 id="report-date-title">Report</h2>
+        <button class="close-btn" id="close-report-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body" id="report-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="delete-habit-modal">
+    <div class="modal-content glass-effect" style="max-width: 400px; text-align: center;">
+      <div class="modal-header" style="margin-bottom: 20px;">
+        <h2 style="color: var(--danger-color);">
+          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          Delete Habit
+        </h2>
+        <button class="close-btn" id="close-delete-habit-modal" aria-label="Close"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
+
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button class="add-btn" id="delete-habit-today-btn" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);">Clear Today's Record</button>
+        <button class="add-btn" id="delete-habit-future-btn" style="background: var(--warning-color); color: white; border: none;">Stop Tracking (Keep History)</button>
+        <button class="add-btn" id="delete-habit-all-btn" style="background: var(--danger-color); color: white; border: none;">Delete All History</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="script.js"></script>
 </body>

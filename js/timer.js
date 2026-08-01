@@ -1,7 +1,7 @@
-import { 
+import {
   timeLeft, totalTime, timerId, isRunning, currentPhase, completedSessions,
   setTimeLeft, setTotalTime, setTimerId, setIsRunning, setCurrentPhase, setCompletedSessions,
-  tasks, focusedTaskId 
+  tasks, focusedTaskId
 } from './state.js';
 
 import { playAlarm } from './audio.js';
@@ -14,7 +14,7 @@ import { getLocalDateKey } from './date-utils.js';
 // instead of a bare "10" buried in updateDisplay().
 const TAB_TITLE_TASK_NAME_MAX_LENGTH = 24;
 
-// Note: These will be exported from tasks.js in the next steps. 
+// Note: These will be exported from tasks.js in the next steps.
 // We import them here to maintain modularity.
 import { saveTasks, formatTaskTime } from './tasks.js';
 
@@ -56,12 +56,12 @@ if (circle) {
 // TIMER STATE MANAGEMENT
 // ==========================================
 export function saveTimerState() {
-  const state = { 
-    timeLeft, 
-    totalTime, 
-    currentPhase, 
-    completedSessions, 
-    lastSaved: Date.now() 
+  const state = {
+    timeLeft,
+    totalTime,
+    currentPhase,
+    completedSessions,
+    lastSaved: Date.now()
   };
   writeJSON('focusTimerState', state);
 }
@@ -70,20 +70,20 @@ export function loadTimerState() {
   const state = readJSON('focusTimerState', null);
   if (!state) return false;
 
-  const FOUR_HOURS = 4 * 60 * 60 * 1000; 
+  const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
   // Invalidate state if it's older than 4 hours
-  if (Date.now() - state.lastSaved > FOUR_HOURS) { 
-    remove('focusTimerState'); 
-    return false; 
+  if (Date.now() - state.lastSaved > FOUR_HOURS) {
+    remove('focusTimerState');
+    return false;
   }
-  
+
   // Use state setters to update global state
   setTimeLeft(state.timeLeft);
   setTotalTime(state.totalTime);
   setCurrentPhase(state.currentPhase);
   setCompletedSessions(state.completedSessions);
-  
+
   const modeSelect = document.getElementById('mode-select');
   if (modeSelect && modeSelect.value === 'pomodoro') {
     updatePhaseText();
@@ -92,8 +92,8 @@ export function loadTimerState() {
   updateDisplay();
   updateCircle();
   updatePhaseColors();
-  
-  return true; 
+
+  return true;
 }
 
 // ==========================================
@@ -111,7 +111,7 @@ export function updateDisplay() {
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  
+
   timeDisplay.textContent = formattedTime;
 
   // FIX: this used to compute activeTaskName once here, then recompute it
@@ -149,9 +149,9 @@ export function updatePhaseText() {
   if (currentPhase === 'work') {
     if (breaksEnabled) {
       currentPhaseEl.innerHTML = `${icons.work} Work ${completedSessions + 1}/4`;
-      nextPhaseEl.innerHTML = (completedSessions === 3) 
-        ? `Next: ${icons.long} Long Break` 
-        : `Next: ${icons.short} Short Break`;
+      nextPhaseEl.innerHTML = (completedSessions === 3)
+      ? `Next: ${icons.long} Long Break`
+      : `Next: ${icons.short} Short Break`;
     } else {
       currentPhaseEl.innerHTML = `${icons.work} Work (Session ${completedSessions + 1})`;
       nextPhaseEl.innerHTML = `Breaks disabled`;
@@ -168,14 +168,14 @@ export function updatePhaseText() {
 export function updatePhaseColors() {
   // Clear all phase classes
   document.body.classList.remove('phase-work', 'phase-short', 'phase-long', 'phase-stopwatch');
-  
+
   const modeSelect = document.getElementById('mode-select');
-  
+
   if (modeSelect && modeSelect.value === 'stopwatch') {
-      document.body.classList.add('phase-stopwatch');
-      return;
+    document.body.classList.add('phase-stopwatch');
+    return;
   }
-  
+
   if (currentPhase === 'work') document.body.classList.add('phase-work');
   else if (currentPhase === 'shortBreak') document.body.classList.add('phase-short');
   else if (currentPhase === 'longBreak') document.body.classList.add('phase-long');
@@ -204,45 +204,45 @@ export function stopTimer() {
 
 export function resetTimer() {
   stopTimer();
-  
+
   const modeSelect = document.getElementById('mode-select');
-  
+
   if (modeSelect && modeSelect.value === 'stopwatch') {
     setTimeLeft(0);
     updateDisplay();
-    if (circle) circle.style.strokeDashoffset = circumference; 
+    if (circle) circle.style.strokeDashoffset = circumference;
     updatePhaseColors();
   } else {
-    setTimeLeft(totalTime); 
-    updateDisplay(); 
-    updateCircle(); 
+    setTimeLeft(totalTime);
+    updateDisplay();
+    updateCircle();
     updatePhaseColors();
   }
-  
-  saveTimerState(); 
+
+  saveTimerState();
 }
 
 export function switchPhase() {
   const breaksToggle = document.getElementById('breaks-toggle');
   const workDurationSelect = document.getElementById('work-duration');
-  
+
   const breaksEnabled = breaksToggle ? breaksToggle.checked : true;
   const workDuration = workDurationSelect ? parseInt(workDurationSelect.value) * 60 : 25 * 60;
-  
+
   if (currentPhase === 'work') {
     setCompletedSessions(completedSessions + 1);
-    
+
     if (breaksEnabled) {
-      if (completedSessions >= 4) { 
-        setCurrentPhase('longBreak'); 
-        setTotalTime(15 * 60); 
-        setCompletedSessions(0); 
-      } else { 
-        setCurrentPhase('shortBreak'); 
-        setTotalTime(5 * 60); 
+      if (completedSessions >= 4) {
+        setCurrentPhase('longBreak');
+        setTotalTime(15 * 60);
+        setCompletedSessions(0);
+      } else {
+        setCurrentPhase('shortBreak');
+        setTotalTime(5 * 60);
       }
-    } else { 
-      setTotalTime(workDuration); 
+    } else {
+      setTotalTime(workDuration);
     }
   } else {
     setCurrentPhase('work');
@@ -262,7 +262,7 @@ export function toggleTimer() {
   const modeSelect = document.getElementById('mode-select');
   const soundSelect = document.getElementById('sound-select');
   const autostartBreaks = document.getElementById('autostart-breaks-toggle');
-  
+
   const currentTaskName = currentTaskNameEl ? currentTaskNameEl.textContent : '';
 
   // Auto-focus logic
@@ -272,16 +272,16 @@ export function toggleTimer() {
       // Logic for toggling focus will be fully implemented in tasks.js
       const event = new CustomEvent('autoFocusTask', { detail: { id: activeTasks[0].id } });
       document.dispatchEvent(event);
-    } else { 
-      showToast('🎯 Please focus on a task first before starting the timer!', 'warning'); 
-      return; 
+    } else {
+      showToast('🎯 Please focus on a task first before starting the timer!', 'warning');
+      return;
     }
   }
 
   if (isRunning) {
     // Pause timer
     stopTimer();
-    
+
     // Ticks now only persist every few seconds (see below), so pausing
     // needs its own explicit save — otherwise up to a few seconds of
     // progress could be lost if the page is reloaded right after pausing.
@@ -289,18 +289,18 @@ export function toggleTimer() {
   } else {
     // Start timer
     setIsRunning(true);
-    
+
     if (startBtn) {
-      startBtn.querySelector('.btn-text').textContent = 'Pause'; 
+      startBtn.querySelector('.btn-text').textContent = 'Pause';
       startBtn.classList.add('pause');
     }
-    
+
     // Anchor drift-correction to right now, at whatever timeLeft currently is
     // (this covers both a fresh start and a resume-from-pause correctly).
     tickAnchorTime = Date.now();
     tickAnchorTimeLeft = timeLeft;
     tickLastElapsedSeconds = 0;
-    
+
     const interval = setInterval(() => {
       // Real elapsed time since the anchor, NOT "however many ticks fired" —
       // this is what makes the timer self-correct if a tick fires late
@@ -435,7 +435,7 @@ export function setupTimerEvents() {
   });
 
   document.addEventListener('tabChanged', () => {
-        const activeTab = readRaw('focusActiveTab');
-        if (!activeTab || activeTab === '0') updateDisplay();
-    });
+    const activeTab = readRaw('focusActiveTab');
+    if (!activeTab || activeTab === '0') updateDisplay();
+  });
 }

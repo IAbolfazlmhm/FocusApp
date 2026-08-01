@@ -11,11 +11,11 @@ import { readRaw, writeRaw } from './storage.js';
 export function escapeHTML(str) {
   if (str === null || str === undefined) return '';
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
 }
 
 // ==========================================
@@ -149,7 +149,7 @@ export const icons = {
 export function showToast(message, type = 'info', silent = false) {
   const container = document.getElementById('toast-container');
   if (!container) return;
-  
+
   const existingToasts = container.querySelectorAll('.toast');
   for (let t of existingToasts) {
     if (t.innerText.includes(message)) return;
@@ -163,10 +163,10 @@ export function showToast(message, type = 'info', silent = false) {
 
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
-  
+
   let icon = '';
-  if (type === 'success') icon = '<span style="color:#10b981">✔</span>'; 
-  if (type === 'warning') icon = '<span style="color:#f59e0b">⚠️</span>'; 
+  if (type === 'success') icon = '<span style="color:#10b981">✔</span>';
+  if (type === 'warning') icon = '<span style="color:#f59e0b">⚠️</span>';
 
   // Icon is always one of our own hardcoded strings above (safe). The
   // message can contain user-typed text (e.g. a tag name), so it's inserted
@@ -178,11 +178,11 @@ export function showToast(message, type = 'info', silent = false) {
   container.appendChild(toast);
 
   if (type !== 'info' && !silent) {
-      const soundToggle = document.getElementById('sound-toggle');
-      if (!soundToggle || soundToggle.checked) {
-          if (type === 'success') playUI('success');
-          if (type === 'warning') playUI('click');
-      }
+    const soundToggle = document.getElementById('sound-toggle');
+    if (!soundToggle || soundToggle.checked) {
+      if (type === 'success') playUI('success');
+      if (type === 'warning') playUI('click');
+    }
   }
 
   setTimeout(() => {
@@ -221,9 +221,9 @@ export function setupTabs() {
     const savedTabIndex = readRaw('focusActiveTab', 0);
     
     if (tabs[savedTabIndex]) {
-        setTimeout(() => {
-            tabs[savedTabIndex].click();
-        }, 50);
+      setTimeout(() => {
+        tabs[savedTabIndex].click();
+      }, 50);
     }
   });
 
@@ -255,28 +255,28 @@ export function setupTabs() {
       } else {
         document.body.classList.remove('phase-work', 'phase-short', 'phase-long', 'phase-stopwatch');
         if (index === 1 && habitsView) {
-            habitsView.style.display = 'flex';
-            document.body.classList.add('phase-habits');
-            document.body.classList.remove('phase-progress');
+          habitsView.style.display = 'flex';
+          document.body.classList.add('phase-habits');
+          document.body.classList.remove('phase-progress');
         }
         if (index === 2 && progressView) {
-            progressView.style.display = 'flex';
-            document.body.classList.remove('phase-habits');
-            document.body.classList.add('phase-progress');
-            // FIX: this used to dispatch synchronously, right here in the
-            // click handler — meaning the (fairly heavy) dashboard
-            // rebuild it triggers (heatmaps, stats, deltas) ran BEFORE the
-            // browser got a chance to paint the tab-switch bubble's first
-            // animation frame. Since the whole handler is one synchronous
-            // task, the bubble's slide would stall for however long that
-            // rebuild took, then jump to catch up — reading as lag.
-            // requestAnimationFrame defers it to right after the browser's
-            // next paint, so the bubble gets its first smooth frame in
-            // before the dashboard work happens (still effectively
-            // instant to the user, just no longer blocking the animation).
-            requestAnimationFrame(() => {
-                document.dispatchEvent(new Event('progressTabOpened'));
-            });
+          progressView.style.display = 'flex';
+          document.body.classList.remove('phase-habits');
+          document.body.classList.add('phase-progress');
+          // FIX: this used to dispatch synchronously, right here in the
+          // click handler — meaning the (fairly heavy) dashboard
+          // rebuild it triggers (heatmaps, stats, deltas) ran BEFORE the
+          // browser got a chance to paint the tab-switch bubble's first
+          // animation frame. Since the whole handler is one synchronous
+          // task, the bubble's slide would stall for however long that
+          // rebuild took, then jump to catch up — reading as lag.
+          // requestAnimationFrame defers it to right after the browser's
+          // next paint, so the bubble gets its first smooth frame in
+          // before the dashboard work happens (still effectively
+          // instant to the user, just no longer blocking the animation).
+          requestAnimationFrame(() => {
+              document.dispatchEvent(new Event('progressTabOpened'));
+          });
         }
       }
 

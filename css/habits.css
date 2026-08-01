@@ -4,116 +4,370 @@
 
 /* --- HABITS SPECIFIC UI --- */
 .habit-icon-circle {
-  width: 44px; height: 44px; border-radius: 14px; display: flex; align-items: center;
-  justify-content: center; flex-shrink: 0; margin-right: 12px;
-  /* Per-habit color is genuinely dynamic data, set from JS via these two
-     custom properties instead of a full inline style block. */
+  width: 44px; 
+  height: 44px; 
+  border-radius: 14px; 
+  display: flex; 
+  align-items: center;
+  justify-content: center; 
+  flex-shrink: 0; 
+  margin-right: 12px;
   background: var(--habit-bg, rgba(59, 130, 246, 0.15));
   color: var(--habit-color, #3b82f6);
 }
-#habit-date-display { color: var(--text-main); }
+
+#habit-date-display { 
+  color: var(--text-main); 
+}
 
 /* Left column: icon circle + name/category/streak text stack. */
-.habit-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; padding-right: 15px; }
-.habit-details { display: flex; flex-direction: column; justify-content: center; gap: 6px; flex: 1; min-width: 0; }
-.habit-name { font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
-.habit-meta-row { display: flex; align-items: center; gap: 12px; flex-wrap: nowrap; }
+.habit-info { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  flex: 1; 
+  min-width: 0; 
+  padding-right: 15px; 
+}
 
-.habit-category-badge { background: var(--glass-bg); padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem; color: var(--text-muted); border: 1px solid var(--glass-border); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: fit-content; max-width: 120px; flex: 0 0 auto; display: inline-block; line-height: 1; }
+.habit-details { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  gap: 6px; 
+  flex: 1; 
+  min-width: 0; 
+}
 
-.streak-flame { display: flex; align-items: center; gap: 4px; color: var(--text-muted); font-weight: bold; font-size: 0.85rem; flex: 0 0 auto; }
-.streak-flame .ui-icon { width: 14px; height: 14px; }
-.streak-flame span { font-variant-numeric: tabular-nums; }
-.streak-flame.active { color: #f97316; text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3); }
+.habit-name { 
+  font-weight: 600; 
+  color: var(--text-main); 
+  font-size: 1.15rem; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  display: block; 
+  width: 100%; 
+}
+
+.habit-meta-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  flex-wrap: nowrap; 
+}
+
+.habit-category-badge { 
+  background: var(--glass-bg); 
+  padding: 3px 9px 3px 11px; 
+  border-radius: 12px; 
+  font-size: 0.75rem; 
+  color: var(--text-muted); 
+  border: 1px solid var(--glass-border); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  width: fit-content; 
+  max-width: 120px; 
+  flex: 0 0 auto; 
+  display: inline-block; 
+  line-height: 1; 
+}
+
+.streak-flame { 
+  display: flex; 
+  align-items: center; 
+  gap: 4px; 
+  color: var(--text-muted); 
+  font-weight: bold; 
+  font-size: 0.85rem; 
+  flex: 0 0 auto; 
+}
+
+.streak-flame .ui-icon { 
+  width: 14px; 
+  height: 14px; 
+}
+
+.streak-flame span { 
+  font-variant-numeric: tabular-nums; 
+}
+
+.streak-flame.active { 
+  color: #f97316; 
+  text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3); 
+}
+
 /* Slightly larger variant used in the "top streaks" mini pills. */
-.streak-flame.lg { font-size: 0.95rem; }
+.streak-flame.lg { 
+  font-size: 0.95rem; 
+}
 
-.stat-icon.mini { width: 32px; height: 32px; }
+.stat-icon.mini { 
+  width: 32px; 
+  height: 32px; 
+}
 
-/* FIX: no flex-wrap here before — on a narrow phone, the 7-circle custom
-   day-of-week picker (justify-content: space-between, no wrap) had
-   nowhere to go but shrink each circle via the default flex-shrink,
-   squeezing already-small 32px tap targets down further on the
-   smallest screens. Wrapping instead keeps every swatch/day-circle at a
-   comfortable, consistent tap size regardless of viewport width. */
-.picker-grid { display: flex; gap: 12px; margin-top: 5px; flex-wrap: wrap; }
-/* Was an inline style="justify-content: space-between" on this specific
-   grid in index.html — moved here so the mobile override below (which
-   centers it once it wraps to two rows) can actually take effect; an
-   inline style attribute always wins over an external stylesheet rule,
-   media query or not. */
-#custom-days-grid { justify-content: space-between; }
+/* 
+  FIX: no flex-wrap here before — on a narrow phone, the 7-circle custom
+  day-of-week picker (justify-content: space-between, no wrap) had
+  nowhere to go but shrink each circle via the default flex-shrink,
+  squeezing already-small 32px tap targets down further on the
+  smallest screens. Wrapping instead keeps every swatch/day-circle at a
+  comfortable, consistent tap size regardless of viewport width. 
+*/
+.picker-grid { 
+  display: 
+  flex; 
+  gap: 12px; 
+  margin-top: 5px; 
+  flex-wrap: wrap; 
+}
 
-/* The 7-day picker's justify-content:space-between above only reads well
-   as a single full row, which is what it stays on wider screens. Once
-   .picker-grid's flex-wrap sends the overflow days to a second row on a
-   narrow phone, space-between stretches that leftover couple of days to
-   the far edges instead of grouping them together — centering reads
-   better once it's two rows. (This has to live after the rule above,
-   not just inside a media query in another file — same #id specificity
-   means whichever rule is later in the loaded stylesheet order wins
-   regardless of a media query matching, and habits.css loads after
-   layout.css.) */
+/* 
+  Was an inline style="justify-content: space-between" on this specific
+  grid in index.html — moved here so the mobile override below (which
+  centers it once it wraps to two rows) can actually take effect; an
+  inline style attribute always wins over an external stylesheet rule,
+  media query or not. 
+*/
+#custom-days-grid { 
+  justify-content: space-between; 
+}
+
+/* 
+  The 7-day picker's justify-content:space-between above only reads well
+  as a single full row, which is what it stays on wider screens. Once
+  .picker-grid's flex-wrap sends the overflow days to a second row on a
+  narrow phone, space-between stretches that leftover couple of days to
+  the far edges instead of grouping them together — centering reads
+  better once it's two rows. (This has to live after the rule above,
+  not just inside a media query in another file — same #id specificity
+  means whichever rule is later in the loaded stylesheet order wins
+  regardless of a media query matching, and habits.css loads after
+  layout.css.) 
+*/
 @media (max-width: 420px) {
   #custom-days-grid { justify-content: center; }
 }
-.color-option { width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.color-option:hover { transform: scale(1.1); }
-.color-option.selected { border: 3px solid var(--text-main); transform: scale(1.15); }
 
-.icon-option { width: 36px; height: 36px; border-radius: 10px; background: var(--btn-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
-.icon-option:hover { background: var(--btn-hover); color: var(--text-main); }
-.icon-option.selected { background: var(--text-main); color: var(--bg-main); border-color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.color-option { 
+  width: 32px; 
+  height: 32px; 
+  border-radius: 50%; 
+  cursor: pointer; 
+  border: 2px solid transparent; 
+  transition: all 0.2s; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+}
+
+.color-option:hover { 
+  transform: scale(1.1); 
+}
+
+.color-option.selected { 
+  border: 3px solid var(--text-main); 
+  transform: scale(1.15); 
+}
+
+.icon-option { 
+  width: 36px; 
+  height: 36px; 
+  border-radius: 10px; 
+  background: var(--btn-bg); 
+  border: 1px solid var(--glass-border); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  cursor: pointer; 
+  color: var(--text-muted); 
+  transition: all 0.2s; 
+}
+
+.icon-option:hover { 
+  background: var(--btn-hover); 
+  color: var(--text-main); 
+}
+
+.icon-option.selected { 
+  background: var(--text-main); 
+  color: var(--bg-main); 
+  border-color: var(--text-main); 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+}
 
 /* --- HABITS THEME & DASHBOARD HARMONY --- */
-.habit-settings-btn, #prev-day-btn, #next-day-btn { color: var(--text-muted); }
-.habit-settings-btn:hover, #prev-day-btn:hover, #next-day-btn:hover { color: var(--text-main); }
-body.phase-habits .date-nav-btn:hover { color: #10b981; }
+.habit-settings-btn, #prev-day-btn, #next-day-btn { 
+  color: var(--text-muted); 
+}
 
-body.phase-habits .habit-item:hover { border-color: #10b981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
-body.phase-habits .icon-btn:hover { color: #10b981; }
-body.phase-habits .done-btn:hover { background: #10b981; color: white; border-color: #10b981; }
+.habit-settings-btn:hover, #prev-day-btn:hover, #next-day-btn:hover { 
+  color: var(--text-main); 
+}
 
-.overview-ring { stroke-linecap: round; transition: stroke-dashoffset 1.5s ease-out; }
-body[data-theme="dark"] .overview-ring { stroke: #2dd4bf !important; }
+body.phase-habits .date-nav-btn:hover { 
+  color: #10b981; 
+}
 
-.habit-quote-text { font-size: 1rem; font-style: italic; color: var(--text-muted); transition: opacity 0.8s ease-in-out; opacity: 1; }
-.habit-quote-text.fade-out { opacity: 0; }
+body.phase-habits .habit-item:hover { 
+  border-color: #10b981; 
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); 
+}
 
-.dashboard-title-text, .dashboard-stats-text strong { color: var(--text-main) !important; }
-.locked-task-label svg { color: var(--text-muted); }
-.dashboard-stats-text { color: var(--text-muted) !important; }
+body.phase-habits .icon-btn:hover { 
+  color: #10b981; 
+}
 
-#habit-overview-dashboard .time-display { display: inline-block; transition: color 0.3s ease; color: var(--text-main); }
-body[data-theme="dark"] #habit-overview-dashboard .time-display { color: #2dd4bf !important; }
+body.phase-habits .done-btn:hover { 
+  background: #10b981; 
+  color: white; 
+  border-color: #10b981; 
+}
+
+.overview-ring { 
+  stroke-linecap: round; 
+  transition: stroke-dashoffset 1.5s ease-out; 
+}
+
+body[data-theme="dark"] .overview-ring { 
+  stroke: #2dd4bf !important; 
+}
+
+.habit-quote-text { 
+  font-size: 1rem; 
+  font-style: italic; 
+  color: var(--text-muted); 
+  transition: opacity 0.8s ease-in-out; 
+  opacity: 1; 
+}
+
+.habit-quote-text.fade-out { 
+  opacity: 0; 
+}
+
+.dashboard-title-text, .dashboard-stats-text strong { 
+  color: var(--text-main) !important; 
+}
+
+.locked-task-label svg { 
+  color: var(--text-muted); 
+}
+
+.dashboard-stats-text { 
+  color: var(--text-muted) !important; 
+}
+
+#habit-overview-dashboard .time-display { 
+  display: inline-block; 
+  transition: color 0.3s ease; 
+  color: var(--text-main); 
+}
+
+body[data-theme="dark"] #habit-overview-dashboard .time-display { 
+  color: #2dd4bf !important; 
+}
 
 /* --- DATE SELECTOR & PICKERS --- */
-.date-selector-btn { font-size: 1.1rem; margin: 0; min-width: 90px; text-align: center; color: var(--text-main) !important; font-weight: bold; cursor: pointer; padding: 0; background: transparent !important; border: none !important; box-shadow: none !important; transition: transform 0.2s ease, color 0.2s ease; user-select: none; }
-.date-selector-btn:hover {
-    color: var(--success-color) !important; 
+.date-selector-btn { 
+  font-size: 1.1rem; 
+  margin: 0; 
+  min-width: 90px; 
+  text-align: center; 
+  color: var(--text-main) !important; 
+  font-weight: bold; 
+  cursor: pointer; 
+  padding: 0; 
+  background: transparent !important; 
+  border: none !important; 
+  box-shadow: none !important; 
+  transition: transform 0.2s ease, color 0.2s ease; user-select: none; 
 }
-body[data-theme="dark"] .date-selector-btn:hover { color: #2dd4bf !important; background: transparent !important; }
 
-.day-option { width: 32px; height: 32px; border-radius: 50%; background: var(--btn-bg); border: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: bold; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
-.day-option.selected { background: var(--text-main); color: var(--bg-main); border-color: var(--text-main); }
+.date-selector-btn:hover {
+  color: var(--success-color) !important;
+}
+
+body[data-theme="dark"] .date-selector-btn:hover { 
+  color: #2dd4bf !important; 
+  background: transparent !important; 
+}
+
+.day-option { 
+  width: 32px; 
+  height: 32px; 
+  border-radius: 50%; 
+  background: var(--btn-bg); 
+  border: 1px solid var(--glass-border); 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 0.85rem; 
+  font-weight: bold; 
+  cursor: pointer; 
+  color: var(--text-muted); 
+  transition: all 0.2s; 
+}
+
+.day-option.selected { 
+  background: var(--text-main); 
+  color: var(--bg-main); 
+  border-color: var(--text-main); 
+}
 
 /* --- UNIFIED DROPDOWNS (Category & Goal) --- */
-#habit-category-wrapper, #habit-frequency-wrapper { position: relative !important; }
-#habit-category-dropdown, #habit-frequency-dropdown { top: calc(100% + 8px) !important; bottom: auto !important; left: 0 !important; width: 100% !important; max-height: 180px !important; padding: 5px !important; z-index: 99999 !important; }
-#habit-category-dropdown .dropdown-item, #habit-frequency-dropdown .dropdown-item { padding: 8px 12px !important; border-radius: 8px !important; margin-bottom: 2px !important; }
-#habit-category-dropdown { width: max-content !important; min-width: 100%; padding-right: 15px; white-space: nowrap; }
+#habit-category-wrapper, #habit-frequency-wrapper { 
+  position: relative !important; 
+}
+
+#habit-category-dropdown, #habit-frequency-dropdown { 
+  top: calc(100% + 8px) !important; 
+  bottom: auto !important; 
+  left: 0 !important; 
+  width: 100% !important; 
+  max-height: 180px !important; 
+  padding: 5px !important; 
+  z-index: 99999 !important; 
+}
+
+#habit-category-dropdown .dropdown-item, #habit-frequency-dropdown .dropdown-item { 
+  padding: 8px 12px !important; 
+  border-radius: 8px !important; 
+  margin-bottom: 2px !important; 
+}
+
+#habit-category-dropdown { 
+  width: max-content !important; 
+  min-width: 100%; 
+  padding-right: 15px; 
+  white-space: nowrap; 
+}
 
 /* --- MISSING HABITS BUBBLE THEMES --- */
-body.phase-habits .active-bubble { background-color: #10b981; }
-body.phase-habits .tab.active { color: white; }
-body.phase-habits .filter-bubble { background-color: #10b981 !important; }
-body.phase-habits .filter-btn.active { color: #ffffff !important; }
-#habit-overview-dashboard .time-display { display: inline-block; transition: color 0.3s ease; }
+body.phase-habits .active-bubble { 
+  background-color: #10b981; 
+}
+
+body.phase-habits .tab.active { 
+  color: white; 
+}
+
+body.phase-habits .filter-bubble { 
+  background-color: #10b981 !important; 
+}
+
+body.phase-habits .filter-btn.active { 
+  color: #ffffff !important; 
+}
+
+#habit-overview-dashboard .time-display { 
+  display: inline-block; 
+  transition: color 0.3s ease; 
+}
 
 /* BUG FIX: Ensure dark text on bright buttons in Dark Mode */
 body[data-theme="dark"] #manage-add-category-btn,
 body[data-theme="dark"] #save-habit-btn,
 body[data-theme="dark"] #quick-add-habit-btn,
 body[data-theme="dark"] #quick-modal-add-btn {
-    color: #0f172a !important; 
+  color: #0f172a !important;
 }

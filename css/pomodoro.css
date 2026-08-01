@@ -4,192 +4,766 @@
 
 /* --- CONTAINERS --- */
 .timer-section, .tasks-section {
-  flex: 1; min-width: 320px; background: var(--glass-bg);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border); padding: 30px; border-radius: 50px;
+  flex: 1; 
+  min-width: 320px; 
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px); 
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); 
+  padding: 30px; 
+  border-radius: 50px;
   box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
-  display: flex; flex-direction: column; align-items: center;
-  height: 550px; max-height: 80vh; justify-content: space-between;
+  display: flex; 
+  flex-direction: column; 
+  align-items: center;
+  height: 550px; 
+  max-height: 80vh; 
+  justify-content: space-between;
 }
 
 /* --- TIMER LEFT SIDE --- */
 .timer-header {
-  display: flex; justify-content: space-between; align-items: center;
-  width: 100%; /* BUG FIX: Matches Progress Tab Width */
-  padding: 8px 15px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  width: 100%;
+  padding: 8px 15px;
   margin-bottom: 20px;
 }
-.locked-task-label { display: flex; align-items: center; gap: 8px; color: var(--text-muted); font-size: 0.95rem; }
-.locked-task-label strong { color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
 
-.session-tracker { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-#current-phase {
-  font-size: 1.1rem; font-weight: bold; color: var(--text-main);
-  background: #f1f5f9; padding: 5px 15px; border-radius: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center;
+.locked-task-label { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  color: var(--text-muted); 
+  font-size: 0.95rem; 
 }
-#next-phase { font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; }
-.session-tracker.hidden { display: none; }
+
+.locked-task-label strong { 
+  color: var(--text-main); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  max-width: 120px; 
+}
+
+.session-tracker { 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+  gap: 5px; 
+}
+
+#current-phase {
+  font-size: 1.1rem; 
+  font-weight: bold; 
+  color: var(--text-main);
+  background: #f1f5f9; 
+  padding: 5px 15px; 
+  border-radius: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+  display: flex; 
+  align-items: center;
+}
+
+#next-phase { 
+  font-size: 0.85rem; 
+  color: var(--text-muted); 
+  display: flex; 
+  align-items: center; 
+}
+
+.session-tracker.hidden { 
+  display: none; 
+}
 
 /* BUG FIX: Centered precisely between header and controls */
-.timer-circle { position: relative; width: 250px; height: 250px; display: flex; justify-content: center; align-items: center; margin: auto; flex-shrink: 0; }
-/* Lets the ring SVG resize with its container (needed for the mobile
-   breakpoint that shrinks .timer-circle) — safe now that the SVG has a
-   viewBox, since that preserves its internal r=110 coordinate system
-   (what timer.js's circumference math reads) regardless of rendered size. */
-.timer-circle .progress-ring { width: 100%; height: 100%; }
-.progress-ring { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
-.progress-ring-track { stroke: #e2e8f0; }
-.progress-ring-circle { stroke: var(--theme-color); stroke-linecap: round; stroke-dasharray: 691; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear !important; }
+.timer-circle { 
+  position: relative; 
+  width: 250px; 
+  height: 250px; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  margin: auto; 
+  flex-shrink: 0; 
+}
 
-.time-display { font-size: 3.5rem; font-weight: bold; color: var(--theme-color); z-index: 1; font-family: 'Courier New', Courier, monospace; }
+/* 
+  Lets the ring SVG resize with its container (needed for the mobile
+  breakpoint that shrinks .timer-circle) — safe now that the SVG has a
+  viewBox, since that preserves its internal r=110 coordinate system
+  (what timer.js's circumference math reads) regardless of rendered size. 
+*/
+.timer-circle .progress-ring { 
+  width: 100%; 
+  height: 100%; 
+}
+
+.progress-ring { 
+  position: absolute; 
+  top: 0; 
+  left: 0; 
+  transform: rotate(-90deg); 
+}
+
+.progress-ring-track { 
+  stroke: #e2e8f0; 
+}
+
+.progress-ring-circle { 
+  stroke: var(--theme-color); 
+  stroke-linecap: round; 
+  stroke-dasharray: 691; 
+  stroke-dashoffset: 0; 
+  transition: stroke-dashoffset 1s linear !important; 
+}
+
+.time-display { 
+  font-size: 3.5rem; 
+  font-weight: bold; 
+  color: var(--theme-color); 
+  z-index: 1; 
+  font-family: 'Courier New', Courier, monospace; 
+}
 
 /* BUG FIX: Controls pill width matches header */
-.timer-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; width: 100%; padding: 8px 15px; margin: 0 auto; }
-.start-btn { padding: 12px 30px; border: none; border-radius: 20px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background-color: var(--theme-color); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--glass-border); transition: all 0.2s; min-width: 100px; }
+.timer-controls { 
+  display: grid; 
+  grid-template-columns: 1fr auto 1fr; 
+  align-items: center; 
+  width: 100%; 
+  padding: 8px 15px; 
+  margin: 0 auto; 
+}
+
+.start-btn { 
+  padding: 12px 30px; 
+  border: none; 
+  border-radius: 20px; 
+  font-size: 1.1rem; 
+  font-weight: bold; 
+  cursor: pointer; 
+  background-color: var(--theme-color); 
+  color: white; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+  border: 1px solid var(--glass-border); 
+  transition: all 0.2s; 
+  min-width: 100px; 
+}
 
 /* BUG FIX: Darken on hover using brightness filter */
-.start-btn:hover, .add-btn:hover { filter: brightness(0.85); transform: translateY(-2px); }
+.start-btn:hover, .add-btn:hover { 
+  filter: brightness(0.85); 
+  transform: translateY(-2px); 
+}
 
-.start-btn.pause { opacity: 0.9; transform: scale(0.98); box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); }
-.start-btn.pause:hover { opacity: 1; transform: scale(1); filter: brightness(0.85); }
-.reset-btn { justify-self: end; margin-right: 10px; }
-.skip-btn { justify-self: start; margin-left: 10px; }
-.reset-btn:hover { color: #3b82f6 !important; }
-.skip-btn:hover { color: #eab308 !important; }
+.start-btn.pause {
+  opacity: 0.9; 
+  transform: scale(0.98); 
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.2); 
+}
+
+.start-btn.pause:hover { 
+  opacity: 1; 
+  transform: scale(1); 
+  filter: brightness(0.85); 
+}
+
+.reset-btn { 
+  justify-self: end; 
+  margin-right: 10px; 
+}
+
+.skip-btn { 
+  justify-self: start; 
+  margin-left: 10px; 
+}
+
+.reset-btn:hover { 
+  color: #3b82f6 !important; 
+}
+
+.skip-btn:hover { 
+  color: #eab308 !important; 
+}
 
 /* --- TASKS RIGHT SIDE --- */
-.tasks-section { justify-content: space-between; align-items: stretch; }
-.task-list-container { width: calc(100% + 20px); margin-left: -10px; padding: 10px; flex: 1; padding-bottom: 30px; margin-bottom: 20px; overflow-y: auto; display: flex; flex-direction: column; -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%); }
-.task-list-container.is-scrolled { -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%); }
-.task-list-container::-webkit-scrollbar { display: none; }
-.guide-text { text-align: center; color: var(--text-muted); font-size: 0.9rem; font-style: italic; margin-top: 15px; order: 3; }
+.tasks-section { 
+  justify-content: space-between; 
+  align-items: stretch; 
+}
 
-.add-task-area { display: flex; width: 100%; padding: 6px 6px 6px 20px; align-items: center; gap: 8px; }
-.task-input { flex: 1; background: transparent; border: none; font-size: 1rem; outline: none; color: var(--text-main); min-width: 0; }
+.task-list-container { 
+  width: calc(100% + 20px); 
+  margin-left: -10px; 
+  padding: 10px; 
+  flex: 1; 
+  padding-bottom: 30px; 
+  margin-bottom: 20px; 
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column; 
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%); 
+  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%); 
+}
+
+.task-list-container.is-scrolled { 
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%); 
+  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%); 
+}
+
+.task-list-container::-webkit-scrollbar { 
+  display: none; 
+}
+
+.guide-text { 
+  text-align: center; 
+  color: var(--text-muted); 
+  font-size: 0.9rem; 
+  font-style: italic; 
+  margin-top: 15px; 
+  order: 3; 
+}
+
+.add-task-area { 
+  display: flex; 
+  width: 100%; 
+  padding: 6px 6px 6px 20px; 
+  align-items: center; 
+  gap: 8px; 
+}
+
+.task-input { 
+  flex: 1; 
+  background: transparent; 
+  border: none; 
+  font-size: 1rem; 
+  outline: none; 
+  color: var(--text-main); 
+  min-width: 0; 
+}
 
 /* --- TASK ITEMS (CARDS) --- */
-.task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; width: 100%; margin-bottom: 12px; border: 2px solid var(--glass-border); border-radius: 50px; background: var(--glass-bg); backdrop-filter: blur(10px); transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; order: 2; min-height: 76px; }
-.task-item:hover { border-color: #8ecae6; box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2); }
+.task-item { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  padding: 15px 20px; 
+  width: 100%; 
+  margin-bottom: 12px; 
+  border: 2px solid var(--glass-border); 
+  border-radius: 50px; 
+  background: var(--glass-bg); 
+  backdrop-filter: blur(10px); 
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; 
+  order: 2; 
+  min-height: 76px; 
+}
 
-/* Left side of a task card: name on top, tag + time badge below. This used
-   to be ".task-info" with a conflicting CSS rule (align-items:flex-start,
-   gap:5px) that every task-item template silently overrode via inline
-   styles (flex-direction:column, gap:8px) — the class rule never actually
-   took effect, it just sat there as dead/misleading CSS. */
-.task-info { display: flex; flex-direction: column; justify-content: center; gap: 8px; flex: 1; min-width: 0; padding-right: 15px; }
-.task-name { font-weight: 600; color: var(--text-main); font-size: 1.15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; }
+.task-item:hover { 
+  border-color: #8ecae6; 
+  box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2); 
+}
+
+/* 
+  Left side of a task card: name on top, tag + time badge below. This used
+  to be ".task-info" with a conflicting CSS rule (align-items:flex-start,
+  gap:5px) that every task-item template silently overrode via inline
+  styles (flex-direction:column, gap:8px) — the class rule never actually
+  took effect, it just sat there as dead/misleading CSS. 
+*/
+.task-info { 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: center; 
+  gap: 8px; 
+  flex: 1; 
+  min-width: 0; 
+  padding-right: 15px; 
+}
+
+.task-name { 
+  font-weight: 600; 
+  color: var(--text-main); 
+  font-size: 1.15rem; 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  display: block; 
+  width: 100%; 
+}
 
 /* Row holding the tag pill + time badge side by side. */
-.task-tag-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.task-tag-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  flex-wrap: nowrap; 
+}
 
-/* Per-tag color (background/text/border) is the one thing that's genuinely
-   per-instance data, not a fixed style — set via CSS custom properties
-   from JS (--tag-bg/--tag-color/--tag-border) instead of a full inline
-   style block, with sane defaults if a tag has no custom color. */
+/* 
+  Per-tag color (background/text/border) is the one thing that's genuinely
+  per-instance data, not a fixed style — set via CSS custom properties
+  from JS (--tag-bg/--tag-color/--tag-border) instead of a full inline
+  style block, with sane defaults if a tag has no custom color. 
+*/
 .task-tag {
-  padding: 3px 9px 3px 11px; border-radius: 12px; font-size: 0.75rem;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  width: fit-content; max-width: 120px; flex: 0 0 auto;
-  display: inline-block; height: max-content; line-height: 1;
+  padding: 3px 9px 3px 11px; 
+  border-radius: 12px; 
+  font-size: 0.75rem;
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  width: fit-content; 
+  max-width: 120px; 
+  flex: 0 0 auto;
+  display: inline-block; 
+  height: max-content; 
+  line-height: 1;
   background: var(--tag-bg, var(--glass-bg));
   color: var(--tag-color, var(--text-muted));
   border: 1px solid var(--tag-border, var(--glass-border));
 }
 
-.task-time-badge { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin: 0; white-space: nowrap; flex: 0 0 auto; display: flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
-
-.task-actions { display: flex; gap: 6px; opacity: 0.6; transition: opacity 0.2s; flex-shrink: 0; }
-.task-item:hover .task-actions { opacity: 1; }
-.done-btn, .remove-btn, .focus-btn, .edit-tag-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--btn-bg); color: var(--text-muted); cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-.done-btn:hover { background: var(--success-color); color: white; border-color: var(--success-color); transform: translateY(-2px); }
-.remove-btn:hover { background: var(--danger-color); color: white; border-color: var(--danger-color); transform: translateY(-2px); }
-.focus-btn:hover { background: #3b82f6; color: white; border-color: #3b82f6; transform: translateY(-2px); }
-.edit-tag-btn:hover { background: #f59e0b; color: white; border-color: #f59e0b; transform: translateY(-2px); box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); }
-.task-actions svg { width: 16px; height: 16px; }
-
-.task-item.active-focus { order: 1; border-color: var(--text-main); background-color: var(--glass-bg); border-left: 6px solid var(--text-main); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); }
-.task-item.completed { background-color: var(--btn-bg); opacity: 0.55; border-color: var(--glass-border); }
-.task-item.completed .task-name { text-decoration: none; }
-body.phase-work .task-item.completed { background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.15); }
-body.phase-short .task-item.completed { background: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.15); }
-body.phase-long .task-item.completed { background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); }
-body.phase-stopwatch .task-item.completed { background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.15); }
-body.phase-habits .task-item.completed { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15); }
-
-/* --- FILTER NAV REVISED --- */
-.filter-nav-wrapper { display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 15px; }
-.manage-tags-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 50%; width: 36px; height: 36px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
-.manage-tags-btn:hover { background: var(--btn-hover); color: var(--text-main); }
-.filter-scroll-area { position: relative; display: flex; align-items: center; overflow-x: auto; flex: 1; gap: 5px; scrollbar-width: none; padding: 5px; background: var(--glass-bg); border-radius: 40px; border: 1px solid var(--glass-border); }
-.filter-scroll-area::-webkit-scrollbar { display: none; }
-.filter-btn { background: transparent; border: none; padding: 8px 16px; border-radius: 30px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: color 0.3s; z-index: 2; position: relative; }
-.filter-btn.active { color: white; }
-.filter-bubble { position: absolute; top: 5px; left: 5px; height: calc(100% - 10px); background: var(--text-main); border-radius: 30px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1; pointer-events: none; }
-
-body.phase-work .filter-bubble, body.phase-work .manage-tags-btn:hover { background-color: #f43f5e; color: white; border-color: #f43f5e; }
-body.phase-short .filter-bubble, body.phase-short .manage-tags-btn:hover { background-color: #14b8a6; color: white; border-color: #14b8a6; }
-body.phase-long .filter-bubble, body.phase-long .manage-tags-btn:hover { background-color: #3b82f6; color: white; border-color: #3b82f6; }
-body.phase-stopwatch .filter-bubble, body.phase-stopwatch .manage-tags-btn:hover { background-color: #8b5cf6; color: white; border-color: #8b5cf6; }
-
-/* --- DATE HEADER & SORT BTN --- */
-.date-header { position: relative; width: 100%; font-size: 0.8rem; font-weight: bold; color: var(--text-muted); margin: 15px 0 8px 0; padding-left: 5px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; user-select: none; -webkit-user-select: none; }
-.date-header-line { flex-grow: 1; height: 1px; background: rgba(148, 163, 184, 0.4); margin-left: 15px; position: relative; z-index: 10; pointer-events: none; }
-
-/* BUG FIX: Date text hover color matches phase */
-#pomodoro-date-display, #habit-date-display { transition: color 0.2s; }
-#pomodoro-date-display:hover, #habit-date-display:hover { color: var(--theme-color) !important; }
-
-body[data-theme="dark"] #pomodoro-date-display:hover, 
-body[data-theme="dark"] #habit-date-display:hover { 
-    color: var(--theme-color) !important; 
+.task-time-badge { 
+  font-size: 0.75rem; 
+  color: var(--text-muted); 
+  font-weight: 600; 
+  margin: 0; 
+  white-space: nowrap; 
+  flex: 0 0 auto; 
+  display: flex; 
+  align-items: center; 
+  gap: 4px; 
+  font-variant-numeric: tabular-nums; 
 }
 
-.sort-btn-inline { background: transparent; border: none; color: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 6px; opacity: 0.7; transition: all 0.2s; }
-.sort-btn-inline:hover { opacity: 1; color: var(--theme-color); background: var(--btn-bg); }
+.task-actions { 
+  display: flex; 
+  gap: 6px; 
+  opacity: 0.6; 
+  transition: opacity 0.2s; 
+  flex-shrink: 0; 
+}
+
+.task-item:hover .task-actions { 
+  opacity: 1; 
+}
+
+.done-btn, .remove-btn, .focus-btn, .edit-tag-btn { 
+  width: 28px; 
+  height: 28px; 
+  border-radius: 8px; 
+  border: 1px solid var(--glass-border); 
+  background: var(--btn-bg); 
+  color: var(--text-muted); 
+  cursor: pointer; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+.done-btn:hover { 
+  background: var(--success-color); 
+  color: white; 
+  border-color: var(--success-color); 
+  transform: translateY(-2px); 
+}
+
+.remove-btn:hover { 
+  background: var(--danger-color); 
+  color: white; 
+  border-color: var(--danger-color); 
+  transform: translateY(-2px); 
+}
+
+.focus-btn:hover { 
+  background: #3b82f6; 
+  color: white; 
+  border-color: #3b82f6; 
+  transform: translateY(-2px); 
+}
+
+.edit-tag-btn:hover { 
+  background: #f59e0b; 
+  color: white; 
+  border-color: #f59e0b; 
+  transform: translateY(-2px); 
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3); 
+}
+
+.task-actions svg { 
+  width: 16px; 
+  height: 16px; 
+}
+
+.task-item.active-focus { 
+  order: 1; 
+  border-color: var(--text-main); 
+  background-color: var(--glass-bg); 
+  border-left: 6px solid var(--text-main); 
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); 
+}
+
+.task-item.completed { 
+  background-color: var(--btn-bg); 
+  opacity: 0.55; 
+  border-color: var(--glass-border); 
+}
+
+.task-item.completed .task-name { 
+  text-decoration: none; 
+}
+
+body.phase-work .task-item.completed { 
+  background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.15); 
+}
+
+body.phase-short .task-item.completed { 
+  background: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.15); 
+}
+
+body.phase-long .task-item.completed { 
+  background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); 
+}
+body.phase-stopwatch .task-item.completed { 
+  background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.15); 
+}
+
+body.phase-habits .task-item.completed { 
+  background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15); 
+}
+
+/* --- FILTER NAV REVISED --- */
+.filter-nav-wrapper { 
+  display: flex; 
+  align-items: center; 
+  gap: 10px; 
+  width: 100%; 
+  margin-bottom: 15px; 
+}
+
+.manage-tags-btn { 
+  background: var(--glass-bg); 
+  border: 1px solid var(--glass-border); 
+  border-radius: 50%; 
+  width: 36px; 
+  height: 36px; 
+  flex-shrink: 0; 
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  color: var(--text-muted); 
+  cursor: pointer; 
+  transition: all 0.2s; 
+}
+
+.manage-tags-btn:hover { 
+  background: var(--btn-hover); 
+  color: var(--text-main); 
+}
+
+.filter-scroll-area { 
+  position: relative; 
+  display: flex; 
+  align-items: center; 
+  overflow-x: auto; 
+  flex: 1; 
+  gap: 5px; 
+  scrollbar-width: none; 
+  padding: 5px; 
+  background: var(--glass-bg); 
+  border-radius: 40px; 
+  border: 1px solid var(--glass-border); 
+}
+
+.filter-scroll-area::-webkit-scrollbar { 
+  display: none; 
+}
+
+.filter-btn { 
+  background: transparent; 
+  border: none; 
+  padding: 8px 16px; 
+  border-radius: 30px; 
+  color: var(--text-muted); 
+  font-size: 0.85rem; 
+  font-weight: 600; 
+  cursor: pointer; 
+  white-space: nowrap; 
+  transition: color 0.3s; 
+  z-index: 2; 
+  position: relative; 
+}
+
+.filter-btn.active { 
+  color: white; 
+}
+
+.filter-bubble { 
+  position: absolute; 
+  top: 5px; 
+  left: 5px; 
+  height: calc(100% - 10px); 
+  background: var(--text-main); 
+  border-radius: 30px; 
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  z-index: 1; 
+  pointer-events: none; 
+}
+
+body.phase-work .filter-bubble, body.phase-work .manage-tags-btn:hover { 
+  background-color: #f43f5e; color: white; border-color: #f43f5e; 
+}
+
+body.phase-short .filter-bubble, body.phase-short .manage-tags-btn:hover { 
+  background-color: #14b8a6; color: white; border-color: #14b8a6; 
+}
+
+body.phase-long .filter-bubble, body.phase-long .manage-tags-btn:hover { 
+  background-color: #3b82f6; color: white; border-color: #3b82f6; 
+}
+
+body.phase-stopwatch .filter-bubble, body.phase-stopwatch .manage-tags-btn:hover { 
+  background-color: #8b5cf6; 
+  color: white; 
+  border-color: #8b5cf6; 
+}
+
+/* --- DATE HEADER & SORT BTN --- */
+.date-header { 
+  position: relative; 
+  width: 100%; 
+  font-size: 0.8rem; 
+  font-weight: bold; 
+  color: var(--text-muted); 
+  margin: 15px 0 8px 0; 
+  padding-left: 5px; 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  display: flex; 
+  align-items: center; 
+  gap: 8px; 
+  user-select: none; 
+  -webkit-user-select: none; 
+}
+
+.date-header-line { 
+  flex-grow: 1; 
+  height: 1px; 
+  background: rgba(148, 163, 184, 0.4); 
+  margin-left: 15px; 
+  position: relative; 
+  z-index: 10; 
+  pointer-events: none; 
+}
+
+/* BUG FIX: Date text hover color matches phase */
+#pomodoro-date-display, #habit-date-display { 
+  transition: color 0.2s; 
+}
+
+#pomodoro-date-display:hover, #habit-date-display:hover { 
+  color: var(--theme-color) !important; 
+}
+
+body[data-theme="dark"] #pomodoro-date-display:hover,
+body[data-theme="dark"] #habit-date-display:hover {
+  color: var(--theme-color) !important;
+}
+
+.sort-btn-inline { 
+  background: transparent; 
+  border: none; 
+  color: inherit; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 4px; 
+  border-radius: 6px; 
+  opacity: 0.7; 
+  transition: all 0.2s; 
+}
+
+.sort-btn-inline:hover { 
+  opacity: 1; 
+  color: var(--theme-color); 
+  background: var(--btn-bg); 
+}
 
 /* --- TIMER & PHASE OVERRIDES --- */
-body.phase-work .progress-ring-circle { stroke: #f43f5e; }
-body.phase-work .time-display { color: #f43f5e; }
-body.phase-work .active-bubble { background-color: #f43f5e; }
-body.phase-work .tab.active { color: white; }
-body.phase-work .start-btn, body.phase-work .add-btn { background-color: #f43f5e; color: white; border: none; }
-body.phase-work .task-item:hover { border-color: #f43f5e; box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); }
+body.phase-work .progress-ring-circle { 
+  stroke: #f43f5e; 
+}
 
-body.phase-short .progress-ring-circle { stroke: #14b8a6; }
-body.phase-short .time-display { color: #14b8a6; }
-body.phase-short .active-bubble { background-color: #14b8a6; }
-body.phase-short .tab.active { color: white; }
-body.phase-short .start-btn, body.phase-short .add-btn { background-color: #14b8a6; color: white; border: none; }
-body.phase-short .task-item:hover { border-color: #14b8a6; box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2); }
+body.phase-work .time-display { 
+  color: #f43f5e; 
+}
 
-body.phase-long .progress-ring-circle { stroke: #3b82f6; }
-body.phase-long .time-display { color: #3b82f6; }
-body.phase-long .active-bubble { background-color: #3b82f6; }
-body.phase-long .tab.active { color: white; }
-body.phase-long .start-btn, body.phase-long .add-btn { background-color: #3b82f6; color: white; border: none; }
-body.phase-long .task-item:hover { border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); }
+body.phase-work .active-bubble { 
+  background-color: #f43f5e; 
+}
 
-body.phase-stopwatch .progress-ring-circle { stroke: #8b5cf6; }
-body.phase-stopwatch .time-display { color: #8b5cf6; }
-body.phase-stopwatch .active-bubble { background-color: #8b5cf6; }
-body.phase-stopwatch .tab.active { color: white; }
-body.phase-stopwatch .start-btn, body.phase-stopwatch .add-btn { background-color: #8b5cf6; color: white; border: none; }
-body.phase-stopwatch .task-item:hover { border-color: #8b5cf6; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); }
+body.phase-work .tab.active { 
+  color: white; 
+}
+
+body.phase-work .start-btn, body.phase-work .add-btn { 
+  background-color: #f43f5e; 
+  color: white; 
+  border: none; 
+}
+
+body.phase-work .task-item:hover { 
+  border-color: #f43f5e; 
+  box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); 
+}
+
+body.phase-short .progress-ring-circle { 
+  stroke: #14b8a6; 
+}
+
+body.phase-short .time-display { 
+  color: #14b8a6; 
+}
+
+body.phase-short .active-bubble { 
+  background-color: #14b8a6; 
+}
+
+body.phase-short .tab.active { 
+  color: white; 
+}
+
+body.phase-short .start-btn, body.phase-short .add-btn { 
+  background-color: #14b8a6; 
+  color: white; 
+  border: none; 
+}
+
+body.phase-short .task-item:hover { 
+  border-color: #14b8a6; 
+  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2); 
+}
+
+body.phase-long .progress-ring-circle { 
+  stroke: #3b82f6; 
+}
+
+body.phase-long .time-display { 
+  color: #3b82f6; 
+}
+
+body.phase-long .active-bubble { 
+  background-color: #3b82f6; 
+}
+
+body.phase-long .tab.active { 
+  color: white; 
+}
+
+body.phase-long .start-btn, body.phase-long .add-btn { 
+  background-color: #3b82f6; 
+  color: white; 
+  border: none; 
+}
+
+body.phase-long .task-item:hover { 
+  border-color: #3b82f6; 
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); 
+}
+
+body.phase-stopwatch .progress-ring-circle { 
+  stroke: #8b5cf6; 
+}
+
+body.phase-stopwatch .time-display { 
+  color: #8b5cf6; 
+}
+
+body.phase-stopwatch .active-bubble { 
+  background-color: #8b5cf6; 
+}
+
+body.phase-stopwatch .tab.active { 
+  color: white; 
+}
+
+body.phase-stopwatch .start-btn, body.phase-stopwatch .add-btn { 
+  background-color: #8b5cf6; 
+  color: white; 
+  border: none; 
+}
+
+body.phase-stopwatch .task-item:hover { 
+  border-color: #8b5cf6; 
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); 
+}
 
 /* --- DARK MODE UI FIXES --- */
-body[data-theme="dark"] .progress-ring-track { stroke: rgba(255, 255, 255, 0.05); }
-body[data-theme="dark"] #current-phase { background: rgba(30, 41, 59, 0.8); color: var(--text-main); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+body[data-theme="dark"] .progress-ring-track { 
+  stroke: rgba(255, 255, 255, 0.05); 
+}
 
-body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn { background-color: #fb7185; color: #0f172a; border: none; }
-body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { background-color: #2dd4bf; color: #0f172a; border: none; }
-body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn { background-color: #60a5fa; color: #0f172a; border: none; }
-body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { background-color: #a78bfa; color: #0f172a; border: none; }
+body[data-theme="dark"] #current-phase { 
+  background: rgba(30, 41, 59, 0.8); 
+  color: var(--text-main); 
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+}
+
+body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn { 
+  background-color: #fb7185; 
+  color: #0f172a; 
+  border: none; 
+}
+
+body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn { 
+  background-color: #2dd4bf; 
+  color: #0f172a; 
+  border: none; 
+}
+
+body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn { 
+  background-color: #60a5fa; 
+  color: #0f172a; 
+  border: none; 
+}
+
+body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { 
+  background-color: #a78bfa; 
+  color: #0f172a; 
+  border: none; 
+}
 
 /* Make the task pill indicate it is clickable */
-.task-item { cursor: pointer; }
+.task-item { 
+  cursor: pointer; 
+}
 
 /* --- EDIT TASK MODAL TAGS --- */
-.tag-select-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-main); padding: 5px 12px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
-.tag-select-btn:hover { border-color: var(--theme-color); transform: translateY(-1px); }
-.tag-select-btn.selected { background: var(--theme-color); color: #ffffff; border-color: var(--theme-color); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+.tag-select-btn { 
+  background: var(--glass-bg); 
+  border: 1px solid var(--glass-border); 
+  color: var(--text-main); 
+  padding: 5px 12px; 
+  border-radius: 12px; 
+  font-size: 0.8rem; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+}
+
+.tag-select-btn:hover { 
+  border-color: var(--theme-color); 
+  transform: translateY(-1px); 
+}
+
+.tag-select-btn.selected { 
+  background: var(--theme-color); 
+  color: #ffffff; 
+  border-color: var(--theme-color); 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15); 
+}
