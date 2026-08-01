@@ -6,9 +6,8 @@ import {
   updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState, stopTimer 
 } from './timer.js';
 
-import { showToast, setupSelectDropdown } from './ui-utils.js';
+import { showToast, setupSelectDropdown, customConfirm } from './ui-utils.js';
 import { readJSON, writeJSON, readRaw } from './storage.js';
-import { customConfirm } from './tasks.js';
 
 // ==========================================
 // DOM ELEMENTS

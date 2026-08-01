@@ -8,7 +8,7 @@ export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
 import { playUI } from './audio.js';
-import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown } from './ui-utils.js';
+import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm } from './ui-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -26,11 +26,6 @@ const manageAddTagBtn = document.getElementById('manage-add-tag-btn');
 const manageNewTagInput = document.getElementById('manage-new-tag-input');
 const manageTagsBtn = document.getElementById('manage-tags-btn');
 
-// Modal Elements
-const confirmModal = document.getElementById('confirm-modal');
-const confirmMsg = document.getElementById('confirm-message');
-
-let confirmCallback = null;
 let editingTaskId = null;
 let pendingQuickTag = null; // Stores the tag selected from the gear
 
@@ -51,32 +46,6 @@ export function formatTaskTime(totalSeconds) {
   const m = Math.floor(totalSeconds / 60); 
   const s = totalSeconds % 60; 
   return `${icons.clock} ${m}m ${s}s`; 
-}
-
-// ==========================================
-// CUSTOM CONFIRM DIALOG
-// ==========================================
-export function customConfirm(message, onConfirm) {
-  if (!confirmMsg || !confirmModal) return;
-  confirmMsg.textContent = message;
-  confirmCallback = onConfirm;
-  confirmModal.classList.add('show');
-}
-
-export function initConfirmModal() {
-  const confirmYes = document.getElementById('confirm-yes-btn');
-  const confirmNo = document.getElementById('confirm-no-btn');
-  if (confirmYes) {
-    confirmYes.onclick = () => { 
-      if (confirmCallback) confirmCallback(); 
-      confirmModal.classList.remove('show'); 
-    };
-  }
-  if (confirmNo) {
-    confirmNo.onclick = () => { 
-      confirmModal.classList.remove('show'); 
-    };
-  }
 }
 
 // ==========================================

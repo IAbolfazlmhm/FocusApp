@@ -4,8 +4,7 @@ import {
 } from './state.js';
 
 import { playUI } from './audio.js';
-import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown } from './ui-utils.js';
-import { customConfirm } from './tasks.js';
+import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm } from './ui-utils.js';
 import { writeJSON, readRaw } from './storage.js';
 
 // ==========================================

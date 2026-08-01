@@ -1,7 +1,7 @@
-import { setupTabs, setupModalAccessibility } from './js/ui-utils.js';
+import { setupTabs, setupModalAccessibility, initConfirmModal } from './js/ui-utils.js';
 import { loadSettings, setupSettingsEvents, applySettingsToTimer } from './js/settings.js';
 import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from './js/timer.js';
-import { renderFilters, renderTasks, initConfirmModal, setupTaskEvents } from './js/tasks.js';
+import { renderFilters, renderTasks, setupTaskEvents } from './js/tasks.js';
 import { renderHabits, setupHabitsEvents, initHabitQuotes } from './js/habits.js';
 import { renderProgressDashboard, setupProgressEvents } from './js/progress.js';
 import { playUI } from './js/audio.js';

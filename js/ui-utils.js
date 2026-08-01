@@ -446,6 +446,40 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
   });
 }
 
+// ==========================================
+// CUSTOM CONFIRM DIALOG
+// ==========================================
+// This dialog is used by multiple features (Tasks, Habits, and Settings),
+// so it belongs in the shared UI layer rather than in any one feature module.
+const confirmModal = document.getElementById('confirm-modal');
+const confirmMessage = document.getElementById('confirm-message');
+let confirmCallback = null;
+
+export function customConfirm(message, onConfirm) {
+  if (!confirmMessage || !confirmModal) return;
+  confirmMessage.textContent = message;
+  confirmCallback = onConfirm;
+  confirmModal.classList.add('show');
+}
+
+export function initConfirmModal() {
+  const confirmYes = document.getElementById('confirm-yes-btn');
+  const confirmNo = document.getElementById('confirm-no-btn');
+
+  if (confirmYes) {
+    confirmYes.onclick = () => {
+      if (confirmCallback) confirmCallback();
+      confirmModal.classList.remove('show');
+    };
+  }
+
+  if (confirmNo) {
+    confirmNo.onclick = () => {
+      confirmModal.classList.remove('show');
+    };
+  }
+}
+
 export function setupModalAccessibility() {
   const activeTraps = new WeakMap();
 
