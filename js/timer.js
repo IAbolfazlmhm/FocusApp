@@ -392,8 +392,20 @@ export function setupTimerEvents() {
 
   if (startBtn) startBtn.addEventListener('click', toggleTimer);
   if (resetBtn) {
-    resetBtn.addEventListener('click', resetTimer);
-    resetBtn.addEventListener('dblclick', function() {
+    let suppressNextClick = false;
+    resetBtn.addEventListener('click', () => {
+      if (suppressNextClick) { suppressNextClick = false; return; }
+      resetTimer();
+    });
+
+    // FIX: the full session reset (back to Work 1, session count to 0)
+    // previously only fired on dblclick — a gesture with no reliable
+    // touch equivalent (double-tap is often intercepted by the browser
+    // as a zoom gesture), and invisible on touch since `title` tooltips
+    // never show there either. Extracted so dblclick (kept as-is for
+    // desktop users) and the new press-and-hold below call the exact
+    // same logic instead of two copies drifting apart over time.
+    function deepResetTimer() {
       const modeSelect = document.getElementById('mode-select');
       if (modeSelect && modeSelect.value === 'pomodoro') {
         stopTimer();
@@ -401,18 +413,47 @@ export function setupTimerEvents() {
         setCompletedSessions(0);
         updatePhaseText();
         updatePhaseColors();
-        
+
         const workDuration = document.getElementById('work-duration');
         const newTotal = workDuration ? parseInt(workDuration.value) * 60 : 25 * 60;
         setTotalTime(newTotal);
         setTimeLeft(newTotal);
-        
+
         updateDisplay();
         updateCircle();
-        saveTimerState(); 
+        saveTimerState();
         showToast('Full Session Reset! Back to Work 1.', 'info');
       }
+    }
+
+    resetBtn.addEventListener('dblclick', deepResetTimer);
+
+    // Press-and-hold: works for both mouse and touch via Pointer Events.
+    // The `.holding` class drives a CSS ring animation (pomodoro.css) so
+    // the hold is visible, not a silent countdown — that visual feedback
+    // is what makes the gesture discoverable in the first place.
+    const LONG_PRESS_MS = 600;
+    let longPressTimer = null;
+
+    function cancelLongPress() {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+      resetBtn.classList.remove('holding');
+    }
+
+    resetBtn.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      resetBtn.classList.add('holding');
+      longPressTimer = setTimeout(() => {
+        cancelLongPress();
+        suppressNextClick = true;
+        deepResetTimer();
+      }, LONG_PRESS_MS);
     });
+
+    resetBtn.addEventListener('pointerup', cancelLongPress);
+    resetBtn.addEventListener('pointerleave', cancelLongPress);
+    resetBtn.addEventListener('pointercancel', cancelLongPress);
   }
 
   if (skipBtn) {

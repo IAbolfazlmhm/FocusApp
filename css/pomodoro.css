@@ -171,6 +171,7 @@
 }
 
 .reset-btn { 
+  position: relative; 
   justify-self: end; 
   margin-right: 10px; 
 }
@@ -186,6 +187,29 @@
 
 .skip-btn:hover { 
   color: #eab308 !important; 
+}
+
+/* 
+  FIX: visual feedback for the press-and-hold deep-reset gesture
+  (js/timer.js) — an expanding, fading ring timed to match the
+  600ms hold threshold, so touch users can see the gesture is
+  registering instead of guessing whether anything is happening. 
+*/
+.reset-btn.holding::after { 
+  content: ''; 
+  position: absolute; 
+  inset: 2px; 
+  border-radius: 50%; 
+  border: 2px solid var(--theme-color); 
+  opacity: 0.9; 
+  transform: scale(0.5); 
+  animation: reset-hold-fill 600ms ease-out forwards; 
+  pointer-events: none; 
+}
+
+@keyframes reset-hold-fill { 
+  from { opacity: 0.9; transform: scale(0.5); } 
+  to   { opacity: 0; transform: scale(1.4); } 
 }
 
 /* --- TASKS RIGHT SIDE --- */
@@ -341,7 +365,7 @@
 
 .task-actions { 
   display: flex; 
-  gap: 6px; 
+  gap: 10px; 
   opacity: 0.6; 
   transition: opacity 0.2s; 
   flex-shrink: 0; 
@@ -351,9 +375,9 @@
   opacity: 1; 
 }
 
-.done-btn, .remove-btn, .focus-btn, .edit-tag-btn { 
-  width: 28px; 
-  height: 28px; 
+.done-btn, .remove-btn, .focus-btn, .edit-tag-btn {
+  width: 40px; 
+  height: 40px; 
   border-radius: 8px; 
   border: 1px solid var(--glass-border); 
   background: var(--btn-bg); 
