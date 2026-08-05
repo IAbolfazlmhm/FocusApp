@@ -13,7 +13,7 @@ function getAudioCtx() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioCtx.state === 'suspended') {audioCtx.resume();}
   return audioCtx;
 }
 
@@ -22,7 +22,7 @@ const lastPlayedTimes = {};
 
 export function playUI(type) {
   const soundToggle = document.getElementById('sound-toggle');
-  if (soundToggle && !soundToggle.checked) return;
+  if (soundToggle && !soundToggle.checked) {return;}
 
   // FIX: this debounce check used to run AFTER creating and wiring up the
   // oscillator/gainNode below, so a rapid double-click (or fast repeated
@@ -71,7 +71,7 @@ export function playUI(type) {
 }
 
 export function playAlarm(type) {
-  if (type === 'mute') return;
+  if (type === 'mute') {return;}
 
   // FIX: previously only the alarm-sound dropdown itself could silence this
   // (by being set to "Mute"). The separate "Sound Effects" toggle already
@@ -81,7 +81,7 @@ export function playAlarm(type) {
   // switch. Checking the toggle here makes it one real source of truth,
   // independent of and in addition to the per-sound "Mute" option.
   const soundToggle = document.getElementById('sound-toggle');
-  if (soundToggle && !soundToggle.checked) return;
+  if (soundToggle && !soundToggle.checked) {return;}
 
   const audioCtx = getAudioCtx();
 

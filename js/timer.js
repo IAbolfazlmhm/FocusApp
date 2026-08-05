@@ -39,6 +39,14 @@ let tickAnchorTime = null;
 let tickAnchorTimeLeft = 0;
 let tickLastElapsedSeconds = 0; // elapsed seconds since anchor, as of the last tick
 
+// FIX: cached copy of which tab is active. Previously, updateDisplay()
+// (which runs every second while any timer runs) called
+// readRaw('focusActiveTab') — a localStorage read — on every single tick.
+// This value only changes when the user switches tabs (an event the app
+// already dispatches: tabChanged), so caching it here and invalidating on
+// that event turns a per-second cost into a one-time cost.
+let cachedActiveTab = readRaw('focusActiveTab', '0');
+
 // getLocalDateKey() (date-utils.js) provides the shared YYYY-MM-DD local-
 // date format used here and in progress.js — previously two separately
 // duplicated copies of the same logic, extracted into one shared module.
@@ -68,7 +76,7 @@ export function saveTimerState() {
 
 export function loadTimerState() {
   const state = readJSON('focusTimerState', null);
-  if (!state) return false;
+  if (!state) {return false;}
 
   const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
@@ -100,13 +108,13 @@ export function loadTimerState() {
 // DOM UPDATE FUNCTIONS
 // ==========================================
 export function updateCircle() {
-  if (!circle) return;
+  if (!circle) {return;}
   const offset = circumference - (timeLeft / totalTime) * circumference;
   circle.style.strokeDashoffset = offset;
 }
 
 export function updateDisplay() {
-  if (!timeDisplay) return;
+  if (!timeDisplay) {return;}
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -122,11 +130,11 @@ export function updateDisplay() {
   let activeTaskName = 'Focus App';
   if (focusedTaskId !== null && tasks) {
     const activeTask = tasks.find(t => t.id === focusedTaskId);
-    if (activeTask) activeTaskName = activeTask.text;
+    if (activeTask) {activeTaskName = activeTask.text;}
   }
 
-  const activeTab = readRaw('focusActiveTab');
-  if (!activeTab || activeTab === '0') {
+  // Uses the cached tab value instead of a per-tick localStorage read
+  if (!cachedActiveTab || cachedActiveTab === '0') {
     let tabTitleTaskName = activeTaskName;
     if (tabTitleTaskName.length > TAB_TITLE_TASK_NAME_MAX_LENGTH) {
       tabTitleTaskName = tabTitleTaskName.substring(0, TAB_TITLE_TASK_NAME_MAX_LENGTH) + '...';
@@ -141,8 +149,8 @@ export function updatePhaseText() {
   const breaksToggle = document.getElementById('breaks-toggle');
   const modeSelect = document.getElementById('mode-select');
 
-  if (!currentPhaseEl || !nextPhaseEl) return;
-  if (modeSelect && modeSelect.value === 'stopwatch') return;
+  if (!currentPhaseEl || !nextPhaseEl) {return;}
+  if (modeSelect && modeSelect.value === 'stopwatch') {return;}
 
   const breaksEnabled = breaksToggle ? breaksToggle.checked : true;
 
@@ -176,9 +184,9 @@ export function updatePhaseColors() {
     return;
   }
 
-  if (currentPhase === 'work') document.body.classList.add('phase-work');
-  else if (currentPhase === 'shortBreak') document.body.classList.add('phase-short');
-  else if (currentPhase === 'longBreak') document.body.classList.add('phase-long');
+  if (currentPhase === 'work') {document.body.classList.add('phase-work');}
+  else if (currentPhase === 'shortBreak') {document.body.classList.add('phase-short');}
+  else if (currentPhase === 'longBreak') {document.body.classList.add('phase-long');}
 }
 
 // ==========================================
@@ -210,7 +218,7 @@ export function resetTimer() {
   if (modeSelect && modeSelect.value === 'stopwatch') {
     setTimeLeft(0);
     updateDisplay();
-    if (circle) circle.style.strokeDashoffset = circumference;
+    if (circle) {circle.style.strokeDashoffset = circumference;}
     updatePhaseColors();
   } else {
     setTimeLeft(totalTime);
@@ -258,18 +266,17 @@ export function switchPhase() {
 }
 
 export function toggleTimer() {
-  const currentTaskNameEl = document.getElementById('current-task-name');
   const modeSelect = document.getElementById('mode-select');
   const soundSelect = document.getElementById('sound-select');
   const autostartBreaks = document.getElementById('autostart-breaks-toggle');
 
-  const currentTaskName = currentTaskNameEl ? currentTaskNameEl.textContent : '';
-
-  // Auto-focus logic
-  if (currentTaskName === 'Nothing' && tasks) {
+  // FIX: used to match on currentTaskNameEl.textContent === 'Nothing',
+  // which is fragile DOM-text coupling — if the UI copy is ever changed
+  // (localization, a rewording pass), the feature breaks silently.
+  // Checking focusedTaskId from state is the real source of truth.
+  if (focusedTaskId === null && tasks) {
     const activeTasks = tasks.filter(t => !t.completed);
     if (activeTasks.length === 1) {
-      // Logic for toggling focus will be fully implemented in tasks.js
       const event = new CustomEvent('autoFocusTask', { detail: { id: activeTasks[0].id } });
       document.dispatchEvent(event);
     } else {
@@ -323,12 +330,12 @@ export function toggleTimer() {
             // under yesterday instead. timeByDate fixes that going forward
             // (existing totals from before this change stay as-is; there's
             // no way to retroactively know which past day they belong to).
-            if (!activeTask.timeByDate) activeTask.timeByDate = {};
+            if (!activeTask.timeByDate) {activeTask.timeByDate = {};}
             const todayKey = getLocalDateKey();
             activeTask.timeByDate[todayKey] = (activeTask.timeByDate[todayKey] || 0) + deltaSeconds;
             saveTasks(); 
             const badge = document.getElementById(`badge-${activeTask.id}`);
-            if (badge) badge.innerHTML = formatTaskTime(activeTask.timeSpent);
+            if (badge) {badge.innerHTML = formatTaskTime(activeTask.timeSpent);}
           }
         }
       }
@@ -390,7 +397,7 @@ export function setupTimerEvents() {
     }
   });
 
-  if (startBtn) startBtn.addEventListener('click', toggleTimer);
+  if (startBtn) {startBtn.addEventListener('click', toggleTimer);}
   if (resetBtn) {
     let suppressNextClick = false;
     resetBtn.addEventListener('click', () => {
@@ -442,7 +449,7 @@ export function setupTimerEvents() {
     }
 
     resetBtn.addEventListener('pointerdown', (e) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) {return;}
       resetBtn.classList.add('holding');
       longPressTimer = setTimeout(() => {
         cancelLongPress();
@@ -476,7 +483,7 @@ export function setupTimerEvents() {
   });
 
   document.addEventListener('tabChanged', () => {
-    const activeTab = readRaw('focusActiveTab');
-    if (!activeTab || activeTab === '0') updateDisplay();
+    cachedActiveTab = readRaw('focusActiveTab', '0');
+    if (!cachedActiveTab || cachedActiveTab === '0') {updateDisplay();}
   });
 }

@@ -4,7 +4,7 @@ import {
 } from './state.js';
 
 import { playUI } from './audio.js';
-import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm } from './ui-utils.js';
+import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget } from './ui-utils.js';
 import { writeJSON, readRaw } from './storage.js';
 
 // ==========================================
@@ -49,8 +49,6 @@ export function getDateKey(dateObj) {
 // ==========================================
 const habitListContainer = document.getElementById('habit-list-container');
 const habitDateDisplay = document.getElementById('habit-date-display');
-const prevDayBtn = document.getElementById('prev-day-btn');
-const nextDayBtn = document.getElementById('next-day-btn');
 
 const openAddHabitBtn = document.getElementById('open-add-habit-btn');
 const habitModal = document.getElementById('habit-modal');
@@ -59,7 +57,6 @@ const saveHabitBtn = document.getElementById('save-habit-btn');
 
 const colorOptions = document.querySelectorAll('.color-option');
 const iconOptions = document.querySelectorAll('.icon-option');
-const customDaysPicker = document.getElementById('custom-days-picker');
 const dayOptions = document.querySelectorAll('.day-option');
 
 const habitCategoryInput = document.getElementById('habit-category-input');
@@ -88,7 +85,7 @@ export const habitIconsDict = {
 };
 
 function hexToRgba(hex, alpha) {
-  let r = parseInt(hex.slice(1, 3), 16),
+  const r = parseInt(hex.slice(1, 3), 16),
   g = parseInt(hex.slice(3, 5), 16),
   b = parseInt(hex.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
@@ -103,9 +100,9 @@ function formatHabitDate(dateObj) {
   const diffTime = dateObj - today;
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'Today';
-  if (diffDays === -1) return 'Yesterday';
-  if (diffDays === 1) return 'Tomorrow';
+  if (diffDays === 0) {return 'Today';}
+  if (diffDays === -1) {return 'Yesterday';}
+  if (diffDays === 1) {return 'Tomorrow';}
 
   return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
@@ -119,7 +116,7 @@ export function updateHabitDateDisplay() {
 
 export function updateDateDisplayUI() {
   const dateDisplayBtn = document.getElementById('habit-date-display');
-  if (!dateDisplayBtn) return;
+  if (!dateDisplayBtn) {return;}
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -145,7 +142,7 @@ export function updateDateDisplayUI() {
 // CATEGORY LOGIC
 // ==========================================
 function showHabitCategoryDropdown() {
-  if (!habitCategoryInput || !habitCategoryDropdown) return;
+  if (!habitCategoryInput || !habitCategoryDropdown) {return;}
   const val = habitCategoryInput.value.toLowerCase().trim();
 
   // Ignore empty and Uncategorized
@@ -180,19 +177,19 @@ function showHabitCategoryDropdown() {
 // RENDER HABITS
 // ==========================================
 export function renderHabits() {
-  if (!habitListContainer) return;
+  if (!habitListContainer) {return;}
   habitListContainer.innerHTML = '';
 
   const activeHabits = habits.filter(habit => isHabitActiveOnDate(habit, currentHabitDate));
   const dateStr = getDateKey(currentHabitDate);
 
   // Safely Apply Filtering
-  let filteredHabits = activeHabits.filter(h => {
+  const filteredHabits = activeHabits.filter(h => {
     const status = (h.logs && h.logs[dateStr]) ? h.logs[dateStr] : null;
-    if (status === 'hidden') return false;
-    if (currentHabitFilter === 'active') return status !== 'done' && status !== 'skipped';
-    if (currentHabitFilter === 'done') return status === 'done';
-    if (currentHabitFilter !== 'all') return h.category === currentHabitFilter;
+    if (status === 'hidden') {return false;}
+    if (currentHabitFilter === 'active') {return status !== 'done' && status !== 'skipped';}
+    if (currentHabitFilter === 'done') {return status === 'done';}
+    if (currentHabitFilter !== 'all') {return h.category === currentHabitFilter;}
     return true;
   });
 
@@ -204,14 +201,14 @@ export function renderHabits() {
     const isCompletedB = (statusB === 'done' || statusB === 'skipped');
 
     // 1. Primary Sort: Sink completed to bottom
-    if (isCompletedA !== isCompletedB) return isCompletedA ? 1 : -1;
+    if (isCompletedA !== isCompletedB) {return isCompletedA ? 1 : -1;}
 
     // 2. Secondary Sort: User's chosen order
     let val = 0;
-    if (currentHabitSort === 'newest') val = new Date(a.createdAt || a.id).getTime() - new Date(b.createdAt || b.id).getTime();
-    else if (currentHabitSort === 'az') val = a.name.localeCompare(b.name);
-    else if (currentHabitSort === 'category') val = (a.category || '').localeCompare(b.category || '');
-    else if (currentHabitSort === 'streak') val = calculateStreak(a) - calculateStreak(b);
+    if (currentHabitSort === 'newest') {val = new Date(a.createdAt || a.id).getTime() - new Date(b.createdAt || b.id).getTime();}
+    else if (currentHabitSort === 'az') {val = a.name.localeCompare(b.name);}
+    else if (currentHabitSort === 'category') {val = (a.category || '').localeCompare(b.category || '');}
+    else if (currentHabitSort === 'streak') {val = calculateStreak(a) - calculateStreak(b);}
 
     return habitSortOrder === 'asc' ? val : -val;
   });
@@ -333,18 +330,18 @@ export function setupHabitsEvents() {
 
       colorOptions.forEach(opt => {
         opt.classList.remove('selected');
-        if (opt.dataset.color === habitToEdit.color) opt.classList.add('selected');
+        if (opt.dataset.color === habitToEdit.color) {opt.classList.add('selected');}
       });
       iconOptions.forEach(opt => {
         opt.classList.remove('selected');
-        if (opt.dataset.icon === habitToEdit.icon) opt.classList.add('selected');
+        if (opt.dataset.icon === habitToEdit.icon) {opt.classList.add('selected');}
       });
 
       if (fVal === 'custom') {
         document.getElementById('custom-days-picker').style.display = 'flex';
         dayOptions.forEach(d => {
           d.classList.remove('selected');
-          if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day, 10))) d.classList.add('selected');
+          if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day, 10))) {d.classList.add('selected');}
         });
       } else {
         document.getElementById('custom-days-picker').style.display = 'none';
@@ -357,10 +354,10 @@ export function setupHabitsEvents() {
   if (habitListContainer) {
     habitListContainer.addEventListener('click', (e) => {
       const habitItem = e.target.closest('.habit-item');
-      if (!habitItem) return;
+      if (!habitItem) {return;}
 
       // If they clicked the actions (Done/Skip/Delete), let the existing logic run.
-      if (e.target.closest('.task-actions')) return;
+      if (e.target.closest('.task-actions')) {return;}
 
       // Otherwise, they clicked the card to edit:
       openHabitEditModal(habitItem.dataset.id);
@@ -369,10 +366,10 @@ export function setupHabitsEvents() {
     // Keyboard equivalent of the click handler above (see the
     // tabIndex/role="button" added to each card in renderHabits()).
     habitListContainer.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (e.key !== 'Enter' && e.key !== ' ') {return;}
       const habitItem = e.target.closest('.habit-item');
-      if (!habitItem) return;
-      if (e.target.closest('.task-actions')) return;
+      if (!habitItem) {return;}
+      if (e.target.closest('.task-actions')) {return;}
 
       e.preventDefault();
       openHabitEditModal(habitItem.dataset.id);
@@ -416,14 +413,14 @@ export function setupHabitsEvents() {
     dateDisplayBtn.addEventListener('click', () => {
       try {
         nativeDatePicker.showPicker(); // Works in modern browsers
-      } catch (error) {
+      } catch {
         nativeDatePicker.click(); // Fallback
       }
     });
 
     // 2. Handle Date Selection from the Popup
     nativeDatePicker.addEventListener('change', (e) => {
-      if (!e.target.value) return;
+      if (!e.target.value) {return;}
 
       // value is formatted as "YYYY-MM-DD"
       const [year, month, day] = e.target.value.split('-').map(Number);
@@ -451,29 +448,28 @@ export function setupHabitsEvents() {
       if (nameInput) {
         nameInput.value = quickInput ? quickInput.value.trim() : '';
       }
-      if (habitCategoryInput) habitCategoryInput.value = '';
+      if (habitCategoryInput) {habitCategoryInput.value = '';}
 
       // Reset frequency to default (Every Day)
       const freqInputDisplay = document.getElementById('habit-frequency-input-display');
-      if (freqInputDisplay) freqInputDisplay.value = 'Every Day';
+      if (freqInputDisplay) {freqInputDisplay.value = 'Every Day';}
 
       // Set hidden frequency value to "everyday" for form submission
       const freqValue = document.getElementById('habit-frequency-value');
-      if (freqValue) freqValue.value = 'everyday';
+      if (freqValue) {freqValue.value = 'everyday';}
 
       // Reset color and icon selections
-      if (customDaysPicker) customDaysPicker.style.display = 'none';
+      if (customDaysPicker) {customDaysPicker.style.display = 'none';}
       dayOptions.forEach(d => d.classList.remove('selected'));
 
       // Default color is the first option
-      if (habitModal) habitModal.classList.add('show');
-      if (nameInput) setTimeout(() => nameInput.focus(), 100);
+      if (habitModal) {habitModal.classList.add('show');}
     });
   }
 
   if (closeHabitModalBtn) {
     closeHabitModalBtn.addEventListener('click', () => {
-      if (habitModal) habitModal.classList.remove('show');
+      if (habitModal) {habitModal.classList.remove('show');}
 
       // If we were creating a new habit (not editing), sync the name back to the quick input
       if (!editingHabitId) {
@@ -488,7 +484,7 @@ export function setupHabitsEvents() {
 
   if (habitModal) {
     habitModal.addEventListener('click', (e) => {
-      if (e.target === habitModal) habitModal.classList.remove('show');
+      if (e.target === habitModal) {habitModal.classList.remove('show');}
     });
   }
 
@@ -513,7 +509,7 @@ export function setupHabitsEvents() {
   if (habitCategoryInput) {
     habitCategoryInput.addEventListener('input', showHabitCategoryDropdown);
     habitCategoryInput.addEventListener('focus', function() {
-      if (this.value === 'Uncategorized') this.value = ''; // Clear default easily
+      if (this.value === 'Uncategorized') {this.value = '';} // Clear default easily
       showHabitCategoryDropdown();
     });
 
@@ -536,7 +532,7 @@ export function setupHabitsEvents() {
       }).observe(habitCategoryDropdown, { attributes: true, attributeFilter: ['class'] });
 
       habitCategoryInput.addEventListener('keydown', (e) => {
-        if (!habitCategoryDropdown.classList.contains('show')) return;
+        if (!habitCategoryDropdown.classList.contains('show')) {return;}
         if (e.key === 'ArrowDown') {
           e.preventDefault();
           habitCategoryDropdown.querySelector('.dropdown-item')?.focus();
@@ -554,8 +550,8 @@ export function setupHabitsEvents() {
           items[Math.min(currentIndex + 1, items.length - 1)]?.focus();
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          if (currentIndex <= 0) habitCategoryInput.focus();
-          else items[currentIndex - 1]?.focus();
+          if (currentIndex <= 0) {habitCategoryInput.focus();}
+          else {items[currentIndex - 1]?.focus();}
         } else if (e.key === 'Home') {
           e.preventDefault();
           items[0]?.focus();
@@ -571,15 +567,9 @@ export function setupHabitsEvents() {
           habitCategoryInput.focus();
         }
       });
+      registerOutsideClickTarget(habitCategoryWrapper, habitCategoryDropdown);
     }
   }
-
-  // Close category dropdown if clicking outside
-  document.addEventListener('click', (e) => {
-    if (habitCategoryDropdown && habitCategoryWrapper && !habitCategoryWrapper.contains(e.target)) {
-      habitCategoryDropdown.classList.remove('show');
-    }
-  });
 
   // --- CUSTOM FREQUENCY DROPDOWN LOGIC ---
   // Opening, closing, keyboard navigation, and ARIA now live in the
@@ -598,7 +588,7 @@ export function setupHabitsEvents() {
         const text = item.textContent;
 
         freqInputDisplay.value = text;
-        if (freqValue) freqValue.value = val;
+        if (freqValue) {freqValue.value = val;}
 
         freqDropdown.classList.remove('show');
 
@@ -630,7 +620,7 @@ export function setupHabitsEvents() {
     saveHabitBtn.addEventListener('click', () => {
       const nameInput = document.getElementById('habit-name-input');
       const name = nameInput ? nameInput.value.trim() : '';
-      let categoryRaw = habitCategoryInput ? habitCategoryInput.value.trim() : '';
+      const categoryRaw = habitCategoryInput ? habitCategoryInput.value.trim() : '';
       // FIX: reuse an existing category's exact casing if one matches
       // case-insensitively, so typing "health" when "Health" already
       // exists doesn't create a second, visually duplicate category.
@@ -647,7 +637,7 @@ export function setupHabitsEvents() {
       const selectedIcon = document.querySelector('.icon-option.selected');
       const icon = selectedIcon ? selectedIcon.dataset.icon : 'book';
 
-      let customDays = [];
+      const customDays = [];
       if (frequency === 'custom') {
         document.querySelectorAll('.day-option.selected').forEach(d => {
             customDays.push(parseInt(d.dataset.day));
@@ -672,7 +662,7 @@ export function setupHabitsEvents() {
           habits[habitIndex].frequency = frequency;
           habits[habitIndex].color = color;
           habits[habitIndex].icon = icon;
-          if (frequency === 'custom') habits[habitIndex].customDays = customDays;
+          if (frequency === 'custom') {habits[habitIndex].customDays = customDays;}
         }
       } else {
         // Create brand new habit
@@ -698,12 +688,12 @@ export function setupHabitsEvents() {
 
       saveHabits();
 
-      if (habitModal) habitModal.classList.remove('show');
+      if (habitModal) {habitModal.classList.remove('show');}
       playUI('success');
       showToast(editingHabitId ? 'Habit Updated!' : 'Habit Created!', 'success');
 
       renderHabits();
-      if (typeof renderHabitCategories === 'function') renderHabitCategories();
+      if (typeof renderHabitCategories === 'function') {renderHabitCategories();}
     });
   }
 
@@ -711,7 +701,7 @@ export function setupHabitsEvents() {
   if (habitListContainer) {
     habitListContainer.addEventListener('click', (e) => {
       const habitItem = e.target.closest('.habit-item');
-      if (!habitItem) return;
+      if (!habitItem) {return;}
 
       const habitId = habitItem.dataset.id;
       const dateStr = getDateKey(currentHabitDate);
@@ -787,7 +777,7 @@ export function setupHabitsEvents() {
   const categoriesManagementList = document.getElementById('categories-management-list');
 
   function renderCategoriesManagement() {
-    if (!categoriesManagementList) return;
+    if (!categoriesManagementList) {return;}
     categoriesManagementList.innerHTML = '';
 
     // Filter out empty strings and the default category
@@ -808,12 +798,12 @@ export function setupHabitsEvents() {
           }
 
           // Move habits to Uncategorized if their category is deleted
-          habits.forEach(h => { if (h.category === cat) h.category = 'Uncategorized'; });
+          habits.forEach(h => { if (h.category === cat) {h.category = 'Uncategorized';} });
 
           saveHabitCategories();
           saveHabits();
 
-          if (currentHabitFilter === cat) currentHabitFilter = 'all';
+          if (currentHabitFilter === cat) {currentHabitFilter = 'all';}
 
           renderCategoriesManagement();
           renderHabitCategories();
@@ -832,11 +822,11 @@ export function setupHabitsEvents() {
     });
   }
 
-  if (closeCategoriesModal) closeCategoriesModal.addEventListener('click', () => categoriesModal.classList.remove('show'));
+  if (closeCategoriesModal) {closeCategoriesModal.addEventListener('click', () => categoriesModal.classList.remove('show'));}
 
   if (manageAddCategoryBtn) {
     manageAddCategoryBtn.addEventListener('click', () => {
-      if (!manageNewCategoryInput) return;
+      if (!manageNewCategoryInput) {return;}
       const newCat = manageNewCategoryInput.value.trim();
 
       // Empty Warning
@@ -847,7 +837,8 @@ export function setupHabitsEvents() {
 
       const alreadyExists = savedHabitCategories.some(c => c.toLowerCase() === newCat.toLowerCase());
       if (!alreadyExists) {
-        setSavedHabitCategories([...savedHabitCategories, newCat]);
+        const capitalizedCat = newCat.charAt(0).toUpperCase() + newCat.slice(1);
+        setSavedHabitCategories([...savedHabitCategories, capitalizedCat]);
         saveHabitCategories();
         manageNewCategoryInput.value = '';
         renderCategoriesManagement();
@@ -889,7 +880,7 @@ export function setupHabitsEvents() {
   updateHabitDateDisplay();
 
   document.addEventListener('tabChanged', () => {
-    if (readRaw('focusActiveTab') === '1') updateHabitProgress();
+    if (readRaw('focusActiveTab') === '1') {updateHabitProgress();}
   });
 
   // --- ADVANCED HABIT DELETION LOGIC ---
@@ -911,7 +902,7 @@ export function setupHabitsEvents() {
         const habitItem = e.target.closest('.habit-item');
         if (habitItem) {
           habitToDeleteId = habitItem.dataset.id;
-          if (deleteModal) deleteModal.classList.add('show');
+          if (deleteModal) {deleteModal.classList.add('show');}
           playUI('click'); // BUG FIX: Play sound when trash can is clicked!
         }
       }
@@ -919,21 +910,22 @@ export function setupHabitsEvents() {
   }
 
   // 2. Remove Today's Habit Completely
-  document.getElementById('delete-habit-today-btn')?.addEventListener('click', (e) => {
-    e.stopPropagation(); // BUG FIX: Stops the global 'click' sound!
-    if (!habitToDeleteId) return;
+  // FIX: removed e.stopPropagation() — these buttons now use data-sound="trash"
+  // in HTML to suppress the global click sound (see script.js global listener).
+  document.getElementById('delete-habit-today-btn')?.addEventListener('click', () => {
+    if (!habitToDeleteId) {return;}
     playUI('trash');
 
     const habit = habits.find(h => h.id === habitToDeleteId);
     const dateStr = getDateKey(currentHabitDate);
 
     if (habit) {
-      if (!habit.logs) habit.logs = {};
+      if (!habit.logs) {habit.logs = {};}
       habit.logs[dateStr] = 'hidden'; // BUG FIX: Mark as completely hidden for today
 
       saveHabitsLocal();
       renderHabits();
-      if (typeof updateHabitProgress === 'function') updateHabitProgress();
+      if (typeof updateHabitProgress === 'function') {updateHabitProgress();}
 
       showToast("Habit removed from today.", "success", true);
     }
@@ -941,9 +933,8 @@ export function setupHabitsEvents() {
   });
 
   // 3. Stop Tracking (Keep History)
-  document.getElementById('delete-habit-future-btn')?.addEventListener('click', (e) => {
-    e.stopPropagation(); // BUG FIX: Stops the global 'click' sound!
-    if (!habitToDeleteId) return;
+  document.getElementById('delete-habit-future-btn')?.addEventListener('click', () => {
+    if (!habitToDeleteId) {return;}
     playUI('trash');
 
     const habit = habits.find(h => h.id === habitToDeleteId);
@@ -956,16 +947,15 @@ export function setupHabitsEvents() {
       habit.endDate = yesterday.getTime();
       saveHabitsLocal();
       renderHabits();
-      if (typeof updateHabitProgress === 'function') updateHabitProgress();
+      if (typeof updateHabitProgress === 'function') {updateHabitProgress();}
       showToast("Habit archived. History preserved.", "success", true);
     }
     closeDeleteModal();
   });
 
   // 4. Delete All History (Nuke it)
-  document.getElementById('delete-habit-all-btn')?.addEventListener('click', (e) => {
-    e.stopPropagation(); // BUG FIX: Stops the global 'click' sound!
-    if (!habitToDeleteId) return;
+  document.getElementById('delete-habit-all-btn')?.addEventListener('click', () => {
+    if (!habitToDeleteId) {return;}
     playUI('trash');
 
     const updatedHabits = habits.filter(h => h.id !== habitToDeleteId);
@@ -973,14 +963,14 @@ export function setupHabitsEvents() {
 
     saveHabitsLocal();
     renderHabits();
-    if (typeof updateHabitProgress === 'function') updateHabitProgress();
+    if (typeof updateHabitProgress === 'function') {updateHabitProgress();}
     showToast("Habit and all history deleted.", "success", true);
     closeDeleteModal();
   });
 
   // 5. Close Handlers (Cancel)
   function closeDeleteModal() {
-    if (deleteModal) deleteModal.classList.remove('show');
+    if (deleteModal) {deleteModal.classList.remove('show');}
     habitToDeleteId = null;
   }
 
@@ -988,7 +978,7 @@ export function setupHabitsEvents() {
 
   if (deleteModal) {
     deleteModal.addEventListener('click', (e) => {
-      if (e.target === deleteModal) closeDeleteModal();
+      if (e.target === deleteModal) {closeDeleteModal();}
     });
   }
 }
@@ -1025,9 +1015,9 @@ export function initHabitQuotes() {
  */
 export function toggleHabitLog(habitId, dateKey, status) {
   const habit = habits.find(h => h.id === habitId);
-  if (!habit) return;
+  if (!habit) {return;}
 
-  if (!habit.logs) habit.logs = {};
+  if (!habit.logs) {habit.logs = {};}
 
   if (habit.logs[dateKey] === status) {
     delete habit.logs[dateKey];
@@ -1051,7 +1041,7 @@ export function isHabitActiveOnDate(habit, targetDate) {
   creationDate.setHours(0, 0, 0, 0);
 
   // Prevent rendering before the habit was actually created
-  if (target < creationDate) return false;
+  if (target < creationDate) {return false;}
 
   // BUG FIX (STEP 4): If the habit was "Stopped", hide it on any days AFTER the stop date!
   if (habit.endDate && target.getTime() > habit.endDate) {
@@ -1061,10 +1051,10 @@ export function isHabitActiveOnDate(habit, targetDate) {
   const dayOfWeek = target.getDay();
   const freq = habit.frequency || 'everyday';
 
-  if (freq === 'everyday') return true;
+  if (freq === 'everyday') {return true;}
 
   if (freq === 'custom') {
-    if (!habit.customDays || habit.customDays.length === 0) return false;
+    if (!habit.customDays || habit.customDays.length === 0) {return false;}
     return habit.customDays.map(Number).includes(dayOfWeek);
   }
 
@@ -1073,7 +1063,7 @@ export function isHabitActiveOnDate(habit, targetDate) {
     'thursday': 4, 'friday': 5, 'saturday': 6
   };
 
-  if (daysMap[freq] !== undefined) return daysMap[freq] === dayOfWeek;
+  if (daysMap[freq] !== undefined) {return daysMap[freq] === dayOfWeek;}
 
   if (freq === 'weekly') {
     const createdDay = creationDate.getDay();
@@ -1082,7 +1072,7 @@ export function isHabitActiveOnDate(habit, targetDate) {
 
   if (freq === 'biweekly') {
     const createdDay = creationDate.getDay();
-    if (createdDay !== dayOfWeek) return false;
+    if (createdDay !== dayOfWeek) {return false;}
     // Same day-of-week as weekly, but only on every OTHER occurrence:
     // count full weeks elapsed since creation and require an even count.
     const msPerWeek = 7 * 24 * 60 * 60 * 1000;
@@ -1103,7 +1093,7 @@ export function calculateStreak(habit) {
   // Rewritten with plain Date + the same getDateKey() used everywhere
   // else in the app, so streaks keep working even if the dayjs CDN
   // script is blocked, slow, or removed — same logic, zero dependency.
-  let d = new Date();
+  const d = new Date();
   d.setHours(0, 0, 0, 0);
   const creationDate = new Date(habit.createdAt || habit.id);
   creationDate.setHours(0, 0, 0, 0);
@@ -1121,7 +1111,7 @@ export function calculateStreak(habit) {
         // Skips and hidden days do not break the streak
       } else {
         // If it's empty, and it is NOT today, the streak is broken
-        if (dateKey !== todayKey) break;
+        if (dateKey !== todayKey) {break;}
       }
     }
     d.setDate(d.getDate() - 1);
@@ -1185,10 +1175,10 @@ export function updateHabitProgress() {
   }
 
   // Update streaks UI
-  if (typeof renderTopStreaks === 'function') renderTopStreaks();
+  if (typeof renderTopStreaks === 'function') {renderTopStreaks();}
 
   const activeTab = readRaw('focusActiveTab');
-  if (activeTab === '1') document.title = `Focus App - Habits (${completed}/${total})`;
+  if (activeTab === '1') {document.title = `Focus App - Habits (${completed}/${total})`;}
 }
 
 // ==========================================
@@ -1208,7 +1198,7 @@ export function animatePercentage(element, start, end, duration) {
 
   let startTimestamp = null;
   const step = (timestamp) => {
-    if (!startTimestamp) startTimestamp = timestamp;
+    if (!startTimestamp) {startTimestamp = timestamp;}
     const progress = Math.min((timestamp - startTimestamp) / duration, 1);
 
     // Smooth easing curve
@@ -1264,13 +1254,13 @@ function processQuickAddHabit() {
 
   input.value = '';
   renderHabits();
-  if (typeof renderHabitCategories === 'function') renderHabitCategories();
+  if (typeof renderHabitCategories === 'function') {renderHabitCategories();}
 }
 
 const quickAddBtn = document.getElementById('quick-add-habit-btn');
 const quickHabitInput = document.getElementById('quick-habit-input');
 
-if (quickAddBtn) quickAddBtn.addEventListener('click', processQuickAddHabit);
+if (quickAddBtn) {quickAddBtn.addEventListener('click', processQuickAddHabit);}
 
 if (quickHabitInput) {
   quickHabitInput.addEventListener('keypress', (e) => {
@@ -1294,7 +1284,7 @@ if (quickHabitInput) {
 
 export function renderHabitCategories() {
   const filterContainer = document.getElementById('habit-filter-container');
-  if (!filterContainer) return;
+  if (!filterContainer) {return;}
 
   // Maintain current active filter state, default to 'all'
   const currentFilter = filterContainer.querySelector('.filter-btn.active')?.dataset.filter || 'all';
@@ -1357,7 +1347,7 @@ renderHabitCategories();
 // Recalculate bubble position when switching to the Habits tab
 document.addEventListener('habitsTabOpened', () => {
   const filterContainer = document.getElementById('habit-filter-container');
-  if (!filterContainer) return;
+  if (!filterContainer) {return;}
   const activeBtn = filterContainer.querySelector('.filter-btn.active');
   const bubble = document.getElementById('habit-filter-bubble');
 
@@ -1384,18 +1374,18 @@ export function setHabitDate(dateObj) {
     today.setHours(0,0,0,0);
     const diffDays = Math.ceil((newDate - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) display.textContent = 'Today';
-    else if (diffDays === -1) display.textContent = 'Yesterday';
-    else if (diffDays === 1) display.textContent = 'Tomorrow';
-    else display.textContent = newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diffDays === 0) {display.textContent = 'Today';}
+    else if (diffDays === -1) {display.textContent = 'Yesterday';}
+    else if (diffDays === 1) {display.textContent = 'Tomorrow';}
+    else {display.textContent = newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
   }
   renderHabits();
-  if (typeof updateDailyOverview === 'function') updateDailyOverview();
+  if (typeof updateDailyOverview === 'function') {updateDailyOverview();} // eslint-disable-line no-undef
 }
 
 export function renderTopStreaks() {
   const list = document.getElementById('top-streaks-list');
-  if (!list) return;
+  if (!list) {return;}
 
   const habitsWithStreaks = habits.map(h => ({ ...h, currentStreak: typeof calculateStreak === 'function' ? calculateStreak(h) : 0 }));
   habitsWithStreaks.sort((a, b) => b.currentStreak - a.currentStreak);

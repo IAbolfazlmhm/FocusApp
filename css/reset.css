@@ -1,6 +1,23 @@
 /* ========================================== */
 /* RESET & BASE STYLES                        */
 /* ========================================== */
+/*
+  Respect users who prefer reduced motion (vestibular disorders, motion sensitivity).
+  This single block disables all transitions and animations app-wide since the
+  architecture centralizes motion in a few key rules (reset.css transition: all,
+  various transform animations, etc.). WCAG 2.3.3 Level AAA.
+*/
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -16,10 +33,48 @@ body {
   padding: 20px;
 }
 
-body, .timer-section, .tasks-section, .glass-pill, .modal-content,
-.task-item, .progress-ring-track, .progress-ring-circle,
-.start-btn, .add-btn, .active-bubble {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* FIX: was `transition: all` on all these elements. "all" watches every
+   animatable property (including layout-triggering ones like width/height/
+   padding) for changes it will never need to animate, for zero benefit over
+   listing the 1-3 properties that actually change per element. Worse, using
+   `!important` here forced every downstream file (e.g. pomodoro.css's
+   progress-ring-circle stroke-dashoffset) to ALSO use `!important` to carve
+   out its own specific transition — a chain reaction documented in the
+   code review. Replacing with explicit properties removes the performance
+   cost and breaks the chain. */
+body {
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.timer-section, .tasks-section {
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-pill {
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-content {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.task-item {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+.progress-ring-track {
+  transition: stroke 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.start-btn, .add-btn {
+  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.active-bubble {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 0.4s ease;
 }
 
 .preload * {
@@ -59,6 +114,8 @@ input:focus, .custom-select:focus {
 .custom-select:focus-visible {
   outline: none;
   border-color: var(--theme-color, #3b82f6);
+  /* Fallback for browsers without color-mix() support (pre-Safari 16.4/Chrome 111/Firefox 113) */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color, #3b82f6) 25%, transparent);
 }
 
@@ -76,12 +133,14 @@ input:focus, .custom-select:focus {
   outline-offset: -2px;
 }
 
-/* 
+/*
   .task-input has no border of its own (it sits inside a .glass-pill
   container), so instead of ringing the input we glow the pill around it
-  via :focus-within — that's the shape the user actually sees. 
+  via :focus-within — that's the shape the user actually sees.
 */
 .add-task-area.glass-pill:focus-within {
+  /* Fallback for browsers without color-mix() support */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-color, #3b82f6) 25%, transparent);
 }
 

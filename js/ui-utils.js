@@ -9,7 +9,7 @@ import { readRaw, writeRaw } from './storage.js';
 // template. This turns "<img src=x onerror=...>" into inert text instead
 // of a tag the browser will parse and execute.
 export function escapeHTML(str) {
-  if (str === null || str === undefined) return '';
+  if (str === null || str === undefined) {return '';}
   return String(str)
   .replace(/&/g, '&amp;')
   .replace(/</g, '&lt;')
@@ -46,7 +46,7 @@ export function escapeHTML(str) {
 // satisfy it, on every load since these run during initial render, not
 // just on click.
 export function centerButtonInScrollArea(container, btn) {
-  if (!container || !btn) return;
+  if (!container || !btn) {return;}
   const target = btn.offsetLeft - (container.clientWidth / 2) + (btn.offsetWidth / 2);
   container.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
 }
@@ -148,11 +148,11 @@ export const icons = {
 // ==========================================
 export function showToast(message, type = 'info', silent = false) {
   const container = document.getElementById('toast-container');
-  if (!container) return;
+  if (!container) {return;}
 
   const existingToasts = container.querySelectorAll('.toast');
-  for (let t of existingToasts) {
-    if (t.innerText.includes(message)) return;
+  for (const t of existingToasts) {
+    if (t.textContent.includes(message)) {return;}
   }
 
   if (container.childElementCount >= 3) {
@@ -165,8 +165,8 @@ export function showToast(message, type = 'info', silent = false) {
   toast.className = `toast ${type}`;
 
   let icon = '';
-  if (type === 'success') icon = '<span style="color:#10b981">✔</span>';
-  if (type === 'warning') icon = '<span style="color:#f59e0b">⚠️</span>';
+  if (type === 'success') {icon = '<span style="color:#10b981">✔</span>';}
+  if (type === 'warning') {icon = '<span style="color:#f59e0b">⚠️</span>';}
 
   // Icon is always one of our own hardcoded strings above (safe). The
   // message can contain user-typed text (e.g. a tag name), so it's inserted
@@ -180,8 +180,8 @@ export function showToast(message, type = 'info', silent = false) {
   if (type !== 'info' && !silent) {
     const soundToggle = document.getElementById('sound-toggle');
     if (!soundToggle || soundToggle.checked) {
-      if (type === 'success') playUI('success');
-      if (type === 'warning') playUI('click');
+      if (type === 'success') {playUI('success');}
+      if (type === 'warning') {playUI('click');}
     }
   }
 
@@ -210,7 +210,7 @@ export function setupTabs() {
   // it on the compositor (GPU) without touching layout at all. See the
   // matching `.active-bubble` rule in layout.css.
   function updateBubble(targetTab) {
-    if (!targetTab || !bubble) return;
+    if (!targetTab || !bubble) {return;}
     bubble.style.width = `${targetTab.offsetWidth}px`;
     bubble.style.transform = `translateX(${targetTab.offsetLeft}px)`;
   }
@@ -243,12 +243,12 @@ export function setupTabs() {
       const habitsView = document.getElementById('habits-view');
       const progressView = document.getElementById('progress-view');
       
-      if (pomodoroView) pomodoroView.style.display = 'none';
-      if (habitsView) habitsView.style.display = 'none';
-      if (progressView) progressView.style.display = 'none';
+      if (pomodoroView) {pomodoroView.style.display = 'none';}
+      if (habitsView) {habitsView.style.display = 'none';}
+      if (progressView) {progressView.style.display = 'none';}
       
       if (index === 0) {
-        if (pomodoroView) pomodoroView.style.display = 'flex'; 
+        if (pomodoroView) {pomodoroView.style.display = 'flex';} 
         document.body.classList.remove('phase-habits', 'phase-progress');
         const event = new CustomEvent('updateColors');
         document.dispatchEvent(event);
@@ -284,21 +284,21 @@ export function setupTabs() {
       const modeSelect = document.getElementById('mode-select');
       
       // Hide Timer Settings & Mode Select when not on Pomodoro tab
-      if (pomodoroSettings) pomodoroSettings.style.display = index === 0 ? 'block' : 'none';
+      if (pomodoroSettings) {pomodoroSettings.style.display = index === 0 ? 'block' : 'none';}
       // Trigger bubble recalculation if switching to Habits tab (index 1)
       if (index === 1) {
           document.dispatchEvent(new Event('habitsTabOpened'));
       }
       if (modeSelect) {
           const modeWrapper = modeSelect.closest('.setting-group');
-          if (modeWrapper) modeWrapper.style.display = index === 0 ? 'flex' : 'none';
+          if (modeWrapper) {modeWrapper.style.display = index === 0 ? 'flex' : 'none';}
       }
     });
   });
 
   window.addEventListener('resize', () => {
      const activeTab = document.querySelector('.tab.active');
-     if (activeTab) updateBubble(activeTab);
+     if (activeTab) {updateBubble(activeTab);}
   });
 }
 
@@ -328,9 +328,9 @@ function getFocusableElements(container) {
 }
 
 function trapTabKey(event, modal) {
-  if (event.key !== 'Tab') return;
+  if (event.key !== 'Tab') {return;}
   const focusable = getFocusableElements(modal);
-  if (focusable.length === 0) return;
+  if (focusable.length === 0) {return;}
 
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
@@ -365,7 +365,7 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
   const wrapper = document.getElementById(wrapperId);
   const trigger = document.getElementById(triggerId);
   const dropdown = document.getElementById(dropdownId);
-  if (!wrapper || !trigger || !dropdown) return;
+  if (!wrapper || !trigger || !dropdown) {return;}
 
   const valueInput = valueInputId ? document.getElementById(valueInputId) : null;
   const getItems = () => Array.from(dropdown.querySelectorAll('.dropdown-item'));
@@ -381,13 +381,13 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
   // selection — reusing that existing contract instead of hooking into
   // each site's own click handler.
   function syncSelectedState() {
-    if (!valueInput) return;
+    if (!valueInput) {return;}
     getItems().forEach(item => {
       item.setAttribute('aria-selected', String(item.dataset.val === valueInput.value));
     });
   }
   syncSelectedState();
-  if (valueInput) valueInput.addEventListener('change', syncSelectedState);
+  if (valueInput) {valueInput.addEventListener('change', syncSelectedState);}
 
   // Keep aria-expanded truthful no matter which path closes the dropdown
   // (an item's own click handler, an outside click, Escape, etc.) — same
@@ -406,7 +406,7 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
       e.preventDefault();
       dropdown.classList.add('show');
       const items = getItems();
-      if (items.length) items[e.key === 'ArrowUp' ? items.length - 1 : 0].focus();
+      if (items.length) {items[e.key === 'ArrowUp' ? items.length - 1 : 0].focus();}
     } else if (e.key === 'Escape' && isOpen()) {
       e.preventDefault();
       dropdown.classList.remove('show');
@@ -441,10 +441,59 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
     }
   });
 
-  document.addEventListener('click', (e) => {
-    if (!wrapper.contains(e.target)) dropdown.classList.remove('show');
-  });
+  // Register with centralized outside-click handler
+  registerOutsideClickTarget(wrapper, dropdown, valueInputId);
 }
+
+// ==========================================
+// CENTRALIZED OUTSIDE-CLICK HANDLER
+// ==========================================
+// Replaces per-dropdown outside-click listeners with a single delegated
+// handler. Each dropdown registers its trigger + dropdown via
+// registerOutsideClickTarget(). On click, we check if the click was
+// outside all registered dropdowns and close the one that was open.
+// This eliminates the 6+ duplicate document.addEventListener('click') calls
+// that were scattered across tasks.js, habits.js (3), settings.js, progress.js.
+const outsideClickTargets = new Map(); // wrapperEl -> { dropdownEl, valueInputId? }
+
+/**
+ * Register a dropdown/trigger pair for outside-click handling.
+ * @param {HTMLElement} wrapperEl - The wrapper element (contains both trigger and dropdown)
+ * @param {HTMLElement} dropdownEl - The dropdown element to close
+ * @param {string} [valueInputId] - Optional hidden input ID for syncing aria-selected
+ */
+export function registerOutsideClickTarget(wrapperEl, dropdownEl, valueInputId) {
+  if (!wrapperEl || !dropdownEl) {return;}
+  outsideClickTargets.set(wrapperEl, { dropdownEl, valueInputId });
+}
+
+/**
+ * Unregister a dropdown/trigger pair.
+ */
+export function unregisterOutsideClickTarget(wrapperEl) {
+  if (!wrapperEl) {return;}
+  outsideClickTargets.delete(wrapperEl);
+}
+
+// Single delegated click handler — closes any open dropdown whose
+// wrapper doesn't contain the click target.
+document.addEventListener('click', (e) => {
+  for (const [wrapperEl, { dropdownEl, valueInputId }] of outsideClickTargets) {
+    if (dropdownEl.classList.contains('show') && !wrapperEl.contains(e.target)) {
+      dropdownEl.classList.remove('show');
+      // Sync aria-selected state if there's a hidden value input
+      if (valueInputId) {
+        const valueInput = document.getElementById(valueInputId);
+        if (valueInput) {
+          const items = dropdownEl.querySelectorAll('.dropdown-item');
+          items.forEach(item => {
+            item.setAttribute('aria-selected', String(item.dataset.val === valueInput.value));
+          });
+        }
+      }
+    }
+  }
+});
 
 // ==========================================
 // CUSTOM CONFIRM DIALOG
@@ -456,7 +505,7 @@ const confirmMessage = document.getElementById('confirm-message');
 let confirmCallback = null;
 
 export function customConfirm(message, onConfirm) {
-  if (!confirmMessage || !confirmModal) return;
+  if (!confirmMessage || !confirmModal) {return;}
   confirmMessage.textContent = message;
   confirmCallback = onConfirm;
   confirmModal.classList.add('show');
@@ -468,7 +517,7 @@ export function initConfirmModal() {
 
   if (confirmYes) {
     confirmYes.onclick = () => {
-      if (confirmCallback) confirmCallback();
+      if (confirmCallback) {confirmCallback();}
       confirmModal.classList.remove('show');
     };
   }
@@ -508,7 +557,7 @@ export function setupModalAccessibility() {
 
     const heading = modal.querySelector('h2, h3');
     if (heading && !modal.hasAttribute('aria-labelledby')) {
-      if (!heading.id) heading.id = `${modal.id}-title`;
+      if (!heading.id) {heading.id = `${modal.id}-title`;}
       modal.setAttribute('aria-labelledby', heading.id);
     }
 
@@ -520,7 +569,7 @@ export function setupModalAccessibility() {
         lastFocusedBeforeModal = document.activeElement;
 
         const focusable = getFocusableElements(modal);
-        if (focusable.length > 0) focusable[0].focus();
+        if (focusable.length > 0) {focusable[0].focus();}
 
         const handler = (event) => trapTabKey(event, modal);
         modal.addEventListener('keydown', handler);

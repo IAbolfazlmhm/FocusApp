@@ -116,7 +116,9 @@
   stroke-linecap: round; 
   stroke-dasharray: 691; 
   stroke-dashoffset: 0; 
-  transition: stroke-dashoffset 1s linear !important; 
+  /* Was !important — no longer needed now that reset.css no longer uses
+     a blanket transition: all !important that this had to override. */
+  transition: stroke-dashoffset 1s linear; 
 }
 
 .time-display { 
@@ -269,20 +271,25 @@
 }
 
 /* --- TASK ITEMS (CARDS) --- */
-.task-item { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 15px 20px; 
-  width: 100%; 
-  margin-bottom: 12px; 
-  border: 2px solid var(--glass-border); 
-  border-radius: 50px; 
-  background: var(--glass-bg); 
-  backdrop-filter: blur(10px); 
-  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease; 
-  order: 2; 
-  min-height: 76px; 
+/* Consolidated height: was previously split between here (min-height) and
+   layout.css (height + min-height with !important) — now fully owned by
+   this single rule. */
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  width: 100%;
+  margin-bottom: 12px;
+  border: 2px solid var(--glass-border);
+  border-radius: 50px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  order: 2;
+  min-height: 76px;
+  height: 76px;
+  cursor: pointer;
 }
 
 .task-item:hover { 
@@ -619,26 +626,24 @@ body[data-theme="dark"] #habit-date-display:hover {
 }
 
 /* --- TIMER & PHASE OVERRIDES --- */
-body.phase-work .progress-ring-circle { 
-  stroke: #f43f5e; 
-}
+/* FIX: body.phase-work .progress-ring-circle and .time-display overrides
+   removed — they hardcoded #f43f5e but the base rules already use
+   var(--theme-color), which variables.css redefines per phase to the exact
+   same value. The overrides were doing nothing except making the file longer
+   and harder to trust. */
 
-body.phase-work .time-display { 
-  color: #f43f5e; 
-}
-
-body.phase-work .active-bubble { 
-  background-color: #f43f5e; 
+body.phase-work .active-bubble {
+  background-color: #f43f5e;
 }
 
 body.phase-work .tab.active { 
   color: white; 
 }
 
-body.phase-work .start-btn, body.phase-work .add-btn { 
-  background-color: #f43f5e; 
-  color: white; 
-  border: none; 
+body.phase-work .start-btn, body.phase-work .tasks-section .add-btn {
+  background-color: #f43f5e;
+  color: white;
+  border: none;
 }
 
 body.phase-work .task-item:hover { 
@@ -646,26 +651,18 @@ body.phase-work .task-item:hover {
   box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2); 
 }
 
-body.phase-short .progress-ring-circle { 
-  stroke: #14b8a6; 
-}
-
-body.phase-short .time-display { 
-  color: #14b8a6; 
-}
-
-body.phase-short .active-bubble { 
-  background-color: #14b8a6; 
+body.phase-short .active-bubble {
+  background-color: #14b8a6;
 }
 
 body.phase-short .tab.active { 
   color: white; 
 }
 
-body.phase-short .start-btn, body.phase-short .add-btn { 
-  background-color: #14b8a6; 
-  color: white; 
-  border: none; 
+body.phase-short .start-btn, body.phase-short .tasks-section .add-btn {
+  background-color: #14b8a6;
+  color: white;
+  border: none;
 }
 
 body.phase-short .task-item:hover { 
@@ -673,42 +670,32 @@ body.phase-short .task-item:hover {
   box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2); 
 }
 
-body.phase-long .progress-ring-circle { 
-  stroke: #3b82f6; 
-}
-
-body.phase-long .time-display { 
-  color: #3b82f6; 
-}
-
-body.phase-long .active-bubble { 
-  background-color: #3b82f6; 
+body.phase-long .active-bubble {
+  background-color: #3b82f6;
 }
 
 body.phase-long .tab.active { 
   color: white; 
 }
 
-body.phase-long .start-btn, body.phase-long .add-btn { 
-  background-color: #3b82f6; 
-  color: white; 
-  border: none; 
+body.phase-long .start-btn, body.phase-long .tasks-section .add-btn {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
 }
 
-body.phase-long .task-item:hover { 
-  border-color: #3b82f6; 
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2); 
+body.phase-long .task-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
 
-body.phase-stopwatch .progress-ring-circle { 
-  stroke: #8b5cf6; 
-}
+/* .progress-ring-circle and .time-display stopwatch overrides removed —
+   same dead pattern as the work/short/long ones above (see comment at the
+   top of this section). Their base rules already use var(--theme-color),
+   which variables.css redefines to #8b5cf6 for body.phase-stopwatch, so
+   the hardcoded overrides recomputed the exact same value. */
 
-body.phase-stopwatch .time-display { 
-  color: #8b5cf6; 
-}
-
-body.phase-stopwatch .active-bubble { 
+body.phase-stopwatch .active-bubble {
   background-color: #8b5cf6; 
 }
 
@@ -716,10 +703,10 @@ body.phase-stopwatch .tab.active {
   color: white; 
 }
 
-body.phase-stopwatch .start-btn, body.phase-stopwatch .add-btn { 
-  background-color: #8b5cf6; 
-  color: white; 
-  border: none; 
+body.phase-stopwatch .start-btn, body.phase-stopwatch .tasks-section .add-btn {
+  background-color: #8b5cf6;
+  color: white;
+  border: none;
 }
 
 body.phase-stopwatch .task-item:hover { 
@@ -761,11 +748,6 @@ body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phas
   background-color: #a78bfa; 
   color: #0f172a; 
   border: none; 
-}
-
-/* Make the task pill indicate it is clickable */
-.task-item { 
-  cursor: pointer; 
 }
 
 /* --- EDIT TASK MODAL TAGS --- */

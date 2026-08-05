@@ -26,10 +26,7 @@ const manageAddTagBtn = document.getElementById('manage-add-tag-btn');
 const manageNewTagInput = document.getElementById('manage-new-tag-input');
 const manageTagsBtn = document.getElementById('manage-tags-btn');
 
-let editingTaskId = null;
 let pendingQuickTag = null; // Stores the tag selected from the gear
-
-const iconTag = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>`;
 
 // ==========================================
 // CORE HELPERS
@@ -42,7 +39,7 @@ export function saveTasks() {
 }
 
 export function formatTaskTime(totalSeconds) {
-  if (totalSeconds === 0) return '';
+  if (totalSeconds === 0) {return '';}
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
   return `${icons.clock} ${m}m ${s}s`;
@@ -52,7 +49,7 @@ export function formatTaskTime(totalSeconds) {
 // RENDER FILTERS & BUBBLE
 // ==========================================
 export function renderFilters() {
-  if (!filterListEl) return;
+  if (!filterListEl) {return;}
   const scrollPos = filterListEl.scrollLeft;
 
   let html = `
@@ -99,7 +96,7 @@ export function renderFilters() {
 }
 
 function updateFilterBubble() {
-  if (!filterListEl) return;
+  if (!filterListEl) {return;}
   const activeBtn = filterListEl.querySelector('.filter-btn.active');
   const bubble = filterListEl.querySelector('.filter-bubble');
 
@@ -126,14 +123,14 @@ function updateFilterBubble() {
 window.groupSortStates = window.groupSortStates || {};
 
 export function renderTasks() {
-  if (!taskListContainer) return;
+  if (!taskListContainer) {return;}
   taskListContainer.innerHTML = '';
 
   // 1. Filter by Tag/Status
   let filtered = tasks;
-  if (currentFilter === 'active') filtered = tasks.filter(t => !t.completed);
-  else if (currentFilter === 'completed') filtered = tasks.filter(t => t.completed);
-  else if (currentFilter !== 'all') filtered = tasks.filter(t => t.tag === currentFilter);
+  if (currentFilter === 'active') {filtered = tasks.filter(t => !t.completed);}
+  else if (currentFilter === 'completed') {filtered = tasks.filter(t => t.completed);}
+  else if (currentFilter !== 'all') {filtered = tasks.filter(t => t.tag === currentFilter);}
 
   // 2. Filter by Date (Only show tasks for the date selected in the top bar)
   if (typeof currentPomodoroDate !== 'undefined') {
@@ -147,14 +144,14 @@ export function renderTasks() {
   // 3. Sort using the new Top Bar logic
   filtered.sort((a, b) => {
     // 1. Primary Sort: Completed tasks ALWAYS sink to the bottom
-    if (a.completed !== b.completed) return a.completed ? 1 : -1;
+    if (a.completed !== b.completed) {return a.completed ? 1 : -1;}
 
     // 2. Secondary Sort: User's choice
     let val = 0;
-    if (currentSort === 'newest') val = a.createdAt - b.createdAt;
-    else if (currentSort === 'az') val = a.text.localeCompare(b.text);
-    else if (currentSort === 'tag') val = (a.tag || '').localeCompare(b.tag || '');
-    else if (currentSort === 'time') val = a.timeSpent - b.timeSpent;
+    if (currentSort === 'newest') {val = a.createdAt - b.createdAt;}
+    else if (currentSort === 'az') {val = a.text.localeCompare(b.text);}
+    else if (currentSort === 'tag') {val = (a.tag || '').localeCompare(b.tag || '');}
+    else if (currentSort === 'time') {val = a.timeSpent - b.timeSpent;}
 
     return sortOrder === 'asc' ? val : -val;
   });
@@ -231,7 +228,7 @@ export function renderTasks() {
 
     // Wire up the dynamic buttons
     const focusBtn = taskDiv.querySelector('.focus-action');
-    if (focusBtn) focusBtn.addEventListener('click', () => toggleFocus(task.id));
+    if (focusBtn) {focusBtn.addEventListener('click', () => toggleFocus(task.id));}
 
     const rescheduleBtn = taskDiv.querySelector('.reschedule-btn');
     if (rescheduleBtn) {
@@ -252,17 +249,28 @@ export function renderTasks() {
 
   // 5. Handle UI states
   if (focusedTaskId) {
-    if (tasksSection) tasksSection.classList.add('zen-mode');
+    if (tasksSection) {tasksSection.classList.add('zen-mode');}
     const t = tasks.find(x => x.id === focusedTaskId);
-    if (currentTaskNameEl) currentTaskNameEl.textContent = t ? t.text : 'Nothing';
-    if (taskListContainer) taskListContainer.scrollTop = 0;
+    if (currentTaskNameEl) {currentTaskNameEl.textContent = t ? t.text : 'Nothing';}
+    if (taskListContainer) {taskListContainer.scrollTop = 0;}
   } else {
-    if (tasksSection) tasksSection.classList.remove('zen-mode');
-    if (currentTaskNameEl) currentTaskNameEl.textContent = 'Nothing';
+    if (tasksSection) {tasksSection.classList.remove('zen-mode');}
+    if (currentTaskNameEl) {currentTaskNameEl.textContent = 'Nothing';}
   }
 
   if (filtered.length === 0) {
-    let msg = "No tasks yet. Take a deep breath and start planning!";
+    let msg;
+    if (tasks.length === 0) {
+      msg = "No tasks yet. Take a deep breath and start planning!";
+    } else if (currentFilter === 'completed') {
+      msg = "No completed tasks yet. Finish one to see it here!";
+    } else if (currentFilter === 'active') {
+      msg = "All caught up! No active tasks remain.";
+    } else if (currentFilter !== 'all') {
+      msg = `No tasks tagged #${escapeHTML(currentFilter)}.`;
+    } else {
+      msg = "No tasks match the current filter.";
+    }
     taskListContainer.innerHTML = `
       <div class="empty-state lg">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
@@ -275,7 +283,7 @@ export function renderTasks() {
 // CORE ACTIONS
 // ==========================================
 export function addTask() {
-  if (!taskInput) return;
+  if (!taskInput) {return;}
   const text = taskInput.value.trim();
 
   // Tag comes from the gear icon (quick-tag modal) — the app's only tag
@@ -306,7 +314,7 @@ export function addTask() {
   }
 
   // Create task for the currently viewed date, but keep the current time for sorting
-  let taskDate = new Date(currentPomodoroDate);
+  const taskDate = new Date(currentPomodoroDate);
   const now = new Date();
   taskDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
@@ -325,13 +333,13 @@ export function addTask() {
   renderFilters();
   renderTasks();
 
-  if (taskInput) taskInput.value = '';
+  if (taskInput) {taskInput.value = '';}
 }
 
 function removeTask(id) {
   playUI('trash');
   setTasks(tasks.filter(t => t.id !== id));
-  if (focusedTaskId === id) setFocusedTaskId(null);
+  if (focusedTaskId === id) {setFocusedTaskId(null);}
   saveTasks();
   renderTasks();
   checkAutoPause();
@@ -345,7 +353,7 @@ function toggleCompleted(id) {
 
     if (t.completed) {
       playUI('success');
-      if (focusedTaskId === id) setFocusedTaskId(null);
+      if (focusedTaskId === id) {setFocusedTaskId(null);}
     }
     saveTasks();
     renderTasks();
@@ -382,7 +390,7 @@ export function setupTaskEvents() {
   if (taskListContainer) {
     taskListContainer.addEventListener('click', (e) => {
       // Ignore clicks on action buttons
-      if (e.target.closest('button') || e.target.closest('.task-actions')) return;
+      if (e.target.closest('button') || e.target.closest('.task-actions')) {return;}
 
       const taskItem = e.target.closest('.task-item');
       if (taskItem) {
@@ -394,8 +402,8 @@ export function setupTaskEvents() {
     // Keyboard equivalent of the click handler above, so Tab + Enter/Space
     // can open the edit modal the same way a mouse click does.
     taskListContainer.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      if (e.target.closest('button') || e.target.closest('.task-actions')) return;
+      if (e.key !== 'Enter' && e.key !== ' ') {return;}
+      if (e.target.closest('button') || e.target.closest('.task-actions')) {return;}
 
       const taskItem = e.target.closest('.task-item');
       if (taskItem) {
@@ -407,21 +415,27 @@ export function setupTaskEvents() {
 
   function openEditTaskModal(id) {
     const task = tasks.find(t => t.id === id);
-    if (!task) return;
+    if (!task) {return;}
 
     currentlyEditingTaskId = id;
 
     const nameInput = document.getElementById('edit-task-name-input');
-    if (nameInput) nameInput.value = task.text;
+    if (nameInput) {nameInput.value = task.text;}
 
     const tagList = document.getElementById('edit-task-tag-list');
     if (tagList) {
-      tagList.innerHTML = `<button class="tag-select-btn ${!task.tag ? 'selected' : ''}" data-tag="">None</button>`;
-
+      // FIX: used to build tag buttons via innerHTML += inside a forEach,
+      // the classic O(n²) anti-pattern (every iteration re-serializes and
+      // re-parses everything already in the container). Now builds a single
+      // HTML string and sets it once — same pattern already used correctly
+      // by renderTagsManagement() and renderQuickTagModal() in this file.
+      const noneSelected = !task.tag ? 'selected' : '';
+      let html = `<button class="tag-select-btn ${noneSelected}" data-tag="">None</button>`;
       savedTags.forEach(tag => {
         const isSelected = task.tag === tag ? 'selected' : '';
-        tagList.innerHTML += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}">${escapeHTML(tag)}</button>`;
+        html += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}">${escapeHTML(tag)}</button>`;
       });
+      tagList.innerHTML = html;
 
       tagList.querySelectorAll('.tag-select-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -434,14 +448,13 @@ export function setupTaskEvents() {
     const modal = document.getElementById('edit-tag-modal');
     if (modal) {
       modal.classList.add('show');
-      if (nameInput) setTimeout(() => nameInput.focus(), 100);
     }
   }
 
   const saveEditBtn = document.getElementById('save-task-edit-btn');
   if (saveEditBtn) {
     saveEditBtn.addEventListener('click', () => {
-      if (!currentlyEditingTaskId) return;
+      if (!currentlyEditingTaskId) {return;}
 
       const task = tasks.find(t => t.id === currentlyEditingTaskId);
       if (task) {
@@ -449,7 +462,7 @@ export function setupTaskEvents() {
         const newName = nameInput.value.trim();
 
         if (!newName) {
-          if (typeof showToast === 'function') showToast('Task name cannot be empty.', 'warning');
+          if (typeof showToast === 'function') {showToast('Task name cannot be empty.', 'warning');}
           return;
         }
 
@@ -461,7 +474,7 @@ export function setupTaskEvents() {
 
         saveTasks();
         renderTasks();
-        if (typeof renderFilters === 'function') renderFilters();
+        if (typeof renderFilters === 'function') {renderFilters();}
 
         // Update dynamic title if the active task was edited
         if (typeof focusedTaskId !== 'undefined' && focusedTaskId === task.id) {
@@ -507,17 +520,17 @@ export function setupTaskEvents() {
     });
   }
 
-  if (addBtn) addBtn.addEventListener('click', addTask);
+  if (addBtn) {addBtn.addEventListener('click', addTask);}
 
   if (taskInput) {
     taskInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') addTask();
+      if (e.key === 'Enter') {addTask();}
     });
   }
 
   if (manageTagsBtn) {
     manageTagsBtn.addEventListener('click', () => {
-      if (tagsModal) tagsModal.classList.add('show');
+      if (tagsModal) {tagsModal.classList.add('show');}
       renderTagsManagement();
     });
   }
@@ -526,20 +539,20 @@ export function setupTaskEvents() {
     manageNewTagInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        if (manageAddTagBtn) manageAddTagBtn.click();
+        if (manageAddTagBtn) {manageAddTagBtn.click();}
       }
     });
   }
 
   if (closeTagsModal) {
     closeTagsModal.addEventListener('click', () => {
-      if (tagsModal) tagsModal.classList.remove('show');
+      if (tagsModal) {tagsModal.classList.remove('show');}
     });
   }
 
   if (manageAddTagBtn) {
     manageAddTagBtn.addEventListener('click', () => {
-      if (!manageNewTagInput) return;
+      if (!manageNewTagInput) {return;}
       const newTagName = manageNewTagInput.value.trim();
 
       if (!newTagName) {
@@ -577,7 +590,7 @@ export function setupTaskEvents() {
   const quickModalTagInput = document.getElementById('quick-modal-tag-input');
 
   function renderQuickTagModal() {
-    if (!quickModalTagList) return;
+    if (!quickModalTagList) {return;}
     quickModalTagList.innerHTML = '';
 
     // "No Tag" option
@@ -599,33 +612,32 @@ export function setupTaskEvents() {
 
   function selectQuickTag(tag) {
     pendingQuickTag = tag;
-    if (quickTagModal) quickTagModal.classList.remove('show');
-    if (taskInput) taskInput.focus();
+    if (quickTagModal) {quickTagModal.classList.remove('show');}
+    if (taskInput) {taskInput.focus();}
 
-    if (tag) showToast(`Tag #${escapeHTML(tag)} selected`, 'success');
+    if (tag) {showToast(`Tag #${escapeHTML(tag)} selected`, 'success');}
   }
 
   if (advancedTaskBtn) {
     advancedTaskBtn.addEventListener('click', () => {
       playUI('click');
       renderQuickTagModal();
-      if (quickTagModal) quickTagModal.classList.add('show');
+      if (quickTagModal) {quickTagModal.classList.add('show');}
       if (quickModalTagInput) {
         quickModalTagInput.value = '';
-        setTimeout(() => quickModalTagInput.focus(), 100);
       }
     });
   }
 
   if (closeQuickTagModal) {
     closeQuickTagModal.addEventListener('click', () => {
-      if (quickTagModal) quickTagModal.classList.remove('show');
+      if (quickTagModal) {quickTagModal.classList.remove('show');}
     });
   }
 
   // Handle adding new tag from inside the modal
   function addNewQuickTag() {
-    if (!quickModalTagInput) return;
+    if (!quickModalTagInput) {return;}
     const newTagRaw = quickModalTagInput.value.trim();
 
     if (!newTagRaw) {
@@ -666,7 +678,7 @@ export function setupTaskEvents() {
 
   if (quickTagModal) {
     quickTagModal.addEventListener('click', (e) => {
-      if (e.target === quickTagModal) quickTagModal.classList.remove('show');
+      if (e.target === quickTagModal) {quickTagModal.classList.remove('show');}
     });
   }
 
@@ -696,11 +708,11 @@ export function setupTaskEvents() {
   if (pomodoroDisplayBtn && pomodoroDatePicker) {
     pomodoroDisplayBtn.addEventListener('click', () => {
       try { pomodoroDatePicker.showPicker(); }
-      catch (e) { pomodoroDatePicker.click(); }
+      catch { pomodoroDatePicker.click(); }
     });
 
   pomodoroDatePicker.addEventListener('change', (e) => {
-      if (!e.target.value) return;
+      if (!e.target.value) {return;}
       // value is formatted as "YYYY-MM-DD"
       const [year, month, day] = e.target.value.split('-').map(Number);
       currentPomodoroDate = new Date(year, month - 1, day);
@@ -712,16 +724,16 @@ export function setupTaskEvents() {
 
   // UI Updater for Pomodoro Date
   function updatePomodoroDateUI() {
-    if (!pomodoroDisplayBtn) return;
+    if (!pomodoroDisplayBtn) {return;}
     const today = new Date();
     today.setHours(0,0,0,0);
     const diffTime = currentPomodoroDate.getTime() - today.getTime();
     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) pomodoroDisplayBtn.textContent = 'Today';
-    else if (diffDays === -1) pomodoroDisplayBtn.textContent = 'Yesterday';
-    else if (diffDays === 1) pomodoroDisplayBtn.textContent = 'Tomorrow';
-    else pomodoroDisplayBtn.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diffDays === 0) {pomodoroDisplayBtn.textContent = 'Today';}
+    else if (diffDays === -1) {pomodoroDisplayBtn.textContent = 'Yesterday';}
+    else if (diffDays === 1) {pomodoroDisplayBtn.textContent = 'Tomorrow';}
+    else {pomodoroDisplayBtn.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
   }
 
   // --- Sort Button Logic ---
@@ -775,7 +787,7 @@ export function setupTaskEvents() {
 
 
 function renderTagsManagement() {
-  if (!tagsManagementList) return;
+  if (!tagsManagementList) {return;}
   tagsManagementList.innerHTML = '';
 
   savedTags.forEach(tag => {
@@ -837,10 +849,10 @@ function renderTagsManagement() {
         setSavedTags(savedTags.filter(t => t !== tag));
         
         tasks.forEach(t => {
-            if (t.tag === tag) t.tag = null;
+            if (t.tag === tag) {t.tag = null;}
         });
 
-        if (currentFilter === tag) setCurrentFilter('all');
+        if (currentFilter === tag) {setCurrentFilter('all');}
         
         // Custom colors are keyed by tag name — clear the override too so
         // a brand new, unrelated tag with the same name later doesn't
@@ -872,10 +884,10 @@ export function setTaskDate(dateObj) {
     today.setHours(0,0,0,0);
     const diffDays = Math.ceil((currentPomodoroDate - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) display.textContent = 'Today';
-    else if (diffDays === -1) display.textContent = 'Yesterday';
-    else if (diffDays === 1) display.textContent = 'Tomorrow';
-    else display.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (diffDays === 0) {display.textContent = 'Today';}
+    else if (diffDays === -1) {display.textContent = 'Yesterday';}
+    else if (diffDays === 1) {display.textContent = 'Tomorrow';}
+    else {display.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
   }
   renderTasks();
 }

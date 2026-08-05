@@ -7,7 +7,7 @@ import {
 } from './timer.js';
 
 import { showToast, setupSelectDropdown, customConfirm } from './ui-utils.js';
-import { readJSON, writeJSON, readRaw } from './storage.js';
+import { readJSON, writeJSON } from './storage.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -39,7 +39,7 @@ export function applySettingsToTimer() {
   const skipBtn = document.getElementById('skip-btn');
 
   if (selectedMode === 'stopwatch') {
-    if (tracker) tracker.classList.add('hidden');
+    if (tracker) {tracker.classList.add('hidden');}
 
     if (skipBtn) {
       skipBtn.style.opacity = '0.3';
@@ -56,7 +56,7 @@ export function applySettingsToTimer() {
     }
     updatePhaseColors();
   } else {
-    if (tracker) tracker.classList.remove('hidden');
+    if (tracker) {tracker.classList.remove('hidden');}
 
     if (skipBtn) {
       skipBtn.style.opacity = '1';
@@ -88,7 +88,7 @@ export function loadSettings() {
       const dropdown = document.getElementById(dropdownId);
       if (input && display && dropdown) {
         const activeItem = dropdown.querySelector(`.dropdown-item[data-val="${input.value}"]`);
-        if (activeItem) display.value = activeItem.textContent;
+        if (activeItem) {display.value = activeItem.textContent;}
       }
     };
 
@@ -110,13 +110,13 @@ export function loadSettings() {
     }
 
     const breaksToggle = document.getElementById('breaks-toggle');
-    if (breaksToggle) breaksToggle.checked = settings.breaksEnabled;
+    if (breaksToggle) {breaksToggle.checked = settings.breaksEnabled;}
 
     const autoStartToggle = document.getElementById('autostart-breaks-toggle');
-    if (autoStartToggle) autoStartToggle.checked = settings.autoStart;
+    if (autoStartToggle) {autoStartToggle.checked = settings.autoStart;}
 
     const soundToggle = document.getElementById('sound-toggle');
-    if (soundToggle) soundToggle.checked = settings.haptics;
+    if (soundToggle) {soundToggle.checked = settings.haptics;}
 
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     if (darkModeToggle) {
@@ -130,8 +130,8 @@ export function loadSettings() {
     }
 
     if (pomodoroWrapper) {
-      if (settings.mode === 'stopwatch') pomodoroWrapper.classList.add('disabled-settings');
-      else pomodoroWrapper.classList.remove('disabled-settings');
+      if (settings.mode === 'stopwatch') {pomodoroWrapper.classList.add('disabled-settings');}
+      else {pomodoroWrapper.classList.remove('disabled-settings');}
     }
   }
 }
@@ -175,7 +175,7 @@ export function setupSettingsEvents() {
         // localStorage.getItem() check first — this keeps every
         // storage read in the app routed through storage.js.
         const value = readJSON(key, undefined);
-        if (value !== undefined) data[key] = value;
+        if (value !== undefined) {data[key] = value;}
       });
 
       const exportBundle = {
@@ -206,14 +206,14 @@ export function setupSettingsEvents() {
 
     importDataInput.addEventListener('change', () => {
       const file = importDataInput.files && importDataInput.files[0];
-      if (!file) return;
+      if (!file) {return;}
 
       const reader = new FileReader();
       reader.onload = () => {
         let parsed;
         try {
           parsed = JSON.parse(reader.result);
-        } catch (err) {
+        } catch {
           showToast('That file is not valid JSON.', 'warning');
           return;
         }
@@ -260,29 +260,29 @@ export function setupSettingsEvents() {
 
   // Catch event from other tabs to reload settings securely
   document.addEventListener('reloadSettingsUI', () => {
-    if (typeof loadSettings === 'function') loadSettings();
+    if (typeof loadSettings === 'function') {loadSettings();}
   });
 
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
       // BUG FIX: Reset visually to the true saved state in case of unsaved clicks
-      if (typeof loadSettings === 'function') loadSettings();
-      if (settingsModal) settingsModal.classList.add('show');
+      if (typeof loadSettings === 'function') {loadSettings();}
+      if (settingsModal) {settingsModal.classList.add('show');}
     });
   }
 
-  if (closeSettingsBtn) closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('show'));
+  if (closeSettingsBtn) {closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('show'));}
 
   if (settingsModal) {
     settingsModal.addEventListener('click', (event) => {
-      if (event.target === settingsModal) settingsModal.classList.remove('show');
+      if (event.target === settingsModal) {settingsModal.classList.remove('show');}
     });
   }
 
   if (modeSelect) {
     modeSelect.addEventListener('change', () => {
-      if (modeSelect.value === 'stopwatch') pomodoroWrapper.classList.add('disabled-settings');
-      else pomodoroWrapper.classList.remove('disabled-settings');
+      if (modeSelect.value === 'stopwatch') {pomodoroWrapper.classList.add('disabled-settings');}
+      else {pomodoroWrapper.classList.remove('disabled-settings');}
     });
   }
 
@@ -309,8 +309,8 @@ export function setupSettingsEvents() {
       }
 
       const darkModeToggle = document.getElementById('dark-mode-toggle');
-      if (darkModeToggle && darkModeToggle.checked) document.body.setAttribute('data-theme','dark');
-      else document.body.removeAttribute('data-theme');
+      if (darkModeToggle && darkModeToggle.checked) {document.body.setAttribute('data-theme','dark');}
+      else {document.body.removeAttribute('data-theme');}
 
       settingsModal.classList.remove('show');
     });
@@ -328,7 +328,7 @@ export function setupSettingsEvents() {
     const input = document.getElementById(inputId);
     const dropdown = document.getElementById(dropdownId);
 
-    if (!display || !input || !dropdown) return;
+    if (!display || !input || !dropdown) {return;}
 
     dropdown.querySelectorAll('.dropdown-item').forEach(item => {
       item.addEventListener('click', () => {

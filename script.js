@@ -102,21 +102,26 @@ document.addEventListener('click', (e) => {
 });
 
 // --- GLOBAL SOUND HAPTICS ---
-// Automatically plays the 'click' sound for all interactive elements across every tab and modal
+// Automatically plays the 'click' sound for all interactive elements across every tab and modal.
+// Buttons with a `data-sound` attribute play their own custom sound (wired up in their specific
+// handler) and are skipped here — this replaces the previous scattered `e.stopPropagation()` calls
+// that each button had to remember to add. New buttons with custom sounds just add
+// `data-sound="trash"` (or whatever) to their HTML and handle the sound in their own listener.
 document.addEventListener('click', (e) => {
   // 1. Identify what the user clicked (or the button wrapping what they clicked)
   const trigger = e.target.closest('button, .filter-btn, .tab, .dropdown-item, .tag-select-btn, .habit-item, .slider, .color-option, .icon-option');
 
   if (trigger) {
-    // 2. Ignore buttons that already have custom sounds wired up in their specific files
+    // 2. Skip if the button declares its own custom sound via data-sound attribute,
+    //    or if it's a known special button with custom sound wiring.
+    if (trigger.dataset.sound) { return; }
+
     const isSpecialButton = trigger.closest('.done-btn') ||
     trigger.closest('.remove-btn') ||
     trigger.closest('.start-btn') ||
     trigger.closest('.done-habit-btn');
 
     if (!isSpecialButton) {
-      // You may need to import playUI at the top of script.js if it isn't already there!
-      // import { playUI } from './js/audio.js';
       if (typeof playUI === 'function') {
         playUI('click');
       }

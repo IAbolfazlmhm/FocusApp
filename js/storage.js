@@ -17,10 +17,10 @@
  */
 export function readJSON(key, fallback, expectedType = null) {
   const raw = localStorage.getItem(key);
-  if (raw === null) return fallback;
+  if (raw === null) {return fallback;}
   try {
     const parsed = JSON.parse(raw);
-    if (parsed === null || parsed === undefined) return fallback;
+    if (parsed === null || parsed === undefined) {return fallback;}
     if (expectedType === 'array' && !Array.isArray(parsed)) {
       console.warn(`localStorage["${key}"] was valid JSON but not an array, resetting to default.`);
       return fallback;

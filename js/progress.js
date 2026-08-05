@@ -37,10 +37,10 @@ function attachSmartTooltip(block) {
     const rect = block.getBoundingClientRect();
 
     let left = rect.left + (rect.width / 2) - (globalTooltip.offsetWidth / 2);
-    let top = rect.top - globalTooltip.offsetHeight - 10;
+    const top = rect.top - globalTooltip.offsetHeight - 10;
 
-    if (left + globalTooltip.offsetWidth > window.innerWidth - 15) left = window.innerWidth - globalTooltip.offsetWidth - 15;
-    if (left < 15) left = 15;
+    if (left + globalTooltip.offsetWidth > window.innerWidth - 15) {left = window.innerWidth - globalTooltip.offsetWidth - 15;}
+    if (left < 15) {left = 15;}
 
     globalTooltip.style.left = left + 'px';
     globalTooltip.style.top = top + 'px';
@@ -77,9 +77,9 @@ export function renderProgressDashboard() {
   const bounds = getDateBounds(refDate, timeRange);
 
   const prevRefDate = new Date(bounds.start);
-  if (timeRange === 'daily') prevRefDate.setDate(prevRefDate.getDate() - 1);
-  else if (timeRange === 'weekly') prevRefDate.setDate(prevRefDate.getDate() - 7);
-  else if (timeRange === 'monthly') prevRefDate.setMonth(prevRefDate.getMonth() - 1);
+  if (timeRange === 'daily') {prevRefDate.setDate(prevRefDate.getDate() - 1);}
+  else if (timeRange === 'weekly') {prevRefDate.setDate(prevRefDate.getDate() - 7);}
+  else if (timeRange === 'monthly') {prevRefDate.setMonth(prevRefDate.getMonth() - 1);}
   else if (timeRange === 'custom') {
     const diffTime = Math.abs(bounds.end - bounds.start);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -94,7 +94,7 @@ export function renderProgressDashboard() {
   renderFocusHeatmap(bounds.start, bounds.end, currentTasks);
   renderHabitHeatmap(bounds.start, bounds.end, currentHabits);
 
-  if (readRaw('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
+  if (readRaw('focusActiveTab') === '2') {document.title = 'Focus App - Dashboard';}
 }
 
 // ==========================================
@@ -105,7 +105,7 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
   let totalExpectedLogs = 0, totalSuccessfulLogs = 0;
   let totalTasksCreated = 0, totalTasksCompleted = 0;
 
-  let d = new Date(startDate);
+  const d = new Date(startDate);
   while (d <= endDate) {
     const localDateStr = getLocalDateKey(d);
     const habitLogKey = getHabitLogKey(d);
@@ -152,7 +152,7 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
         if (d.getTime() >= created) {
           if (isHabitActiveOnDate(h, d)) {
             dailyHabitsExpected++;
-            if (h.logs && h.logs[habitLogKey] === 'done') dailyHabitsDone++;
+            if (h.logs && h.logs[habitLogKey] === 'done') {dailyHabitsDone++;}
           }
         }
       });
@@ -163,8 +163,8 @@ function calculateStats(startDate, endDate, currentTasks, currentHabits) {
     totalExpectedLogs += dailyHabitsExpected;
     totalSuccessfulLogs += dailyHabitsDone;
 
-    if (showHabits && dailyHabitsExpected > 0 && dailyHabitsDone === dailyHabitsExpected) perfectDaysCount++;
-    else if (!showHabits && dailyTasksDone > 0) perfectDaysCount++;
+    if (showHabits && dailyHabitsExpected > 0 && dailyHabitsDone === dailyHabitsExpected) {perfectDaysCount++;}
+    else if (!showHabits && dailyTasksDone > 0) {perfectDaysCount++;}
 
     d.setDate(d.getDate() + 1);
   }
@@ -177,10 +177,10 @@ function updateLeftPanelUI(curr, prev, bounds) {
   const formatShort = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   if (title) {
-    if (timeRange === 'daily') title.textContent = formatShort(bounds.start);
-    else if (timeRange === 'weekly') title.textContent = `${formatShort(bounds.start)} - ${formatShort(bounds.end)}`;
-    else if (timeRange === 'monthly') title.textContent = bounds.start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    else if (timeRange === 'custom') title.textContent = `${formatShort(bounds.start)} - ${formatShort(bounds.end)}`;
+    if (timeRange === 'daily') {title.textContent = formatShort(bounds.start);}
+    else if (timeRange === 'weekly') {title.textContent = `${formatShort(bounds.start)} - ${formatShort(bounds.end)}`;}
+    else if (timeRange === 'monthly') {title.textContent = bounds.start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });}
+    else if (timeRange === 'custom') {title.textContent = `${formatShort(bounds.start)} - ${formatShort(bounds.end)}`;}
   }
 
   // BUG FIX: True Weighted Average of Both Tabs!
@@ -199,7 +199,7 @@ function updateLeftPanelUI(curr, prev, bounds) {
   const finalScore = totalItems === 0 ? 0 : Math.round((completedItems / totalItems) * 100);
 
   const scoreVal = document.getElementById('hero-score-value');
-  if (scoreVal) scoreVal.textContent = `${finalScore}%`;
+  if (scoreVal) {scoreVal.textContent = `${finalScore}%`;}
 
   const ring = document.getElementById('hero-consistency-ring');
   if (ring) {
@@ -207,7 +207,7 @@ function updateLeftPanelUI(curr, prev, bounds) {
     const circumference = radius * 2 * Math.PI;
     const offset = circumference - (finalScore / 100) * circumference;
     ring.style.strokeDasharray = `${circumference} ${circumference}`;
-    setTimeout(() => ring.style.strokeDashoffset = offset, 50);
+    requestAnimationFrame(() => ring.style.strokeDashoffset = offset);
   }
 
   const hours = Math.floor(curr.focusMinutes / 60);
@@ -217,9 +217,9 @@ function updateLeftPanelUI(curr, prev, bounds) {
   const statItems = document.getElementById('stat-items-done');
   const statPerfect = document.getElementById('stat-perfect-days');
 
-  if (statFocus) statFocus.textContent = `${hours}h ${mins}m`;
-  if (statItems) statItems.textContent = curr.itemsCompleted;
-  if (statPerfect) statPerfect.textContent = curr.perfectDaysCount;
+  if (statFocus) {statFocus.textContent = `${hours}h ${mins}m`;}
+  if (statItems) {statItems.textContent = curr.itemsCompleted;}
+  if (statPerfect) {statPerfect.textContent = curr.perfectDaysCount;}
 
   updateDeltaBadge('delta-focus', curr.focusMinutes, prev.focusMinutes, 'm');
   updateDeltaBadge('delta-items', curr.itemsCompleted, prev.itemsCompleted, '');
@@ -228,7 +228,7 @@ function updateLeftPanelUI(curr, prev, bounds) {
 
 function updateDeltaBadge(elementId, currVal, prevVal, suffix) {
   const badge = document.getElementById(elementId);
-  if (!badge) return;
+  if (!badge) {return;}
 
   if (!compareMode || timeRange === 'custom') {
     badge.classList.remove('show');
@@ -256,7 +256,7 @@ function updateDeltaBadge(elementId, currVal, prevVal, suffix) {
 function renderFocusHeatmap(startDate, endDate, currentTasks) {
   const container = document.getElementById('prog-focus-container');
   const heatmap = document.getElementById('focus-heatmap');
-  if (!container || !heatmap) return;
+  if (!container || !heatmap) {return;}
 
   if (!showPomodoro) { container.style.display = 'none'; return; }
   container.style.display = 'flex';
@@ -284,7 +284,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
       // constraint.
       if (getLocalDateKey(t.createdAt) === dateStr) {
         totalTasks++;
-        if (t.completed) doneTasks++;
+        if (t.completed) {doneTasks++;}
       }
     });
 
@@ -292,21 +292,21 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
     block.className = 'heatmap-block';
     const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    let completionRate = totalTasks === 0 ? 0 : (doneTasks / totalTasks);
+    const completionRate = totalTasks === 0 ? 0 : (doneTasks / totalTasks);
 
     // Dynamic Tooltip
     let tooltipHTML = `<span class="report-date-label">${displayDate}</span><br/>`;
-    if (totalTasks > 0) tooltipHTML += `${doneTasks}/${totalTasks} tasks done (${Math.round(completionRate*100)}%)<br/>${mins}m focus time`;
-    else if (mins > 0) tooltipHTML += `0 tasks, ${mins}m focus time`;
-    else tooltipHTML += `No activity`;
+    if (totalTasks > 0) {tooltipHTML += `${doneTasks}/${totalTasks} tasks done (${Math.round(completionRate*100)}%)<br/>${mins}m focus time`;}
+    else if (mins > 0) {tooltipHTML += `0 tasks, ${mins}m focus time`;}
+    else {tooltipHTML += `No activity`;}
 
     block.setAttribute('data-date', tooltipHTML);
 
     // BUG FIX: Color is now based strictly on Completion Rate!
     if (totalTasks > 0) {
-      if (completionRate > 0 && completionRate < 0.5) block.classList.add('focus-level-1');
-      else if (completionRate >= 0.5 && completionRate < 1) block.classList.add('focus-level-2');
-      else if (completionRate === 1) block.classList.add('focus-level-3');
+      if (completionRate > 0 && completionRate < 0.5) {block.classList.add('focus-level-1');}
+      else if (completionRate >= 0.5 && completionRate < 1) {block.classList.add('focus-level-2');}
+      else if (completionRate === 1) {block.classList.add('focus-level-3');}
     } else if (mins > 0) {
       block.classList.add('focus-level-1'); // Fallback if they focused without tasks
     }
@@ -320,7 +320,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
 function renderHabitHeatmap(startDate, endDate, currentHabits) {
   const container = document.getElementById('prog-habit-container');
   const heatmap = document.getElementById('habit-heatmap');
-  if (!container || !heatmap) return;
+  if (!container || !heatmap) {return;}
 
   if (!showHabits) { container.style.display = 'none'; return; }
   container.style.display = 'flex';
@@ -339,7 +339,7 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
         // BUG FIX: Accurate scheduling
         if (isHabitActiveOnDate(h, d)) {
           activeCount++;
-          if (h.logs && h.logs[logKey] === 'done') doneCount++;
+          if (h.logs && h.logs[logKey] === 'done') {doneCount++;}
         }
       }
     });
@@ -360,9 +360,9 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
 
     if (doneCount > 0) {
       const rate = doneCount / activeCount;
-      if (rate > 0 && rate <= 0.33) block.classList.add('habit-level-1');
-      else if (rate > 0.33 && rate <= 0.66) block.classList.add('habit-level-2');
-      else if (rate > 0.66) block.classList.add('habit-level-3');
+      if (rate > 0 && rate <= 0.33) {block.classList.add('habit-level-1');}
+      else if (rate > 0.33 && rate <= 0.66) {block.classList.add('habit-level-2');}
+      else if (rate > 0.66) {block.classList.add('habit-level-3');}
     }
 
     block.addEventListener('click', () => openDailyReport(d));
@@ -378,7 +378,7 @@ function openDailyReport(dateObj) {
   const modal = document.getElementById('daily-report-modal');
   const title = document.getElementById('report-date-title');
   const body = document.getElementById('report-modal-body');
-  if (!modal) return;
+  if (!modal) {return;}
 
   const currentTasks = readJSON('focusTasks', [], 'array');
   const currentHabits = readJSON('focusHabits', [], 'array');
@@ -399,7 +399,7 @@ function openDailyReport(dateObj) {
     const dayTasks = currentTasks.filter(t =>
       getLocalDateKey(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
     );
-    if (dayTasks.length === 0) html += `<p class="report-empty-msg">No tasks recorded.</p>`;
+    if (dayTasks.length === 0) {html += `<p class="report-empty-msg">No tasks recorded.</p>`;}
     dayTasks.forEach(t => {
       // Show THIS day's time, not the task's all-time total — legacy
       // tasks with no timeByDate fall back to their full total since
@@ -408,8 +408,8 @@ function openDailyReport(dateObj) {
       ? (t.timeByDate[localDateStr] || 0)
       : (t.timeSpent || 0);
       const timeBadge = formatTaskTime(dayTimeSeconds);
-      if (t.completed) html += `<div class="report-item success"><span><strike>${escapeHTML(t.text)}</strike></span> <span>${timeBadge}</span></div>`;
-      else html += `<div class="report-item failed"><span>${escapeHTML(t.text)}</span> <span>${timeBadge}</span></div>`;
+      if (t.completed) {html += `<div class="report-item success"><span><strike>${escapeHTML(t.text)}</strike></span> <span>${timeBadge}</span></div>`;}
+      else {html += `<div class="report-item failed"><span>${escapeHTML(t.text)}</span> <span>${timeBadge}</span></div>`;}
     });
   }
 
@@ -421,12 +421,12 @@ function openDailyReport(dateObj) {
       if (dateObj.getTime() >= created && isHabitActiveOnDate(h, dateObj)) {
         habitFound = true;
         const status = h.logs && h.logs[habitLogKey];
-        if (status === 'done') html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Done</span></div>`;
-        else if (status === 'skipped') html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Skipped</span></div>`;
-        else html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Missed</span></div>`;
+        if (status === 'done') {html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Done</span></div>`;}
+        else if (status === 'skipped') {html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Skipped</span></div>`;}
+        else {html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Missed</span></div>`;}
       }
     });
-    if (!habitFound) html += `<p class="report-empty-msg">No habits scheduled.</p>`;
+    if (!habitFound) {html += `<p class="report-empty-msg">No habits scheduled.</p>`;}
   }
 
   // BUG FIX: Only show buttons for active sections
@@ -450,11 +450,14 @@ function openDailyReport(dateObj) {
   modal.classList.add('show');
 
   // Safely attach event listeners only if the buttons exist
+  // FIX: used to navigate by hardcoded tab index ([0], [1]), which breaks
+  // silently if the tab order or count in the HTML ever changes. Now uses
+  // semantic IDs that are tied to the actual tab elements.
   const gotoFocusBtn = document.getElementById('goto-focus-btn');
   if (gotoFocusBtn) {
     gotoFocusBtn.addEventListener('click', () => {
       document.getElementById('close-report-modal').click();
-      document.querySelectorAll('.tab')[0].click();
+      document.getElementById('tab-pomodoro').click();
       setTaskDate(dateObj);
     });
   }
@@ -463,7 +466,7 @@ function openDailyReport(dateObj) {
   if (gotoHabitsBtn) {
     gotoHabitsBtn.addEventListener('click', () => {
       document.getElementById('close-report-modal').click();
-      document.querySelectorAll('.tab')[1].click();
+      document.getElementById('tab-habits').click();
       setHabitDate(dateObj);
     });
   }
@@ -476,7 +479,7 @@ function getDateBounds(date, range) {
   const d = new Date(date);
   d.setHours(0,0,0,0);
 
-  if (range === 'daily') return { start: new Date(d), end: new Date(d) };
+  if (range === 'daily') {return { start: new Date(d), end: new Date(d) };}
   if (range === 'weekly') {
     const day = d.getDay() || 7;
     const start = new Date(d);
@@ -490,12 +493,12 @@ function getDateBounds(date, range) {
     const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
     return { start, end };
   }
-  if (range === 'custom') return { start: customStartDate || new Date(), end: customEndDate || new Date() };
+  if (range === 'custom') {return { start: customStartDate || new Date(), end: customEndDate || new Date() };}
 }
 
 function getDaysArray(start, end) {
   const arr = [];
-  let d = new Date(start);
+  const d = new Date(start);
   while (d <= end) {
     arr.push(new Date(d));
     d.setDate(d.getDate() + 1);
@@ -522,10 +525,10 @@ export function setupProgressEvents() {
   const prevBtn = document.getElementById('prog-prev-btn');
   const nextBtn = document.getElementById('prog-next-btn');
 
-  if (prevBtn) prevBtn.addEventListener('click', () => {
-    if (timeRange === 'daily') refDate.setDate(refDate.getDate() - 1);
-    else if (timeRange === 'weekly') refDate.setDate(refDate.getDate() - 7);
-    else if (timeRange === 'monthly') refDate.setMonth(refDate.getMonth() - 1);
+  if (prevBtn) {prevBtn.addEventListener('click', () => {
+    if (timeRange === 'daily') {refDate.setDate(refDate.getDate() - 1);}
+    else if (timeRange === 'weekly') {refDate.setDate(refDate.getDate() - 7);}
+    else if (timeRange === 'monthly') {refDate.setMonth(refDate.getMonth() - 1);}
     else if (timeRange === 'custom') {
       const bounds = getDateBounds(refDate, 'custom');
       const diffDays = Math.ceil(Math.abs(bounds.end - bounds.start) / (1000 * 60 * 60 * 24)) + 1;
@@ -533,12 +536,12 @@ export function setupProgressEvents() {
       customEndDate.setDate(customEndDate.getDate() - diffDays);
     }
     renderProgressDashboard();
-  });
+  });}
 
-  if (nextBtn) nextBtn.addEventListener('click', () => {
-    if (timeRange === 'daily') refDate.setDate(refDate.getDate() + 1);
-    else if (timeRange === 'weekly') refDate.setDate(refDate.getDate() + 7);
-    else if (timeRange === 'monthly') refDate.setMonth(refDate.getMonth() + 1);
+  if (nextBtn) {nextBtn.addEventListener('click', () => {
+    if (timeRange === 'daily') {refDate.setDate(refDate.getDate() + 1);}
+    else if (timeRange === 'weekly') {refDate.setDate(refDate.getDate() + 7);}
+    else if (timeRange === 'monthly') {refDate.setMonth(refDate.getMonth() + 1);}
     else if (timeRange === 'custom') {
       const bounds = getDateBounds(refDate, 'custom');
       const diffDays = Math.ceil(Math.abs(bounds.end - bounds.start) / (1000 * 60 * 60 * 24)) + 1;
@@ -546,7 +549,7 @@ export function setupProgressEvents() {
       customEndDate.setDate(customEndDate.getDate() + diffDays);
     }
     renderProgressDashboard();
-  });
+  });}
 
   const rangeBtn = document.getElementById('prog-range-btn');
   const rangeDropdown = document.getElementById('prog-range-dropdown');
@@ -561,11 +564,11 @@ export function setupProgressEvents() {
         item.classList.add('active-sort');
 
         if (selectedRange === 'custom') {
-          if (customRangeModal) customRangeModal.classList.add('show');
+          if (customRangeModal) {customRangeModal.classList.add('show');}
         } else {
           timeRange = selectedRange;
           refDate = new Date();
-          if (rangeDisplay) rangeDisplay.textContent = item.textContent;
+          if (rangeDisplay) {rangeDisplay.textContent = item.textContent;}
           renderProgressDashboard();
         }
         rangeDropdown.classList.remove('show');
@@ -578,7 +581,7 @@ export function setupProgressEvents() {
   const applyCustomBtn = document.getElementById('apply-custom-range');
   const closeCustomBtn = document.getElementById('close-custom-range');
 
-  if (closeCustomBtn && customRangeModal) closeCustomBtn.addEventListener('click', () => customRangeModal.classList.remove('show'));
+  if (closeCustomBtn && customRangeModal) {closeCustomBtn.addEventListener('click', () => customRangeModal.classList.remove('show'));}
 
   if (applyCustomBtn && customRangeModal) {
     applyCustomBtn.addEventListener('click', () => {
@@ -608,7 +611,7 @@ export function setupProgressEvents() {
         }
 
         timeRange = 'custom';
-        if (rangeDisplay) rangeDisplay.textContent = "Custom Range";
+        if (rangeDisplay) {rangeDisplay.textContent = "Custom Range";}
         customRangeModal.classList.remove('show');
         renderProgressDashboard();
       }
@@ -632,33 +635,33 @@ export function setupProgressEvents() {
 
   if (setBtn && setModal) {
     setBtn.addEventListener('click', () => {
-      if (togFocus) togFocus.checked = showPomodoro;
-      if (togHabits) togHabits.checked = showHabits;
-      if (togComp) togComp.checked = compareMode;
-      if (progDarkMode && mainDarkMode) progDarkMode.checked = mainDarkMode.checked;
-      if (progSound && mainSound) progSound.checked = mainSound.checked;
+      if (togFocus) {togFocus.checked = showPomodoro;}
+      if (togHabits) {togHabits.checked = showHabits;}
+      if (togComp) {togComp.checked = compareMode;}
+      if (progDarkMode && mainDarkMode) {progDarkMode.checked = mainDarkMode.checked;}
+      if (progSound && mainSound) {progSound.checked = mainSound.checked;}
       setModal.classList.add('show');
     });
   }
 
-  if (closeSet && setModal) closeSet.addEventListener('click', () => setModal.classList.remove('show'));
-  if (closeRep && repModal) closeRep.addEventListener('click', () => repModal.classList.remove('show'));
+  if (closeSet && setModal) {closeSet.addEventListener('click', () => setModal.classList.remove('show'));}
+  if (closeRep && repModal) {closeRep.addEventListener('click', () => repModal.classList.remove('show'));}
 
   if (saveProgSetBtn) {
     saveProgSetBtn.addEventListener('click', () => {
-      if (togFocus) showPomodoro = togFocus.checked;
-      if (togHabits) showHabits = togHabits.checked;
-      if (togComp) compareMode = togComp.checked;
+      if (togFocus) {showPomodoro = togFocus.checked;}
+      if (togHabits) {showHabits = togHabits.checked;}
+      if (togComp) {compareMode = togComp.checked;}
 
       if (progDarkMode && mainDarkMode) {
         mainDarkMode.checked = progDarkMode.checked;
-        if (progDarkMode.checked) document.body.setAttribute('data-theme', 'dark');
-        else document.body.removeAttribute('data-theme');
+        if (progDarkMode.checked) {document.body.setAttribute('data-theme', 'dark');}
+        else {document.body.removeAttribute('data-theme');}
       }
-      if (progSound && mainSound) mainSound.checked = progSound.checked;
+      if (progSound && mainSound) {mainSound.checked = progSound.checked;}
 
       const mainSaveBtn = document.getElementById('save-settings');
-      if (mainSaveBtn) mainSaveBtn.click();
+      if (mainSaveBtn) {mainSaveBtn.click();}
 
       // BUG FIX: Protect the layout! If both tabs are now ON, and they have a massive custom range active, shrink it.
       if (showPomodoro && showHabits && timeRange === 'custom') {
@@ -679,12 +682,12 @@ export function setupProgressEvents() {
   }
 
   document.addEventListener('click', (e) => {
-    if (setModal && e.target === setModal) setModal.classList.remove('show');
-    if (repModal && e.target === repModal) repModal.classList.remove('show');
-    if (customRangeModal && e.target === customRangeModal) customRangeModal.classList.remove('show');
+    if (setModal && e.target === setModal) {setModal.classList.remove('show');}
+    if (repModal && e.target === repModal) {repModal.classList.remove('show');}
+    if (customRangeModal && e.target === customRangeModal) {customRangeModal.classList.remove('show');}
   });
 
   document.addEventListener('tabChanged', () => {
-    if (readRaw('focusActiveTab') === '2') document.title = 'Focus App - Dashboard';
+    if (readRaw('focusActiveTab') === '2') {document.title = 'Focus App - Dashboard';}
   });
 }

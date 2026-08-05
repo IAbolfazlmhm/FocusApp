@@ -106,11 +106,6 @@
   min-height: 56px !important; 
 }
 
-.task-item { 
-  min-height: 76px !important; 
-  height: 76px !important; 
-}
-
 #pomodoro-date-display, #habit-date-display { 
   color: var(--text-main); 
 }

@@ -29,6 +29,7 @@ svg.phase-icon {
 
 /* --- BUTTONS --- */
 .add-btn {
+  min-height: 44px;
   padding: 10px 25px; 
   background: var(--btn-bg); 
   color: var(--text-main);
@@ -36,7 +37,7 @@ svg.phase-icon {
   border-radius: 40px;
   font-weight: bold; 
   cursor: pointer; 
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05); flex-shrink: 0;
 }
 
@@ -54,6 +55,7 @@ svg.phase-icon {
   look instead of matching the current tab's color. 
 */
 .theme-outline-btn {
+  min-height: 44px;
   padding: 10px 20px; 
   background: transparent; 
   color: var(--theme-color, #3b82f6);
@@ -61,7 +63,7 @@ svg.phase-icon {
   border-radius: 40px;
   font-weight: bold; 
   cursor: pointer; 
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .theme-outline-btn:hover { 
@@ -71,6 +73,8 @@ svg.phase-icon {
 }
 
 .icon-btn {
+  min-width: 44px;
+  min-height: 44px;
   background: transparent; 
   border: none; 
   font-size: 1.5rem; 
@@ -84,14 +88,14 @@ svg.phase-icon {
 }
 
 /* BUG FIX: Settings gear and arrows now hover in the phase theme color */
-.icon-btn:hover { 
-  transform: scale(1.1); 
-  color: var(--theme-color) !important; 
+.icon-btn:hover {
+  transform: scale(1.1);
+  color: var(--theme-color);
 }
 
 .theme-circle-btn {
-  width: 38px; 
-  height: 38px; 
+  width: 44px; 
+  height: 44px; 
   border-radius: 50%;
   background: var(--glass-bg); 
   border: 1px solid var(--glass-border);
@@ -156,18 +160,18 @@ body.phase-habits .theme-circle-btn:hover {
 }
 
 /* --- TOASTS --- */
-#toast-container { 
-  position: fixed; 
-  bottom: 30px; 
-  left: 50%; 
-  transform: translateX(-50%); 
-  z-index: 9999; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px; 
-  pointer-events: none; 
-  width: auto; 
-  align-items: center; 
+#toast-container {
+  position: fixed;
+  bottom: max(30px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  width: auto;
+  align-items: center;
 }
 
 .toast { 
@@ -299,6 +303,8 @@ body.phase-habits .theme-circle-btn:hover {
 
 .modal-content:hover::-webkit-scrollbar-thumb,
 .modal-content:focus-within::-webkit-scrollbar-thumb {
+  /* Fallback for browsers without color-mix() support */
+  background-color: rgba(59, 130, 246, 0.5);
   background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 50%, transparent);
 }
 
@@ -428,16 +434,18 @@ body[data-theme="dark"] .custom-select option {
   reads as "part of this app" instead of a generic gray widget, while
   staying clearly distinguishable from the solid "on" state.
 */
-.slider { 
-  position: absolute; 
-  cursor: pointer; 
-  top: 0; 
-  left: 0; 
-  right: 0; 
-  bottom: 0; 
-  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 15%, var(--glass-bg)); 
-  border: 1px solid var(--glass-border); 
-  transition: .4s; 
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Fallback for browsers without color-mix() support */
+  background-color: rgba(59, 130, 246, 0.15);
+  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 15%, var(--glass-bg));
+  border: 1px solid var(--glass-border);
+  transition: .4s;
 }
 
 .slider:before { 
@@ -470,7 +478,7 @@ input:checked + .slider:before {
 }
 
 #confirm-modal {
-  z-index: 10000 !important;
+  z-index: 10000;
 }
 
 /* --- DROPDOWNS --- */
@@ -540,9 +548,9 @@ body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb {
   align-items: center; 
 }
 
-.dropdown-item svg { 
-  width: 12px !important; 
-  height: 12px !important; 
+.dropdown-item svg {
+  width: 12px;
+  height: 12px;
 }
 
 .icon-inline-sm { 
@@ -677,49 +685,52 @@ body[data-theme="dark"] .dropdown-item.active-sort {
 /* --- MODAL ROW FIXES --- */
 .add-tag-row { 
   display: flex; 
-  gap: 10px; 
-  margin-bottom: 10px; 
-}
-
-#confirm-message { 
-  color: var(--text-main) !important; 
-  font-size: 1.1rem; 
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 /* --- DROPDOWN POSITION FIXES --- */
-.sort-wrapper { 
-  position: relative; 
+.sort-wrapper {
+  position: relative;
 }
 
-#sort-dropdown, #habit-sort-dropdown { 
-  top: calc(100% + 8px) !important; 
-  right: 0 !important; 
-  left: auto !important; 
-  bottom: auto !important; 
+#sort-dropdown, #habit-sort-dropdown {
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  bottom: auto;
 }
 
 /* --- CONFIRM MODAL DARK MODE FIXES --- */
-#confirm-message { 
-  color: var(--text-main); 
-  transition: color 0.3s; 
+#confirm-message {
+  color: var(--text-main);
+  font-size: 1.1rem;
+  transition: color 0.3s;
 }
 
-body[data-theme="dark"] #confirm-message { 
-  color: #f8fafc; 
+body[data-theme="dark"] #confirm-message {
+  color: #f8fafc;
 }
 
-.cancel-btn:hover { 
-  background: var(--glass-bg) !important; 
-  transform: translateY(-2px); 
+.cancel-btn {
+  background: var(--btn-bg);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+  flex: 1;
 }
 
-body[data-theme="dark"] .cancel-btn { 
-  background: rgba(255, 255, 255, 0.05) !important; 
-  color: #f8fafc !important; 
+.cancel-btn:hover {
+  background: var(--glass-bg);
+  transform: translateY(-2px);
 }
 
-body[data-theme="dark"] .cancel-btn:hover { 
-  background: rgba(255, 255, 255, 0.1) !important; 
+body[data-theme="dark"] .cancel-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+}
+
+body[data-theme="dark"] .cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* 

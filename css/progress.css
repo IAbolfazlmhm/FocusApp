@@ -4,10 +4,10 @@
 
 /* Override Habits Green Hover & Remove Scale Animation */
 body.phase-progress .date-selector-btn:hover {
-  color: #8b5cf6 !important;
+  color: #8b5cf6;
 }
 body[data-theme="dark"].phase-progress .date-selector-btn:hover {
-  color: #a78bfa !important;
+  color: #a78bfa;
 }
 
 /* --- PROGRESS TAB THEME COLORS --- */
@@ -127,9 +127,9 @@ body[data-theme="dark"].phase-progress .dropdown-item.active-sort {
 }
 
 #prog-range-dropdown {
-  top: calc(100% + 8px) !important;
-  bottom: auto !important;
-  z-index: 99999 !important;
+  top: calc(100% + 8px);
+  bottom: auto;
+  z-index: 99999;
   border: 1px solid var(--glass-border);
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }

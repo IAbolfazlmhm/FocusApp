@@ -1,0 +1,25 @@
+{
+  "name": "focusapp",
+  "version": "1.0.0",
+  "description": "A Pomodoro timer, task manager, and habit tracker with focus sessions, streaks, heatmaps, and data export. All data stored locally in your browser.",
+  "type": "module",
+  "scripts": {
+    "start": "npx serve .",
+    "lint": "eslint js/ --ext .js",
+    "lint:fix": "eslint js/ --ext .js --fix"
+  },
+  "keywords": [
+    "pomodoro",
+    "timer",
+    "tasks",
+    "habits",
+    "productivity",
+    "focus"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0"
+  }
+}
