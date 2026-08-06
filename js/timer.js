@@ -4,7 +4,7 @@ import {
   tasks, focusedTaskId
 } from './state.js';
 
-import { playAlarm } from './audio.js';
+import { playAlarm, playUI } from './audio.js';
 import { showToast, icons } from './ui-utils.js';
 import { readJSON, writeJSON, readRaw, remove } from './storage.js';
 import { getLocalDateKey } from './date-utils.js';
@@ -288,6 +288,7 @@ export function toggleTimer() {
   if (isRunning) {
     // Pause timer
     stopTimer();
+    playUI('click');
 
     // Ticks now only persist every few seconds (see below), so pausing
     // needs its own explicit save — otherwise up to a few seconds of
@@ -296,6 +297,7 @@ export function toggleTimer() {
   } else {
     // Start timer
     setIsRunning(true);
+    playUI('click');
 
     if (startBtn) {
       startBtn.querySelector('.btn-text').textContent = 'Pause';
@@ -384,7 +386,6 @@ export function toggleTimer() {
 // TIMER EVENT LISTENERS
 // ==========================================
 export function setupTimerEvents() {
-  const startBtn = document.getElementById('start-btn');
   const resetBtn = document.getElementById('reset-btn');
   const skipBtn = document.getElementById('skip-btn');
 

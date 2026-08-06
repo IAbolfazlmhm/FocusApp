@@ -8,8 +8,8 @@
   "theme_color": "#3b82f6",
   "icons": [
     {
-      "src": "Stopwatch.png",
-      "sizes": "any",
+      "src": "assets/Stopwatch.png",
+      "sizes": "48x48",
       "type": "image/png"
     }
   ]

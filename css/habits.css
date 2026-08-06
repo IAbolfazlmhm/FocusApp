@@ -229,8 +229,8 @@ body.phase-habits .done-btn:hover {
   transition: stroke-dashoffset 1.5s ease-out; 
 }
 
-body[data-theme="dark"] .overview-ring { 
-  stroke: #2dd4bf !important; 
+body[data-theme="dark"] .overview-ring {
+  stroke: var(--success-color) !important;
 }
 
 .habit-quote-text { 
@@ -263,8 +263,8 @@ body[data-theme="dark"] .overview-ring {
   color: var(--text-main); 
 }
 
-body[data-theme="dark"] #habit-overview-dashboard .time-display { 
-  color: #2dd4bf !important; 
+body[data-theme="dark"] #habit-overview-dashboard .time-display {
+  color: var(--success-color) !important;
 }
 
 /* --- DATE SELECTOR & PICKERS --- */
@@ -360,17 +360,13 @@ body.phase-habits .filter-bubble {
   background-color: #10b981 !important; 
 }
 
-body.phase-habits .filter-btn.active { 
-  color: #ffffff !important; 
-}
-
-#habit-overview-dashboard .time-display { 
-  display: inline-block; 
-  transition: color 0.3s ease; 
+body.phase-habits .filter-btn.active {
+  color: #ffffff !important;
 }
 
 /* BUG FIX: Ensure dark text on bright buttons in Dark Mode */
 body[data-theme="dark"] #manage-add-category-btn,
+body[data-theme="dark"] #manage-add-tag-btn,
 body[data-theme="dark"] #save-habit-btn,
 body[data-theme="dark"] #quick-add-habit-btn,
 body[data-theme="dark"] #quick-modal-add-btn {

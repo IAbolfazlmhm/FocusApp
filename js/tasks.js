@@ -8,7 +8,7 @@ export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
 import { playUI } from './audio.js';
-import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm } from './ui-utils.js';
+import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm, setupHorizontalWheelScroll } from './ui-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -68,14 +68,13 @@ export function renderFilters() {
   const btns = filterListEl.querySelectorAll('.filter-btn');
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
-      playUI('click');
       setCurrentFilter(btn.dataset.filter);
-      
+
       btns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      
-      updateFilterBubble(); 
-      renderTasks(); 
+
+      updateFilterBubble();
+      renderTasks();
     });
   });
 
@@ -93,6 +92,9 @@ export function renderFilters() {
     void bubble.offsetWidth; // Force reflow
     bubble.style.transition = '';
   }
+
+  // Add horizontal wheel scroll support for desktop
+  setupHorizontalWheelScroll(filterListEl);
 }
 
 function updateFilterBubble() {
@@ -327,8 +329,6 @@ export function addTask() {
     timeByDate: {}, 
     createdAt: taskDate.getTime() 
   }]);
-
-  playUI('click');
   saveTasks();
   renderFilters();
   renderTasks();
@@ -354,6 +354,8 @@ function toggleCompleted(id) {
     if (t.completed) {
       playUI('success');
       if (focusedTaskId === id) {setFocusedTaskId(null);}
+    } else {
+      playUI('click');
     }
     saveTasks();
     renderTasks();
@@ -620,7 +622,6 @@ export function setupTaskEvents() {
 
   if (advancedTaskBtn) {
     advancedTaskBtn.addEventListener('click', () => {
-      playUI('click');
       renderQuickTagModal();
       if (quickTagModal) {quickTagModal.classList.add('show');}
       if (quickModalTagInput) {

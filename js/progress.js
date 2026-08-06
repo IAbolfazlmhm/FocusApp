@@ -1,6 +1,7 @@
 import { formatTaskTime, setTaskDate } from './tasks.js';
 import { setHabitDate, isHabitActiveOnDate, getDateKey } from './habits.js';
 import { showToast, escapeHTML, setupSelectDropdown } from './ui-utils.js';
+import { saveSettings } from './settings.js';
 import { readJSON, readRaw } from './storage.js';
 import { getLocalDateKey } from './date-utils.js';
 
@@ -31,9 +32,20 @@ if (!globalTooltip) {
   document.body.appendChild(globalTooltip);
 }
 
-function attachSmartTooltip(block) {
+// Tooltip HTML content keyed by block element, rather than round-tripped
+// through a `data-*` attribute. `data-*` attributes are meant to hold data,
+// not markup — storing HTML there and reading it back into innerHTML was a
+// pattern that had silently opted out of this codebase's escapeHTML()
+// discipline (see FocusApp-Senior-Audit.md, Finding M4). Every value here
+// is still app-generated today, but escapeHTML() is applied to the one
+// piece of it (the date label) regardless, so this stays safe if the
+// tooltip is ever extended to include a task or habit name.
+const tooltipContent = new WeakMap();
+
+function attachSmartTooltip(block, html) {
+  tooltipContent.set(block, html);
   block.addEventListener('mouseenter', () => {
-    globalTooltip.innerHTML = block.getAttribute('data-date');
+    globalTooltip.innerHTML = tooltipContent.get(block) || '';
     const rect = block.getBoundingClientRect();
 
     let left = rect.left + (rect.width / 2) - (globalTooltip.offsetWidth / 2);
@@ -295,12 +307,10 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
     const completionRate = totalTasks === 0 ? 0 : (doneTasks / totalTasks);
 
     // Dynamic Tooltip
-    let tooltipHTML = `<span class="report-date-label">${displayDate}</span><br/>`;
+    let tooltipHTML = `<span class="report-date-label">${escapeHTML(displayDate)}</span><br/>`;
     if (totalTasks > 0) {tooltipHTML += `${doneTasks}/${totalTasks} tasks done (${Math.round(completionRate*100)}%)<br/>${mins}m focus time`;}
     else if (mins > 0) {tooltipHTML += `0 tasks, ${mins}m focus time`;}
     else {tooltipHTML += `No activity`;}
-
-    block.setAttribute('data-date', tooltipHTML);
 
     // BUG FIX: Color is now based strictly on Completion Rate!
     if (totalTasks > 0) {
@@ -312,7 +322,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
     }
 
     block.addEventListener('click', () => openDailyReport(d));
-    attachSmartTooltip(block);
+    attachSmartTooltip(block, tooltipHTML);
     heatmap.appendChild(block);
   });
 }
@@ -348,15 +358,13 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
     block.className = 'heatmap-block';
     const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
-    let tooltipHTML = `<span class="report-date-label">${displayDate}</span><br/>`;
+    let tooltipHTML = `<span class="report-date-label">${escapeHTML(displayDate)}</span><br/>`;
     if (activeCount > 0) {
       const completionRate = Math.round((doneCount / activeCount) * 100);
       tooltipHTML += `${doneCount}/${activeCount} habits done (${completionRate}%)`;
     } else {
       tooltipHTML += `No scheduled habits`;
     }
-
-    block.setAttribute('data-date', tooltipHTML);
 
     if (doneCount > 0) {
       const rate = doneCount / activeCount;
@@ -366,7 +374,7 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
     }
 
     block.addEventListener('click', () => openDailyReport(d));
-    attachSmartTooltip(block);
+    attachSmartTooltip(block, tooltipHTML);
     heatmap.appendChild(block);
   });
 }
@@ -635,11 +643,11 @@ export function setupProgressEvents() {
 
   if (setBtn && setModal) {
     setBtn.addEventListener('click', () => {
-      if (togFocus) {togFocus.checked = showPomodoro;}
-      if (togHabits) {togHabits.checked = showHabits;}
-      if (togComp) {togComp.checked = compareMode;}
-      if (progDarkMode && mainDarkMode) {progDarkMode.checked = mainDarkMode.checked;}
-      if (progSound && mainSound) {progSound.checked = mainSound.checked;}
+      if (togFocus) {togFocus.checked = showPomodoro; togFocus.setAttribute('aria-checked', showPomodoro.toString());}
+      if (togHabits) {togHabits.checked = showHabits; togHabits.setAttribute('aria-checked', showHabits.toString());}
+      if (togComp) {togComp.checked = compareMode; togComp.setAttribute('aria-checked', compareMode.toString());}
+      if (progDarkMode && mainDarkMode) {progDarkMode.checked = mainDarkMode.checked; progDarkMode.setAttribute('aria-checked', mainDarkMode.checked.toString());}
+      if (progSound && mainSound) {progSound.checked = mainSound.checked; progSound.setAttribute('aria-checked', mainSound.checked.toString());}
       setModal.classList.add('show');
     });
   }
@@ -649,19 +657,23 @@ export function setupProgressEvents() {
 
   if (saveProgSetBtn) {
     saveProgSetBtn.addEventListener('click', () => {
-      if (togFocus) {showPomodoro = togFocus.checked;}
-      if (togHabits) {showHabits = togHabits.checked;}
-      if (togComp) {compareMode = togComp.checked;}
+      if (togFocus) {showPomodoro = togFocus.checked; togFocus.setAttribute('aria-checked', togFocus.checked.toString());}
+      if (togHabits) {showHabits = togHabits.checked; togHabits.setAttribute('aria-checked', togHabits.checked.toString());}
+      if (togComp) {compareMode = togComp.checked; togComp.setAttribute('aria-checked', togComp.checked.toString());}
 
       if (progDarkMode && mainDarkMode) {
         mainDarkMode.checked = progDarkMode.checked;
+        mainDarkMode.setAttribute('aria-checked', progDarkMode.checked.toString());
         if (progDarkMode.checked) {document.body.setAttribute('data-theme', 'dark');}
         else {document.body.removeAttribute('data-theme');}
       }
-      if (progSound && mainSound) {mainSound.checked = progSound.checked;}
+      if (progSound && mainSound) {mainSound.checked = progSound.checked; mainSound.setAttribute('aria-checked', progSound.checked.toString());}
 
-      const mainSaveBtn = document.getElementById('save-settings');
-      if (mainSaveBtn) {mainSaveBtn.click();}
+      // Call the real save logic directly instead of simulating a click on
+      // the Settings modal's save button — that indirection broke silently
+      // if the button's ID or handler ever changed (see
+      // FocusApp-Senior-Audit.md, Finding M6).
+      saveSettings();
 
       // BUG FIX: Protect the layout! If both tabs are now ON, and they have a massive custom range active, shrink it.
       if (showPomodoro && showHabits && timeRange === 'custom') {

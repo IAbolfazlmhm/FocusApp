@@ -1,125 +1,90 @@
-import { setupTabs, setupModalAccessibility, initConfirmModal } from './js/ui-utils.js';
+import { setupTabs, setupModalAccessibility, initConfirmModal, closeTopmostModal } from './js/ui-utils.js';
 import { loadSettings, setupSettingsEvents, applySettingsToTimer } from './js/settings.js';
 import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from './js/timer.js';
 import { renderFilters, renderTasks, setupTaskEvents } from './js/tasks.js';
 import { renderHabits, setupHabitsEvents, initHabitQuotes } from './js/habits.js';
-import { renderProgressDashboard, setupProgressEvents } from './js/progress.js';
+import { setupProgressEvents } from './js/progress.js';
 import { playUI } from './js/audio.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. Settings Initialization
-    loadSettings();
-    setupSettingsEvents();
+  // 1. Settings Initialization
+  loadSettings();
+  setupSettingsEvents();
 
-    // 2. Timer Initialization
-    const hasSavedTimer = loadTimerState();
-    if (!hasSavedTimer) applySettingsToTimer();
-    setupTimerEvents();
+  // 2. Timer Initialization
+  const hasSavedTimer = loadTimerState();
+  if (!hasSavedTimer) {applySettingsToTimer();}
+  setupTimerEvents();
 
-    // 3. Tasks Initialization
-    initConfirmModal();
-    setupTaskEvents();
-    renderFilters();
-    renderTasks();
+  // 3. Tasks Initialization
+  initConfirmModal();
+  setupTaskEvents();
+  renderFilters();
+  renderTasks();
 
-    // 4. Habits Initialization
-    setupHabitsEvents();
-    setupProgressEvents();
-    renderHabits();
-    if (typeof initHabitQuotes === 'function') initHabitQuotes();
+  // 4. Habits Initialization
+  setupHabitsEvents();
+  setupProgressEvents();
+  renderHabits();
+  if (typeof initHabitQuotes === 'function') {initHabitQuotes();}
 
-    // 5. UI & Navigation
-    setupTabs();
-    setupModalAccessibility();
-    setupGlobalShortcuts();
-  });
+  // 5. UI & Navigation
+  setupTabs();
+  setupModalAccessibility();
+  setupGlobalShortcuts();
+});
 
 // Inter-module event listener for updating background themes
 document.addEventListener('updateColors', () => {
-    updatePhaseColors();
-  });
+  updatePhaseColors();
+});
 
 // Global Keyboard Shortcuts
 function setupGlobalShortcuts() {
   document.addEventListener('keydown', (event) => {
     // Prevent triggering shortcuts when typing in inputs
-    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {return;}
 
-    // Space key to toggle timer
     if (event.code === 'Space') {
       event.preventDefault();
       toggleTimer();
     }
 
-    // Escape to close any open modals.
-    // FIX: this used to hardcode 4 modal IDs, but index.html has more
-    // than that (categories-modal, custom-range-modal,
-    // progress-settings-modal, daily-report-modal, delete-habit-modal,
-    // quick-add-modal, etc.) — any modal not in that list was stuck
-    // open until its own close button was clicked. Querying every
-    // element with the shared .modal-overlay class means a newly added
-    // modal gets Escape-to-close for free, with nothing to remember to
-    // update here.
+    // ESC key closes only the topmost modal
     if (event.code === 'Escape') {
-      document.querySelectorAll('.modal-overlay.show').forEach(modal => {
-        modal.classList.remove('show');
-      });
+      event.preventDefault();
+      closeTopmostModal();
     }
   });
 }
 
-// Global Input Sanitizer
-// This used to whitelist a fixed set of "allowed" characters (letters,
-// numbers, spaces, plus a short punctuation list) as an XSS defense —
-// meaning apostrophes, colons, quotes, slashes, ampersands, question
-// marks, etc. all got silently stripped while you typed. That was
-// solving the problem in the wrong place: character-whitelisting on
-// input fights normal language (you couldn't type "Don't" or "9am-5pm:
-// meeting") and is easy to get wrong either direction.
-// The correct place to defend against XSS is at render time — every
-// place task/habit/tag/category text gets shown now goes through
-// escapeHTML() (see ui-utils.js), which neutralizes `< > & " '` no
-// matter what was typed. So here we only block the two characters that
-// have no legitimate use in a task/habit name and would otherwise let
-// someone start typing a fake HTML tag — everything else is left alone.
-document.addEventListener('input', (e) => {
-  if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
-    const cursorPosition = e.target.selectionStart;
-    e.target.value = e.target.value.replace(/[<>]/g, '');
-    e.target.setSelectionRange(cursorPosition, cursorPosition);
-  }
-});
-
 // --- GLOBAL EVENT DISPATCHER ---
-// Captures clicks on any interactive button and triggers a global sync
 document.addEventListener('click', (e) => {
-  // If the user completes a habit or task, tell the Progress tab to update
   if (e.target.closest('.done-btn') || e.target.closest('.habit-item') || e.target.closest('.task-item')) {
     setTimeout(() => {
       document.dispatchEvent(new Event('dataUpdated'));
-    }, 100); // 100ms delay ensures localStorage saves first
+    }, 100);
   }
 });
 
 // --- GLOBAL SOUND HAPTICS ---
-// Automatically plays the 'click' sound for all interactive elements across every tab and modal.
-// Buttons with a `data-sound` attribute play their own custom sound (wired up in their specific
-// handler) and are skipped here — this replaces the previous scattered `e.stopPropagation()` calls
-// that each button had to remember to add. New buttons with custom sounds just add
-// `data-sound="trash"` (or whatever) to their HTML and handle the sound in their own listener.
 document.addEventListener('click', (e) => {
-  // 1. Identify what the user clicked (or the button wrapping what they clicked)
   const trigger = e.target.closest('button, .filter-btn, .tab, .dropdown-item, .tag-select-btn, .habit-item, .slider, .color-option, .icon-option');
 
   if (trigger) {
-    // 2. Skip if the button declares its own custom sound via data-sound attribute,
-    //    or if it's a known special button with custom sound wiring.
     if (trigger.dataset.sound) { return; }
 
+    // NOTE: this is a manually-maintained exclusion list — every button that
+    // plays its own sound (via an explicit playUI() call in its click handler)
+    // MUST be added here, or it will double-fire against the generic 'click'
+    // sound below. See FocusApp-Senior-Audit.md, Finding H1.
     const isSpecialButton = trigger.closest('.done-btn') ||
     trigger.closest('.remove-btn') ||
     trigger.closest('.start-btn') ||
-    trigger.closest('.done-habit-btn');
+    trigger.closest('.done-habit-btn') ||
+    trigger.closest('.focus-btn') ||
+    trigger.closest('.skip-habit-btn') ||
+    trigger.closest('#confirm-yes-btn');
 
     if (!isSpecialButton) {
       if (typeof playUI === 'function') {

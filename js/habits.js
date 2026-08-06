@@ -4,7 +4,7 @@ import {
 } from './state.js';
 
 import { playUI } from './audio.js';
-import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget } from './ui-utils.js';
+import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget, setupHorizontalWheelScroll, hexToRgba } from './ui-utils.js';
 import { writeJSON, readRaw } from './storage.js';
 
 // ==========================================
@@ -48,7 +48,6 @@ export function getDateKey(dateObj) {
 // DOM ELEMENTS
 // ==========================================
 const habitListContainer = document.getElementById('habit-list-container');
-const habitDateDisplay = document.getElementById('habit-date-display');
 
 const openAddHabitBtn = document.getElementById('open-add-habit-btn');
 const habitModal = document.getElementById('habit-modal');
@@ -84,36 +83,9 @@ export const habitIconsDict = {
   'music': `<path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>`
 };
 
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16),
-  g = parseInt(hex.slice(3, 5), 16),
-  b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 // ==========================================
 // DATE NAVIGATION LOGIC
 // ==========================================
-function formatHabitDate(dateObj) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffTime = dateObj - today;
-  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) {return 'Today';}
-  if (diffDays === -1) {return 'Yesterday';}
-  if (diffDays === 1) {return 'Tomorrow';}
-
-  return dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-export function updateHabitDateDisplay() {
-  if (habitDateDisplay) {
-    habitDateDisplay.textContent = formatHabitDate(currentHabitDate);
-  }
-  renderHabits();
-}
-
 export function updateDateDisplayUI() {
   const dateDisplayBtn = document.getElementById('habit-date-display');
   if (!dateDisplayBtn) {return;}
@@ -663,6 +635,12 @@ export function setupHabitsEvents() {
           habits[habitIndex].color = color;
           habits[habitIndex].icon = icon;
           if (frequency === 'custom') {habits[habitIndex].customDays = customDays;}
+
+          // Also sync custom category to savedHabitCategories on EDIT
+          if (category && category.trim() !== '' && category !== 'Uncategorized' && !savedHabitCategories.includes(category)) {
+            setSavedHabitCategories([...savedHabitCategories, category]);
+            saveHabitCategories();
+          }
         }
       } else {
         // Create brand new habit
@@ -876,8 +854,9 @@ export function setupHabitsEvents() {
     });
   }
 
-  // Initial Display
-  updateHabitDateDisplay();
+  // Initial Display (text only — renderHabits() is already called separately
+  // during startup in script.js, so this no longer duplicates that render)
+  updateDateDisplayUI();
 
   document.addEventListener('tabChanged', () => {
     if (readRaw('focusActiveTab') === '1') {updateHabitProgress();}
@@ -1147,11 +1126,15 @@ export function updateHabitProgress() {
     ring.style.strokeDasharray = `${circumference} ${circumference}`;
     ring.style.strokeDashoffset = offset;
 
-    if (percentage === 100 && total > 0) {
-      ring.style.stroke = 'var(--success-color)';
-    } else {
-      ring.style.stroke = '';
-    }
+    // Set both states explicitly instead of falling back to the CSS class
+    // default (--theme-color) for the "not complete" case — that fallback
+    // only happens to render the same color as --success-color today
+    // because both variables happen to equal #10b981. Nothing enforces
+    // that they stay equal, so relying on the coincidence would silently
+    // break (two different greens) if either value ever changes.
+    ring.style.stroke = (percentage === 100 && total > 0)
+      ? 'var(--success-color)'
+      : 'var(--theme-color)';
   }
 
   // 2. Animate the Percentage Number (Bulletproof Version)
@@ -1303,6 +1286,9 @@ export function renderHabitCategories() {
 
   filterContainer.innerHTML = bubbleHTML + buttonsHTML;
 
+  // Add horizontal wheel scroll support for desktop
+  setupHorizontalWheelScroll(filterContainer);
+
   // Attach click listeners and auto-scroll
   filterContainer.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', function() {
@@ -1407,6 +1393,7 @@ export function renderTopStreaks() {
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${habitIconsDict[h.icon] || habitIconsDict['activity']}</svg>
         </div>
         <div class="stat-row-right">
+          <span class="stat-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; display:block;">${escapeHTML(h.name)}</span>
           <div class="streak-flame active lg">
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
             <span>${h.currentStreak}</span>

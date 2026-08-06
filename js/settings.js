@@ -17,6 +17,25 @@ const modeSelect = document.getElementById('mode-select');
 const pomodoroWrapper = document.getElementById('pomodoro-settings-wrapper');
 const circle = document.querySelector('.progress-ring-circle');
 
+// All toggle switch IDs for aria-checked sync
+const TOGGLE_IDS = [
+  'dark-mode-toggle', 'sound-toggle', 'breaks-toggle', 'autostart-breaks-toggle',
+  'prog-dark-mode', 'prog-sound-toggle', 'prog-toggle-focus', 'prog-toggle-habits', 'prog-toggle-compare'
+];
+
+// Helper to sync aria-checked with checkbox state
+function syncAriaChecked(id) {
+  const toggle = document.getElementById(id);
+  if (toggle) {
+    toggle.setAttribute('aria-checked', toggle.checked.toString());
+  }
+}
+
+// Sync all toggles
+function syncAllToggles() {
+  TOGGLE_IDS.forEach(syncAriaChecked);
+}
+
 // ==========================================
 // SETTINGS LOGIC
 // ==========================================
@@ -133,6 +152,7 @@ export function loadSettings() {
       if (settings.mode === 'stopwatch') {pomodoroWrapper.classList.add('disabled-settings');}
       else {pomodoroWrapper.classList.remove('disabled-settings');}
     }
+    syncAllToggles();
   }
 }
 
@@ -311,6 +331,8 @@ export function setupSettingsEvents() {
       const darkModeToggle = document.getElementById('dark-mode-toggle');
       if (darkModeToggle && darkModeToggle.checked) {document.body.setAttribute('data-theme','dark');}
       else {document.body.removeAttribute('data-theme');}
+
+      syncAllToggles();
 
       settingsModal.classList.remove('show');
     });

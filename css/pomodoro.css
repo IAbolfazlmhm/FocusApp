@@ -514,35 +514,35 @@ body.phase-habits .task-item.completed {
   display: none; 
 }
 
-.filter-btn { 
-  background: transparent; 
-  border: none; 
-  padding: 8px 16px; 
-  border-radius: 30px; 
-  color: var(--text-muted); 
-  font-size: 0.85rem; 
-  font-weight: 600; 
-  cursor: pointer; 
-  white-space: nowrap; 
-  transition: color 0.3s; 
-  z-index: 2; 
-  position: relative; 
+.filter-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 40px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.3s;
+  z-index: 2;
+  position: relative;
 }
 
 .filter-btn.active { 
   color: white; 
 }
 
-.filter-bubble { 
-  position: absolute; 
-  top: 5px; 
-  left: 5px; 
-  height: calc(100% - 10px); 
-  background: var(--text-main); 
-  border-radius: 30px; 
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-  z-index: 1; 
-  pointer-events: none; 
+.filter-bubble {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: calc(100% - 10px);
+  background: var(--text-main);
+  border-radius: 40px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  pointer-events: none;
 }
 
 body.phase-work .filter-bubble, body.phase-work .manage-tags-btn:hover { 
@@ -709,9 +709,20 @@ body.phase-stopwatch .start-btn, body.phase-stopwatch .tasks-section .add-btn {
   border: none;
 }
 
-body.phase-stopwatch .task-item:hover { 
-  border-color: #8b5cf6; 
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2); 
+body.phase-stopwatch .task-item:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+}
+
+body.phase-habits .start-btn, body.phase-habits .tasks-section .add-btn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+}
+
+body.phase-habits .task-item:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
 
 /* --- DARK MODE UI FIXES --- */
@@ -744,11 +755,20 @@ body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-lon
   border: none; 
 }
 
-body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn { 
-  background-color: #a78bfa; 
-  color: #0f172a; 
-  border: none; 
+body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn {
+  background-color: #a78bfa;
+  color: #0f172a;
+  border: none;
 }
+
+/* M1 fix (see FocusApp-Senior-Audit.md): the habits-phase dark-mode
+   lightening override was never extended to the progress ring, category
+   badges, or color-picker swatches, which all stay at the base #10b981 —
+   so the Start/Add buttons visibly didn't match everything else sitting
+   next to them in dark mode. Removed here rather than extending the
+   lightening app-wide, since the base color already has sufficient
+   contrast against these buttons' dark-mode background and this keeps
+   every habits-phase green element visually consistent. */
 
 /* --- EDIT TASK MODAL TAGS --- */
 .tag-select-btn { 

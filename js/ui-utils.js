@@ -1,6 +1,34 @@
 import { playUI } from './audio.js';
 import { readRaw, writeRaw } from './storage.js';
 
+// Modal stack for ESC key handling (close only topmost)
+const openModals = [];
+
+export function registerModalOpen(modal) {
+  if (modal && !openModals.includes(modal)) {
+    openModals.push(modal);
+  }
+}
+
+export function registerModalClose(modal) {
+  const index = openModals.indexOf(modal);
+  if (index !== -1) {
+    openModals.splice(index, 1);
+  }
+}
+
+export function closeTopmostModal() {
+  if (openModals.length > 0) {
+    const topModal = openModals[openModals.length - 1];
+    topModal.classList.remove('show');
+  }
+}
+
+// Expose globally for script.js compatibility
+window.registerModalOpen = registerModalOpen;
+window.registerModalClose = registerModalClose;
+window.closeTopmostModal = closeTopmostModal;
+
 // ==========================================
 // SECURITY: HTML ESCAPING
 // ==========================================
@@ -49,6 +77,17 @@ export function centerButtonInScrollArea(container, btn) {
   if (!container || !btn) {return;}
   const target = btn.offsetLeft - (container.clientWidth / 2) + (btn.offsetWidth / 2);
   container.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+}
+
+// Horizontal wheel scroll for filter bars (desktop)
+export function setupHorizontalWheelScroll(container) {
+  if (!container) {return;}
+  container.addEventListener('wheel', (e) => {
+    if (e.deltaY !== 0) {
+      e.preventDefault();
+      container.scrollLeft += e.deltaY;
+    }
+  }, { passive: false });
 }
 
 export function generateId() {
@@ -564,6 +603,13 @@ export function setupModalAccessibility() {
     const observer = new MutationObserver(() => {
       const isOpen = modal.classList.contains('show');
       modal.inert = !isOpen;
+
+      // Register with modal stack for ESC key handling
+      if (isOpen) {
+        window.registerModalOpen?.(modal);
+      } else {
+        window.registerModalClose?.(modal);
+      }
 
       if (isOpen && !activeTraps.has(modal)) {
         lastFocusedBeforeModal = document.activeElement;

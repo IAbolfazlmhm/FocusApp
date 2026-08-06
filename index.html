@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/pomodoro.css">
   <link rel="stylesheet" href="css/habits.css">
   <link rel="stylesheet" href="css/progress.css">
-  <link rel="icon" href="Stopwatch.png" type="image/png">
+  <link rel="icon" href="assets/Stopwatch.png" type="image/png">
 </head>
 <body class="preload">
   <noscript>
@@ -285,9 +285,12 @@
           </div>
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
-          <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings">
-            <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
-          </button>
+          <div class="pill-icon-btn-wrapper">
+            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
+            </button>
+          </div>
+
           <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" maxlength="30">
           <button class="add-btn" id="quick-add-habit-btn">Add</button>
         </div>
@@ -449,11 +452,11 @@
         </div>
         <div class="setting-group toggle-group">
           <label for="dark-mode-toggle">Dark mode</label>
-          <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider round"></span></label>
+          <label class="switch"><input type="checkbox" id="dark-mode-toggle" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="sound-toggle">Sound Effects (Haptics):</label>
-          <label class="switch"><input type="checkbox" id="sound-toggle" checked><span class="slider round"></span></label>
+          <label class="switch"><input type="checkbox" id="sound-toggle" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
 
         <div id="pomodoro-settings-wrapper">
@@ -472,11 +475,11 @@
 
           <div class="setting-group toggle-group">
             <label for="breaks-toggle">Enable Breaks (Short/Long):</label>
-            <label class="switch"><input type="checkbox" id="breaks-toggle" checked><span class="slider round"></span></label>
+            <label class="switch"><input type="checkbox" id="breaks-toggle" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
           </div>
           <div class="setting-group toggle-group">
             <label for="autostart-breaks-toggle">Auto-start Breaks:</label>
-            <label class="switch"><input type="checkbox" id="autostart-breaks-toggle" checked><span class="slider round"></span></label>
+            <label class="switch"><input type="checkbox" id="autostart-breaks-toggle" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
           </div>
 
           <div class="setting-group dropdown-anchor" id="sound-wrapper">
@@ -709,24 +712,24 @@
       <div class="modal-body">
         <div class="setting-group toggle-group">
           <label for="prog-dark-mode">Global Dark Mode</label>
-          <label class="switch" for="prog-dark-mode"><input type="checkbox" id="prog-dark-mode"><span class="slider round"></span></label>
+          <label class="switch" for="prog-dark-mode"><input type="checkbox" id="prog-dark-mode" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="prog-sound-toggle">Sound Effects</label>
-          <label class="switch" for="prog-sound-toggle"><input type="checkbox" id="prog-sound-toggle"><span class="slider round"></span></label>
+          <label class="switch" for="prog-sound-toggle"><input type="checkbox" id="prog-sound-toggle" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 15px 0;">
         <div class="setting-group toggle-group">
           <label for="prog-toggle-focus">Show Pomodoro Data</label>
-          <label class="switch" for="prog-toggle-focus"><input type="checkbox" id="prog-toggle-focus" checked><span class="slider round"></span></label>
+          <label class="switch" for="prog-toggle-focus"><input type="checkbox" id="prog-toggle-focus" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="prog-toggle-habits">Show Habits Data</label>
-          <label class="switch" for="prog-toggle-habits"><input type="checkbox" id="prog-toggle-habits" checked><span class="slider round"></span></label>
+          <label class="switch" for="prog-toggle-habits"><input type="checkbox" id="prog-toggle-habits" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="prog-toggle-compare">Show Comparisons (↑↓)</label>
-          <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" checked><span class="slider round"></span></label>
+          <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
           
         <button class="save-settings-btn" id="save-prog-settings">Save & Apply</button>
