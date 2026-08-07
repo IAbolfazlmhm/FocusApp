@@ -256,9 +256,9 @@ export function setupTabs() {
 
   window.addEventListener('load', () => {
     document.body.classList.remove('preload');
-    
+
     const savedTabIndex = readRaw('focusActiveTab', 0);
-    
+
     if (tabs[savedTabIndex]) {
       setTimeout(() => {
         tabs[savedTabIndex].click();
@@ -267,27 +267,27 @@ export function setupTabs() {
   });
 
   tabs.forEach((tab, index) => {
-    tab.addEventListener('click', () => { 
-      playUI('click');
-      
+    tab.addEventListener('click', () => {
+      // playUI('click'); - now handled by data-sound delegate
+
       writeRaw('focusActiveTab', index);
       document.dispatchEvent(new Event('tabChanged'));
-      
-      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); }); 
-      tab.classList.add('active'); 
+
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+      tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
-      updateBubble(tab); 
-      
+      updateBubble(tab);
+
       const pomodoroView = document.getElementById('pomodoro-view');
       const habitsView = document.getElementById('habits-view');
       const progressView = document.getElementById('progress-view');
-      
+
       if (pomodoroView) {pomodoroView.style.display = 'none';}
       if (habitsView) {habitsView.style.display = 'none';}
       if (progressView) {progressView.style.display = 'none';}
-      
+
       if (index === 0) {
-        if (pomodoroView) {pomodoroView.style.display = 'flex';} 
+        if (pomodoroView) {pomodoroView.style.display = 'flex';}
         document.body.classList.remove('phase-habits', 'phase-progress');
         const event = new CustomEvent('updateColors');
         document.dispatchEvent(event);
@@ -321,7 +321,7 @@ export function setupTabs() {
 
       const pomodoroSettings = document.getElementById('pomodoro-settings-wrapper');
       const modeSelect = document.getElementById('mode-select');
-      
+
       // Hide Timer Settings & Mode Select when not on Pomodoro tab
       if (pomodoroSettings) {pomodoroSettings.style.display = index === 0 ? 'block' : 'none';}
       // Trigger bubble recalculation if switching to Habits tab (index 1)

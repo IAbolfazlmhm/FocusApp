@@ -5,85 +5,85 @@
 /* --- GLASS PILL --- */
 .glass-pill {
   background: var(--glass-bg);
-  backdrop-filter: blur(15px); 
+  backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid var(--glass-border); 
+  border: 1px solid var(--glass-border);
   border-radius: 50px;
   box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
 }
 
 /* --- ICONS --- */
-svg.ui-icon { 
-  width: 22px; 
-  height: 22px; 
+svg.ui-icon {
+  width: 22px;
+  height: 22px;
   pointer-events: none;
 }
 
-svg.phase-icon { 
-  width: 16px; 
-  height: 16px; 
-  margin-bottom: -3px; 
-  margin-right: 5px; 
-  margin-left: 5px; 
+svg.phase-icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: -3px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 /* --- BUTTONS --- */
 .add-btn {
   min-height: 44px;
-  padding: 10px 25px; 
-  background: var(--btn-bg); 
+  padding: 10px 25px;
+  background: var(--btn-bg);
   color: var(--text-main);
-  border: 1px solid var(--glass-border); 
+  border: 1px solid var(--glass-border);
   border-radius: 40px;
-  font-weight: bold; 
-  cursor: pointer; 
+  font-weight: bold;
+  cursor: pointer;
   transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05); flex-shrink: 0;
 }
 
-.add-btn:hover { 
-  background: var(--btn-hover); 
-  transform: translateY(-2px); 
+.add-btn:hover {
+  background: var(--btn-hover);
+  transform: translateY(-2px);
 }
 
-/* 
+/*
   Secondary "ghost" buttons that should always follow --theme-color no
   matter which tab/phase they're opened from. .add-btn's colored look only
   comes from body.phase-work/short/long/stopwatch overrides — it never
   covered body.phase-habits or body.phase-progress, so anything using
   .add-btn outside the 4 Pomodoro phases fell back to a plain white/glass
-  look instead of matching the current tab's color. 
+  look instead of matching the current tab's color.
 */
 .theme-outline-btn {
   min-height: 44px;
-  padding: 10px 20px; 
-  background: transparent; 
+  padding: 10px 20px;
+  background: transparent;
   color: var(--theme-color, #3b82f6);
-  border: 1.5px solid var(--theme-color, #3b82f6); 
+  border: 1.5px solid var(--theme-color, #3b82f6);
   border-radius: 40px;
-  font-weight: bold; 
-  cursor: pointer; 
+  font-weight: bold;
+  cursor: pointer;
   transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s;
 }
 
-.theme-outline-btn:hover { 
-  background: var(--theme-color, #3b82f6); 
-  color: white; 
-  transform: translateY(-2px); 
+.theme-outline-btn:hover {
+  background: var(--theme-color, #3b82f6);
+  color: white;
+  transform: translateY(-2px);
 }
 
 .icon-btn {
   min-width: 44px;
   min-height: 44px;
-  background: transparent; 
-  border: none; 
-  font-size: 1.5rem; 
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
   cursor: pointer;
-  color: var(--text-muted); 
+  color: var(--text-muted);
   transition: transform 0.2s, color 0.2s;
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding: 8px;
 }
 
@@ -94,60 +94,60 @@ svg.phase-icon {
 }
 
 .theme-circle-btn {
-  width: 44px; 
-  height: 44px; 
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: var(--glass-bg); 
+  background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  color: var(--text-main); 
-  display: flex; 
-  align-items: center; 
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
   justify-content: center;
-  cursor: pointer; 
+  cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-  padding: 0; 
-  outline: none; 
+  padding: 0;
+  outline: none;
   flex-shrink: 0;
 }
 
-.theme-circle-btn:focus { 
-  outline: none; 
+.theme-circle-btn:focus {
+  outline: none;
 }
 
-.theme-circle-btn:focus-visible { 
-  outline: 2px solid var(--theme-color, #3b82f6); 
-  outline-offset: 2px; 
+.theme-circle-btn:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
 }
 
 /* Phase-specific hovers for theme-circle-btn */
-body.phase-work .theme-circle-btn:hover { 
-  background-color: #f43f5e; 
-  color: #fff; 
-  border-color: #f43f5e; 
+body.phase-work .theme-circle-btn:hover {
+  background-color: #f43f5e;
+  color: #fff;
+  border-color: #f43f5e;
 }
 
-body.phase-short .theme-circle-btn:hover { 
-  background-color: #14b8a6; 
-  color: #fff; 
-  border-color: #14b8a6; 
+body.phase-short .theme-circle-btn:hover {
+  background-color: #14b8a6;
+  color: #fff;
+  border-color: #14b8a6;
 }
 
-body.phase-long .theme-circle-btn:hover { 
-  background-color: #3b82f6; 
-  color: #fff; 
-  border-color: #3b82f6; 
+body.phase-long .theme-circle-btn:hover {
+  background-color: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
 }
 
-body.phase-stopwatch .theme-circle-btn:hover { 
-  background-color: #8b5cf6; 
-  color: #fff; 
-  border-color: #8b5cf6; 
+body.phase-stopwatch .theme-circle-btn:hover {
+  background-color: #8b5cf6;
+  color: #fff;
+  border-color: #8b5cf6;
 }
 
-body.phase-habits .theme-circle-btn:hover { 
-  background-color: #10b981; 
-  color: #fff; 
-  border-color: #10b981; 
+body.phase-habits .theme-circle-btn:hover {
+  background-color: #10b981;
+  color: #fff;
+  border-color: #10b981;
 }
 
 /* Habit quick-add override */
@@ -184,91 +184,92 @@ body.phase-habits .theme-circle-btn:hover {
   align-items: center;
 }
 
-.toast { 
-  background: var(--modal-bg); 
-  backdrop-filter: blur(12px); 
-  -webkit-backdrop-filter: blur(12px); 
-  color: var(--text-main); 
-  padding: 10px 20px; 
-  border-radius: 50px; 
-  font-size: 0.9rem; 
-  font-weight: 500; 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
-  border: 1px solid var(--glass-border); 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  opacity: 0; 
-  transform: translateY(20px) scale(0.9); 
-  animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+/* backdrop-filter removed (see FocusApp-Senior-Audit.md, Finding P1): this
+   element animates opacity + transform on every appearance via toastIn/
+   toastOut, and a blurred layer that's also animating forces the browser
+   to recompute the blur on every frame — same mechanism that caused the
+   confirmed modal jank. --modal-bg is opaque enough on its own that the
+   blur wasn't adding much visually here. */
+.toast {
+  background: var(--modal-bg);
+  color: var(--text-main);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-@keyframes toastIn { 
-  to { 
-    opacity: 1; 
-    transform: 
-    translateY(0) scale(1); 
-  } 
+@keyframes toastIn {
+  to {
+    opacity: 1;
+    transform:
+    translateY(0) scale(1);
+  }
 }
 
-@keyframes toastOut { 
-  to { 
-    opacity: 0; 
-    transform: translateY(-10px) scale(0.95); 
-  } 
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
 }
 
-.toast.success { 
-  border-bottom: 2px solid var(--success-color); 
+.toast.success {
+  border-bottom: 2px solid var(--success-color);
 }
 
-.toast.warning { 
-  border-bottom: 2px solid #f59e0b; 
+.toast.warning {
+  border-bottom: 2px solid #f59e0b;
 }
-.toast.info { 
-  border-bottom: 2px solid var(--glass-border); 
+.toast.info {
+  border-bottom: 2px solid var(--glass-border);
 }
 
 /* --- MODALS & SETTINGS --- */
-.modal-overlay { 
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  height: 100%; 
-  background: rgba(0, 0, 0, 0.4); 
-  backdrop-filter: blur(5px); 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  z-index: 1000; 
-  opacity: 0; 
-  pointer-events: none; 
-  transition: opacity 0.3s ease; 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.modal-overlay.show { 
-  opacity: 1; 
-  pointer-events: auto; 
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.modal-content { 
-  background: var(--modal-bg); 
-  backdrop-filter: blur(20px); 
-  -webkit-backdrop-filter: blur(20px); 
-  width: 90%; 
-  max-width: 400px; 
-  max-height: 85vh; 
-  overflow-y: auto; 
-  border-radius: 30px; 
-  padding: 25px; 
-  box-shadow: var(--glass-shadow); 
-  border: 1px solid var(--glass-border); 
-  transform: translateY(-20px); 
-  transition: transform 0.3s ease; 
+.modal-content {
+  background: var(--modal-bg);
+  width: 90%;
+  max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 30px;
+  padding: 25px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  transform: translateY(-20px);
+  transition: transform 0.3s ease;
 }
 
-/* 
+/*
   Themed scrollbar for modals, matching the glass aesthetic instead of the
   default OS scrollbar. NOTE: .custom-dropdown already has its own
   scrollbar rules further down (with a dark-mode variant), so it's
@@ -322,124 +323,124 @@ body.phase-habits .theme-circle-btn:hover {
   background-color: var(--theme-color, #3b82f6);
 }
 
-.modal-overlay.show .modal-content { 
-  transform: translateY(0); 
+.modal-overlay.show .modal-content {
+  transform: translateY(0);
 }
 
-.modal-header { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 20px; 
-  border-bottom: 1px solid var(--glass-border); 
-  padding-bottom: 15px; 
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 15px;
 }
 
-.modal-header h2 { 
-  display: flex; 
-  align-items: center; 
-  gap: 8px; 
-  font-size: 1.2rem; 
-  color: var(--text-main); 
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  color: var(--text-main);
 }
 
-.modal-divider { 
-  border: 0; 
-  border-top: 1px solid rgba(255,255,255,0.2); 
-  margin: 15px 0; 
+.modal-divider {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  margin: 15px 0;
 }
 
-.close-btn { 
-  background: none; 
-  border: none; 
-  font-size: 1.2rem; 
-  color: var(--text-muted); 
-  cursor: pointer; 
-  transition: color 0.2s; 
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
-.close-btn:hover { 
-  color: var(--danger-color); 
+.close-btn:hover {
+  color: var(--danger-color);
 }
-.setting-group { 
-  margin-bottom: 20px; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-}
-
-.setting-group label { 
-  font-weight: bold; 
-  font-size: 0.9rem; 
-  color: var(--text-muted); 
+.setting-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.custom-select { 
-  padding: 10px; 
-  border-radius: 15px; 
-  border: 1px solid var(--glass-border); 
-  outline: none; 
-  font-size: 1rem; 
-  background: var(--btn-bg); 
-  color: var(--text-main); 
-  font-weight: 500; 
+.setting-group label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
-.custom-select option { 
-  background: #ffffff; 
-  color: #2b2d42; 
-  font-weight: 500; 
-  padding: 10px; 
+.custom-select {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--glass-border);
+  outline: none;
+  font-size: 1rem;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-weight: 500;
 }
 
-body[data-theme="dark"] .custom-select option { 
-  background: #1e293b; 
-  color: #f8fafc; 
+.custom-select option {
+  background: #ffffff;
+  color: #2b2d42;
+  font-weight: 500;
+  padding: 10px;
 }
 
-.toggle-group { 
-  flex-direction: row; 
-  justify-content: space-between; 
-  align-items: center; 
+body[data-theme="dark"] .custom-select option {
+  background: #1e293b;
+  color: #f8fafc;
 }
 
-.disabled-settings { 
-  opacity: 0.4; 
-  pointer-events: none; 
+.toggle-group {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.save-settings-btn { 
-  width: 100%; 
-  padding: 12px; 
-  background: var(--theme-color, #3b82f6); 
-  color: white; 
-  border: none; 
-  border-radius: 12px; 
-  font-weight: bold; 
-  font-size: 1rem; 
-  cursor: pointer; 
-  margin-top: 10px; 
-  transition: filter 0.2s ease; 
+.disabled-settings {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
-.save-settings-btn:hover { 
-  filter: brightness(0.9); 
+.save-settings-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--theme-color, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: filter 0.2s ease;
 }
 
-.switch { 
-  position: relative; 
-  display: inline-block; 
-  width: 50px; 
-  height: 24px; 
+.save-settings-btn:hover {
+  filter: brightness(0.9);
 }
 
-.switch input { 
-  opacity: 0; 
-  width: 0; 
-  height: 0; 
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
 }
 
-/* 
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/*
   Off-state used to be flat #ccc regardless of theme — a soft themed tint
   reads as "part of this app" instead of a generic gray widget, while
   staying clearly distinguishable from the solid "on" state.
@@ -458,29 +459,29 @@ body[data-theme="dark"] .custom-select option {
   transition: .4s;
 }
 
-.slider:before { 
-  position: absolute; 
-  content: ""; 
-  height: 16px; 
-  width: 16px; 
-  left: 3px; 
-  bottom: 3px; 
-  background-color: white; 
-  transition: .4s; 
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2); 
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
-input:checked + .slider { 
-  background-color: var(--theme-color, #3b82f6); 
-  border-color: var(--theme-color, #3b82f6); 
+input:checked + .slider {
+  background-color: var(--theme-color, #3b82f6);
+  border-color: var(--theme-color, #3b82f6);
 }
 
-input:checked + .slider:before { 
-  transform: translateX(26px); 
+input:checked + .slider:before {
+  transform: translateX(26px);
 }
 
-.slider.round { 
-  border-radius: 34px; 
+.slider.round {
+  border-radius: 34px;
 }
 
 .slider.round:before {
@@ -498,70 +499,73 @@ input:checked + .slider:before {
 }
 
 /* --- DROPDOWNS --- */
-.custom-dropdown { 
-  position: absolute; 
-  bottom: 120%; 
-  left: 0; 
-  width: 150px; 
-  min-height: 100%; 
-  max-height: 150px; 
-  overflow-y: auto; 
-  border-radius: 15px; 
-  z-index: 1000; 
-  display: none; 
-  flex-direction: column; 
-  padding: 5px; 
-  background: var(--modal-bg); 
-  backdrop-filter: blur(15px); 
-  -webkit-backdrop-filter: blur(15px); 
-  border: 1px solid var(--glass-border); 
-  box-shadow: var(--glass-shadow); 
+/* backdrop-filter removed (see FocusApp-Senior-Audit.md, Finding P1): .show
+   runs the popIn animation (opacity + transform) on this same element, and
+   an animating blurred layer forces a per-frame blur recompute — the same
+   mechanism confirmed to cause the modal jank, just at dropdown scale.
+   --modal-bg is opaque enough that this isn't a visible regression. */
+.custom-dropdown {
+  position: absolute;
+  bottom: 120%;
+  left: 0;
+  width: 150px;
+  min-height: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  border-radius: 15px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  padding: 5px;
+  background: var(--modal-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-.custom-dropdown.show { 
-  display: flex; 
-  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+.custom-dropdown.show {
+  display: flex;
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-@keyframes popIn { 
-  from { 
-    opacity: 0; 
-    transform: translateY(10px) scale(0.95); 
-  } to { 
-    opacity: 1; 
-    transform: translateY(0) scale(1); 
-  } 
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  } to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.custom-dropdown::-webkit-scrollbar { 
-  width: 10px; 
+.custom-dropdown::-webkit-scrollbar {
+  width: 10px;
 }
 
-.custom-dropdown::-webkit-scrollbar-track { 
-  background: transparent; 
+.custom-dropdown::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.custom-dropdown::-webkit-scrollbar-thumb { 
-  background: rgba(0,0,0,0.2); 
-  border-radius: 10px; 
-  border: 3px solid transparent; 
-  background-clip: content-box; 
+.custom-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
-body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb { 
-  background: rgba(255,255,255,0.25); 
+body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
 }
 
-.dropdown-item { 
-  padding: 6px 10px; 
-  cursor: pointer; 
-  border-radius: 10px; 
-  font-size: 0.8rem; 
-  font-weight: 600; 
-  color: var(--text-muted); 
-  transition: all 0.2s; 
-  display: flex; 
-  align-items: center; 
+.dropdown-item {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-item svg {
@@ -569,79 +573,79 @@ body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb {
   height: 12px;
 }
 
-.icon-inline-sm { 
-  width: 14px; 
-  height: 14px; 
-  margin-right: 8px; 
+.icon-inline-sm {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
 }
 
-.sort-dir { 
-  margin-left: auto; 
-  font-size: 0.8rem; 
+.sort-dir {
+  margin-left: auto;
+  font-size: 0.8rem;
 }
 
-.dropdown-item:hover { 
-  background: var(--btn-bg); 
-  color: var(--text-main); 
-  transform: translateX(3px); 
+.dropdown-item:hover {
+  background: var(--btn-bg);
+  color: var(--text-main);
+  transform: translateX(3px);
 }
 
-.dropdown-item.active-sort { 
-  color: #3b82f6; 
-  background: rgba(59, 130, 246, 0.1); 
+.dropdown-item.active-sort {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
 }
 
-body[data-theme="dark"] .dropdown-item.active-sort { 
-  color: #60a5fa; background: rgba(96, 165, 250, 0.15); 
+body[data-theme="dark"] .dropdown-item.active-sort {
+  color: #60a5fa; background: rgba(96, 165, 250, 0.15);
 }
 
 /* --- TAG CHIPS --- */
-.tags-list-grid { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 10px; 
-  justify-content: center; 
+.tags-list-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
 }
 
-.tag-chip { 
-  padding: 6px 14px; 
-  border-radius: 20px; 
-  font-size: 0.9rem; 
-  cursor: pointer; 
-  border: 1px solid transparent; 
-  transition: all 0.2s; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  background: var(--btn-bg); color: var(--text-main); 
+.tag-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--btn-bg); color: var(--text-main);
 }
 
-.tag-chip.deletable:hover { 
-  background: #fee2e2; 
-  border-color: var(--danger-color); 
-  color: var(--danger-color); 
-  text-decoration: line-through; 
+.tag-chip.deletable:hover {
+  background: #fee2e2;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+  text-decoration: line-through;
 }
 
-.tag-chip.selectable:hover { 
-  background: #fef3c7; 
-  border-color: #f59e0b; 
-  color: #d97706; 
-  transform: scale(1.05); 
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2); 
+.tag-chip.selectable:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #d97706;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
 }
 
 /* Tag color picker (Manage Tags modal) */
-.tag-chip.manageable { 
-  gap: 8px; 
-  padding: 6px 10px 6px 6px; 
+.tag-chip.manageable {
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
 }
 
-.tag-chip.manageable .tag-chip-label { 
-  pointer-events: none; 
+.tag-chip.manageable .tag-chip-label {
+  pointer-events: none;
 }
-.tag-chip.manageable:hover .tag-chip-label { 
-  text-decoration: line-through; 
+.tag-chip.manageable:hover .tag-chip-label {
+  text-decoration: line-through;
 }
 .tag-color-swatch {
   width: 22px;
@@ -656,24 +660,24 @@ body[data-theme="dark"] .dropdown-item.active-sort {
   flex-shrink: 0;
 }
 
-/* 
+/*
   Native color inputs render a swatch inside padding by default in
   Chromium/WebKit — strip that so the circular border above is the only
-  visible edge and the color fills the whole circle. 
+  visible edge and the color fills the whole circle.
 */
-.tag-color-swatch::-webkit-color-swatch-wrapper { 
-  padding: 0; 
-  border-radius: 50%; 
+.tag-color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 50%;
 }
 
-.tag-color-swatch::-webkit-color-swatch { 
-  border: none; 
-  border-radius: 50%; 
+.tag-color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
 }
 
-.tag-color-swatch::-moz-color-swatch { 
-  border: none; 
-  border-radius: 50%; 
+.tag-color-swatch::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
 }
 
 .tag-color-reset {
@@ -693,14 +697,14 @@ body[data-theme="dark"] .dropdown-item.active-sort {
   flex-shrink: 0;
 }
 
-.tag-color-reset:hover { 
-  background: rgba(0, 0, 0, 0.15); 
-  color: var(--text-main); 
+.tag-color-reset:hover {
+  background: rgba(0, 0, 0, 0.15);
+  color: var(--text-main);
 }
 
 /* --- MODAL ROW FIXES --- */
-.add-tag-row { 
-  display: flex; 
+.add-tag-row {
+  display: flex;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -749,7 +753,7 @@ body[data-theme="dark"] .cancel-btn:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* 
+/*
   ==========================================
   SMALL LAYOUT UTILITY CLASSES
   ==========================================
@@ -763,40 +767,40 @@ body[data-theme="dark"] .cancel-btn:hover {
   own intrinsic minimum content width for an input wins over flex-shrink,
   so the input refused to shrink past ~190-230px on a narrow phone —
   pushing its neighboring button, and the whole modal, into horizontal
-  overflow. min-width:0 lets it actually shrink to fit. 
+  overflow. min-width:0 lets it actually shrink to fit.
 */
-.flex-1 { 
-  flex: 1; 
-  min-width: 0; 
+.flex-1 {
+  flex: 1;
+  min-width: 0;
 }
 
-/* 
+/*
   Shared "nothing here" message (used by both the task list and habit
   list when there's nothing to show for the selected day/filter) — was
-  previously two near-identical inline style blocks, one per file. 
+  previously two near-identical inline style blocks, one per file.
 */
-.empty-state { 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
-  justify-content: center; 
-  color: #94a3b8; 
-  opacity: 0.7; 
-  margin-top: 40px; 
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  opacity: 0.7;
+  margin-top: 40px;
 }
 
-.empty-state svg { 
-  width: 50px; 
-  height: 50px; 
-  margin-bottom: 10px; 
+.empty-state svg {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
 }
 
-.empty-state.lg svg { 
-  width: 60px; 
-  height: 60px; 
+.empty-state.lg svg {
+  width: 60px;
+  height: 60px;
 }
 
-/* 
+/*
   ==========================================
   INDEX.HTML STATIC LAYOUT — was ~130 inline
   style="..." attributes, almost all repeated
@@ -804,212 +808,212 @@ body[data-theme="dark"] .cancel-btn:hover {
   here so a spacing/sizing change only needs to
   happen in one place, and so the markup itself is
   readable.
-  ========================================== 
+  ==========================================
 */
 
-.section-top-wrapper { 
-  width: 100%; 
-  margin-bottom: 15px; 
+.section-top-wrapper {
+  width: 100%;
+  margin-bottom: 15px;
 }
 
-.date-nav-full { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 8px 15px; 
-  margin-bottom: 10px; 
+.date-nav-full {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  margin-bottom: 10px;
 }
 
-/* 
+/*
   Progress tab's date-nav sits directly in a gap-based flex column (no
   .section-top-wrapper), and needs to stay above the heatmap/legend below
-  it, so it skips the bottom margin and adds stacking context instead. 
+  it, so it skips the bottom margin and adds stacking context instead.
 */
-.date-nav-full.no-margin-stacked { 
-  margin-bottom: 0; 
-  position: relative; 
-  z-index: 100; 
+.date-nav-full.no-margin-stacked {
+  margin-bottom: 0;
+  position: relative;
+  z-index: 100;
 }
 
-/* 
+/*
   The clickable "Today"/date-label area that has an invisible native
-  <input type="date"> stacked on top of it for the native date picker. 
+  <input type="date"> stacked on top of it for the native date picker.
 */
-.date-display-toggle { 
-  position: relative; 
-  flex: 1; 
-  text-align: center; 
-  font-weight: bold; 
-  cursor: pointer; 
+.date-display-toggle {
+  position: relative;
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-.native-date-input { 
-  position: absolute; 
-  opacity: 0; 
-  pointer-events: none; 
-  width: 0; 
-  height: 0; 
-  border: none; 
+.native-date-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  border: none;
 }
 
-.filter-row-unified { 
-  display: flex; 
-  align-items: center; 
-  gap: 10px; 
-  width: 100%; 
+.filter-row-unified {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
-/* 
+/*
   .filter-scroll-area's own base rule already sets display/align-items/
   overflow-x/flex — this modifier only carries the two properties that
-  actually differ in this denser layout (margin/padding). 
+  actually differ in this denser layout (margin/padding).
 */
-.filter-scroll-area.dense { 
-  margin: 0; 
-  padding: 6px 10px; 
+.filter-scroll-area.dense {
+  margin: 0;
+  padding: 6px 10px;
 }
 
-/* 
+/*
   Width variants for .custom-dropdown (default 150px). display:none is
-  already .custom-dropdown's own default, so it never needed repeating. 
+  already .custom-dropdown's own default, so it never needed repeating.
 */
-.custom-dropdown.w-140 { 
-  width: 140px; 
+.custom-dropdown.w-140 {
+  width: 140px;
 }
 
-.custom-dropdown.centered { 
-  width: 160px; 
-  left: 50%; 
-  transform: translateX(-50%); 
+.custom-dropdown.centered {
+  width: 160px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* 
+/*
   Settings-modal style dropdowns (mode/duration/sound/category/frequency)
-  that should span the full width of their input instead of the 150px default. 
+  that should span the full width of their input instead of the 150px default.
 */
-.custom-dropdown.full-width { 
-  width: 100%; 
-  top: 100%; 
-  left: 0; 
-  margin-top: 5px; 
+.custom-dropdown.full-width {
+  width: 100%;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
 }
 
-/* 
+/*
   Wraps the small tag/settings icon button that sits inside the
-  add-task/add-habit input pill. 
+  add-task/add-habit input pill.
 */
-.pill-icon-btn-wrapper { 
-  position: relative; 
-  display: flex; 
-  align-items: center; 
+.pill-icon-btn-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
-/* 
+/*
   Smaller variant of .timer-circle (default 250px) used by the compact
-  overview rings on the Habits and Progress tabs. 
+  overview rings on the Habits and Progress tabs.
 */
-.timer-circle.mini { 
-  width: 180px; 
-  height: 180px; 
-  margin: 0 auto; 
+.timer-circle.mini {
+  width: 180px;
+  height: 180px;
+  margin: 0 auto;
 }
 
 /* Smaller variant of .time-display (default 3.5rem) to match. */
-.time-display.mini { 
-  font-size: 2.5rem; 
+.time-display.mini {
+  font-size: 2.5rem;
 }
 
 /* Centered icon+percentage overlay sitting on top of an SVG progress ring. */
-.ring-center-overlay { 
-  position: absolute; 
-  display: flex; 
-  flex-direction: column; 
-  align-items: center; 
+.ring-center-overlay {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* 
+/*
   .progress-hero's own base rule sets margin-bottom:10px — the compact
-  overview rings on Habits/Progress don't want that extra gap. 
+  overview rings on Habits/Progress don't want that extra gap.
 */
-.progress-hero.tight { 
-  margin: 0; 
+.progress-hero.tight {
+  margin: 0;
 }
 
-/* 
+/*
   The rotated "Top Streaks" / "Overview" side label next to the mini
-  stat stack on the Habits and Progress tabs. 
+  stat stack on the Habits and Progress tabs.
 */
 .vertical-side-label {
-  writing-mode: vertical-rl; 
-  transform: rotate(180deg); 
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
   text-align: center;
-  color: var(--text-muted); 
-  font-size: 0.75rem; 
+  color: var(--text-muted);
+  font-size: 0.75rem;
   font-weight: bold;
-  letter-spacing: 2px; 
-  text-transform: uppercase; 
+  letter-spacing: 2px;
+  text-transform: uppercase;
   display: flex;
-  align-items: center; 
+  align-items: center;
   justify-content: center;
-  border-right: 2px solid var(--glass-border); 
+  border-right: 2px solid var(--glass-border);
   padding-left: 5px;
   font-family: 'Segoe UI', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased; 
+  -webkit-font-smoothing: antialiased;
   backface-visibility: hidden;
 }
 
 /* Column of stat rows / top-streak pills sitting next to a vertical-side-label. */
-.side-label-stack { 
-  flex: 1; 
-  display: flex; 
-  flex-direction: column; 
-  gap: 8px; 
-  justify-content: center; 
-  min-height: 120px; 
+.side-label-stack {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  justify-content: center;
+  min-height: 120px;
 }
 
-.side-label-row { 
-  display: flex; 
-  gap: 12px; 
-  align-items: stretch; 
-  width: 100%; 
+.side-label-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  width: 100%;
 }
 
-.stat-value-row { 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
+.stat-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .text-center { text-align: center; }
-/* 
+/*
   .setting-group wraps a custom-select + its dropdown in the settings
-  modal — needs position:relative as the dropdown's positioning anchor. 
+  modal — needs position:relative as the dropdown's positioning anchor.
 */
-.setting-group.dropdown-anchor { 
-  position: relative; 
+.setting-group.dropdown-anchor {
+  position: relative;
 }
 
 /* The small gear/settings icon button at the right end of a timer-header. */
-.icon-btn.header-action { 
-  flex-shrink: 0; 
-  margin-left: 10px; 
+.icon-btn.header-action {
+  flex-shrink: 0;
+  margin-left: 10px;
 }
-/* 
+/*
   .locked-task-label's own base rule already sets display/align-items/gap
   at font-size:0.95rem — this modifier is the one property that actually
-  differs on the Habits/Progress "Daily Overview" header. 
+  differs on the Habits/Progress "Daily Overview" header.
 */
-.locked-task-label.lg { 
-  font-size: 1.05rem; 
+.locked-task-label.lg {
+  font-size: 1.05rem;
 }
-/* 
+/*
   Habits/Progress tabs' left panel is a full-height flex column instead of
-  the default centered timer layout. 
+  the default centered timer layout.
 */
-.timer-section.split-layout { 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: space-between; 
-  height: 100%; 
+.timer-section.split-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
 }

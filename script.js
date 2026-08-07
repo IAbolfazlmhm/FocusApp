@@ -48,6 +48,9 @@ function setupGlobalShortcuts() {
     if (event.code === 'Space') {
       event.preventDefault();
       toggleTimer();
+      // Keyboard shortcut bypasses the click-based data-sound delegate
+      // entirely (no click event fires), so it needs its own explicit call.
+      if (typeof playUI === 'function') {playUI('click');}
     }
 
     // ESC key closes only the topmost modal
@@ -67,29 +70,15 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// --- GLOBAL SOUND HAPTICS ---
+// --- GLOBAL SOUND HAPTICS (delegate-only model) ---
+// Every interactive element that should produce a sound gets a
+// data-sound="type" attribute. This single delegated handler is the
+// ONLY place playUI() is called for UI sounds — no explicit calls in
+// feature modules, no manual exclusion list to maintain.
 document.addEventListener('click', (e) => {
-  const trigger = e.target.closest('button, .filter-btn, .tab, .dropdown-item, .tag-select-btn, .habit-item, .slider, .color-option, .icon-option');
+  const trigger = e.target.closest('[data-sound]');
 
-  if (trigger) {
-    if (trigger.dataset.sound) { return; }
-
-    // NOTE: this is a manually-maintained exclusion list — every button that
-    // plays its own sound (via an explicit playUI() call in its click handler)
-    // MUST be added here, or it will double-fire against the generic 'click'
-    // sound below. See FocusApp-Senior-Audit.md, Finding H1.
-    const isSpecialButton = trigger.closest('.done-btn') ||
-    trigger.closest('.remove-btn') ||
-    trigger.closest('.start-btn') ||
-    trigger.closest('.done-habit-btn') ||
-    trigger.closest('.focus-btn') ||
-    trigger.closest('.skip-habit-btn') ||
-    trigger.closest('#confirm-yes-btn');
-
-    if (!isSpecialButton) {
-      if (typeof playUI === 'function') {
-        playUI('click');
-      }
-    }
+  if (trigger && typeof playUI === 'function') {
+    playUI(trigger.dataset.sound);
   }
 });

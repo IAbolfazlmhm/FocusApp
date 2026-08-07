@@ -75,9 +75,9 @@
   <div class="header-container">
     <nav class="glass-tabs-container" role="tablist" aria-label="App sections">
       <div class="active-bubble"></div>
-      <button class="tab active" role="tab" aria-selected="true" id="tab-pomodoro" aria-controls="pomodoro-view">Pomodoro</button>
-      <button class="tab" role="tab" aria-selected="false" id="tab-habits" aria-controls="habits-view">Habits</button>
-      <button class="tab" role="tab" aria-selected="false" id="tab-progress" aria-controls="progress-view">Progress</button>
+      <button class="tab active" role="tab" aria-selected="true" id="tab-pomodoro" aria-controls="pomodoro-view" data-sound="click">Pomodoro</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-habits" aria-controls="habits-view" data-sound="click">Habits</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-progress" aria-controls="progress-view" data-sound="click">Progress</button>
     </nav>
   </div>
 
@@ -115,11 +115,11 @@
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           </button>
           
-          <button class="start-btn" id="start-btn">
+          <button class="start-btn" id="start-btn" data-sound="click">
             <span class="btn-text">Start</span>
           </button>
           
-          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase">
+          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
         </div>
@@ -128,16 +128,16 @@
       <section class="tasks-section">
         <div class="section-top-wrapper">
           <div class="date-nav-full glass-pill">
-            <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <div class="date-display-toggle">
               <span id="pomodoro-date-display">Today</span>
               <input type="date" id="pomodoro-date-picker" class="native-date-input">
             </div>
-            <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
           </div>
 
           <div class="filter-row-unified">
-            <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags">
+            <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags" data-sound="click">
               <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
             </button>
             
@@ -146,23 +146,23 @@
             </div>
 
             <div class="sort-wrapper" id="task-sort-wrapper">
-              <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks">
+              <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks" data-sound="click">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
               </button>
               <div id="sort-dropdown" class="custom-dropdown glass-effect w-140">
-                <div class="dropdown-item active-sort" data-sort="newest">
+                <div class="dropdown-item active-sort" data-sort="newest" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
                   <span>Newest</span> <span class="sort-dir">↓</span>
                 </div>
-                <div class="dropdown-item" data-sort="time">
+                <div class="dropdown-item" data-sort="time" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14M5 2h14M7 22V16l5-6-5-6V2M17 22V16l-5-6 5-6V2"/></svg> 
                   <span>Time Spent</span> <span class="sort-dir"></span>
                 </div>
-                <div class="dropdown-item" data-sort="az">
+                <div class="dropdown-item" data-sort="az" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
                   <span>A-Z</span> <span class="sort-dir"></span>
                 </div>
-                <div class="dropdown-item" data-sort="tag">
+                <div class="dropdown-item" data-sort="tag" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> 
                   <span>By Tag</span> <span class="sort-dir"></span>
                 </div>
@@ -180,13 +180,13 @@
           
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div class="pill-icon-btn-wrapper">
-            <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" aria-label="Set Tag">
+            <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" aria-label="Set Tag" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
             </button>
           </div>
           
           <input type="text" placeholder="Add a new task..." class="task-input" maxlength="30">
-          <button class="add-btn">Add</button>
+          <button class="add-btn" data-sound="click">Add</button>
         </div>
       </section>
 
@@ -201,7 +201,7 @@
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             <strong class="dashboard-title-text">Daily Overview</strong>
           </span>
-          <button class="icon-btn habit-settings-btn header-action" aria-label="Habit Settings" title="Habit Settings">
+          <button class="icon-btn habit-settings-btn header-action" aria-label="Habit Settings" title="Habit Settings" data-sound="click">
             <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
           </button>
         </div>
@@ -238,16 +238,16 @@
         
         <div class="section-top-wrapper">
           <div class="date-nav-full glass-pill">
-            <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <div class="date-display-toggle">
               <span id="habit-date-display">Today</span>
               <input type="date" id="native-date-picker" class="native-date-input">
             </div>
-            <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
           </div>
 
           <div class="filter-row-unified">
-            <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories">
+            <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories" data-sound="click">
               <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
             </button>
               
@@ -256,15 +256,15 @@
             </div>
 
             <div class="sort-wrapper" id="habit-sort-wrapper">
-              <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits">
+              <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits" data-sound="click">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
               </button>
               <div id="habit-sort-dropdown" class="custom-dropdown glass-effect w-140">
-                <div class="dropdown-item active-sort" data-sort="newest">
+                <div class="dropdown-item active-sort" data-sort="newest" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
                   <span>Newest</span> <span class="sort-dir">↓</span>
                 </div>
-                <div class="dropdown-item" data-sort="az">
+                <div class="dropdown-item" data-sort="az" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> 
                   <span>A-Z</span> <span class="sort-dir"></span>
                 </div>
@@ -286,13 +286,13 @@
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div class="pill-icon-btn-wrapper">
-            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings">
+            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
             </button>
           </div>
 
           <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" maxlength="30">
-          <button class="add-btn" id="quick-add-habit-btn">Add</button>
+          <button class="add-btn" id="quick-add-habit-btn" data-sound="click">Add</button>
         </div>
       </section>
 
@@ -310,7 +310,7 @@
             <svg class="ui-icon phase-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
             <strong class="dashboard-title-text" id="left-panel-title">This Week</strong>
           </span>
-          <button class="icon-btn header-action" id="prog-settings-btn" aria-label="Dashboard Settings" title="Dashboard Settings">
+          <button class="icon-btn header-action" id="prog-settings-btn" aria-label="Dashboard Settings" title="Dashboard Settings" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
           </button>
         </div>
@@ -374,22 +374,22 @@
       <section class="tasks-section" style="justify-content: flex-start; gap: 15px; overflow-y: hidden;">
           
         <div class="date-nav-full glass-pill no-margin-stacked">
-          <button class="icon-btn date-arrow" id="prog-prev-btn" title="Previous period" aria-label="Previous period"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+          <button class="icon-btn date-arrow" id="prog-prev-btn" title="Previous period" aria-label="Previous period" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             
           <div class="sort-wrapper" id="prog-range-wrapper" style="flex: 1; text-align: center; position: relative;">
-            <button class="date-selector-btn" id="prog-range-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;">
+            <button class="date-selector-btn" id="prog-range-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;" data-sound="click">
               <span id="prog-range-display">Weekly</span>
               <svg class="ui-icon phase-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div id="prog-range-dropdown" class="custom-dropdown glass-effect centered">
-              <div class="dropdown-item" data-range="daily">Daily</div>
-              <div class="dropdown-item active-sort" data-range="weekly">Weekly</div>
-              <div class="dropdown-item" data-range="monthly">Monthly</div>
-              <div class="dropdown-item" data-range="custom">Custom Range...</div>
+              <div class="dropdown-item" data-range="daily" data-sound="click">Daily</div>
+              <div class="dropdown-item active-sort" data-range="weekly" data-sound="click">Weekly</div>
+              <div class="dropdown-item" data-range="monthly" data-sound="click">Monthly</div>
+              <div class="dropdown-item" data-range="custom" data-sound="click">Custom Range...</div>
             </div>
           </div>
             
-          <button class="icon-btn date-arrow" id="prog-next-btn" title="Next period" aria-label="Next period"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          <button class="icon-btn date-arrow" id="prog-next-btn" title="Next period" aria-label="Next period" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
         </div>
 
         <div class="chart-block" id="prog-focus-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
@@ -436,7 +436,7 @@
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
           Settings
         </h2>
-        <button class="close-btn" id="close-settings" title="Close" aria-label="Close">
+        <button class="close-btn" id="close-settings" title="Close" aria-label="Close" data-sound="click">
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
         </button>
       </div>
@@ -446,8 +446,8 @@
           <input type="text" id="mode-display" class="custom-select" value="Pomodoro Timer" readonly style="cursor: pointer;">
           <input type="hidden" id="mode-select" value="pomodoro">
           <div id="mode-dropdown" class="custom-dropdown glass-effect full-width">
-            <div class="dropdown-item" data-val="pomodoro">Pomodoro Timer</div>
-            <div class="dropdown-item" data-val="stopwatch">Stopwatch (Count up)</div>
+            <div class="dropdown-item" data-val="pomodoro" data-sound="click">Pomodoro Timer</div>
+            <div class="dropdown-item" data-val="stopwatch" data-sound="click">Stopwatch (Count up)</div>
           </div>
         </div>
         <div class="setting-group toggle-group">
@@ -465,11 +465,11 @@
             <input type="text" id="duration-display" class="custom-select" value="25 Minutes (Default)" readonly style="cursor: pointer;">
             <input type="hidden" id="work-duration" value="25">
             <div id="duration-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="10">10 Minutes</div>
-              <div class="dropdown-item" data-val="15">15 Minutes</div>
-              <div class="dropdown-item" data-val="25">25 Minutes (Default)</div>
-              <div class="dropdown-item" data-val="45">45 Minutes</div>
-              <div class="dropdown-item" data-val="60">60 Minutes</div>
+              <div class="dropdown-item" data-val="10" data-sound="click">10 Minutes</div>
+              <div class="dropdown-item" data-val="15" data-sound="click">15 Minutes</div>
+              <div class="dropdown-item" data-val="25" data-sound="click">25 Minutes (Default)</div>
+              <div class="dropdown-item" data-val="45" data-sound="click">45 Minutes</div>
+              <div class="dropdown-item" data-val="60" data-sound="click">60 Minutes</div>
             </div>
           </div>
 
@@ -487,10 +487,10 @@
             <input type="text" id="sound-display" class="custom-select" value="Soft Bell" readonly style="cursor: pointer;">
             <input type="hidden" id="sound-select" value="bell">
             <div id="sound-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="mute">Mute (No Sound)</div>
-              <div class="dropdown-item" data-val="bell">Soft Bell</div>
-              <div class="dropdown-item" data-val="digital">Digital Beep</div>
-              <div class="dropdown-item" data-val="bird">Bird Chirp</div>
+              <div class="dropdown-item" data-val="mute" data-sound="click">Mute (No Sound)</div>
+              <div class="dropdown-item" data-val="bell" data-sound="click">Soft Bell</div>
+              <div class="dropdown-item" data-val="digital" data-sound="click">Digital Beep</div>
+              <div class="dropdown-item" data-val="bird" data-sound="click">Bird Chirp</div>
             </div>
           </div>
         </div>
@@ -501,12 +501,12 @@
             Everything is stored only in this browser. Clearing site data, private browsing, or a browser reset can erase it — export a backup you can restore later.
           </p>
           <div style="display: flex; gap: 10px;">
-            <button type="button" class="theme-outline-btn flex-1" id="export-data-btn" aria-label="Export all data as a JSON file">Export Data</button>
-            <button type="button" class="theme-outline-btn flex-1" id="import-data-btn" aria-label="Import data from a JSON file">Import Data</button>
+            <button type="button" class="theme-outline-btn flex-1" id="export-data-btn" aria-label="Export all data as a JSON file" data-sound="click">Export Data</button>
+            <button type="button" class="theme-outline-btn flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-sound="click">Import Data</button>
           </div>
           <input type="file" id="import-data-input" accept="application/json" style="display:none;">
         </div>
-        <button class="save-settings-btn" id="save-settings">Save & Apply</button>
+        <button class="save-settings-btn" id="save-settings" data-sound="success">Save & Apply</button>
       </div>
     </div>
   </div>
@@ -515,12 +515,12 @@
     <div class="modal-content glass-effect">
       <div class="modal-header">
         <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Manage Tags</h2>
-        <button class="close-btn" id="close-tags-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-tags-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
           <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select flex-1" maxlength="20">
-          <button id="manage-add-tag-btn" class="add-btn" style="padding: 8px 15px;">Add</button>
+          <button id="manage-add-tag-btn" class="add-btn" style="padding: 8px 15px;" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="tags-management-list" class="tags-list-grid"></div>
@@ -533,8 +533,8 @@
     <div class="modal-content glass-effect" style="max-width: 320px; text-align: center; padding: 30px 20px;">
       <h3 id="confirm-message" style="margin-bottom: 25px; font-size: 1.2rem; font-weight: bold;">Are you sure?</h3>
       <div style="display: flex; gap: 15px; justify-content: center;">
-        <button id="confirm-no-btn" class="add-btn cancel-btn">Cancel</button>
-        <button id="confirm-yes-btn" class="add-btn" style="background: var(--danger-color); color: white; border: none; flex: 1;">Yes, Delete</button>
+        <button id="confirm-no-btn" class="add-btn cancel-btn" data-sound="click">Cancel</button>
+        <button id="confirm-yes-btn" class="add-btn" style="background: var(--danger-color); color: white; border: none; flex: 1;" data-sound="trash">Yes, Delete</button>
       </div>
     </div>
   </div>
@@ -546,7 +546,7 @@
           <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> 
           Edit Task
         </h2>
-        <button class="close-btn" id="close-edit-tag-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-edit-tag-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="setting-group" style="margin-bottom: 15px;">
@@ -558,7 +558,7 @@
           <div id="edit-task-tag-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
           </div>
         </div>
-        <button class="save-settings-btn" id="save-task-edit-btn">Save Changes</button>
+        <button class="save-settings-btn" id="save-task-edit-btn" data-sound="success">Save Changes</button>
       </div>
     </div>
   </div>
@@ -567,7 +567,7 @@
     <div class="modal-content glass-effect" style="max-width: 420px;">
       <div class="modal-header">
         <h2 id="habit-modal-title"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit</h2>
-        <button class="close-btn" id="close-habit-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-habit-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
         
       <div class="modal-body">
@@ -588,17 +588,17 @@
             <input type="hidden" id="habit-frequency-value" value="everyday">
             
             <div id="habit-frequency-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="everyday">Every Day</div>
-              <div class="dropdown-item" data-val="weekly">Once a Week</div>
-              <div class="dropdown-item" data-val="biweekly">Every 2 Weeks</div>
-              <div class="dropdown-item" data-val="monday">Every Monday</div>
-              <div class="dropdown-item" data-val="tuesday">Every Tuesday</div>
-              <div class="dropdown-item" data-val="wednesday">Every Wednesday</div>
-              <div class="dropdown-item" data-val="thursday">Every Thursday</div>
-              <div class="dropdown-item" data-val="friday">Every Friday</div>
-              <div class="dropdown-item" data-val="saturday">Every Saturday</div>
-              <div class="dropdown-item" data-val="sunday">Every Sunday</div>
-              <div class="dropdown-item" data-val="custom">Custom Days...</div>
+              <div class="dropdown-item" data-val="everyday" data-sound="click">Every Day</div>
+              <div class="dropdown-item" data-val="weekly" data-sound="click">Once a Week</div>
+              <div class="dropdown-item" data-val="biweekly" data-sound="click">Every 2 Weeks</div>
+              <div class="dropdown-item" data-val="monday" data-sound="click">Every Monday</div>
+              <div class="dropdown-item" data-val="tuesday" data-sound="click">Every Tuesday</div>
+              <div class="dropdown-item" data-val="wednesday" data-sound="click">Every Wednesday</div>
+              <div class="dropdown-item" data-val="thursday" data-sound="click">Every Thursday</div>
+              <div class="dropdown-item" data-val="friday" data-sound="click">Every Friday</div>
+              <div class="dropdown-item" data-val="saturday" data-sound="click">Every Saturday</div>
+              <div class="dropdown-item" data-val="sunday" data-sound="click">Every Sunday</div>
+              <div class="dropdown-item" data-val="custom" data-sound="click">Custom Days...</div>
             </div>
           </div>
         </div>
@@ -606,44 +606,44 @@
         <div class="setting-group" id="custom-days-picker" style="display: none; margin-bottom: 20px;">
           <label>Select Days</label>
           <div class="picker-grid" id="custom-days-grid">
-            <div class="day-option" data-day="1">M</div>
-            <div class="day-option" data-day="2">T</div>
-            <div class="day-option" data-day="3">W</div>
-            <div class="day-option" data-day="4">T</div>
-            <div class="day-option" data-day="5">F</div>
-            <div class="day-option" data-day="6">S</div>
-            <div class="day-option" data-day="0">S</div>
+            <div class="day-option" data-day="1" data-sound="click">M</div>
+            <div class="day-option" data-day="2" data-sound="click">T</div>
+            <div class="day-option" data-day="3" data-sound="click">W</div>
+            <div class="day-option" data-day="4" data-sound="click">T</div>
+            <div class="day-option" data-day="5" data-sound="click">F</div>
+            <div class="day-option" data-day="6" data-sound="click">S</div>
+            <div class="day-option" data-day="0" data-sound="click">S</div>
           </div>
         </div>
 
         <div class="setting-group">
           <label>Color</label>
           <div class="picker-grid" id="habit-color-picker">
-            <div class="color-option selected" data-color="#3b82f6" style="background: #3b82f6;"></div>
-            <div class="color-option" data-color="#10b981" style="background: #10b981;"></div>
-            <div class="color-option" data-color="#f43f5e" style="background: #f43f5e;"></div>
-            <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;"></div>
-            <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;"></div>
+            <div class="color-option selected" data-color="#3b82f6" style="background: #3b82f6;" data-sound="click"></div>
+            <div class="color-option" data-color="#10b981" style="background: #10b981;" data-sound="click"></div>
+            <div class="color-option" data-color="#f43f5e" style="background: #f43f5e;" data-sound="click"></div>
+            <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;" data-sound="click"></div>
+            <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;" data-sound="click"></div>
           </div>
         </div>
 
         <div class="setting-group">
           <label>Icon</label>
           <div class="picker-grid" id="habit-icon-picker" style="flex-wrap: wrap; gap: 10px;">
-            <div class="icon-option selected" data-icon="book"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
-            <div class="icon-option" data-icon="activity"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
-            <div class="icon-option" data-icon="droplet"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
-            <div class="icon-option" data-icon="heart"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
-            <div class="icon-option" data-icon="star"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
-            <div class="icon-option" data-icon="coffee"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></div>
-            <div class="icon-option" data-icon="moon"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
-            <div class="icon-option" data-icon="sun"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
-            <div class="icon-option" data-icon="monitor"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
-            <div class="icon-option" data-icon="music"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
+            <div class="icon-option selected" data-icon="book" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+            <div class="icon-option" data-icon="activity" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+            <div class="icon-option" data-icon="droplet" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
+            <div class="icon-option" data-icon="heart" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></div>
+            <div class="icon-option" data-icon="star" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
+            <div class="icon-option" data-icon="coffee" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></div>
+            <div class="icon-option" data-icon="moon" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></div>
+            <div class="icon-option" data-icon="sun" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></div>
+            <div class="icon-option" data-icon="monitor" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></div>
+            <div class="icon-option" data-icon="music" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div>
           </div>
         </div>
 
-        <button class="save-settings-btn" id="save-habit-btn" style="margin-top: 15px;">Save Habit</button>
+        <button class="save-settings-btn" id="save-habit-btn" style="margin-top: 15px;" data-sound="success">Save Habit</button>
       </div>
     </div>
   </div>
@@ -652,12 +652,12 @@
     <div class="modal-content glass-effect">
       <div class="modal-header">
         <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Set Task Tag</h2>
-        <button class="close-btn" id="close-quick-tag-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-quick-tag-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
           <input type="text" id="quick-modal-tag-input" placeholder="New tag name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-          <button id="quick-modal-add-btn" class="add-btn" style="padding: 8px 15px; background: var(--theme-color); color: #fff">Add</button>
+          <button id="quick-modal-add-btn" class="add-btn" style="padding: 8px 15px; background: var(--theme-color); color: #fff" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="quick-modal-tag-list" class="tags-list-grid"></div>
@@ -669,12 +669,12 @@
     <div class="modal-content glass-effect">
       <div class="modal-header">
         <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Manage Categories</h2>
-        <button class="close-btn" id="close-categories-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-categories-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
           <input type="text" id="manage-new-category-input" placeholder="New category name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-          <button id="manage-add-category-btn" class="add-btn" style="padding: 8px 15px; background: var(--success-color); color: #FFF">Add</button>
+          <button id="manage-add-category-btn" class="add-btn" style="padding: 8px 15px; background: var(--success-color); color: #FFF" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="categories-management-list" class="tags-list-grid"></div>
@@ -687,7 +687,7 @@
     <div class="modal-content glass-effect">
       <div class="modal-header">
         <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Custom Range</h2>
-        <button class="close-btn" id="close-custom-range" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-custom-range" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="setting-group">
@@ -698,7 +698,7 @@
           <label>End Date</label>
           <input type="date" id="range-end-input" class="custom-select">
         </div>
-        <button class="save-settings-btn" id="apply-custom-range">Apply Range</button>
+        <button class="save-settings-btn" id="apply-custom-range" data-sound="success">Apply Range</button>
       </div>
     </div>
   </div>
@@ -707,7 +707,7 @@
     <div class="modal-content glass-effect">
       <div class="modal-header">
         <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg> Settings</h2>
-        <button class="close-btn" id="close-prog-settings" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-prog-settings" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="setting-group toggle-group">
@@ -732,7 +732,7 @@
           <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
           
-        <button class="save-settings-btn" id="save-prog-settings">Save & Apply</button>
+        <button class="save-settings-btn" id="save-prog-settings" data-sound="success">Save & Apply</button>
       </div>
     </div>
   </div>
@@ -741,7 +741,7 @@
     <div class="modal-content glass-effect" style="max-width: 380px;">
       <div class="modal-header" style="margin-bottom: 10px;">
         <h2 id="report-date-title">Report</h2>
-        <button class="close-btn" id="close-report-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-report-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body" id="report-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
       </div>
@@ -755,7 +755,7 @@
           <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           Delete Habit
         </h2>
-        <button class="close-btn" id="close-delete-habit-modal" aria-label="Close"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-delete-habit-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>

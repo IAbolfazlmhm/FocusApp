@@ -7,7 +7,6 @@ import { writeJSON } from './storage.js';
 export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
-import { playUI } from './audio.js';
 import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm, setupHorizontalWheelScroll } from './ui-utils.js';
 
 // ==========================================
@@ -54,13 +53,13 @@ export function renderFilters() {
 
   let html = `
     <div class="filter-bubble"></div>
-    <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>
-    <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active">Active</button>
-    <button class="filter-btn ${currentFilter === 'completed' ? 'active' : ''}" data-filter="completed">Done</button>
+    <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">All</button>
+    <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">Active</button>
+    <button class="filter-btn ${currentFilter === 'completed' ? 'active' : ''}" data-filter="completed" data-sound="click">Done</button>
   `;
 
   savedTags.forEach(tag => {
-    html += `<button class="filter-btn ${currentFilter === tag ? 'active' : ''}" data-filter="${escapeHTML(tag)}">#${escapeHTML(tag)}</button>`;
+    html += `<button class="filter-btn ${currentFilter === tag ? 'active' : ''}" data-filter="${escapeHTML(tag)}" data-sound="click">#${escapeHTML(tag)}</button>`;
   });
 
   filterListEl.innerHTML = html;
@@ -182,13 +181,13 @@ export function renderTasks() {
     let actionButtons = '';
     if (!isToday && !task.completed) {
       actionButtons = `
-        <button class="focus-btn reschedule-btn" title="Move to Today">
+        <button class="focus-btn reschedule-btn" title="Move to Today" data-sound="success">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
         </button>
       `;
     } else {
       actionButtons = `
-        <button class="focus-btn focus-action" title="Focus">
+        <button class="focus-btn focus-action" title="Focus" data-sound="click">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         </button>
       `;
@@ -212,9 +211,9 @@ export function renderTasks() {
     // are part of those classes now, not repeated inline every render.
     taskDiv.innerHTML = `
       <div class="task-info">
-        
+
         <span class="task-name" title="${escapeHTML(task.text)}">${escapeHTML(task.text)}</span>
-        
+
         <div class="task-tag-row">
           ${tagHTML}
           <span class="task-time-badge" id="badge-${task.id}">${formatTaskTime(task.timeSpent)}</span>
@@ -223,7 +222,7 @@ export function renderTasks() {
       </div>
       <div class="task-actions">
         ${actionButtons}
-        <button class="done-btn" title="Done"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="done-btn" title="Done" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
         <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
       </div>
     `;
@@ -236,7 +235,6 @@ export function renderTasks() {
     if (rescheduleBtn) {
       rescheduleBtn.addEventListener('click', () => {
         task.createdAt = Date.now(); // Updates timestamp to "Right Now"
-        playUI('success');
         saveTasks();
         renderTasks();
         showToast('Task moved to Today!', 'success');
@@ -320,14 +318,14 @@ export function addTask() {
   const now = new Date();
   taskDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
-  setTasks([...tasks, { 
-    id: generateId(), 
-    text, 
-    tag: finalTag, 
-    completed: false, 
-    timeSpent: 0, 
-    timeByDate: {}, 
-    createdAt: taskDate.getTime() 
+  setTasks([...tasks, {
+    id: generateId(),
+    text,
+    tag: finalTag,
+    completed: false,
+    timeSpent: 0,
+    timeByDate: {},
+    createdAt: taskDate.getTime()
   }]);
   saveTasks();
   renderFilters();
@@ -337,7 +335,6 @@ export function addTask() {
 }
 
 function removeTask(id) {
-  playUI('trash');
   setTasks(tasks.filter(t => t.id !== id));
   if (focusedTaskId === id) {setFocusedTaskId(null);}
   saveTasks();
@@ -351,12 +348,6 @@ function toggleCompleted(id) {
     t.completed = !t.completed;
     t.completedAt = t.completed ? Date.now() : null;
 
-    if (t.completed) {
-      playUI('success');
-      if (focusedTaskId === id) {setFocusedTaskId(null);}
-    } else {
-      playUI('click');
-    }
     saveTasks();
     renderTasks();
     checkAutoPause();
@@ -370,7 +361,6 @@ function toggleFocus(id) {
     return;
   }
   setFocusedTaskId(focusedTaskId === id ? null : id);
-  playUI('click');
   saveTasks();
   renderTasks();
   checkAutoPause();
@@ -432,10 +422,10 @@ export function setupTaskEvents() {
       // HTML string and sets it once — same pattern already used correctly
       // by renderTagsManagement() and renderQuickTagModal() in this file.
       const noneSelected = !task.tag ? 'selected' : '';
-      let html = `<button class="tag-select-btn ${noneSelected}" data-tag="">None</button>`;
+      let html = `<button class="tag-select-btn ${noneSelected}" data-tag="" data-sound="click">None</button>`;
       savedTags.forEach(tag => {
         const isSelected = task.tag === tag ? 'selected' : '';
-        html += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}">${escapeHTML(tag)}</button>`;
+        html += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}" data-sound="click">${escapeHTML(tag)}</button>`;
       });
       tagList.innerHTML = html;
 
@@ -599,6 +589,7 @@ export function setupTaskEvents() {
     const noTagBtn = document.createElement('div');
     noTagBtn.className = 'tag-chip selectable';
     noTagBtn.textContent = '❌ No Tag';
+    noTagBtn.dataset.sound = 'click';
     noTagBtn.onclick = () => selectQuickTag(null);
     quickModalTagList.appendChild(noTagBtn);
 
@@ -607,6 +598,7 @@ export function setupTaskEvents() {
       const btn = document.createElement('div');
       btn.className = 'tag-chip selectable';
       btn.textContent = `#${tag}`;
+      btn.dataset.sound = 'click';
       btn.onclick = () => selectQuickTag(tag);
       quickModalTagList.appendChild(btn);
     });
@@ -767,7 +759,6 @@ export function setupTaskEvents() {
         item.classList.add('active-sort');
         item.querySelector('.sort-dir').textContent = sortOrder === 'asc' ? '↑' : '↓';
 
-        playUI('click');
         sortDropdown.classList.remove('show');
         renderTasks();
       });
@@ -834,6 +825,7 @@ function renderTagsManagement() {
       resetBtn.title = `Reset #${tag} to its default color`;
       resetBtn.setAttribute('aria-label', `Reset color for tag ${tag}`);
       resetBtn.innerHTML = icons.reset || '↺';
+      resetBtn.dataset.sound = 'click';
       resetBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         const { [tag]: _removed, ...rest } = tagColors;
@@ -848,13 +840,13 @@ function renderTagsManagement() {
     chip.addEventListener('click', () => {
       customConfirm(`Delete tag "${tag}"?`, () => {
         setSavedTags(savedTags.filter(t => t !== tag));
-        
+
         tasks.forEach(t => {
             if (t.tag === tag) {t.tag = null;}
         });
 
         if (currentFilter === tag) {setCurrentFilter('all');}
-        
+
         // Custom colors are keyed by tag name — clear the override too so
         // a brand new, unrelated tag with the same name later doesn't
         // silently inherit an old color from a tag that no longer exists.

@@ -4,7 +4,7 @@ import {
   tasks, focusedTaskId
 } from './state.js';
 
-import { playAlarm, playUI } from './audio.js';
+import { playAlarm } from './audio.js';
 import { showToast, icons } from './ui-utils.js';
 import { readJSON, writeJSON, readRaw, remove } from './storage.js';
 import { getLocalDateKey } from './date-utils.js';
@@ -288,7 +288,6 @@ export function toggleTimer() {
   if (isRunning) {
     // Pause timer
     stopTimer();
-    playUI('click');
 
     // Ticks now only persist every few seconds (see below), so pausing
     // needs its own explicit save — otherwise up to a few seconds of
@@ -297,7 +296,6 @@ export function toggleTimer() {
   } else {
     // Start timer
     setIsRunning(true);
-    playUI('click');
 
     if (startBtn) {
       startBtn.querySelector('.btn-text').textContent = 'Pause';
@@ -324,7 +322,7 @@ export function toggleTimer() {
         if ((modeSelect && modeSelect.value === 'stopwatch') || currentPhase === 'work') {
           const activeTask = tasks.find(t => t.id === focusedTaskId);
           if (activeTask) {
-            activeTask.timeSpent += deltaSeconds; 
+            activeTask.timeSpent += deltaSeconds;
             // Also record which DAY this time was earned on. Previously only
             // the all-time total existed, and the dashboard attributed 100%
             // of it to the task's createdAt date — so time spent focusing
@@ -335,36 +333,36 @@ export function toggleTimer() {
             if (!activeTask.timeByDate) {activeTask.timeByDate = {};}
             const todayKey = getLocalDateKey();
             activeTask.timeByDate[todayKey] = (activeTask.timeByDate[todayKey] || 0) + deltaSeconds;
-            saveTasks(); 
+            saveTasks();
             const badge = document.getElementById(`badge-${activeTask.id}`);
             if (badge) {badge.innerHTML = formatTaskTime(activeTask.timeSpent);}
           }
         }
       }
-      
+
       // Stopwatch or Pomodoro mode checks
       if (modeSelect && modeSelect.value === 'stopwatch') {
-        setTimeLeft(tickAnchorTimeLeft + nowElapsedSeconds); 
+        setTimeLeft(tickAnchorTimeLeft + nowElapsedSeconds);
         updateDisplay();
-        
+
         if (circle) {
           const offset = circumference - ((timeLeft % 60) / 60) * circumference;
           circle.style.strokeDashoffset = offset;
         }
       } else {
-        setTimeLeft(Math.max(0, tickAnchorTimeLeft - nowElapsedSeconds)); 
-        updateDisplay(); 
-        updateCircle(); 
-        
+        setTimeLeft(Math.max(0, tickAnchorTimeLeft - nowElapsedSeconds));
+        updateDisplay();
+        updateCircle();
+
         // Phase completion logic
         if (timeLeft <= 0) {
           stopTimer();
-          
+
           playAlarm(soundSelect ? soundSelect.value : 'bell');
           switchPhase();
-          
+
           if (autostartBreaks && autostartBreaks.checked && currentPhase !== 'work') {
-            toggleTimer(); 
+            toggleTimer();
           }
         }
       }
@@ -377,7 +375,7 @@ export function toggleTimer() {
         saveTimerState();
       }
     }, 1000);
-    
+
     setTimerId(interval);
   }
 }
@@ -466,11 +464,11 @@ export function setupTimerEvents() {
 
   if (skipBtn) {
     skipBtn.addEventListener('click', function(event) {
-      event.preventDefault(); 
+      event.preventDefault();
       const modeSelect = document.getElementById('mode-select');
       if (modeSelect && modeSelect.value === 'pomodoro') {
         stopTimer();
-        switchPhase(); 
+        switchPhase();
       }
     });
   }

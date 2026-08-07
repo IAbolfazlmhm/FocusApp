@@ -3,7 +3,6 @@ import {
   setCurrentHabitDate, setHabits, setSavedHabitCategories
 } from './state.js';
 
-import { playUI } from './audio.js';
 import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget, setupHorizontalWheelScroll, hexToRgba } from './ui-utils.js';
 import { writeJSON, readRaw } from './storage.js';
 
@@ -238,7 +237,7 @@ export function renderHabits() {
     // 2. Pristine 2-Row Layout WITH Original Streak SVG
     habitDiv.innerHTML = `
       <div class="habit-info">
-        
+
         <!-- Left Side: Original Icon Wrapper -->
         <div class="habit-icon-circle" style="--habit-bg:${bgRgba}; --habit-color:${habit.color};">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconSvgContent}</svg>
@@ -246,10 +245,10 @@ export function renderHabits() {
 
         <!-- Right Side: Text Stack -->
         <div class="habit-details">
-          
+
           <!-- Top Row: Habit Name -->
           <span class="habit-name" title="${escapeHTML(habit.name)}">${escapeHTML(habit.name)}</span>
-          
+
           <!-- Bottom Row: Category & Original Streak SVG -->
           <div class="habit-meta-row">
             ${catHTML}
@@ -258,14 +257,14 @@ export function renderHabits() {
               <span>${currentStreak}</span>
             </div>
           </div>
-          
+
         </div>
       </div>
-      
+
       <div class="task-actions">
         <button class="remove-btn advanced-delete-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-        <button class="focus-btn skip-habit-btn" title="Skip Today"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
-        <button class="done-btn done-habit-btn" title="Done!"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="focus-btn skip-habit-btn" title="Skip Today" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+        <button class="done-btn done-habit-btn" title="Done!" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
       </div>
     `;
 
@@ -410,7 +409,6 @@ export function setupHabitsEvents() {
   // Modal Triggers
   if (openAddHabitBtn) {
     openAddHabitBtn.addEventListener('click', () => {
-      playUI('click');
       editingHabitId = null; // CRITICAL: Tells the form we are creating, not editing
       document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit';
 
@@ -463,7 +461,6 @@ export function setupHabitsEvents() {
   // Modal Pickers
   colorOptions.forEach(option => {
     option.addEventListener('click', () => {
-      playUI('click');
       colorOptions.forEach(opt => opt.classList.remove('selected'));
       option.classList.add('selected');
     });
@@ -471,7 +468,6 @@ export function setupHabitsEvents() {
 
   iconOptions.forEach(option => {
     option.addEventListener('click', () => {
-      playUI('click');
       iconOptions.forEach(opt => opt.classList.remove('selected'));
       option.classList.add('selected');
     });
@@ -582,7 +578,6 @@ export function setupHabitsEvents() {
   // Custom Days Interaction
   dayOptions.forEach(day => {
     day.addEventListener('click', () => {
-      playUI('click');
       day.classList.toggle('selected');
     });
   });
@@ -667,7 +662,6 @@ export function setupHabitsEvents() {
       saveHabits();
 
       if (habitModal) {habitModal.classList.remove('show');}
-      playUI('success');
       showToast(editingHabitId ? 'Habit Updated!' : 'Habit Created!', 'success');
 
       renderHabits();
@@ -687,12 +681,10 @@ export function setupHabitsEvents() {
       // Done
       if (e.target.closest('.done-habit-btn')) {
         toggleHabitLog(habitId, dateStr, 'done');
-        playUI('success');
       }
       // Skip
       else if (e.target.closest('.skip-habit-btn')) {
         toggleHabitLog(habitId, dateStr, 'skipped');
-        playUI('click');
       }
     });
   }
@@ -702,7 +694,6 @@ export function setupHabitsEvents() {
   const settingsModal = document.getElementById('settings-modal');
   if (habitSettingsBtn && settingsModal) {
     habitSettingsBtn.addEventListener('click', () => {
-      playUI('click');
       // BUG FIX: Revert unsaved changes when opening from Habits!
       document.dispatchEvent(new Event('reloadSettingsUI'));
       settingsModal.classList.add('show');
@@ -737,7 +728,6 @@ export function setupHabitsEvents() {
         item.classList.add('active-sort');
         item.querySelector('.sort-dir').textContent = habitSortOrder === 'asc' ? '↑' : '↓';
 
-        playUI('click');
         habitSortDropdown.classList.remove('show');
         renderHabits();
       });
@@ -794,7 +784,6 @@ export function setupHabitsEvents() {
 
   if (manageCategoriesBtn && categoriesModal) {
     manageCategoriesBtn.addEventListener('click', () => {
-      playUI('click');
       renderCategoriesManagement();
       categoriesModal.classList.add('show');
     });
@@ -835,7 +824,6 @@ export function setupHabitsEvents() {
     catInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        playUI('click'); // BUG FIX: Explicit sound
         catBtn.click();
       }
     });
@@ -848,7 +836,6 @@ export function setupHabitsEvents() {
     hInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        playUI('click'); // BUG FIX: Explicit sound
         hSaveBtn.click();
       }
     });
@@ -882,7 +869,6 @@ export function setupHabitsEvents() {
         if (habitItem) {
           habitToDeleteId = habitItem.dataset.id;
           if (deleteModal) {deleteModal.classList.add('show');}
-          playUI('click'); // BUG FIX: Play sound when trash can is clicked!
         }
       }
     });
@@ -893,7 +879,6 @@ export function setupHabitsEvents() {
   // in HTML to suppress the global click sound (see script.js global listener).
   document.getElementById('delete-habit-today-btn')?.addEventListener('click', () => {
     if (!habitToDeleteId) {return;}
-    playUI('trash');
 
     const habit = habits.find(h => h.id === habitToDeleteId);
     const dateStr = getDateKey(currentHabitDate);
@@ -914,7 +899,6 @@ export function setupHabitsEvents() {
   // 3. Stop Tracking (Keep History)
   document.getElementById('delete-habit-future-btn')?.addEventListener('click', () => {
     if (!habitToDeleteId) {return;}
-    playUI('trash');
 
     const habit = habits.find(h => h.id === habitToDeleteId);
 
@@ -935,7 +919,6 @@ export function setupHabitsEvents() {
   // 4. Delete All History (Nuke it)
   document.getElementById('delete-habit-all-btn')?.addEventListener('click', () => {
     if (!habitToDeleteId) {return;}
-    playUI('trash');
 
     const updatedHabits = habits.filter(h => h.id !== habitToDeleteId);
     setHabits(updatedHabits);
@@ -988,7 +971,7 @@ export function initHabitQuotes() {
 
 /**
  * Toggles a habit log for a specific date
- * @param {number} habitId 
+ * @param {number} habitId
  * @param {string} dateKey - Format: 'YYYY-MM-DD'
  * @param {string} status - 'done' or 'skipped'
  */
@@ -1249,7 +1232,6 @@ if (quickHabitInput) {
   quickHabitInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      playUI('click'); // BUG FIX: Explicit sound
       processQuickAddHabit();
     }
   });
@@ -1276,12 +1258,12 @@ export function renderHabitCategories() {
   const usedCats = habits.map(h => h.category || 'Uncategorized');
   const uniqueCategories = [...new Set([...savedHabitCategories, ...usedCats])].filter(cat => cat && cat.trim() !== '');
 
-  let buttonsHTML = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>`;
-  buttonsHTML += `<button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active">Active</button>`;
-  buttonsHTML += `<button class="filter-btn ${currentFilter === 'done' ? 'active' : ''}" data-filter="done">Done</button>`;
+  let buttonsHTML = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">All</button>`;
+  buttonsHTML += `<button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">Active</button>`;
+  buttonsHTML += `<button class="filter-btn ${currentFilter === 'done' ? 'active' : ''}" data-filter="done" data-sound="click">Done</button>`;
 
   uniqueCategories.forEach(cat => {
-    buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${escapeHTML(cat)}">${escapeHTML(cat)}</button>`;
+    buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${escapeHTML(cat)}" data-sound="click">${escapeHTML(cat)}</button>`;
   });
 
   filterContainer.innerHTML = bubbleHTML + buttonsHTML;
