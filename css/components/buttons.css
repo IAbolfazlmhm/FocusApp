@@ -1,0 +1,246 @@
+/* ========================================== */
+/* BUTTONS & ICON BUTTONS                     */
+/* ========================================== */
+
+/* --- ICONS --- */
+svg.ui-icon {
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+svg.phase-icon {
+  width: 16px;
+  height: 16px;
+  margin-bottom: -3px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+
+/* --- BUTTONS ---
+   .btn is the shared pill shape (padding, radius, shadow, hover-lift);
+   color comes from a modifier, never from an inline style. This
+   replaces the old .add-btn, which was originally just the "Add Task"
+   button's class and got reused — with per-instance inline style
+   overrides — for Cancel, Delete, Stop Tracking, category/tag Add, etc.
+   Reading class="add-btn" on a Delete button told you nothing about
+   what the button did; class="btn btn-danger" does. */
+.btn {
+  min-height: 44px;
+  padding: 10px 25px;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  font-weight: bold;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, filter 0.2s;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+/* Compact padding for buttons that sit inline next to a text input
+   (Manage Tags/Categories "Add" row, the quick-add-task modal). */
+.btn-sm {
+  padding: 8px 15px;
+  min-height: 0;
+}
+
+/*
+  Solid, theme-colored primary action. Default color is --theme-color
+  (blue) so it looks intentional even outside the Pomodoro tab's phase
+  system (Habits/Progress never set a phase-work/short/long/stopwatch
+  class). Inside .tasks-section, the phase-tinting rules further down
+  this file/pomodoro.css override the color to match the active phase —
+  this is the same behavior the old .add-btn had within .tasks-section,
+  just no longer requiring the button to also be a plain, undifferentiated
+  .add-btn everywhere else it appeared.
+*/
+.btn-primary {
+  background: var(--theme-color, #3b82f6);
+  color: #fff;
+  border-color: transparent;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+  background: var(--theme-color, #3b82f6);
+}
+
+/* Neutral action alongside a primary/danger one — Cancel, "keep as-is". */
+.btn-secondary {
+  background: var(--btn-bg);
+  color: var(--text-main);
+  border: 1px solid var(--glass-border);
+  flex: 1;
+}
+
+.btn-secondary:hover {
+  background: var(--glass-bg);
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--danger-color);
+  color: #fff;
+  border: none;
+}
+
+.btn-danger:hover {
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+}
+
+.btn-warning {
+  background: var(--warning-color);
+  color: #fff;
+  border: none;
+}
+
+.btn-warning:hover {
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+}
+
+/* Full-width solid submit button anchoring the bottom of a modal/form
+   (Save Habit, Save & Apply, Apply Range, Save Changes) — a deliberately
+   different visual weight from the pill-shaped .btn family above, used
+   specifically for "the one primary action that closes this form". */
+.btn-block {
+  width: 100%;
+  padding: 12px;
+  background: var(--theme-color, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: bold;
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  margin-top: 10px;
+  transition: filter 0.2s ease;
+}
+
+.btn-block:hover {
+  filter: brightness(0.9);
+}
+
+.btn-outline {
+  min-height: 44px;
+  padding: 10px 20px;
+  background: transparent;
+  color: var(--theme-color, #3b82f6);
+  border: 1.5px solid var(--theme-color, #3b82f6);
+  border-radius: var(--radius-pill);
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-outline:hover {
+  background: var(--theme-color, #3b82f6);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.icon-btn {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: transform 0.2s, color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+}
+
+/* BUG FIX: Settings gear and arrows now hover in the phase theme color */
+.icon-btn:hover {
+  transform: scale(1.1);
+  color: var(--theme-color);
+}
+
+.theme-circle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  padding: 0;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.theme-circle-btn:focus {
+  outline: none;
+}
+
+.theme-circle-btn:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/* Phase-specific hovers for theme-circle-btn */
+body.phase-work .theme-circle-btn:hover {
+  background-color: #f43f5e;
+  color: #fff;
+  border-color: #f43f5e;
+}
+
+body.phase-short .theme-circle-btn:hover {
+  background-color: #14b8a6;
+  color: #fff;
+  border-color: #14b8a6;
+}
+
+body.phase-long .theme-circle-btn:hover {
+  background-color: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+}
+
+body.phase-stopwatch .theme-circle-btn:hover {
+  background-color: #8b5cf6;
+  color: #fff;
+  border-color: #8b5cf6;
+}
+
+body.phase-habits .theme-circle-btn:hover {
+  background-color: #10b981;
+  color: #fff;
+  border-color: #10b981;
+}
+
+/* Habit quick-add override */
+#quick-add-habit-btn {
+  background-color: #10b981;
+  color: #fff;
+}
+#quick-add-habit-btn:hover {
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+}
+
+/* Tag Management Add button - ensure it follows theme color in light mode */
+#manage-add-tag-btn {
+  background-color: var(--theme-color, #3b82f6);
+  color: #fff;
+  border: none;
+}
+#manage-add-tag-btn:hover {
+  filter: brightness(0.92);
+  transform: translateY(-2px);
+}
+

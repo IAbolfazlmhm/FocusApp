@@ -1,0 +1,122 @@
+/* ========================================== */
+/* TAG CHIPS                                   */
+/* ========================================== */
+
+/* --- TAG CHIPS --- */
+.tags-list-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.tag-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--btn-bg); color: var(--text-main);
+}
+
+.tag-chip.deletable:hover {
+  background: #fee2e2;
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+  text-decoration: line-through;
+}
+
+.tag-chip.selectable:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #d97706;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* Tag color picker (Manage Tags modal) */
+.tag-chip.manageable {
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
+}
+
+.tag-chip.manageable .tag-chip-label {
+  pointer-events: none;
+}
+.tag-chip.manageable:hover .tag-chip-label {
+  text-decoration: line-through;
+}
+.tag-color-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+}
+
+/*
+  Native color inputs render a swatch inside padding by default in
+  Chromium/WebKit — strip that so the circular border above is the only
+  visible edge and the color fills the whole circle.
+*/
+.tag-color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 50%;
+}
+
+.tag-color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.tag-color-swatch::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* Larger variant, sized to match .color-option, for the Habit color
+   picker's "custom" swatch — same native-color-input pattern as tags,
+   just sitting in a grid of bigger preset circles. */
+.tag-color-swatch.lg {
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tag-color-swatch.lg.selected {
+  border: 3px solid var(--text-main);
+  transform: scale(1.15);
+}
+
+.tag-color-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tag-color-reset:hover {
+  background: rgba(0, 0, 0, 0.15);
+  color: var(--text-main);
+}
+

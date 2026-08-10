@@ -353,16 +353,16 @@ body[data-theme="dark"] .heatmap-block:not(.focus-level-1):not(.focus-level-2):n
 }
 
 /* 
-  Specificity note: body.phase-work .add-btn (etc.) has specificity 0,2,1
-  (the `body` element selector counts too) which beats a plain 2-class
-  selector here — these buttons would silently change color with the
-  current Pomodoro phase instead of staying fixed. Using all three classes
-  actually present on the button (.add-btn.report-goto-btn.focus = 0,3,0)
-  correctly outranks it regardless of load order. 
+  Specificity note: body.phase-work .btn-primary (etc.) has specificity
+  0,2,1 (the `body` element selector counts too) which beats a plain
+  2-class selector here — these buttons would silently change color with
+  the current Pomodoro phase instead of staying fixed. Using all three
+  classes actually present on the button (.btn.report-goto-btn.focus =
+  0,3,0) correctly outranks it regardless of load order. 
 */
-.add-btn.report-goto-btn.focus { 
+.btn.report-goto-btn.focus { 
   background: #3b82f6; 
 }
-.add-btn.report-goto-btn.habits { 
+.btn.report-goto-btn.habits { 
   background: #10b981; 
 }

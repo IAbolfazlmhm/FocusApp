@@ -22,7 +22,18 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-sans);
+  /*
+    Kills the WebKit/Blink mobile "tap highlight" — the translucent gray
+    rectangle that briefly flashes over an element on touch, ignoring its
+    border-radius. On pill-shaped buttons that rectangle visibly pokes out
+    past the rounded edges, which is what was being seen as a stray
+    "glow" behind the Start/Pause button and other controls after tapping
+    a neighboring one. This is unrelated to keyboard focus rings (handled
+    separately below via :focus-visible) — removing it does not affect
+    keyboard accessibility.
+  */
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -31,6 +42,31 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  background: transparent;
+}
+
+/*
+  The phase gradient lives on this fixed, viewport-sized pseudo-element
+  instead of directly on <body>. body's own height grows with scrolling
+  content (habit lists, heatmaps) and changes as that content renders in;
+  since a linear-gradient's endpoints are computed from its own box size,
+  painting it straight on body meant the gradient visibly recomputed
+  every time body's height changed after first paint — seen on mobile as
+  the background "stopping" and repainting from a different position,
+  most noticeably on the Habits and Progress tabs where content height
+  varies most. Pinning it to the viewport via position:fixed removes the
+  dependency on content height entirely; it only ever needs to repaint
+  when --bg-main itself changes (tab/phase switch), which is what the
+  transition below now actually animates — background-color could never
+  do that, because these are gradients (background-image), not colors.
+*/
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg-main);
+  transition: background var(--transition-slow, 0.5s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 /* FIX: was `transition: all` on all these elements. "all" watches every
@@ -42,9 +78,6 @@ body {
    out its own specific transition — a chain reaction documented in the
    code review. Replacing with explicit properties removes the performance
    cost and breaks the chain. */
-body {
-  transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
 .timer-section, .tasks-section {
   transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -67,7 +100,7 @@ body {
 .progress-ring-circle {
   transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.start-btn, .add-btn {
+.start-btn, .btn {
   transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               color 0.5s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);

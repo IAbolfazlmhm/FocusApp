@@ -50,11 +50,17 @@
   width: 100%; 
 }
 
+/*
+  Same overflow risk as .task-tag-row in pomodoro.css: a long category
+  name plus a large streak number could exceed .habit-details' width
+  with nowrap. Wrapping keeps both fully visible and off .habit-actions.
+*/
 .habit-meta-row { 
   display: flex; 
   align-items: center; 
-  gap: 12px; 
-  flex-wrap: nowrap; 
+  gap: 6px 12px; 
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 .habit-category-badge { 
@@ -205,10 +211,6 @@
   color: var(--text-main); 
 }
 
-body.phase-habits .date-nav-btn:hover { 
-  color: #10b981; 
-}
-
 body.phase-habits .habit-item:hover { 
   border-color: #10b981; 
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); 
@@ -257,19 +259,38 @@ body[data-theme="dark"] .overview-ring {
   color: var(--text-muted);
 }
 
-#habit-overview-dashboard .time-display { 
+/*
+  FIX: this selector referenced #habit-overview-dashboard, an id that
+  doesn't exist anywhere in the HTML (a leftover from before this
+  section was renamed to #habit-detail-panel — see habits.js, which
+  already correctly targets `#habit-detail-panel .time-display` when
+  updating this number). Because the rule never matched, the ring's
+  percentage text was falling back to a hardcoded inline
+  `style="color: #10b981"` on the element itself, which is exactly the
+  --success-color token this rule was already trying to apply — so
+  fixing the selector and removing the inline style land on the same
+  color by design, they just do it through one real, theme-aware place
+  instead of a dead rule plus a hardcoded duplicate. --success-color is
+  the same value in both themes (see variables.css), and this selector's
+  specificity (id + class) already beats the base .time-display
+  rule in either theme, so no dark-mode-specific !important duplicate
+  is needed here.
+*/
+#habit-detail-panel .time-display { 
   display: inline-block; 
   transition: color 0.3s ease; 
-  color: var(--text-main); 
+  color: var(--success-color); 
 }
 
-body[data-theme="dark"] #habit-overview-dashboard .time-display {
-  color: var(--success-color) !important;
-}
-
-/* --- DATE SELECTOR & PICKERS --- */
+/* --- DATE SELECTOR & PICKERS ---
+   font-size explicitly matches .date-display-toggle (components.css) —
+   "Weekly" here and "Today" there are the same role (the nav label next
+   to a tab's date/range picker) and need to sit at the same typographic
+   weight. This button previously hardcoded 1.1rem while the other used
+   the browser default 1rem, a small but visible mismatch between tabs.
+*/
 .date-selector-btn {
-  font-size: 1.1rem;
+  font-size: var(--font-size-md);
   margin: 0;
   min-width: 90px;
   text-align: center;

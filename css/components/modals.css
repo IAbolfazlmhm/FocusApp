@@ -1,0 +1,288 @@
+/* ========================================== */
+/* MODALS & SETTINGS                          */
+/* ========================================== */
+
+/* --- MODALS & SETTINGS --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--modal-bg);
+  width: 90%;
+  max-width: 400px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 30px;
+  padding: 25px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  transform: translateY(-20px);
+  transition: transform 0.3s ease;
+}
+
+/*
+  Themed scrollbar for modals, matching the glass aesthetic instead of the
+  default OS scrollbar. NOTE: .custom-dropdown already has its own
+  scrollbar rules further down (with a dark-mode variant), so it's
+  deliberately excluded here — including it caused two same-specificity
+  rules to fight over it, and the older, non-themed one was silently
+  winning since it appears later in the file. Firefox uses
+  scrollbar-color/width; WebKit browsers need the ::-webkit- pseudo-elements.
+
+  The thumb is transparent until the modal is hovered/focused-within, so
+  it stays out of the way as an "always-on" bar and only appears when
+  someone is actually about to scroll — closer to the fading overlay
+  scrollbars native apps use than a permanently-visible bar.
+  (An earlier version of this also added a mask-image fade to the whole
+  modal's top/bottom edge — removed, since that faded the modal's actual
+  content/title on every modal, including ones that don't even scroll,
+  which was never the intent. Only the scrollbar itself is styled here.)
+*/
+.modal-content {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+
+.modal-content:hover,
+.modal-content:focus-within {
+  scrollbar-color: var(--theme-color, #3b82f6) transparent;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 10px;
+  transition: background-color 0.2s ease;
+}
+
+.modal-content:hover::-webkit-scrollbar-thumb,
+.modal-content:focus-within::-webkit-scrollbar-thumb {
+  /* Fallback for browsers without color-mix() support */
+  background-color: rgba(59, 130, 246, 0.5);
+  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 50%, transparent);
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--theme-color, #3b82f6);
+}
+
+.modal-overlay.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 15px;
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  color: var(--text-main);
+}
+
+.modal-divider {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  margin: 15px 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: var(--danger-color);
+}
+.setting-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-group label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.custom-select {
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--glass-border);
+  outline: none;
+  font-size: 1rem;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.custom-select option {
+  background: #ffffff;
+  color: #2b2d42;
+  font-weight: 500;
+  padding: 10px;
+}
+
+body[data-theme="dark"] .custom-select option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.toggle-group {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.disabled-settings {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* .save-settings-btn removed — was a "settings" name reused for Save
+   Habit / Save Changes / Apply Range / Save & Apply. Superseded by
+   .btn-block (see the BUTTONS section above), which names what the
+   component actually is: a full-width solid modal submit button. */
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/*
+  Off-state used to be flat #ccc regardless of theme — a soft themed tint
+  reads as "part of this app" instead of a generic gray widget, while
+  staying clearly distinguishable from the solid "on" state.
+*/
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Fallback for browsers without color-mix() support */
+  background-color: rgba(59, 130, 246, 0.15);
+  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 15%, var(--glass-bg));
+  border: 1px solid var(--glass-border);
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--theme-color, #3b82f6);
+  border-color: var(--theme-color, #3b82f6);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Focus indicator for toggle switches (accessibility) */
+.switch input:focus-visible + .slider {
+  outline: 2px solid var(--theme-color);
+  outline-offset: 2px;
+}
+
+#confirm-modal {
+  z-index: 10000;
+}
+
+
+/* --- MODAL ROW FIXES --- */
+.add-tag-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+
+/* --- CONFIRM MODAL DARK MODE FIXES --- */
+#confirm-message {
+  color: var(--text-main);
+  font-size: 1.1rem;
+  transition: color 0.3s;
+}
+
+body[data-theme="dark"] #confirm-message {
+  color: #f8fafc;
+}
+
+/*
+  Cancel/neutral styling now comes from .btn-secondary (see the BUTTONS
+  section above) — no dark-mode-specific override here anymore. The
+  Pomodoro confirm modal's Cancel button used to get a manually dimmed
+  dark-mode background (rgba(255,255,255,0.05), independent of --btn-bg,
+  which is already rgba(255,255,255,0.1) in dark mode) that no other
+  button received, which is why it looked inconsistent next to the
+  Habits delete modal's buttons. Letting it inherit --btn-bg/--btn-hover
+  like every other themed button fixes that.
+*/
+

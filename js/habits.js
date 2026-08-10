@@ -3,7 +3,8 @@ import {
   setCurrentHabitDate, setHabits, setSavedHabitCategories
 } from './state.js';
 
-import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget, setupHorizontalWheelScroll, hexToRgba } from './ui-utils.js';
+import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget, setupHorizontalWheelScroll, hexToRgba, isValidHexColor, keepInputVisibleOnMobileKeyboard } from './ui-utils.js';
+import { startQuoteRotation } from './motivation.js';
 import { writeJSON, readRaw } from './storage.js';
 
 // ==========================================
@@ -54,6 +55,7 @@ const closeHabitModalBtn = document.getElementById('close-habit-modal');
 const saveHabitBtn = document.getElementById('save-habit-btn');
 
 const colorOptions = document.querySelectorAll('.color-option');
+const habitColorCustomInput = document.getElementById('habit-color-custom');
 const iconOptions = document.querySelectorAll('.icon-option');
 const dayOptions = document.querySelectorAll('.day-option');
 
@@ -63,6 +65,11 @@ const habitCategoryWrapper = document.getElementById('habit-category-wrapper');
 
 let editingHabitId = null;
 let currentHabitSort = 'newest';
+// Tracks the picked color independently of which DOM element is
+// visually marked .selected — needed because the custom native color
+// input has no dataset.color to read back at save time the way the
+// preset swatches do.
+let selectedHabitColor = colorOptions[0]?.dataset.color || '#3b82f6';
 let habitSortOrder = 'desc';
 export let currentHabitFilter = 'all';
 
@@ -202,6 +209,10 @@ export function renderHabits() {
   // After enough actions, a single click on a habit would fire the "open
   // edit modal" logic multiple times in a row.)
 
+  // Built up in a fragment and appended once — see the matching comment
+  // in tasks.js's renderTasks(), which has the same pattern.
+  const fragment = document.createDocumentFragment();
+
   filteredHabits.forEach(habit => {
     const currentStreak = calculateStreak(habit);
     const status = habit.logs && habit.logs[dateStr] ? habit.logs[dateStr] : null;
@@ -217,7 +228,12 @@ export function renderHabits() {
     }
 
     // --- RESTORED ORIGINAL VARIABLES ---
-    const bgRgba = hexToRgba(habit.color || '#3b82f6', 0.15);
+    // Validated before use — see isValidHexColor in ui-utils.js for why
+    // an unvalidated color string here would be a real injection risk,
+    // not just a source of broken CSS, since it's interpolated straight
+    // into a style="..." attribute below.
+    const safeColor = isValidHexColor(habit.color) ? habit.color : '#3b82f6';
+    const bgRgba = hexToRgba(safeColor, 0.15);
     const iconSvgContent = habitIconsDict[habit.icon] || `<circle cx="12" cy="12" r="10"/>`;
 
     // 1. Generate Category Pill (with ellipsis and optical padding fix)
@@ -239,7 +255,7 @@ export function renderHabits() {
       <div class="habit-info">
 
         <!-- Left Side: Original Icon Wrapper -->
-        <div class="habit-icon-circle" style="--habit-bg:${bgRgba}; --habit-color:${habit.color};">
+        <div class="habit-icon-circle" style="--habit-bg:${bgRgba}; --habit-color:${safeColor};">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconSvgContent}</svg>
         </div>
 
@@ -268,8 +284,10 @@ export function renderHabits() {
       </div>
     `;
 
-    habitListContainer.appendChild(habitDiv);
+    fragment.appendChild(habitDiv);
   });
+
+  habitListContainer.appendChild(fragment);
 
   updateHabitProgress();
 }
@@ -303,6 +321,16 @@ export function setupHabitsEvents() {
         opt.classList.remove('selected');
         if (opt.dataset.color === habitToEdit.color) {opt.classList.add('selected');}
       });
+      habitColorCustomInput?.classList.remove('selected');
+      selectedHabitColor = habitToEdit.color || colorOptions[0]?.dataset.color || '#3b82f6';
+      if (habitColorCustomInput) {
+        habitColorCustomInput.value = selectedHabitColor;
+        // No preset swatch matched this habit's color — it was picked via
+        // the custom input, so mark that swatch as the selected one instead.
+        if (!Array.from(colorOptions).some(opt => opt.dataset.color === habitToEdit.color)) {
+          habitColorCustomInput.classList.add('selected');
+        }
+      }
       iconOptions.forEach(opt => {
         opt.classList.remove('selected');
         if (opt.dataset.icon === habitToEdit.icon) {opt.classList.add('selected');}
@@ -432,7 +460,19 @@ export function setupHabitsEvents() {
       if (customDaysPicker) {customDaysPicker.style.display = 'none';}
       dayOptions.forEach(d => d.classList.remove('selected'));
 
-      // Default color is the first option
+      // FIX: this reset never actually happened — a comment claimed the
+      // color/icon pickers were being reset to the first option, but no
+      // code did it, so creating a new habit right after editing one
+      // silently kept showing the previously-edited habit's color/icon
+      // as "selected" (just visually stale; the swatch/icon under the
+      // ring didn't match what would actually be saved until the user
+      // clicked one). Default color is the first preset option.
+      colorOptions.forEach((opt, i) => opt.classList.toggle('selected', i === 0));
+      habitColorCustomInput?.classList.remove('selected');
+      selectedHabitColor = colorOptions[0]?.dataset.color || '#3b82f6';
+      if (habitColorCustomInput) {habitColorCustomInput.value = selectedHabitColor;}
+      iconOptions.forEach((opt, i) => opt.classList.toggle('selected', i === 0));
+
       if (habitModal) {habitModal.classList.add('show');}
     });
   }
@@ -462,9 +502,22 @@ export function setupHabitsEvents() {
   colorOptions.forEach(option => {
     option.addEventListener('click', () => {
       colorOptions.forEach(opt => opt.classList.remove('selected'));
+      habitColorCustomInput?.classList.remove('selected');
       option.classList.add('selected');
+      selectedHabitColor = option.dataset.color;
+      if (habitColorCustomInput) {habitColorCustomInput.value = selectedHabitColor;}
     });
   });
+
+  // Custom color input — same native-picker pattern as Pomodoro tag
+  // colors, so any color is reachable, not just the 5 presets.
+  if (habitColorCustomInput) {
+    habitColorCustomInput.addEventListener('input', () => {
+      colorOptions.forEach(opt => opt.classList.remove('selected'));
+      habitColorCustomInput.classList.add('selected');
+      selectedHabitColor = habitColorCustomInput.value;
+    });
+  }
 
   iconOptions.forEach(option => {
     option.addEventListener('click', () => {
@@ -598,8 +651,7 @@ export function setupHabitsEvents() {
       const freqValueInput = document.getElementById('habit-frequency-value');
       const frequency = freqValueInput ? freqValueInput.value : 'everyday';
 
-      const selectedColor = document.querySelector('.color-option.selected');
-      const color = selectedColor ? selectedColor.dataset.color : '#3b82f6';
+      const color = selectedHabitColor || '#3b82f6';
 
       const selectedIcon = document.querySelector('.icon-option.selected');
       const icon = selectedIcon ? selectedIcon.dataset.icon : 'book';
@@ -946,27 +998,8 @@ export function setupHabitsEvents() {
 }
 
 export function initHabitQuotes() {
-  const habitQuotes = [
-    "Small steps every day.",
-    "Consistency over intensity.",
-    "Your habits define your future.",
-    "Focus on the system, not the goal.",
-    "Every action is a vote for who you want to be."
-  ];
-
-  let currentQuoteIndex = 0;
   const quoteElement = document.getElementById('motivational-quote');
-
-  if (quoteElement) {
-    setInterval(() => {
-      quoteElement.classList.add('fade-out');
-      setTimeout(() => {
-        currentQuoteIndex = (currentQuoteIndex + 1) % habitQuotes.length;
-        quoteElement.textContent = `"${habitQuotes[currentQuoteIndex]}"`;
-        quoteElement.classList.remove('fade-out');
-      }, 800);
-    }, 8000);
-  }
+  startQuoteRotation(quoteElement, { category: 'habits' });
 }
 
 /**
@@ -1235,6 +1268,7 @@ if (quickHabitInput) {
       processQuickAddHabit();
     }
   });
+  keepInputVisibleOnMobileKeyboard(quickHabitInput);
 }
 
 // FIX: removed a dead `updateHabitFilterBubble()` function + a top-level
@@ -1370,8 +1404,9 @@ export function renderTopStreaks() {
 
     if (top3[i]) {
       const h = top3[i];
+      const safeStreakColor = isValidHexColor(h.color) ? h.color : '#10b981';
       pill.innerHTML = `
-        <div class="stat-icon mini" style="color: ${h.color || '#10b981'}; background: ${h.color ? h.color+'20' : 'rgba(16,185,129,0.15)'};">
+        <div class="stat-icon mini" style="color: ${safeStreakColor}; background: ${safeStreakColor}20;">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${habitIconsDict[h.icon] || habitIconsDict['activity']}</svg>
         </div>
         <div class="stat-row-right">

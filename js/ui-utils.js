@@ -100,6 +100,25 @@ export function generateId() {
 // ==========================================
 // DETERMINISTIC TAG COLOR
 // ==========================================
+// A hex color that reaches rendering always comes from a native
+// <input type="color"> under normal use, which the browser itself
+// constrains to "#rrggbb" — but stored tag/habit colors also come back
+// out of localStorage, including via Import Data, which writes an
+// uploaded JSON file's contents straight in with no validation of what's
+// inside it. Both getTagColor below and renderHabits() in habits.js
+// interpolate a color string directly into a style="..." attribute
+// inside an innerHTML template (for the --tag-color/--habit-color CSS
+// custom properties) — an unvalidated string there is a real injection
+// path (e.g. a color value containing a `"` could close the attribute
+// early), not just a source of visually broken output. Validating at
+// the point a stored color is read for rendering — rather than only
+// when it's written — covers every path data can arrive by, present or
+// future, not just the ones that exist today.
+const HEX_COLOR_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+export function isValidHexColor(value) {
+  return typeof value === 'string' && HEX_COLOR_RE.test(value);
+}
+
 // FIX: renderTasks() in tasks.js used to look for `window.getTagObj` /
 // `window.hexToRgba` to color tag chips, but neither was ever defined
 // anywhere in the app (only referenced, behind a `typeof === 'function'`
@@ -112,7 +131,10 @@ export function generateId() {
 // Converts "#3b82f6" (+ alpha) into "rgba(59, 130, 246, 0.15)". Needed
 // because hsla()/hsl() strings (used for the hash-based default color)
 // can't take a hex color as input, and vice versa — this is the one
-// conversion point shared by both color paths.
+// conversion point shared by both color paths. Assumes a valid hex
+// input; callers pass already-validated colors (see isValidHexColor
+// above) or one of this file's own hslToHex() outputs, which are
+// always well-formed by construction.
 export function hexToRgba(hex, alpha) {
   const clean = hex.replace('#', '');
   const bigint = parseInt(clean.length === 3
@@ -143,8 +165,10 @@ export function getTagColor(tag, customHex) {
   // "Health") might already have a color meaning to the user elsewhere.
   // Passing a stored custom hex (see tagColors in state.js, wired up in
   // tasks.js) here now takes priority; the hash is only ever a fallback
-  // for tags nobody has customized yet.
-  if (customHex) {
+  // for tags nobody has customized yet. Falls through to the hash-based
+  // default if customHex isn't a well-formed hex color — see
+  // isValidHexColor above for why that check exists.
+  if (customHex && isValidHexColor(customHex)) {
     return {
       solid: customHex,
       bg: hexToRgba(customHex, 0.15),
@@ -634,3 +658,43 @@ export function setupModalAccessibility() {
     observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
   });
 }
+
+/*
+  Keeps a bottom-of-page text input visible when the on-screen keyboard
+  opens on mobile. The layout viewport (what `vh`/`dvh` are computed
+  against on most mobile browsers) doesn't shrink when the keyboard
+  appears — only the *visual* viewport does — so a naive check made at
+  focus time has no idea yet how much space the keyboard is about to
+  take. window.visualViewport's 'resize' event fires once the keyboard
+  has actually finished animating in and the visual viewport has its
+  real post-keyboard size, which is the right moment to act: scrolling
+  any earlier just guesses.
+*/
+export function keepInputVisibleOnMobileKeyboard(inputEl) {
+  if (!inputEl || !window.visualViewport) {return;}
+
+  let awaitingKeyboard = false;
+
+  const scrollIntoView = () => {
+    if (document.activeElement === inputEl) {
+      inputEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  };
+
+  inputEl.addEventListener('focus', () => {
+    awaitingKeyboard = true;
+  });
+
+  inputEl.addEventListener('blur', () => {
+    awaitingKeyboard = false;
+  });
+
+  window.visualViewport.addEventListener('resize', () => {
+    if (awaitingKeyboard) {
+      awaitingKeyboard = false;
+      // Let the keyboard-show reflow settle a frame before measuring/scrolling.
+      requestAnimationFrame(scrollIntoView);
+    }
+  });
+}
+

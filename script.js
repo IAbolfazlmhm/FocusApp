@@ -5,6 +5,7 @@ import { renderFilters, renderTasks, setupTaskEvents } from './js/tasks.js';
 import { renderHabits, setupHabitsEvents, initHabitQuotes } from './js/habits.js';
 import { setupProgressEvents } from './js/progress.js';
 import { playUI } from './js/audio.js';
+import { setupFocusMode, exitFocusMode, isFocusModeActive } from './js/focus-mode.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   // 1. Settings Initialization
@@ -31,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
   // 5. UI & Navigation
   setupTabs();
   setupModalAccessibility();
+  setupFocusMode();
   setupGlobalShortcuts();
 });
 
@@ -53,10 +55,17 @@ function setupGlobalShortcuts() {
       if (typeof playUI === 'function') {playUI('click');}
     }
 
-    // ESC key closes only the topmost modal
+    // ESC key closes only the topmost modal — or, if none is open,
+    // exits Focus Mode. Never both in one keypress: closing a modal
+    // that happens to be open while Focus Mode is also active takes
+    // priority, matching how Escape already behaves everywhere else.
     if (event.code === 'Escape') {
       event.preventDefault();
-      closeTopmostModal();
+      if (document.querySelector('.modal-overlay.show')) {
+        closeTopmostModal();
+      } else if (isFocusModeActive()) {
+        exitFocusMode();
+      }
     }
   });
 }

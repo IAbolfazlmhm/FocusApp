@@ -2,7 +2,15 @@
 /* POMODORO & TASKS UI                        */
 /* ========================================== */
 
-/* --- CONTAINERS --- */
+/* --- CONTAINERS ---
+   Sizing eased up a step from the original 900px container / 550px
+   fixed panel height, which centered a fairly small, tightly-bounded
+   pair of cards on anything wider than a laptop screen. height uses
+   clamp() instead of a fixed value so panels still shrink gracefully on
+   short viewports (the 80vh ceiling below is the real safety net there)
+   while getting a bit more breathing room on tall ones, rather than
+   sitting at exactly 550px regardless of available space.
+*/
 .timer-section, .tasks-section {
   flex: 1;
   min-width: 320px;
@@ -16,7 +24,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 550px;
+  height: clamp(520px, 58vh, 620px);
   max-height: 80vh;
   justify-content: space-between;
 }
@@ -29,6 +37,12 @@
   width: 100%;
   padding: 8px 15px;
   margin-bottom: 20px;
+}
+
+.timer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .locked-task-label {
@@ -154,8 +168,11 @@
   min-width: 100px;
 }
 
-/* BUG FIX: Darken on hover using brightness filter */
-.start-btn:hover, .add-btn:hover {
+/* Primary-colored buttons (.btn-primary) get their hover darkening from
+   components.css; .start-btn isn't part of the .btn family (it's the
+   large dedicated timer control, not a generic action button) so it
+   keeps its own copy of the same treatment here. */
+.start-btn:hover {
   filter: brightness(0.85);
   transform: translateY(-2px);
 }
@@ -234,11 +251,6 @@
   mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
 }
 
-.task-list-container.is-scrolled {
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 90%, transparent 100%);
-}
-
 .task-list-container::-webkit-scrollbar {
   display: none;
 }
@@ -270,10 +282,26 @@
   min-width: 0;
 }
 
-/* --- TASK ITEMS (CARDS) --- */
-/* Consolidated height: was previously split between here (min-height) and
-   layout.css (height + min-height with !important) — now fully owned by
-   this single rule. */
+/* --- TASK ITEMS (CARDS) ---
+   min-height only (not a fixed height): metadata (tag + time badge, or a
+   habit's category + streak) needs to be free to wrap onto a second line
+   for long tag names/large numbers without sliding under .task-actions —
+   see the .task-tag-row comment below. A hard height clipped that second
+   line instead of ever letting it exist.
+
+   PERFORMANCE: no backdrop-filter on this rule, even though every card
+   is meant to read as frosted glass. This card is nested inside
+   .tasks-section, which already blurs the raw page background once —
+   each card re-blurring that already-blurred backdrop is visually
+   redundant (blurring a blur reveals nothing new) but costs its own GPU
+   compositing pass, and unlike the header/control pills (see .glass-pill
+   in components.css) this one is rendered once per task or habit, so
+   the cost scales directly with list length. A long list previously
+   meant a blur pass per row on every scroll/animation frame — a real,
+   measurable mobile cost for no visible difference, since
+   background + border already read as a frosted card against the
+   panel's own blur.
+*/
 .task-item {
   display: flex;
   justify-content: space-between;
@@ -284,11 +312,9 @@
   border: 2px solid var(--glass-border);
   border-radius: 50px;
   background: var(--glass-bg);
-  backdrop-filter: blur(10px);
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
   order: 2;
   min-height: 76px;
-  height: 76px;
   cursor: pointer;
 }
 
@@ -325,12 +351,22 @@
   width: 100%;
 }
 
-/* Row holding the tag pill + time badge side by side. */
+/*
+  Row holding the tag pill + time badge (or, on the Habits tab, the
+  category badge + streak). flex-wrap was `nowrap`: with a long tag name
+  and a wide time/streak value both set to never shrink, the row could
+  exceed .task-info's width and spill out past it, sliding under
+  .task-actions instead of staying contained. Wrapping the badge onto its
+  own line keeps every piece of metadata fully visible and never lets it
+  reach the action buttons, regardless of text length — the card simply
+  grows a little taller (.task-item above has no fixed height anymore).
+*/
 .task-tag-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
+  gap: 6px 8px;
+  flex-wrap: wrap;
+  min-width: 0;
 }
 
 /*
@@ -382,7 +418,7 @@
   opacity: 1;
 }
 
-.done-btn, .remove-btn, .focus-btn, .edit-tag-btn {
+.done-btn, .remove-btn, .focus-btn {
   width: 40px;
   height: 40px;
   border-radius: 8px;
@@ -415,14 +451,6 @@
   color: white;
   border-color: #3b82f6;
   transform: translateY(-2px);
-}
-
-.edit-tag-btn:hover {
-  background: #f59e0b;
-  color: white;
-  border-color: #f59e0b;
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .task-actions svg {
@@ -467,35 +495,7 @@ body.phase-habits .task-item.completed {
   background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15);
 }
 
-/* --- FILTER NAV REVISED --- */
-.filter-nav-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  margin-bottom: 15px;
-}
-
-.manage-tags-btn {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.manage-tags-btn:hover {
-  background: var(--btn-hover);
-  color: var(--text-main);
-}
-
+/* --- FILTER NAV --- */
 .filter-scroll-area {
   position: relative;
   display: flex;
@@ -545,19 +545,19 @@ body.phase-habits .task-item.completed {
   pointer-events: none;
 }
 
-body.phase-work .filter-bubble, body.phase-work .manage-tags-btn:hover {
+body.phase-work .filter-bubble {
   background-color: var(--theme-color); color: white; border-color: var(--theme-color);
 }
 
-body.phase-short .filter-bubble, body.phase-short .manage-tags-btn:hover {
+body.phase-short .filter-bubble {
   background-color: var(--theme-color); color: white; border-color: var(--theme-color);
 }
 
-body.phase-long .filter-bubble, body.phase-long .manage-tags-btn:hover {
+body.phase-long .filter-bubble {
   background-color: var(--theme-color); color: white; border-color: var(--theme-color);
 }
 
-body.phase-stopwatch .filter-bubble, body.phase-stopwatch .manage-tags-btn:hover {
+body.phase-stopwatch .filter-bubble {
   background-color: var(--theme-color);
   color: white;
   border-color: var(--theme-color);
@@ -605,26 +605,6 @@ body[data-theme="dark"] #habit-date-display:hover {
   color: var(--theme-color) !important;
 }
 
-.sort-btn-inline {
-  background: transparent;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: 6px;
-  opacity: 0.7;
-  transition: all 0.2s;
-}
-
-.sort-btn-inline:hover {
-  opacity: 1;
-  color: var(--theme-color);
-  background: var(--btn-bg);
-}
-
 /* --- TIMER & PHASE OVERRIDES --- */
 /* FIX: body.phase-work .progress-ring-circle and .time-display overrides
    removed — they hardcoded #f43f5e but the base rules already use
@@ -640,7 +620,7 @@ body.phase-work .tab.active {
   color: white;
 }
 
-body.phase-work .start-btn, body.phase-work .tasks-section .add-btn {
+body.phase-work .start-btn, body.phase-work .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
@@ -659,7 +639,7 @@ body.phase-short .tab.active {
   color: white;
 }
 
-body.phase-short .start-btn, body.phase-short .tasks-section .add-btn {
+body.phase-short .start-btn, body.phase-short .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
@@ -678,7 +658,7 @@ body.phase-long .tab.active {
   color: white;
 }
 
-body.phase-long .start-btn, body.phase-long .tasks-section .add-btn {
+body.phase-long .start-btn, body.phase-long .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
@@ -703,7 +683,7 @@ body.phase-stopwatch .tab.active {
   color: white;
 }
 
-body.phase-stopwatch .start-btn, body.phase-stopwatch .tasks-section .add-btn {
+body.phase-stopwatch .start-btn, body.phase-stopwatch .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
@@ -714,7 +694,7 @@ body.phase-stopwatch .task-item:hover {
   box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
 }
 
-body.phase-habits .start-btn, body.phase-habits .tasks-section .add-btn {
+body.phase-habits .start-btn, body.phase-habits .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
@@ -737,25 +717,39 @@ body[data-theme="dark"] #current-phase {
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .add-btn {
+/*
+  FIX: these dark-mode phase overrides used to target a bare `.add-btn`
+  (unlike their light-mode counterparts above, which correctly scope to
+  `.tasks-section .add-btn`). An unscoped `.add-btn` matched every button
+  using that class anywhere in the DOM — including the Cancel button in
+  the delete-confirmation modal, which also carried `.add-btn` for its
+  base pill styling. The practical effect: in dark mode, whenever the
+  Pomodoro tab was on phase-work/short/long/stopwatch, "Cancel" silently
+  picked up that phase's bright --theme-color-dark background instead of
+  its intended neutral gray — the exact "dark-mode-specific inconsistent
+  appearance" this refactor was asked to fix. Scoping to
+  `.tasks-section .btn-primary` (matching the light-mode rules) means
+  only the real Add Task/Add Habit buttons are affected, in both themes.
+*/
+body[data-theme="dark"].phase-work .start-btn, body[data-theme="dark"].phase-work .tasks-section .btn-primary {
   background-color: var(--theme-color-dark);
   color: #0f172a;
   border: none;
 }
 
-body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .add-btn {
+body[data-theme="dark"].phase-short .start-btn, body[data-theme="dark"].phase-short .tasks-section .btn-primary {
   background-color: var(--theme-color-dark);
   color: #0f172a;
   border: none;
 }
 
-body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .add-btn {
+body[data-theme="dark"].phase-long .start-btn, body[data-theme="dark"].phase-long .tasks-section .btn-primary {
   background-color: var(--theme-color-dark);
   color: #0f172a;
   border: none;
 }
 
-body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .add-btn {
+body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phase-stopwatch .tasks-section .btn-primary {
   background-color: var(--theme-color-dark);
   color: #0f172a;
   border: none;
@@ -792,4 +786,49 @@ body[data-theme="dark"].phase-stopwatch .start-btn, body[data-theme="dark"].phas
   color: #ffffff;
   border-color: var(--theme-color);
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* --- FOCUS MODE ---
+   Deliberately not the Fullscreen API — that adds a permission prompt,
+   changes browser chrome, and gives every platform a different exit
+   gesture. This is a plain CSS state instead: hide the tab nav and task
+   list, let the timer panel take the freed space, show a rotating
+   quote. The timer itself doesn't know this exists — timer.js is
+   untouched, so pause/resume/phase transitions all work exactly as
+   before regardless of whether this is on. See js/focus-mode.js.
+*/
+body.focus-mode-active .header-container,
+body.focus-mode-active .tasks-section {
+  display: none;
+}
+
+body.focus-mode-active .container {
+  max-width: 480px;
+}
+
+body.focus-mode-active .timer-section {
+  width: 100%;
+}
+
+body.focus-mode-active .focus-mode-toggle-btn {
+  color: var(--theme-color);
+  background: var(--btn-hover);
+  border-radius: 50%;
+}
+
+.focus-mode-quote-wrap {
+  display: none;
+}
+
+body.focus-mode-active .focus-mode-quote-wrap {
+  display: block;
+  text-align: center;
+  margin-top: 18px;
+  min-height: 20px;
+}
+
+@media (max-width: 768px) {
+  body.focus-mode-active .container {
+    max-width: none;
+  }
 }

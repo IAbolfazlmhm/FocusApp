@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npx serve .",
     "lint": "eslint js/ script.js",
-    "lint:fix": "eslint js/ script.js --fix"
+    "lint:fix": "eslint js/ script.js --fix",
+    "test": "node --test"
   },
   "keywords": [
     "pomodoro",
@@ -20,6 +21,7 @@
   "license": "MIT",
   "devDependencies": {
     "eslint": "^9.0.0",
-    "globals": "^15.0.0"
+    "globals": "^15.0.0",
+    "jsdom": "^30.0.1"
   }
 }

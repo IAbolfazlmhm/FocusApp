@@ -1,0 +1,118 @@
+/* ========================================== */
+/* DROPDOWNS                                   */
+/* ========================================== */
+
+/* --- DROPDOWNS --- */
+/* backdrop-filter removed (see FocusApp-Senior-Audit.md, Finding P1): .show
+   runs the popIn animation (opacity + transform) on this same element, and
+   an animating blurred layer forces a per-frame blur recompute — the same
+   mechanism confirmed to cause the modal jank, just at dropdown scale.
+   --modal-bg is opaque enough that this isn't a visible regression. */
+.custom-dropdown {
+  position: absolute;
+  bottom: 120%;
+  left: 0;
+  width: 150px;
+  min-height: 100%;
+  max-height: 150px;
+  overflow-y: auto;
+  border-radius: 15px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  padding: 5px;
+  background: var(--modal-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.custom-dropdown.show {
+  display: flex;
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  } to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.custom-dropdown::-webkit-scrollbar {
+  width: 10px;
+}
+
+.custom-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.25);
+}
+
+.dropdown-item {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.dropdown-item svg {
+  width: 12px;
+  height: 12px;
+}
+
+.icon-inline-sm {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+}
+
+.sort-dir {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.dropdown-item:hover {
+  background: var(--btn-bg);
+  color: var(--text-main);
+  transform: translateX(3px);
+}
+
+.dropdown-item.active-sort {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+body[data-theme="dark"] .dropdown-item.active-sort {
+  color: #60a5fa; background: rgba(96, 165, 250, 0.15);
+}
+
+
+/* --- DROPDOWN POSITION FIXES --- */
+.sort-wrapper {
+  position: relative;
+}
+
+#sort-dropdown, #habit-sort-dropdown {
+  top: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  bottom: auto;
+}
+

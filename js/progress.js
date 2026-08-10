@@ -112,7 +112,7 @@ export function renderProgressDashboard() {
 // ==========================================
 // DATA CALCULATION ENGINE
 // ==========================================
-function calculateStats(startDate, endDate, currentTasks, currentHabits) {
+export function calculateStats(startDate, endDate, currentTasks, currentHabits) {
   let focusMinutes = 0, itemsCompleted = 0, perfectDaysCount = 0;
   let totalExpectedLogs = 0, totalSuccessfulLogs = 0;
   let totalTasksCreated = 0, totalTasksCompleted = 0;
@@ -275,6 +275,11 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
   heatmap.innerHTML = '';
 
   const days = getDaysArray(startDate, endDate);
+  // Building blocks in a DocumentFragment and appending once (instead of
+  // appendChild per block) avoids up to ~365 separate reflow-triggering
+  // insertions into a live, visible list on every date-range change —
+  // one reflow for the whole heatmap instead of one per day.
+  const fragment = document.createDocumentFragment();
 
   days.forEach(d => {
     const dateStr = getLocalDateKey(d);
@@ -323,8 +328,10 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
 
     block.addEventListener('click', () => openDailyReport(d));
     attachSmartTooltip(block, tooltipHTML);
-    heatmap.appendChild(block);
+    fragment.appendChild(block);
   });
+
+  heatmap.appendChild(fragment);
 }
 
 function renderHabitHeatmap(startDate, endDate, currentHabits) {
@@ -337,6 +344,9 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
   heatmap.innerHTML = '';
 
   const days = getDaysArray(startDate, endDate);
+  // See renderFocusHeatmap above for why this batches into a fragment
+  // instead of appending each block directly.
+  const fragment = document.createDocumentFragment();
 
   days.forEach(d => {
     const logKey = getHabitLogKey(d);
@@ -375,8 +385,10 @@ function renderHabitHeatmap(startDate, endDate, currentHabits) {
 
     block.addEventListener('click', () => openDailyReport(d));
     attachSmartTooltip(block, tooltipHTML);
-    heatmap.appendChild(block);
+    fragment.appendChild(block);
   });
+
+  heatmap.appendChild(fragment);
 }
 
 // ==========================================
@@ -440,10 +452,10 @@ function openDailyReport(dateObj) {
   // BUG FIX: Only show buttons for active sections
   let buttonsHTML = '';
   if (showPomodoro) {
-    buttonsHTML += `<button class="add-btn report-goto-btn focus" id="goto-focus-btn">Go to Focus</button>`;
+    buttonsHTML += `<button class="btn report-goto-btn focus" id="goto-focus-btn">Go to Focus</button>`;
   }
   if (showHabits) {
-    buttonsHTML += `<button class="add-btn report-goto-btn habits" id="goto-habits-btn">Go to Habits</button>`;
+    buttonsHTML += `<button class="btn report-goto-btn habits" id="goto-habits-btn">Go to Habits</button>`;
   }
 
   if (buttonsHTML !== '') {

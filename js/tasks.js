@@ -7,13 +7,13 @@ import { writeJSON } from './storage.js';
 export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
-import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm, setupHorizontalWheelScroll } from './ui-utils.js';
+import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm, setupHorizontalWheelScroll, keepInputVisibleOnMobileKeyboard } from './ui-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
 // ==========================================
-const taskInput = document.querySelector('.task-input');
-const addBtn = document.querySelector('.add-btn');
+const taskInput = document.getElementById('task-input');
+const addBtn = document.getElementById('add-task-btn');
 const taskListContainer = document.querySelector('.task-list-container');
 const tasksSection = document.querySelector('.tasks-section');
 const currentTaskNameEl = document.getElementById('current-task-name');
@@ -162,6 +162,12 @@ export function renderTasks() {
   actualToday.setHours(0, 0, 0, 0);
   const isToday = currentPomodoroDate.getTime() === actualToday.getTime();
 
+  // Built up in a fragment and appended once at the end instead of per
+  // task — avoids a separate reflow-triggering insertion into the live,
+  // visible list for every single task on every render (add/delete/
+  // complete/filter/sort all call renderTasks()).
+  const fragment = document.createDocumentFragment();
+
   filtered.forEach(task => {
     const taskDiv = document.createElement('div');
     taskDiv.className = `task-item ${task.completed ? 'completed' : ''} ${task.id === focusedTaskId ? 'active-focus' : ''}`;
@@ -244,8 +250,10 @@ export function renderTasks() {
     taskDiv.querySelector('.done-btn').addEventListener('click', () => toggleCompleted(task.id));
     taskDiv.querySelector('.remove-btn').addEventListener('click', () => customConfirm("Delete this task?", () => removeTask(task.id)));
 
-    taskListContainer.appendChild(taskDiv);
+    fragment.appendChild(taskDiv);
   });
+
+  taskListContainer.appendChild(fragment);
 
   // 5. Handle UI states
   if (focusedTaskId) {
@@ -518,6 +526,7 @@ export function setupTaskEvents() {
     taskInput.addEventListener('keypress', e => {
       if (e.key === 'Enter') {addTask();}
     });
+    keepInputVisibleOnMobileKeyboard(taskInput);
   }
 
   if (manageTagsBtn) {

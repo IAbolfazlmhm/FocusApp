@@ -1,0 +1,68 @@
+/* ========================================== */
+/* TOASTS                                      */
+/* ========================================== */
+
+/* --- TOASTS --- */
+#toast-container {
+  position: fixed;
+  bottom: max(30px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  width: auto;
+  align-items: center;
+}
+
+/* backdrop-filter removed (see FocusApp-Senior-Audit.md, Finding P1): this
+   element animates opacity + transform on every appearance via toastIn/
+   toastOut, and a blurred layer that's also animating forces the browser
+   to recompute the blur on every frame — same mechanism that caused the
+   confirmed modal jank. --modal-bg is opaque enough on its own that the
+   blur wasn't adding much visually here. */
+.toast {
+  background: var(--modal-bg);
+  color: var(--text-main);
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes toastIn {
+  to {
+    opacity: 1;
+    transform:
+    translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+}
+
+.toast.success {
+  border-bottom: 2px solid var(--success-color);
+}
+
+.toast.warning {
+  border-bottom: 2px solid #f59e0b;
+}
+.toast.info {
+  border-bottom: 2px solid var(--glass-border);
+}
+

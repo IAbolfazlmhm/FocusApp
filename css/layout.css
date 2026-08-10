@@ -78,7 +78,7 @@
 .container {
   display: flex; 
   width: 100%; 
-  max-width: 900px; 
+  max-width: 1040px; 
   gap: 40px;
   justify-content: center; 
   flex-wrap: nowrap;
@@ -90,14 +90,6 @@
   gap: 40px; 
   justify-content: center; 
   flex-wrap: wrap;
-}
-
-.placeholder-box {
-  width: 100%; 
-  padding: 50px; 
-  text-align: center; 
-  color: var(--text-muted); 
-  margin-top: 50px;
 }
 
 /* --- GLOBAL HEIGHT & TEXT FIXES --- */

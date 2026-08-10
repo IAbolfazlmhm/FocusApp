@@ -7,9 +7,16 @@
   <meta name="description" content="A Pomodoro timer, task manager, and habit tracker with focus sessions, streaks, heatmaps, and data export. All data stored locally in your browser.">
   <meta name="theme-color" content="#3b82f6">
   <link rel="manifest" href="manifest.json">
+  <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/reset.css">
-  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/components/buttons.css">
+  <link rel="stylesheet" href="css/components/toasts.css">
+  <link rel="stylesheet" href="css/components/modals.css">
+  <link rel="stylesheet" href="css/components/dropdowns.css">
+  <link rel="stylesheet" href="css/components/tags.css">
+  <link rel="stylesheet" href="css/utilities.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/pomodoro.css">
   <link rel="stylesheet" href="css/habits.css">
@@ -31,6 +38,9 @@
     </symbol>
     <symbol id="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </symbol>
+    <symbol id="icon-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
     </symbol>
   </svg>
 
@@ -89,12 +99,17 @@
       <section class="timer-section">
         <div class="timer-header glass-pill">
           <span class="locked-task-label">
-            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-target"/></svg>
             Focus: <strong id="current-task-name">Nothing</strong>
           </span>
-          <button class="icon-btn settings-btn" title="Settings" aria-label="Settings">
-            <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
-          </button>
+          <div class="timer-header-actions">
+            <button class="icon-btn focus-mode-toggle-btn" id="focus-mode-toggle-btn" title="Focus Mode" aria-label="Enter Focus Mode" aria-pressed="false" data-sound="click">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-target"/></svg>
+            </button>
+            <button class="icon-btn settings-btn" title="Settings" aria-label="Settings">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
+            </button>
+          </div>
         </div>
 
         <div class="session-tracker" id="session-tracker">
@@ -122,6 +137,10 @@
           <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
+        </div>
+
+        <div class="focus-mode-quote-wrap">
+          <p id="focus-mode-quote" class="habit-quote-text"></p>
         </div>
       </section>
 
@@ -185,8 +204,8 @@
             </button>
           </div>
           
-          <input type="text" placeholder="Add a new task..." class="task-input" maxlength="30">
-          <button class="add-btn" data-sound="click">Add</button>
+          <input type="text" id="task-input" placeholder="Add a new task..." class="task-input" maxlength="30">
+          <button class="btn btn-primary" id="add-task-btn" data-sound="click">Add</button>
         </div>
       </section>
 
@@ -220,7 +239,7 @@
               <circle class="progress-ring-circle overview-ring" cx="90" cy="90" r="80" fill="transparent" stroke-width="12" style="stroke: #10b981; transition: stroke-dashoffset 1.5s ease-out; stroke-dasharray: 502; stroke-dashoffset: 502;"/>
             </svg>
             <div class="ring-center-overlay">
-              <span class="time-display mini" style="color: #10b981;">0%</span>
+              <span class="time-display mini">0%</span>
             </div>
           </div>
         </div>
@@ -292,7 +311,7 @@
           </div>
 
           <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" maxlength="30">
-          <button class="add-btn" id="quick-add-habit-btn" data-sound="click">Add</button>
+          <button class="btn btn-primary" id="quick-add-habit-btn" data-sound="click">Add</button>
         </div>
       </section>
 
@@ -501,12 +520,12 @@
             Everything is stored only in this browser. Clearing site data, private browsing, or a browser reset can erase it — export a backup you can restore later.
           </p>
           <div style="display: flex; gap: 10px;">
-            <button type="button" class="theme-outline-btn flex-1" id="export-data-btn" aria-label="Export all data as a JSON file" data-sound="click">Export Data</button>
-            <button type="button" class="theme-outline-btn flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-sound="click">Import Data</button>
+            <button type="button" class="btn-outline flex-1" id="export-data-btn" aria-label="Export all data as a JSON file" data-sound="click">Export Data</button>
+            <button type="button" class="btn-outline flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-sound="click">Import Data</button>
           </div>
           <input type="file" id="import-data-input" accept="application/json" style="display:none;">
         </div>
-        <button class="save-settings-btn" id="save-settings" data-sound="success">Save & Apply</button>
+        <button class="btn-block" id="save-settings" data-sound="success">Save & Apply</button>
       </div>
     </div>
   </div>
@@ -520,7 +539,7 @@
       <div class="modal-body">
         <div class="add-tag-row">
           <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select flex-1" maxlength="20">
-          <button id="manage-add-tag-btn" class="add-btn" style="padding: 8px 15px;" data-sound="click">Add</button>
+          <button id="manage-add-tag-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="tags-management-list" class="tags-list-grid"></div>
@@ -533,8 +552,8 @@
     <div class="modal-content glass-effect" style="max-width: 320px; text-align: center; padding: 30px 20px;">
       <h3 id="confirm-message" style="margin-bottom: 25px; font-size: 1.2rem; font-weight: bold;">Are you sure?</h3>
       <div style="display: flex; gap: 15px; justify-content: center;">
-        <button id="confirm-no-btn" class="add-btn cancel-btn" data-sound="click">Cancel</button>
-        <button id="confirm-yes-btn" class="add-btn" style="background: var(--danger-color); color: white; border: none; flex: 1;" data-sound="trash">Yes, Delete</button>
+        <button id="confirm-no-btn" class="btn btn-secondary" data-sound="click">Cancel</button>
+        <button id="confirm-yes-btn" class="btn btn-danger" style="flex: 1;" data-sound="trash">Yes, Delete</button>
       </div>
     </div>
   </div>
@@ -558,7 +577,7 @@
           <div id="edit-task-tag-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
           </div>
         </div>
-        <button class="save-settings-btn" id="save-task-edit-btn" data-sound="success">Save Changes</button>
+        <button class="btn-block" id="save-task-edit-btn" data-sound="success">Save Changes</button>
       </div>
     </div>
   </div>
@@ -624,6 +643,7 @@
             <div class="color-option" data-color="#f43f5e" style="background: #f43f5e;" data-sound="click"></div>
             <div class="color-option" data-color="#8b5cf6" style="background: #8b5cf6;" data-sound="click"></div>
             <div class="color-option" data-color="#f59e0b" style="background: #f59e0b;" data-sound="click"></div>
+            <input type="color" id="habit-color-custom" class="tag-color-swatch lg" value="#3b82f6" title="Custom color" aria-label="Custom habit color" data-sound="click">
           </div>
         </div>
 
@@ -643,7 +663,7 @@
           </div>
         </div>
 
-        <button class="save-settings-btn" id="save-habit-btn" style="margin-top: 15px;" data-sound="success">Save Habit</button>
+        <button class="btn-block" id="save-habit-btn" style="margin-top: 15px;" data-sound="success">Save Habit</button>
       </div>
     </div>
   </div>
@@ -657,7 +677,7 @@
       <div class="modal-body">
         <div class="add-tag-row">
           <input type="text" id="quick-modal-tag-input" placeholder="New tag name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-          <button id="quick-modal-add-btn" class="add-btn" style="padding: 8px 15px; background: var(--theme-color); color: #fff" data-sound="click">Add</button>
+          <button id="quick-modal-add-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="quick-modal-tag-list" class="tags-list-grid"></div>
@@ -674,7 +694,7 @@
       <div class="modal-body">
         <div class="add-tag-row">
           <input type="text" id="manage-new-category-input" placeholder="New category name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-          <button id="manage-add-category-btn" class="add-btn" style="padding: 8px 15px; background: var(--success-color); color: #FFF" data-sound="click">Add</button>
+          <button id="manage-add-category-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="categories-management-list" class="tags-list-grid"></div>
@@ -698,7 +718,7 @@
           <label>End Date</label>
           <input type="date" id="range-end-input" class="custom-select">
         </div>
-        <button class="save-settings-btn" id="apply-custom-range" data-sound="success">Apply Range</button>
+        <button class="btn-block" id="apply-custom-range" data-sound="success">Apply Range</button>
       </div>
     </div>
   </div>
@@ -732,7 +752,7 @@
           <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
           
-        <button class="save-settings-btn" id="save-prog-settings" data-sound="success">Save & Apply</button>
+        <button class="btn-block" id="save-prog-settings" data-sound="success">Save & Apply</button>
       </div>
     </div>
   </div>
@@ -761,9 +781,9 @@
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
 
       <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button class="add-btn" id="delete-habit-today-btn" data-sound="trash" style="background: var(--glass-bg); color: var(--text-main); border: 1px solid var(--glass-border);">Clear Today's Record</button>
-        <button class="add-btn" id="delete-habit-future-btn" data-sound="trash" style="background: var(--warning-color); color: white; border: none;">Stop Tracking (Keep History)</button>
-        <button class="add-btn" id="delete-habit-all-btn" data-sound="trash" style="background: var(--danger-color); color: white; border: none;">Delete All History</button>
+        <button class="btn btn-secondary" id="delete-habit-today-btn" data-sound="trash">Clear Today's Record</button>
+        <button class="btn btn-warning" id="delete-habit-future-btn" data-sound="trash">Stop Tracking (Keep History)</button>
+        <button class="btn btn-danger" id="delete-habit-all-btn" data-sound="trash">Delete All History</button>
       </div>
     </div>
   </div>

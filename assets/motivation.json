@@ -1,0 +1,26 @@
+{
+  "quotes": [
+    { "quote": "Small steps every day.", "category": "habits" },
+    { "quote": "Consistency over intensity.", "category": "habits" },
+    { "quote": "Your habits define your future.", "category": "habits" },
+    { "quote": "Focus on the system, not the goal.", "category": "habits" },
+    { "quote": "Every action is a vote for who you want to be.", "category": "habits" },
+    { "quote": "Miss a day, not two.", "category": "habits" },
+    { "quote": "Progress is rarely loud.", "category": "habits" },
+    { "quote": "Show up. That's most of it.", "category": "habits" },
+    { "quote": "One task at a time.", "category": "focus" },
+    { "quote": "Depth beats speed.", "category": "focus" },
+    { "quote": "This is the only thing that matters right now.", "category": "focus" },
+    { "quote": "Let the timer hold the rest of the day.", "category": "focus" },
+    { "quote": "Slow is smooth. Smooth is done.", "category": "focus" },
+    { "quote": "Distraction can wait a few minutes.", "category": "focus" },
+    { "quote": "You don't need motivation, just a starting point.", "category": "focus" },
+    { "quote": "Close enough is a trap. Keep going.", "category": "focus" },
+    { "quote": "Done is better than perfect.", "category": "general" },
+    { "quote": "Start before you feel ready.", "category": "general" },
+    { "quote": "Rest is part of the work.", "category": "general" },
+    { "quote": "You're allowed to go slow.", "category": "general" },
+    { "quote": "Momentum is built, not found.", "category": "general" },
+    { "quote": "The work you avoid rarely gets smaller.", "category": "general" }
+  ]
+}
