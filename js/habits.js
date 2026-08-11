@@ -56,6 +56,7 @@ const saveHabitBtn = document.getElementById('save-habit-btn');
 
 const colorOptions = document.querySelectorAll('.color-option');
 const habitColorCustomInput = document.getElementById('habit-color-custom');
+const habitColorCustomWrapper = document.getElementById('habit-color-custom-wrapper');
 const iconOptions = document.querySelectorAll('.icon-option');
 const dayOptions = document.querySelectorAll('.day-option');
 
@@ -70,6 +71,18 @@ let currentHabitSort = 'newest';
 // input has no dataset.color to read back at save time the way the
 // preset swatches do.
 let selectedHabitColor = colorOptions[0]?.dataset.color || '#3b82f6';
+
+// The visible "selected" ring lives on the wrapper label (see
+// .custom-color-swatch-wrapper.selected in tags.css) since the actual
+// <input type="color"> is opacity:0 there — but the input still needs
+// its own .selected class too, for the code below that reads "which
+// swatch is currently selected" via a plain DOM query. One helper keeps
+// both in sync instead of every call site remembering to toggle two
+// elements.
+function setCustomSwatchSelected(isSelected) {
+  habitColorCustomInput?.classList.toggle('selected', isSelected);
+  habitColorCustomWrapper?.classList.toggle('selected', isSelected);
+}
 let habitSortOrder = 'desc';
 export let currentHabitFilter = 'all';
 
@@ -321,14 +334,14 @@ export function setupHabitsEvents() {
         opt.classList.remove('selected');
         if (opt.dataset.color === habitToEdit.color) {opt.classList.add('selected');}
       });
-      habitColorCustomInput?.classList.remove('selected');
+      setCustomSwatchSelected(false);
       selectedHabitColor = habitToEdit.color || colorOptions[0]?.dataset.color || '#3b82f6';
       if (habitColorCustomInput) {
         habitColorCustomInput.value = selectedHabitColor;
         // No preset swatch matched this habit's color — it was picked via
         // the custom input, so mark that swatch as the selected one instead.
         if (!Array.from(colorOptions).some(opt => opt.dataset.color === habitToEdit.color)) {
-          habitColorCustomInput.classList.add('selected');
+          setCustomSwatchSelected(true);
         }
       }
       iconOptions.forEach(opt => {
@@ -468,7 +481,7 @@ export function setupHabitsEvents() {
       // ring didn't match what would actually be saved until the user
       // clicked one). Default color is the first preset option.
       colorOptions.forEach((opt, i) => opt.classList.toggle('selected', i === 0));
-      habitColorCustomInput?.classList.remove('selected');
+      setCustomSwatchSelected(false);
       selectedHabitColor = colorOptions[0]?.dataset.color || '#3b82f6';
       if (habitColorCustomInput) {habitColorCustomInput.value = selectedHabitColor;}
       iconOptions.forEach((opt, i) => opt.classList.toggle('selected', i === 0));
@@ -502,7 +515,7 @@ export function setupHabitsEvents() {
   colorOptions.forEach(option => {
     option.addEventListener('click', () => {
       colorOptions.forEach(opt => opt.classList.remove('selected'));
-      habitColorCustomInput?.classList.remove('selected');
+      setCustomSwatchSelected(false);
       option.classList.add('selected');
       selectedHabitColor = option.dataset.color;
       if (habitColorCustomInput) {habitColorCustomInput.value = selectedHabitColor;}
@@ -514,7 +527,7 @@ export function setupHabitsEvents() {
   if (habitColorCustomInput) {
     habitColorCustomInput.addEventListener('input', () => {
       colorOptions.forEach(opt => opt.classList.remove('selected'));
-      habitColorCustomInput.classList.add('selected');
+      setCustomSwatchSelected(true);
       selectedHabitColor = habitColorCustomInput.value;
     });
   }

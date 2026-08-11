@@ -67,7 +67,6 @@ svg.phase-icon {
 .btn-primary:hover {
   filter: brightness(0.92);
   transform: translateY(-2px);
-  background: var(--theme-color, #3b82f6);
 }
 
 /* Neutral action alongside a primary/danger one — Cancel, "keep as-is". */

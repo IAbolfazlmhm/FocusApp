@@ -39,57 +39,13 @@
 }
 
 /*
-  Themed scrollbar for modals, matching the glass aesthetic instead of the
-  default OS scrollbar. NOTE: .custom-dropdown already has its own
-  scrollbar rules further down (with a dark-mode variant), so it's
-  deliberately excluded here — including it caused two same-specificity
-  rules to fight over it, and the older, non-themed one was silently
-  winning since it appears later in the file. Firefox uses
-  scrollbar-color/width; WebKit browsers need the ::-webkit- pseudo-elements.
-
-  The thumb is transparent until the modal is hovered/focused-within, so
-  it stays out of the way as an "always-on" bar and only appears when
-  someone is actually about to scroll — closer to the fading overlay
-  scrollbars native apps use than a permanently-visible bar.
-  (An earlier version of this also added a mask-image fade to the whole
-  modal's top/bottom edge — removed, since that faded the modal's actual
-  content/title on every modal, including ones that don't even scroll,
-  which was never the intent. Only the scrollbar itself is styled here.)
+  Themed scrollbar for modals now comes from the app-wide default in
+  reset.css — see the comment there. Only the width override stays here
+  (6px reads better inside a modal's narrower content column than the
+  8px global default).
 */
-.modal-content {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.2s ease;
-}
-
-.modal-content:hover,
-.modal-content:focus-within {
-  scrollbar-color: var(--theme-color, #3b82f6) transparent;
-}
-
 .modal-content::-webkit-scrollbar {
   width: 6px;
-}
-
-.modal-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.modal-content::-webkit-scrollbar-thumb {
-  background-color: transparent;
-  border-radius: 10px;
-  transition: background-color 0.2s ease;
-}
-
-.modal-content:hover::-webkit-scrollbar-thumb,
-.modal-content:focus-within::-webkit-scrollbar-thumb {
-  /* Fallback for browsers without color-mix() support */
-  background-color: rgba(59, 130, 246, 0.5);
-  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 50%, transparent);
-}
-
-.modal-content::-webkit-scrollbar-thumb:hover {
-  background-color: var(--theme-color, #3b82f6);
 }
 
 .modal-overlay.show .modal-content {

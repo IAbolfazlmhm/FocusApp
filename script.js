@@ -91,3 +91,18 @@ document.addEventListener('click', (e) => {
     playUI(trigger.dataset.sound);
   }
 });
+
+// --- SWITCH KEYBOARD SUPPORT ---
+// A native <input type="checkbox"> only toggles on Space — but every
+// toggle in this app is also marked role="switch" for screen readers,
+// and the WAI-ARIA switch pattern expects Enter to activate it too, not
+// just Space. This is a separate listener from setupGlobalShortcuts()
+// above rather than folded into it, since that one explicitly bails out
+// for any INPUT target (so Space isn't double-handled) — this needs the
+// opposite: to run *only* for switch inputs.
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.matches('[role="switch"]')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});

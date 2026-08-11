@@ -140,11 +140,15 @@
 /*
   .filter-scroll-area's own base rule already sets display/align-items/
   overflow-x/flex — this modifier only carries the two properties that
-  actually differ in this denser layout (margin/padding).
+  actually differ in this denser layout (margin/padding). Horizontal
+  padding matches .glass-tabs-container's 5px (layout.css) so the active
+  filter bubble sits the same distance from the left edge as the main
+  nav's active tab bubble does — it was 10px here, a visibly bigger gap
+  than the nav's for what's meant to be the same "active pill" pattern.
 */
 .filter-scroll-area.dense {
   margin: 0;
-  padding: 6px 10px;
+  padding: 6px 5px;
 }
 
 /*
@@ -282,14 +286,4 @@
 */
 .locked-task-label.lg {
   font-size: 1.05rem;
-}
-/*
-  Habits/Progress tabs' left panel is a full-height flex column instead of
-  the default centered timer layout.
-*/
-.timer-section.split-layout {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
 }

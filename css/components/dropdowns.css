@@ -41,23 +41,13 @@
   }
 }
 
+/*
+  Scrollbar styling now comes from the app-wide default in reset.css —
+  see the comment there. Only the width override stays here (10px reads
+  better in this wider dropdown list than the 8px global default).
+*/
 .custom-dropdown::-webkit-scrollbar {
   width: 10px;
-}
-
-.custom-dropdown::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-dropdown::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.2);
-  border-radius: 10px;
-  border: 3px solid transparent;
-  background-clip: content-box;
-}
-
-body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.25);
 }
 
 .dropdown-item {
@@ -99,8 +89,18 @@ body[data-theme="dark"] .custom-dropdown::-webkit-scrollbar-thumb {
   background: rgba(59, 130, 246, 0.1);
 }
 
-body[data-theme="dark"] .dropdown-item.active-sort {
-  color: #60a5fa; background: rgba(96, 165, 250, 0.15);
+/*
+  FIX: setupSelectDropdown() (ui-utils.js) — the shared dropdown used by
+  the 4 Settings modal selects (Work Duration, Sound Alert, etc.), the
+  category picker, and the date-range picker — correctly sets
+  aria-selected="true" on the current item, but nothing ever styled
+  that attribute. Only .active-sort (the Sort dropdowns' own separate,
+  manually-toggled class) had a visual treatment, so every dropdown
+  built on the shared component silently showed no selection at all.
+*/
+.dropdown-item[aria-selected="true"] {
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
 }
 
 

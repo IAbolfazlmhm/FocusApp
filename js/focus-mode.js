@@ -33,8 +33,14 @@ function setToggleButtonState(active) {
   btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   btn.setAttribute('aria-label', active ? 'Exit Focus Mode' : 'Enter Focus Mode');
   btn.title = active ? 'Exit Focus Mode' : 'Focus Mode';
-  const use = btn.querySelector('use');
-  if (use) {use.setAttribute('href', active ? '#icon-close' : '#icon-target');}
+  // No icon swap on activation — every other toggle-style control in
+  // the app (tabs, filter pills) signals its active state with color,
+  // not by swapping to a different glyph, and the swapped-in close (X)
+  // icon here was styled as an isolated one-off rather than matching
+  // any of those. aria-pressed above already drives the same active
+  // treatment (see .focus-mode-toggle-btn in pomodoro.css) that an
+  // active tab/filter gets, so the button stays visually consistent
+  // with the rest of the app in both states.
 }
 
 export function enterFocusMode() {

@@ -6,9 +6,6 @@
 body.phase-progress .date-selector-btn:hover {
   color: #8b5cf6;
 }
-body[data-theme="dark"].phase-progress .date-selector-btn:hover {
-  color: #a78bfa;
-}
 
 /* --- PROGRESS TAB THEME COLORS --- */
 body.phase-progress .active-bubble { 
@@ -31,21 +28,11 @@ body.phase-progress .dropdown-item.active-sort {
 }
 
 /* 
-  FIX: these two rules had "body[data-theme=\"dark\"] body.phase-progress"
-  — a body element nested inside another body element, which can never
-  exist in a real DOM, so both rules were 100% dead: the purple dropdown
-  hover/active-sort colors silently never applied in dark mode, always
-  falling back to the light-mode color above them instead. 
+  Dark-mode-specific purple variants removed at the user's request — see
+  the equivalent note in pomodoro.css. The light-mode colors immediately
+  above (#8b5cf6) now apply unchanged in dark mode too; nothing here
+  redefines --theme-color or a phase accent color for dark mode anymore.
 */
-body[data-theme="dark"].phase-progress .dropdown-item:hover { 
-  background: rgba(167, 139, 250, 0.2); 
-  color: #a78bfa; 
-}
-
-body[data-theme="dark"].phase-progress .dropdown-item.active-sort { 
-  color: #a78bfa; 
-  background: rgba(167, 139, 250, 0.15); 
-}
 
 /* --- LAYOUT & SIZING (Scrollbar fix) --- */
 .progress-hero { 

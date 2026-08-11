@@ -86,25 +86,21 @@ body {
 body.phase-work {
   --bg-main: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
   --theme-color: #f43f5e;
-  --theme-color-dark: #fb7185;
 }
 
 body.phase-short {
   --bg-main: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
   --theme-color: #14b8a6;
-  --theme-color-dark: #2dd4bf;
 }
 
 body.phase-long {
   --bg-main: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
   --theme-color: #3b82f6;
-  --theme-color-dark: #60a5fa;
 }
 
 body.phase-stopwatch {
   --bg-main: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
   --theme-color: #8b5cf6;
-  --theme-color-dark: #a78bfa;
 }
 
 body.phase-habits {
