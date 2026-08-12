@@ -6,6 +6,7 @@ import { renderHabits, setupHabitsEvents, initHabitQuotes } from './js/habits.js
 import { setupProgressEvents } from './js/progress.js';
 import { playUI } from './js/audio.js';
 import { setupFocusMode, exitFocusMode, isFocusModeActive } from './js/focus-mode.js';
+import { setupQuotesEvents } from './js/quotes.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   // 1. Settings Initialization
@@ -31,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // 5. UI & Navigation
   setupTabs();
+  setupQuotesEvents();
   setupModalAccessibility();
   setupFocusMode();
   setupGlobalShortcuts();

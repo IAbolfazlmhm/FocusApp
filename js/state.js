@@ -41,6 +41,14 @@ export let savedHabitCategories = readJSON('focusHabitCategories', ['Health', 'L
 export let currentHabitDate = new Date();
 currentHabitDate.setHours(0, 0, 0, 0);
 
+// --- QUOTES STATE ---
+// User-created quotes only. Built-in quotes are loaded separately by
+// motivation.js straight from assets/motivation.json and never touch
+// localStorage — keeping the two pools structurally separate rather than
+// merging them into one array on disk (see motivation.js for how they're
+// combined at read time for rotation).
+export let userQuotes = readJSON('focusUserQuotes', [], 'array');
+
 // ==========================================
 // STATE SETTERS (For Module Mutation)
 // ==========================================
@@ -62,3 +70,5 @@ export function setSortOrder(val) { sortOrder = val; }
 export function setHabits(val) { habits = val; }
 export function setSavedHabitCategories(val) { savedHabitCategories = val; }
 export function setCurrentHabitDate(val) { currentHabitDate = val; }
+
+export function setUserQuotes(val) { userQuotes = val; }

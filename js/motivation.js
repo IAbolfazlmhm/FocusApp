@@ -9,6 +9,10 @@
 // several browsers), a 404, or malformed JSON — so a broken asset never
 // removes the feature, just narrows it back to a fixed short list.
 
+import { userQuotes, setUserQuotes } from './state.js';
+import { writeJSON } from './storage.js';
+import { generateId } from './ui-utils.js';
+
 const MOTIVATION_URL = 'assets/motivation.json';
 
 const FALLBACK_QUOTES = [
@@ -45,11 +49,60 @@ function loadQuotes() {
   return loadPromise;
 }
 
+/**
+ * Built-in quotes (assets/motivation.json, with the small hardcoded
+ * fallback if that fetch fails) plus the user's own quotes, combined into
+ * one pool for rotation. The two stay separate in storage — this merge
+ * happens only here, at read time — so a user quote is never written into
+ * the source JSON and the built-in list is never touched.
+ */
+async function getCombinedQuotes() {
+  const builtIn = await loadQuotes();
+  return userQuotes.length > 0 ? builtIn.concat(userQuotes) : builtIn;
+}
+
 export async function getRandomQuote(category = null) {
-  const quotes = await loadQuotes();
-  const pool = category ? quotes.filter(q => q.category === category) : quotes;
+  const quotes = await getCombinedQuotes();
+  // A quote tagged "general" fits anywhere, so it's included alongside an
+  // exact category match rather than requiring category === null to ever
+  // surface — otherwise a user quote saved as "General" (or the built-in
+  // general quotes already in motivation.json) would never appear, since
+  // every current call site asks for a specific category.
+  const pool = category ? quotes.filter(q => q.category === category || q.category === 'general') : quotes;
   const list = pool.length > 0 ? pool : quotes;
   return list[Math.floor(Math.random() * list.length)];
+}
+
+// ==========================================
+// USER QUOTE MANAGEMENT
+// ==========================================
+// CRUD over the user's own quotes only. Data/persistence lives here
+// (alongside the rest of the quote engine); the Settings > Manage Quotes
+// modal (quotes.js) owns rendering that list and wiring its form — same
+// split already used for storage vs. UI everywhere else in the app.
+
+export function getUserQuotes() {
+  return userQuotes;
+}
+
+export function addUserQuote(quoteText, category) {
+  const entry = { id: generateId(), quote: quoteText, category };
+  const updated = [...userQuotes, entry];
+  setUserQuotes(updated);
+  writeJSON('focusUserQuotes', updated);
+  return entry;
+}
+
+export function updateUserQuote(id, { quote: quoteText, category }) {
+  const updated = userQuotes.map(q => (q.id === id ? { ...q, quote: quoteText, category } : q));
+  setUserQuotes(updated);
+  writeJSON('focusUserQuotes', updated);
+}
+
+export function deleteUserQuote(id) {
+  const updated = userQuotes.filter(q => q.id !== id);
+  setUserQuotes(updated);
+  writeJSON('focusUserQuotes', updated);
 }
 
 /**

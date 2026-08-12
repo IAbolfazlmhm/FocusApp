@@ -158,6 +158,9 @@
 }
 
 .color-option {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -167,8 +170,14 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.color-option:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .color-option:hover {
+    transform: scale(1.1);
+  }
+}
+
+.color-option:active, .icon-option:active, .day-option:active {
+  transform: scale(0.96);
 }
 
 .color-option.selected {
@@ -177,6 +186,9 @@
 }
 
 .icon-option {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
   width: 36px;
   height: 36px;
   border-radius: 10px;
@@ -190,9 +202,11 @@
   transition: all 0.2s;
 }
 
-.icon-option:hover {
-  background: var(--btn-hover);
-  color: var(--text-main);
+@media (hover: hover) {
+  .icon-option:hover {
+    background: var(--btn-hover);
+    color: var(--text-main);
+  }
 }
 
 .icon-option.selected {
@@ -207,23 +221,25 @@
   color: var(--text-muted);
 }
 
-.habit-settings-btn:hover, #prev-day-btn:hover, #next-day-btn:hover {
-  color: var(--text-main);
-}
+@media (hover: hover) {
+  .habit-settings-btn:hover, #prev-day-btn:hover, #next-day-btn:hover {
+    color: var(--text-main);
+  }
 
-body.phase-habits .habit-item:hover {
-  border-color: #10b981;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
-}
+  body.phase-habits .habit-item:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+  }
 
-body.phase-habits .icon-btn:hover {
-  color: #10b981;
-}
+  body.phase-habits .icon-btn:hover {
+    color: #10b981;
+  }
 
-body.phase-habits .done-btn:hover {
-  background: #10b981;
-  color: white;
-  border-color: #10b981;
+  body.phase-habits .done-btn:hover {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+  }
 }
 
 .overview-ring {

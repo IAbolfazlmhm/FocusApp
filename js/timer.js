@@ -274,14 +274,15 @@ export function toggleTimer() {
   // which is fragile DOM-text coupling — if the UI copy is ever changed
   // (localization, a rewording pass), the feature breaks silently.
   // Checking focusedTaskId from state is the real source of truth.
-  if (focusedTaskId === null && tasks) {
+  const requiresWorkTracking = currentPhase === 'work' || modeSelect?.value === 'stopwatch';
+  if (requiresWorkTracking && focusedTaskId === null && tasks) {
     const activeTasks = tasks.filter(t => !t.completed);
     if (activeTasks.length === 1) {
       const event = new CustomEvent('autoFocusTask', { detail: { id: activeTasks[0].id } });
       document.dispatchEvent(event);
     } else {
-      showToast('🎯 Please focus on a task first before starting the timer!', 'warning');
-      return;
+      const currentTaskLabel = document.getElementById('current-task-name');
+      if (currentTaskLabel) {currentTaskLabel.textContent = 'No Task';}
     }
   }
 

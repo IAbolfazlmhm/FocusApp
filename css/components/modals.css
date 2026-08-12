@@ -242,3 +242,69 @@ body[data-theme="dark"] #confirm-message {
   like every other themed button fixes that.
 */
 
+/* --- MANAGE QUOTES MODAL ---
+   A vertical list rather than the wrapped chip grid used by tags/
+   categories (.tags-list-grid) — quote text runs too long per-item to
+   read well as an inline chip. Capped height + its own scroll so a long
+   list doesn't push the Add row and category select off-screen inside
+   the outer modal-content scroll. */
+.quotes-management-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.quote-manage-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.quote-manage-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.quote-manage-text p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  overflow-wrap: break-word;
+}
+
+.quote-category-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.quote-manage-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.quote-manage-actions .icon-btn {
+  width: 32px;
+  height: 32px;
+}
+
+.quote-manage-actions .delete-quote-btn:hover {
+  color: var(--danger-color);
+}
+

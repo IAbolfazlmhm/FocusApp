@@ -18,6 +18,8 @@ let refDate = new Date();
 refDate.setHours(0,0,0,0);
 let customStartDate = null;
 let customEndDate = null;
+let pendingCustomStart = null;
+let pendingCustomEnd = null;
 
 let showPomodoro = true;
 let showHabits = true;
@@ -411,7 +413,7 @@ function openDailyReport(dateObj) {
   let html = '';
 
   if (showPomodoro) {
-    html += `<div class="report-section-title">Focus Tasks</div>`;
+    html += `<div class="report-section-title">Pomodoro Tasks</div>`;
     // A task belongs on this day's report if it was CREATED that day,
     // OR if focus time was actually logged for it that day (timeByDate) —
     // previously only createdAt was checked, so working on an
@@ -452,7 +454,7 @@ function openDailyReport(dateObj) {
   // BUG FIX: Only show buttons for active sections
   let buttonsHTML = '';
   if (showPomodoro) {
-    buttonsHTML += `<button class="btn report-goto-btn focus" id="goto-focus-btn">Go to Focus</button>`;
+    buttonsHTML += `<button class="btn report-goto-btn focus" id="goto-focus-btn">Go to Pomodoro</button>`;
   }
   if (showHabits) {
     buttonsHTML += `<button class="btn report-goto-btn habits" id="goto-habits-btn">Go to Habits</button>`;
@@ -584,7 +586,7 @@ export function setupProgressEvents() {
         item.classList.add('active-sort');
 
         if (selectedRange === 'custom') {
-          if (customRangeModal) {customRangeModal.classList.add('show');}
+          openCustomRangeModal();
         } else {
           timeRange = selectedRange;
           refDate = new Date();
@@ -600,41 +602,71 @@ export function setupProgressEvents() {
 
   const applyCustomBtn = document.getElementById('apply-custom-range');
   const closeCustomBtn = document.getElementById('close-custom-range');
+  const rangeStartInput = document.getElementById('range-start-input');
+  const rangeEndInput = document.getElementById('range-end-input');
 
-  if (closeCustomBtn && customRangeModal) {closeCustomBtn.addEventListener('click', () => customRangeModal.classList.remove('show'));}
+  const toInputDate = date => {
+    const local = new Date(date);
+    local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
+    return local.toISOString().slice(0, 10);
+  };
+
+  const openCustomRangeModal = () => {
+    if (!customRangeModal || !rangeStartInput || !rangeEndInput) {return;}
+
+    pendingCustomStart = customStartDate ? new Date(customStartDate) : new Date();
+    pendingCustomEnd = customEndDate ? new Date(customEndDate) : new Date();
+    rangeStartInput.value = toInputDate(pendingCustomStart);
+    rangeEndInput.value = toInputDate(pendingCustomEnd);
+    customRangeModal.classList.add('show');
+    rangeStartInput.focus();
+  };
+
+  const closeCustomRangeModal = () => {
+    pendingCustomStart = null;
+    pendingCustomEnd = null;
+    if (customRangeModal) {customRangeModal.classList.remove('show');}
+  };
+
+  if (closeCustomBtn) {closeCustomBtn.addEventListener('click', closeCustomRangeModal);}
 
   if (applyCustomBtn && customRangeModal) {
     applyCustomBtn.addEventListener('click', () => {
-      const startInput = document.getElementById('range-start-input').value;
-      const endInput = document.getElementById('range-end-input').value;
-      if (startInput && endInput) {
-        customStartDate = new Date(startInput);
-        customEndDate = new Date(endInput);
-        customStartDate.setHours(0,0,0,0);
-        customEndDate.setHours(23,59,59,999);
-
-        if (customStartDate > customEndDate) {
-          showToast("Start date must be before end date.", "warning");
-          return;
-        }
-
-        const diffDays = Math.ceil(Math.abs(customEndDate - customStartDate) / (1000 * 60 * 60 * 24)) + 1;
-
-        // BUG FIX: Dynamic limit based on available vertical space!
-        const maxAllowedDays = (showPomodoro && showHabits) ? 60 : 100;
-
-        if (diffDays > maxAllowedDays) {
-          if (typeof showToast === 'function') {
-            showToast(`Please select a range of ${maxAllowedDays} days or less.`, "warning");
-          }
-          return;
-        }
-
-        timeRange = 'custom';
-        if (rangeDisplay) {rangeDisplay.textContent = "Custom Range";}
-        customRangeModal.classList.remove('show');
-        renderProgressDashboard();
+      const startInput = rangeStartInput?.value || '';
+      const endInput = rangeEndInput?.value || '';
+      if (!startInput || !endInput) {
+        showToast('Choose both a start and end date.', 'warning');
+        return;
       }
+
+      const start = new Date(`${startInput}T00:00:00`);
+      const end = new Date(`${endInput}T23:59:59.999`);
+      if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+        showToast('Please choose valid dates.', 'warning');
+        return;
+      }
+      if (start > end) {
+        showToast('Start date must be before end date.', 'warning');
+        return;
+      }
+
+      const diffDays = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      const maxAllowedDays = (showPomodoro && showHabits) ? 60 : 100;
+      if (diffDays > maxAllowedDays) {
+        showToast(`Please select a range of ${maxAllowedDays} days or less.`, 'warning');
+        return;
+      }
+
+      customStartDate = start;
+      customEndDate = end;
+      timeRange = 'custom';
+      refDate = new Date(start);
+      refDate.setHours(0, 0, 0, 0);
+      if (rangeDisplay) {rangeDisplay.textContent = 'Custom Range';}
+      rangeDropdown?.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active-sort'));
+      rangeDropdown?.querySelector('[data-range="custom"]')?.classList.add('active-sort');
+      closeCustomRangeModal();
+      renderProgressDashboard();
     });
   }
 
@@ -708,7 +740,7 @@ export function setupProgressEvents() {
   document.addEventListener('click', (e) => {
     if (setModal && e.target === setModal) {setModal.classList.remove('show');}
     if (repModal && e.target === repModal) {repModal.classList.remove('show');}
-    if (customRangeModal && e.target === customRangeModal) {customRangeModal.classList.remove('show');}
+    if (customRangeModal && e.target === customRangeModal) {closeCustomRangeModal();}
   });
 
   document.addEventListener('tabChanged', () => {

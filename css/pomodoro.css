@@ -71,7 +71,7 @@
   font-size: 1.1rem;
   font-weight: bold;
   color: var(--text-main);
-  background: #f1f5f9;
+  background: var(--glass-bg);
   padding: 5px 15px;
   border-radius: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.05);
@@ -82,8 +82,7 @@
 #next-phase {
   font-size: 0.85rem;
   color: var(--text-muted);
-  display: flex;
-  align-items: center;
+  display: inline-flex;
 }
 
 .session-tracker.hidden {
@@ -121,7 +120,7 @@
 }
 
 .progress-ring-track {
-  stroke: #e2e8f0;
+  stroke: var(--glass-border);
 }
 
 .progress-ring-circle {
@@ -139,7 +138,9 @@
   font-weight: bold;
   color: var(--theme-color);
   z-index: 1;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
 }
 
 /* BUG FIX: Controls pill width matches header */
@@ -318,7 +319,7 @@
 }
 
 .task-item:hover {
-  border-color: #8ecae6;
+  border-color: var(--glass-border-hover);
   box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2);
 }
 
@@ -413,7 +414,14 @@
   flex-shrink: 0;
 }
 
-.task-item:hover .task-actions {
+@media (hover: hover) {
+  .task-item:hover .task-actions {
+    opacity: 1;
+  }
+}
+
+.task-item:focus-within .task-actions,
+.task-item:active .task-actions {
   opacity: 1;
 }
 
@@ -445,11 +453,17 @@
   transform: translateY(-2px);
 }
 
-.focus-btn:hover {
-  background: #3b82f6;
-  color: white;
-  border-color: #3b82f6;
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .focus-btn:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+  }
+}
+
+.focus-btn:active {
+  transform: scale(0.97);
 }
 
 .task-actions svg {
@@ -710,7 +724,7 @@ body[data-theme="dark"] .progress-ring-track {
 }
 
 body[data-theme="dark"] #current-phase {
-  background: rgba(30, 41, 59, 0.8);
+  background: var(--glass-bg);
   color: var(--text-main);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);

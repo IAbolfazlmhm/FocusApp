@@ -331,13 +331,15 @@ export function setupHabitsEvents() {
       document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
 
       colorOptions.forEach(opt => {
-        opt.classList.remove('selected');
-        if (opt.dataset.color === habitToEdit.color) {opt.classList.add('selected');}
+        const selected = opt.dataset.color === habitToEdit.color;
+        opt.classList.toggle('selected', selected);
+        opt.setAttribute('aria-pressed', String(selected));
       });
       setCustomSwatchSelected(false);
       selectedHabitColor = habitToEdit.color || colorOptions[0]?.dataset.color || '#3b82f6';
       if (habitColorCustomInput) {
         habitColorCustomInput.value = selectedHabitColor;
+        habitColorCustomWrapper?.style.setProperty('--custom-color', selectedHabitColor);
         // No preset swatch matched this habit's color — it was picked via
         // the custom input, so mark that swatch as the selected one instead.
         if (!Array.from(colorOptions).some(opt => opt.dataset.color === habitToEdit.color)) {
@@ -345,8 +347,9 @@ export function setupHabitsEvents() {
         }
       }
       iconOptions.forEach(opt => {
-        opt.classList.remove('selected');
-        if (opt.dataset.icon === habitToEdit.icon) {opt.classList.add('selected');}
+        const selected = opt.dataset.icon === habitToEdit.icon;
+        opt.classList.toggle('selected', selected);
+        opt.setAttribute('aria-pressed', String(selected));
       });
 
       if (fVal === 'custom') {
@@ -480,11 +483,20 @@ export function setupHabitsEvents() {
       // as "selected" (just visually stale; the swatch/icon under the
       // ring didn't match what would actually be saved until the user
       // clicked one). Default color is the first preset option.
-      colorOptions.forEach((opt, i) => opt.classList.toggle('selected', i === 0));
+      colorOptions.forEach((opt, i) => {
+        const selected = i === 0;
+        opt.classList.toggle('selected', selected);
+        opt.setAttribute('aria-pressed', String(selected));
+      });
       setCustomSwatchSelected(false);
       selectedHabitColor = colorOptions[0]?.dataset.color || '#3b82f6';
       if (habitColorCustomInput) {habitColorCustomInput.value = selectedHabitColor;}
-      iconOptions.forEach((opt, i) => opt.classList.toggle('selected', i === 0));
+      habitColorCustomWrapper?.style.setProperty('--custom-color', selectedHabitColor);
+      iconOptions.forEach((opt, i) => {
+        const selected = i === 0;
+        opt.classList.toggle('selected', selected);
+        opt.setAttribute('aria-pressed', String(selected));
+      });
 
       if (habitModal) {habitModal.classList.add('show');}
     });
@@ -514,11 +526,16 @@ export function setupHabitsEvents() {
   // Modal Pickers
   colorOptions.forEach(option => {
     option.addEventListener('click', () => {
-      colorOptions.forEach(opt => opt.classList.remove('selected'));
+      colorOptions.forEach(opt => {
+        opt.classList.remove('selected');
+        opt.setAttribute('aria-pressed', 'false');
+      });
       setCustomSwatchSelected(false);
       option.classList.add('selected');
+      option.setAttribute('aria-pressed', 'true');
       selectedHabitColor = option.dataset.color;
       if (habitColorCustomInput) {habitColorCustomInput.value = selectedHabitColor;}
+      habitColorCustomWrapper?.style.setProperty('--custom-color', selectedHabitColor);
     });
   });
 
@@ -526,16 +543,24 @@ export function setupHabitsEvents() {
   // colors, so any color is reachable, not just the 5 presets.
   if (habitColorCustomInput) {
     habitColorCustomInput.addEventListener('input', () => {
-      colorOptions.forEach(opt => opt.classList.remove('selected'));
+      colorOptions.forEach(opt => {
+        opt.classList.remove('selected');
+        opt.setAttribute('aria-pressed', 'false');
+      });
       setCustomSwatchSelected(true);
       selectedHabitColor = habitColorCustomInput.value;
+      habitColorCustomWrapper?.style.setProperty('--custom-color', selectedHabitColor);
     });
   }
 
   iconOptions.forEach(option => {
     option.addEventListener('click', () => {
-      iconOptions.forEach(opt => opt.classList.remove('selected'));
+      iconOptions.forEach(opt => {
+        opt.classList.remove('selected');
+        opt.setAttribute('aria-pressed', 'false');
+      });
       option.classList.add('selected');
+      option.setAttribute('aria-pressed', 'true');
     });
   });
 
@@ -817,8 +842,10 @@ export function setupHabitsEvents() {
     const validCategories = savedHabitCategories.filter(cat => cat && cat.trim() !== '' && cat !== 'Uncategorized');
 
     validCategories.forEach(cat => {
-      const chip = document.createElement('div');
+      const chip = document.createElement('button');
+      chip.type = 'button';
       chip.className = 'tag-chip deletable';
+      chip.setAttribute('aria-label', `Delete category ${cat}`);
       chip.textContent = cat;
 
       chip.addEventListener('click', () => {

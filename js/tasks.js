@@ -186,18 +186,26 @@ export function renderTasks() {
 
     let actionButtons = '';
     if (!isToday && !task.completed) {
-      actionButtons = `
-        <button class="focus-btn reschedule-btn" title="Move to Today" data-sound="success">
+      actionButtons += `
+        <button class="focus-btn reschedule-btn" title="Move to Today" aria-label="Move task to today" data-sound="success">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
         </button>
       `;
-    } else {
-      actionButtons = `
-        <button class="focus-btn focus-action" title="Focus" data-sound="click">
-          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-        </button>
-      `;
     }
+
+    // Focus is independent from the task's calendar date. Always expose a
+    // real toggle so a focused task from an older day can be unfocused
+    // directly without moving it or creating a replacement task.
+    const isFocused = task.id === focusedTaskId;
+    actionButtons += `
+      <button class="focus-btn focus-action ${isFocused ? 'is-focused' : ''}"
+        title="${isFocused ? 'Unfocus' : 'Focus'}"
+        aria-label="${isFocused ? 'Unfocus task' : 'Focus task'}"
+        aria-pressed="${isFocused}"
+        data-sound="click">
+        <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      </button>
+    `;
 
     taskDiv.style.cursor = 'pointer';
     taskDiv.dataset.id = task.id;
@@ -595,8 +603,10 @@ export function setupTaskEvents() {
     quickModalTagList.innerHTML = '';
 
     // "No Tag" option
-    const noTagBtn = document.createElement('div');
+    const noTagBtn = document.createElement('button');
+    noTagBtn.type = 'button';
     noTagBtn.className = 'tag-chip selectable';
+    noTagBtn.setAttribute('aria-label', 'No tag');
     noTagBtn.textContent = '❌ No Tag';
     noTagBtn.dataset.sound = 'click';
     noTagBtn.onclick = () => selectQuickTag(null);
@@ -604,8 +614,10 @@ export function setupTaskEvents() {
 
     // Existing Tags
     savedTags.forEach(tag => {
-      const btn = document.createElement('div');
+      const btn = document.createElement('button');
+      btn.type = 'button';
       btn.className = 'tag-chip selectable';
+      btn.setAttribute('aria-label', `Select tag ${tag}`);
       btn.textContent = `#${tag}`;
       btn.dataset.sound = 'click';
       btn.onclick = () => selectQuickTag(tag);
