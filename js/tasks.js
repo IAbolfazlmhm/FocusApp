@@ -2,7 +2,7 @@ import {
   tasks, focusedTaskId, savedTags, tagColors, currentFilter, currentSort, sortOrder,
   setTasks, setFocusedTaskId, setSavedTags, setTagColors, setCurrentFilter, setCurrentSort, setSortOrder
 } from './state.js';
-import { writeJSON } from './storage.js';
+import { writeJSON, STORAGE_KEYS } from './storage.js';
 
 export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
@@ -31,10 +31,10 @@ let pendingQuickTag = null; // Stores the tag selected from the gear
 // CORE HELPERS
 // ==========================================
 export function saveTasks() {
-  writeJSON('focusTasks', tasks);
-  writeJSON('focusedTaskId', focusedTaskId);
-  writeJSON('focusTagsList', savedTags);
-  writeJSON('focusTagColors', tagColors);
+  writeJSON(STORAGE_KEYS.TASKS, tasks);
+  writeJSON(STORAGE_KEYS.FOCUSED_TASK_ID, focusedTaskId);
+  writeJSON(STORAGE_KEYS.TAGS_LIST, savedTags);
+  writeJSON(STORAGE_KEYS.TAG_COLORS, tagColors);
 }
 
 export function formatTaskTime(totalSeconds) {

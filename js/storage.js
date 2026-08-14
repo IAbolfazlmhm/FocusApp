@@ -11,6 +11,28 @@
 // to change (e.g. namespacing keys, adding a quota-exceeded fallback), it
 // only needs to change here.
 
+// FIX: the key name for each of these was a raw string literal repeated
+// at every call site across 8 files (40+ occurrences total) — 'focusTasks'
+// typed out again in tasks.js, progress.js, and script.js, and so on for
+// every key below. A typo in any one of those occurrences wouldn't throw;
+// it would just silently read/write a new, disconnected key that happened
+// to look almost right. One definition per key here means every call site
+// either imports the real thing or fails to import at all — never a typo
+// that quietly works.
+export const STORAGE_KEYS = {
+  ACTIVE_TAB: 'focusActiveTab',
+  TASKS: 'focusTasks',
+  HABITS: 'focusHabits',
+  HABIT_CATEGORIES: 'focusHabitCategories',
+  USER_QUOTES: 'focusUserQuotes',
+  TIMER_STATE: 'focusTimerState',
+  TASKLESS_TIME: 'focusTasklessTime',
+  SETTINGS: 'focusSettings',
+  FOCUSED_TASK_ID: 'focusedTaskId',
+  TAGS_LIST: 'focusTagsList',
+  TAG_COLORS: 'focusTagColors',
+};
+
 /**
  * Read and JSON.parse a key, falling back safely if it's missing, invalid
  * JSON, or (when expectedType is 'array') the wrong shape.

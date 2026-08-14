@@ -6,7 +6,7 @@ import {
 
 import { playAlarm } from './audio.js';
 import { showToast, icons } from './ui-utils.js';
-import { readJSON, writeJSON, readRaw, remove } from './storage.js';
+import { readJSON, writeJSON, readRaw, remove, STORAGE_KEYS } from './storage.js';
 import { getLocalDateKey } from './date-utils.js';
 
 // Task-name length shown in the browser tab title, kept short since tab
@@ -24,15 +24,14 @@ const TAB_TITLE_TASK_NAME_MAX_LENGTH = 24;
 // nothing was ever storing it. This is a minimal, separate accumulator
 // (keyed by day, exactly like task.timeByDate) so that time counts
 // toward the Progress tab's totals/heatmap instead of being discarded.
-// Exported so progress.js can read the same key when building stats.
-export const TASKLESS_TIME_KEY = 'focusTasklessTime';
-
+// Stored under STORAGE_KEYS.TASKLESS_TIME — progress.js reads the same
+// key when building stats.
 function addTasklessFocusTime(seconds) {
   if (seconds <= 0) {return;}
-  const byDate = readJSON(TASKLESS_TIME_KEY, {});
+  const byDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
   const todayKey = getLocalDateKey();
   byDate[todayKey] = (byDate[todayKey] || 0) + seconds;
-  writeJSON(TASKLESS_TIME_KEY, byDate);
+  writeJSON(STORAGE_KEYS.TASKLESS_TIME, byDate);
 }
 
 // Note: These will be exported from tasks.js in the next steps.
@@ -62,11 +61,11 @@ let tickLastElapsedSeconds = 0; // elapsed seconds since anchor, as of the last 
 
 // FIX: cached copy of which tab is active. Previously, updateDisplay()
 // (which runs every second while any timer runs) called
-// readRaw('focusActiveTab') — a localStorage read — on every single tick.
+// readRaw(STORAGE_KEYS.ACTIVE_TAB) — a localStorage read — on every single tick.
 // This value only changes when the user switches tabs (an event the app
 // already dispatches: tabChanged), so caching it here and invalidating on
 // that event turns a per-second cost into a one-time cost.
-let cachedActiveTab = readRaw('focusActiveTab', '0');
+let cachedActiveTab = readRaw(STORAGE_KEYS.ACTIVE_TAB, '0');
 
 // getLocalDateKey() (date-utils.js) provides the shared YYYY-MM-DD local-
 // date format used here and in progress.js — previously two separately
@@ -92,11 +91,11 @@ export function saveTimerState() {
     completedSessions,
     lastSaved: Date.now()
   };
-  writeJSON('focusTimerState', state);
+  writeJSON(STORAGE_KEYS.TIMER_STATE, state);
 }
 
 export function loadTimerState() {
-  const state = readJSON('focusTimerState', null);
+  const state = readJSON(STORAGE_KEYS.TIMER_STATE, null);
   if (!state) {return false;}
 
   const FOUR_HOURS = 4 * 60 * 60 * 1000;
@@ -509,7 +508,7 @@ export function setupTimerEvents() {
   });
 
   document.addEventListener('tabChanged', () => {
-    cachedActiveTab = readRaw('focusActiveTab', '0');
+    cachedActiveTab = readRaw(STORAGE_KEYS.ACTIVE_TAB, '0');
     if (!cachedActiveTab || cachedActiveTab === '0') {updateDisplay();}
   });
 }

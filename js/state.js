@@ -1,4 +1,4 @@
-import { readJSON } from './storage.js';
+import { readJSON, STORAGE_KEYS } from './storage.js';
 
 // ==========================================
 // APP INITIAL STATE (GLOBAL VARIABLES)
@@ -23,21 +23,21 @@ export let currentPhase = 'work';
 export let completedSessions = 0;
 
 // --- TASKS STATE ---
-export let tasks = readJSON('focusTasks', [], 'array');
-export let focusedTaskId = readJSON('focusedTaskId', null);
-export let savedTags = readJSON('focusTagsList', ['Work', 'Study', 'Personal'], 'array');
+export let tasks = readJSON(STORAGE_KEYS.TASKS, [], 'array');
+export let focusedTaskId = readJSON(STORAGE_KEYS.FOCUSED_TASK_ID, null);
+export let savedTags = readJSON(STORAGE_KEYS.TAGS_LIST, ['Work', 'Study', 'Personal'], 'array');
 // Custom user-picked colors, keyed by tag name (e.g. { "Work": "#3b82f6" }).
 // A tag with no entry here just falls back to its deterministic hash color
 // (see getTagColor in ui-utils.js) — this only needs to store the tags
 // someone has actually chosen to override.
-export let tagColors = readJSON('focusTagColors', {});
+export let tagColors = readJSON(STORAGE_KEYS.TAG_COLORS, {});
 export let currentFilter = 'all';
 export let currentSort = 'newest';
 export let sortOrder = 'desc';
 
 // --- HABITS STATE ---
-export let habits = readJSON('focusHabits', [], 'array');
-export let savedHabitCategories = readJSON('focusHabitCategories', ['Health', 'Learning', 'Productivity', 'Mindfulness'], 'array');
+export let habits = readJSON(STORAGE_KEYS.HABITS, [], 'array');
+export let savedHabitCategories = readJSON(STORAGE_KEYS.HABIT_CATEGORIES, ['Health', 'Learning', 'Productivity', 'Mindfulness'], 'array');
 export let currentHabitDate = new Date();
 currentHabitDate.setHours(0, 0, 0, 0);
 
@@ -47,7 +47,7 @@ currentHabitDate.setHours(0, 0, 0, 0);
 // localStorage — keeping the two pools structurally separate rather than
 // merging them into one array on disk (see motivation.js for how they're
 // combined at read time for rotation).
-export let userQuotes = readJSON('focusUserQuotes', [], 'array');
+export let userQuotes = readJSON(STORAGE_KEYS.USER_QUOTES, [], 'array');
 
 // ==========================================
 // STATE SETTERS (For Module Mutation)

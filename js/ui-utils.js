@@ -1,5 +1,5 @@
 import { playUI } from './audio.js';
-import { readRaw, writeRaw } from './storage.js';
+import { readRaw, writeRaw, STORAGE_KEYS } from './storage.js';
 
 // Modal stack for ESC key handling (close only topmost)
 const openModals = [];
@@ -281,7 +281,7 @@ export function setupTabs() {
   window.addEventListener('load', () => {
     document.body.classList.remove('preload');
 
-    const savedTabIndex = readRaw('focusActiveTab', 0);
+    const savedTabIndex = readRaw(STORAGE_KEYS.ACTIVE_TAB, 0);
 
     if (tabs[savedTabIndex]) {
       setTimeout(() => {
@@ -330,7 +330,7 @@ export function setupTabs() {
     tab.addEventListener('click', () => {
       // playUI('click'); - now handled by data-sound delegate
 
-      writeRaw('focusActiveTab', index);
+      writeRaw(STORAGE_KEYS.ACTIVE_TAB, index);
       document.dispatchEvent(new Event('tabChanged'));
 
       tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
@@ -572,14 +572,6 @@ const outsideClickTargets = new Map(); // wrapperEl -> { dropdownEl, valueInputI
 export function registerOutsideClickTarget(wrapperEl, dropdownEl, valueInputId) {
   if (!wrapperEl || !dropdownEl) {return;}
   outsideClickTargets.set(wrapperEl, { dropdownEl, valueInputId });
-}
-
-/**
- * Unregister a dropdown/trigger pair.
- */
-export function unregisterOutsideClickTarget(wrapperEl) {
-  if (!wrapperEl) {return;}
-  outsideClickTargets.delete(wrapperEl);
 }
 
 // Single delegated click handler — closes any open dropdown whose

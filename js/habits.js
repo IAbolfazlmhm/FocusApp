@@ -5,7 +5,7 @@ import {
 
 import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget, setupHorizontalWheelScroll, hexToRgba, isValidHexColor, keepInputVisibleOnMobileKeyboard } from './ui-utils.js';
 import { startQuoteRotation } from './motivation.js';
-import { writeJSON, readRaw } from './storage.js';
+import { writeJSON, readRaw, STORAGE_KEYS } from './storage.js';
 
 // ==========================================
 // CENTRALIZED PERSISTENCE
@@ -17,11 +17,11 @@ import { writeJSON, readRaw } from './storage.js';
 // what's saved. Centralizing it here means there is exactly one place
 // that knows how habits get persisted.
 export function saveHabits() {
-  writeJSON('focusHabits', habits);
+  writeJSON(STORAGE_KEYS.HABITS, habits);
 }
 
 export function saveHabitCategories() {
-  writeJSON('focusHabitCategories', savedHabitCategories);
+  writeJSON(STORAGE_KEYS.HABIT_CATEGORIES, savedHabitCategories);
 }
 
 // ==========================================
@@ -944,7 +944,7 @@ export function setupHabitsEvents() {
   updateDateDisplayUI();
 
   document.addEventListener('tabChanged', () => {
-    if (readRaw('focusActiveTab') === '1') {updateHabitProgress();}
+    if (readRaw(STORAGE_KEYS.ACTIVE_TAB) === '1') {updateHabitProgress();}
   });
 
   // --- ADVANCED HABIT DELETION LOGIC ---
@@ -1222,7 +1222,7 @@ export function updateHabitProgress() {
   // Update streaks UI
   if (typeof renderTopStreaks === 'function') {renderTopStreaks();}
 
-  const activeTab = readRaw('focusActiveTab');
+  const activeTab = readRaw(STORAGE_KEYS.ACTIVE_TAB);
   if (activeTab === '1') {document.title = `Focus App - Habits (${completed}/${total})`;}
 }
 

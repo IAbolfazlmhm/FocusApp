@@ -7,7 +7,7 @@ import {
 } from './timer.js';
 
 import { showToast, setupSelectDropdown, customConfirm } from './ui-utils.js';
-import { readJSON, writeJSON } from './storage.js';
+import { readJSON, writeJSON, STORAGE_KEYS } from './storage.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -98,7 +98,7 @@ export function applySettingsToTimer() {
 }
 
 export function loadSettings() {
-  const settings = readJSON('focusSettings', null);
+  const settings = readJSON(STORAGE_KEYS.SETTINGS, null);
   if (settings) {
     // Helper to visually update the custom display text
     const syncDisplay = (inputId, displayId, dropdownId) => {
@@ -166,7 +166,7 @@ export function saveSettings() {
     darkMode: document.getElementById('dark-mode-toggle') ? document.getElementById('dark-mode-toggle').checked : false,
     haptics: document.getElementById('sound-toggle') ? document.getElementById('sound-toggle').checked : true
   };
-  writeJSON('focusSettings', settings);
+  writeJSON(STORAGE_KEYS.SETTINGS, settings);
 }
 
 export function setupSettingsEvents() {
@@ -314,7 +314,7 @@ export function setupSettingsEvents() {
       // here, which meant toggling something unrelated like dark mode
       // or the notification sound would wipe an in-progress session
       // (reset time left, phase, and completed session count to zero).
-      const previous = readJSON('focusSettings', null);
+      const previous = readJSON(STORAGE_KEYS.SETTINGS, null);
 
       saveSettings();
 

@@ -10,7 +10,7 @@
 // removes the feature, just narrows it back to a fixed short list.
 
 import { userQuotes, setUserQuotes } from './state.js';
-import { writeJSON } from './storage.js';
+import { writeJSON, STORAGE_KEYS } from './storage.js';
 import { generateId } from './ui-utils.js';
 
 const MOTIVATION_URL = 'assets/motivation.json';
@@ -94,14 +94,14 @@ export function addUserQuote(quoteText, category) {
   const entry = { id: generateId(), quote: quoteText, category, enabled: true };
   const updated = [...userQuotes, entry];
   setUserQuotes(updated);
-  writeJSON('focusUserQuotes', updated);
+  writeJSON(STORAGE_KEYS.USER_QUOTES, updated);
   return entry;
 }
 
 export function updateUserQuote(id, { quote: quoteText, category }) {
   const updated = userQuotes.map(q => (q.id === id ? { ...q, quote: quoteText, category } : q));
   setUserQuotes(updated);
-  writeJSON('focusUserQuotes', updated);
+  writeJSON(STORAGE_KEYS.USER_QUOTES, updated);
 }
 
 // Temporarily removes a quote from rotation without losing its text —
@@ -115,14 +115,14 @@ export function toggleUserQuoteEnabled(id) {
     return { ...q, enabled: nowEnabled };
   });
   setUserQuotes(updated);
-  writeJSON('focusUserQuotes', updated);
+  writeJSON(STORAGE_KEYS.USER_QUOTES, updated);
   return nowEnabled;
 }
 
 export function deleteUserQuote(id) {
   const updated = userQuotes.filter(q => q.id !== id);
   setUserQuotes(updated);
-  writeJSON('focusUserQuotes', updated);
+  writeJSON(STORAGE_KEYS.USER_QUOTES, updated);
 }
 
 /**

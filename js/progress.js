@@ -2,7 +2,7 @@ import { formatTaskTime, setTaskDate } from './tasks.js';
 import { setHabitDate, isHabitActiveOnDate, getDateKey } from './habits.js';
 import { showToast, escapeHTML, setupSelectDropdown } from './ui-utils.js';
 import { saveSettings } from './settings.js';
-import { readJSON, readRaw } from './storage.js';
+import { readJSON, readRaw, STORAGE_KEYS } from './storage.js';
 import { getLocalDateKey } from './date-utils.js';
 
 // FIX: this used to be its own copy of the same safe-parse logic that
@@ -10,7 +10,7 @@ import { getLocalDateKey } from './date-utils.js';
 // "must be an array" validation and state.js's original safeParse wasn't
 // shared code yet. Now that storage.js exports readJSON with the same
 // 'array' type check, this local copy is redundant; call sites below use
-// readJSON('focusTasks', [], 'array') directly instead.
+// readJSON(STORAGE_KEYS.TASKS, [], 'array') directly instead.
 
 // Global Progress State
 let timeRange = 'weekly';
@@ -85,8 +85,8 @@ const getHabitLogKey = getDateKey;
 // CORE RENDER FUNCTION
 // ==========================================
 export function renderProgressDashboard() {
-  const currentTasks = readJSON('focusTasks', [], 'array');
-  const currentHabits = readJSON('focusHabits', [], 'array');
+  const currentTasks = readJSON(STORAGE_KEYS.TASKS, [], 'array');
+  const currentHabits = readJSON(STORAGE_KEYS.HABITS, [], 'array');
 
   const bounds = getDateBounds(refDate, timeRange);
 
@@ -108,7 +108,7 @@ export function renderProgressDashboard() {
   renderFocusHeatmap(bounds.start, bounds.end, currentTasks);
   renderHabitHeatmap(bounds.start, bounds.end, currentHabits);
 
-  if (readRaw('focusActiveTab') === '2') {document.title = 'Focus App - Dashboard';}
+  if (readRaw(STORAGE_KEYS.ACTIVE_TAB) === '2') {document.title = 'Focus App - Dashboard';}
 }
 
 // ==========================================
@@ -119,12 +119,11 @@ export function calculateStats(startDate, endDate, currentTasks, currentHabits) 
   let totalExpectedLogs = 0, totalSuccessfulLogs = 0;
   let totalTasksCreated = 0, totalTasksCompleted = 0;
 
-  // Taskless-session time (see timer.js's addTasklessFocusTime) — read
-  // once per call rather than importing timer.js just for the key name,
-  // matching this file's existing convention of inlining localStorage
-  // keys (e.g. readJSON('focusTasks', ...) below) instead of a cross-
-  // module import for a single string constant.
-  const tasklessByDate = readJSON('focusTasklessTime', {});
+  // Taskless-session time (see timer.js's addTasklessFocusTime, which
+  // writes this same key) — read locally rather than importing a value
+  // from timer.js, since STORAGE_KEYS (storage.js) is already the single
+  // shared source of truth for the key name itself.
+  const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
 
   const d = new Date(startDate);
   while (d <= endDate) {
@@ -299,7 +298,7 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
 
   // Taskless-session time — see calculateStats() above for why this is
   // read locally instead of imported from timer.js.
-  const tasklessByDate = readJSON('focusTasklessTime', {});
+  const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
 
   days.forEach(d => {
     const dateStr = getLocalDateKey(d);
@@ -422,8 +421,8 @@ function openDailyReport(dateObj) {
   const body = document.getElementById('report-modal-body');
   if (!modal) {return;}
 
-  const currentTasks = readJSON('focusTasks', [], 'array');
-  const currentHabits = readJSON('focusHabits', [], 'array');
+  const currentTasks = readJSON(STORAGE_KEYS.TASKS, [], 'array');
+  const currentHabits = readJSON(STORAGE_KEYS.HABITS, [], 'array');
 
   const localDateStr = getLocalDateKey(dateObj);
   const habitLogKey = getHabitLogKey(dateObj);
@@ -457,7 +456,7 @@ function openDailyReport(dateObj) {
     // Taskless sessions (see timer.js's addTasklessFocusTime) — kept as
     // its own line rather than folded into a task, since it's real
     // focus time earned with no task attached to it.
-    const tasklessByDate = readJSON('focusTasklessTime', {});
+    const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
     const tasklessSeconds = tasklessByDate[localDateStr] || 0;
     if (tasklessSeconds > 0) {
       html += `<div class="report-item"><span>Focus time (no task)</span> <span>${formatTaskTime(tasklessSeconds)}</span></div>`;
@@ -775,6 +774,6 @@ export function setupProgressEvents() {
   });
 
   document.addEventListener('tabChanged', () => {
-    if (readRaw('focusActiveTab') === '2') {document.title = 'Focus App - Dashboard';}
+    if (readRaw(STORAGE_KEYS.ACTIVE_TAB) === '2') {document.title = 'Focus App - Dashboard';}
   });
 }
