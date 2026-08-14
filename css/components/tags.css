@@ -135,13 +135,19 @@
   inset: 2px;
   width: calc(100% - 4px);
   height: calc(100% - 4px);
-  opacity: 1;
+  opacity: 0;
   border: none;
   box-shadow: none;
   transform: none;
 }
 
 .custom-color-swatch-wrapper.selected {
+  /* One source of truth for "what color did you pick": once selected,
+     the wrapper shows the actual --custom-color value solid, instead of
+     the generic rainbow — JS has set this custom property on every
+     selection since it was added, but nothing in CSS ever read it
+     before this. */
+  background: var(--custom-color, #3b82f6);
   outline: 2px solid var(--text-main);
   outline-offset: 2px;
   transform: scale(1.12);

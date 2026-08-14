@@ -211,7 +211,7 @@
 
 .icon-option.selected {
   background: var(--text-main);
-  color: var(--bg-main);
+  color: var(--bg-base);
   border-color: var(--text-main);
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
@@ -320,7 +320,13 @@ body[data-theme="dark"] .overview-ring {
   transition: transform 0.2s ease, color 0.2s ease; user-select: none;
 }
 
-.date-selector-btn:hover {
+@media (hover: hover) {
+  .date-selector-btn:hover {
+    color: var(--success-color);
+  }
+}
+
+.date-selector-btn:active {
   color: var(--success-color);
 }
 
@@ -339,11 +345,13 @@ body[data-theme="dark"] .overview-ring {
   cursor: pointer;
   color: var(--text-muted);
   transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .day-option.selected {
   background: var(--text-main);
-  color: var(--bg-main);
+  color: var(--bg-base);
   border-color: var(--text-main);
 }
 

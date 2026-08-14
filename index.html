@@ -636,13 +636,13 @@
         <div class="setting-group" id="custom-days-picker" style="display: none; margin-bottom: 20px;">
           <label>Select Days</label>
           <div class="picker-grid" id="custom-days-grid">
-            <div class="day-option" data-day="1" data-sound="click">M</div>
-            <div class="day-option" data-day="2" data-sound="click">T</div>
-            <div class="day-option" data-day="3" data-sound="click">W</div>
-            <div class="day-option" data-day="4" data-sound="click">T</div>
-            <div class="day-option" data-day="5" data-sound="click">F</div>
-            <div class="day-option" data-day="6" data-sound="click">S</div>
-            <div class="day-option" data-day="0" data-sound="click">S</div>
+            <button type="button" class="day-option" data-day="1" aria-pressed="false" aria-label="Monday" data-sound="click">M</button>
+            <button type="button" class="day-option" data-day="2" aria-pressed="false" aria-label="Tuesday" data-sound="click">T</button>
+            <button type="button" class="day-option" data-day="3" aria-pressed="false" aria-label="Wednesday" data-sound="click">W</button>
+            <button type="button" class="day-option" data-day="4" aria-pressed="false" aria-label="Thursday" data-sound="click">T</button>
+            <button type="button" class="day-option" data-day="5" aria-pressed="false" aria-label="Friday" data-sound="click">F</button>
+            <button type="button" class="day-option" data-day="6" aria-pressed="false" aria-label="Saturday" data-sound="click">S</button>
+            <button type="button" class="day-option" data-day="0" aria-pressed="false" aria-label="Sunday" data-sound="click">S</button>
           </div>
         </div>
 
@@ -759,7 +759,10 @@
           <label>End Date</label>
           <input type="date" id="range-end-input" class="custom-select">
         </div>
-        <button class="btn-block" id="apply-custom-range" data-sound="success">Apply Range</button>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn btn-secondary" id="cancel-custom-range" data-sound="click">Cancel</button>
+          <button class="btn-block" id="apply-custom-range" style="flex: 1;" data-sound="success">Apply Range</button>
+        </div>
       </div>
     </div>
   </div>
@@ -804,7 +807,7 @@
         <h2 id="report-date-title">Report</h2>
         <button class="close-btn" id="close-report-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
-      <div class="modal-body" id="report-modal-body" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+      <div class="modal-body" id="report-modal-body">
       </div>
     </div>
   </div>
@@ -819,12 +822,14 @@
         <button class="close-btn" id="close-delete-habit-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
 
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
+      <div class="modal-body">
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button class="btn btn-secondary" id="delete-habit-today-btn" data-sound="trash">Clear Today's Record</button>
-        <button class="btn btn-warning" id="delete-habit-future-btn" data-sound="trash">Stop Tracking (Keep History)</button>
-        <button class="btn btn-danger" id="delete-habit-all-btn" data-sound="trash">Delete All History</button>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button class="btn btn-secondary" id="delete-habit-today-btn" data-sound="trash">Clear Today's Record</button>
+          <button class="btn btn-warning" id="delete-habit-future-btn" data-sound="trash">Stop Tracking (Keep History)</button>
+          <button class="btn btn-danger" id="delete-habit-all-btn" data-sound="trash">Delete All History</button>
+        </div>
       </div>
     </div>
   </div>

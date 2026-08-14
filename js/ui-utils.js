@@ -290,6 +290,42 @@ export function setupTabs() {
     }
   });
 
+  // FIX: tab switches used to swap `display: none` <-> `display: flex`
+  // directly, with no transition — every tab switch just popped instantly.
+  // display isn't itself animatable, so showing a view now happens in two
+  // steps: make it part of layout at opacity 0 / offset, then (after the
+  // browser has actually painted that starting frame — double
+  // requestAnimationFrame, not a single one, which some browsers can
+  // still coalesce into the same frame and skip straight to the end
+  // state) let it transition to its resting position. The outgoing view
+  // is hidden instantly rather than faded out — the incoming view is
+  // what the user's attention follows, and only one view occupies the
+  // page's actual layout space at a time, so an exit fade would just be
+  // motion nobody's looking at while adding another moving part to get
+  // wrong. CSS custom properties already collapse this to a no-op
+  // transition under prefers-reduced-motion (see reset.css).
+  //
+  // `alreadyVisible` exists because the click handler below re-clicks
+  // whichever tab is already active — both on every page load (the
+  // setTimeout above) and whenever a user re-clicks their current tab.
+  // Without it, both cases would needlessly fade the current view to
+  // transparent and back on every single load, since by the time
+  // showView() runs the blanket display:none a few lines down has
+  // already fired.
+  function showView(view, alreadyVisible) {
+    if (!view) {return;}
+    view.style.display = 'flex';
+    if (alreadyVisible) {return;}
+    view.style.opacity = '0';
+    view.style.transform = 'translateY(6px)';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        view.style.opacity = '1';
+        view.style.transform = 'translateY(0)';
+      });
+    });
+  }
+
   tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => {
       // playUI('click'); - now handled by data-sound delegate
@@ -306,24 +342,32 @@ export function setupTabs() {
       const habitsView = document.getElementById('habits-view');
       const progressView = document.getElementById('progress-view');
 
+      // Captured before the blanket hide below overwrites it — see the
+      // comment on showView() above.
+      const wasVisible = {
+        pomodoro: !!pomodoroView && pomodoroView.style.display !== 'none',
+        habits: !!habitsView && habitsView.style.display !== 'none',
+        progress: !!progressView && progressView.style.display !== 'none',
+      };
+
       if (pomodoroView) {pomodoroView.style.display = 'none';}
       if (habitsView) {habitsView.style.display = 'none';}
       if (progressView) {progressView.style.display = 'none';}
 
       if (index === 0) {
-        if (pomodoroView) {pomodoroView.style.display = 'flex';}
+        showView(pomodoroView, wasVisible.pomodoro);
         document.body.classList.remove('phase-habits', 'phase-progress');
         const event = new CustomEvent('updateColors');
         document.dispatchEvent(event);
       } else {
         document.body.classList.remove('phase-work', 'phase-short', 'phase-long', 'phase-stopwatch');
         if (index === 1 && habitsView) {
-          habitsView.style.display = 'flex';
+          showView(habitsView, wasVisible.habits);
           document.body.classList.add('phase-habits');
           document.body.classList.remove('phase-progress');
         }
         if (index === 2 && progressView) {
-          progressView.style.display = 'flex';
+          showView(progressView, wasVisible.progress);
           document.body.classList.remove('phase-habits');
           document.body.classList.add('phase-progress');
           // FIX: this used to dispatch synchronously, right here in the

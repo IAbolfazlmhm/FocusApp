@@ -78,10 +78,17 @@
   font-size: 0.8rem;
 }
 
-.dropdown-item:hover {
+@media (hover: hover) {
+  .dropdown-item:hover {
+    background: var(--btn-bg);
+    color: var(--text-main);
+    transform: translateX(3px);
+  }
+}
+
+.dropdown-item:active {
   background: var(--btn-bg);
   color: var(--text-main);
-  transform: translateX(3px);
 }
 
 .dropdown-item.active-sort {

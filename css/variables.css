@@ -2,8 +2,22 @@
 /* CSS VARIABLES & THEMES                     */
 /* ========================================== */
 :root {
-  /* --- Surface & text (theme-dependent, redefined below for dark) --- */
-  --bg-main: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  /* --- Background system (atmospheric, not a big gradient identity) ---
+     --bg-base is a stable, flat, theme-correct color — it is what paints
+     immediately, is what mobile overscroll/rubber-band ever reveals (see
+     `html` in reset.css), and is the one thing that must NEVER be a
+     gradient (gradients aren't valid `color` values, and a couple of
+     "selected" pills below intentionally reuse this as a text color —
+     see .icon-option.selected / .day-option.selected in habits.css).
+     --bg-glow-primary/secondary are extremely soft radial tints composited
+     on top of --bg-base (see body::before in reset.css); --bg-accent is a
+     single restrained hue that the active phase/tab nudges — never a full
+     background replacement. Phase blocks below only ever redeclare these
+     three plus --theme-color. */
+  --bg-base: #eef1f8;
+  --bg-glow-primary: rgba(59, 130, 246, 0.14);
+  --bg-glow-secondary: rgba(139, 92, 246, 0.10);
+  --bg-accent: #3b82f6;
   --glass-bg: rgba(255, 255, 255, 0.25);
   --modal-bg: rgba(255, 255, 255, 0.65);
   --glass-border: rgba(255, 255, 255, 0.4);
@@ -55,14 +69,21 @@
   --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.15);
   --shadow-lg: 0 8px 20px rgba(0, 0, 0, 0.15);
 
-  /* --- Motion --- */
+  /* --- Motion ---
+     One scale, used everywhere instead of one-off durations per component:
+     instant = immediate micro-feedback (press states), fast = hovers/small
+     toggles, base = default for most transitions (tab switches, modals),
+     slow = ambient/background changes that shouldn't draw the eye. */
+  --transition-instant: 0.1s ease;
   --transition-fast: 0.2s ease;
   --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body[data-theme="dark"] {
-  --bg-main: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --bg-base: #0b1120;
+  --bg-glow-primary: rgba(59, 130, 246, 0.12);
+  --bg-glow-secondary: rgba(139, 92, 246, 0.08);
   --glass-bg: rgba(30, 41, 59, 0.6);
   --modal-bg: rgba(30, 41, 59, 0.55);
   --glass-border: rgba(255, 255, 255, 0.1);
@@ -74,57 +95,72 @@ body[data-theme="dark"] {
   --btn-hover: rgba(255, 255, 255, 0.2);
 }
 
-/* --- DYNAMIC PHASE BACKGROUNDS & THEME COLORS ---
-   Phases only ever set the --bg-main variable (+ --theme-color); the
-   actual painting happens once, in the body::before layer defined in
-   reset.css. See the comment there for why the background lives on a
-   fixed pseudo-element instead of directly on body. */
+/* --- DYNAMIC PHASE ACCENTS & THEME COLORS ---
+   Phases used to swap in an entirely different saturated linear-gradient
+   as --bg-main — a strong "gradient wallpaper" identity that also had to
+   be recomputed as the page/body grew (a source of the mobile background
+   bugs this file used to carry workarounds for). Now phases only ever
+   nudge two low-opacity glow tints + one accent hue; --bg-base never
+   changes. The actual painting happens once, in the body::before layer
+   defined in reset.css. */
 body {
   --theme-color: #3b82f6;
 }
 
 body.phase-work {
-  --bg-main: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+  --bg-glow-primary: rgba(244, 63, 94, 0.14);
+  --bg-glow-secondary: rgba(251, 113, 133, 0.10);
+  --bg-accent: #f43f5e;
   --theme-color: #f43f5e;
 }
 
 body.phase-short {
-  --bg-main: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  --bg-glow-primary: rgba(20, 184, 166, 0.14);
+  --bg-glow-secondary: rgba(45, 212, 191, 0.10);
+  --bg-accent: #14b8a6;
   --theme-color: #14b8a6;
 }
 
 body.phase-long {
-  --bg-main: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  --bg-glow-primary: rgba(59, 130, 246, 0.14);
+  --bg-glow-secondary: rgba(96, 165, 250, 0.10);
+  --bg-accent: #3b82f6;
   --theme-color: #3b82f6;
 }
 
 body.phase-stopwatch {
-  --bg-main: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  --bg-glow-primary: rgba(139, 92, 246, 0.14);
+  --bg-glow-secondary: rgba(167, 139, 250, 0.10);
+  --bg-accent: #8b5cf6;
   --theme-color: #8b5cf6;
 }
 
 body.phase-habits {
-  --bg-main: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+  --bg-glow-primary: rgba(16, 185, 129, 0.14);
+  --bg-glow-secondary: rgba(52, 211, 153, 0.10);
+  --bg-accent: #10b981;
   --theme-color: #10b981;
 }
 
 body.phase-progress {
-  --bg-main: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  --bg-glow-primary: rgba(139, 92, 246, 0.14);
+  --bg-glow-secondary: rgba(167, 139, 250, 0.10);
+  --bg-accent: #8b5cf6;
   --theme-color: #8b5cf6;
 }
 
 /*
-  FIX: dark mode should always show its own flat, dark gradient — never a
-  phase's bright light-mode color. This used to be enforced with a
-  six-selector `body[data-theme="dark"].phase-X { background: ... !important; }`
-  block. Equal-specificity rules resolve by source order, so simply
-  placing this block AFTER every body.phase-* rule above makes
-  `body[data-theme="dark"]`'s --bg-main win the cascade on its own,
-  whether or not a phase class is also present — no !important and no
-  combinatorial selector list needed. (This re-declares the block from
-  the top of this file; CSS custom properties can be safely redeclared
-  further down to win a later cascade point like this.)
+  Dark mode should always show its own dim, neutral glow — never a phase's
+  bright light-mode tint. Equal-specificity rules resolve by source order,
+  so placing this block AFTER every body.phase-* rule above makes
+  `body[data-theme="dark"]`'s glow tokens win on their own, whether or not
+  a phase class is also present — no !important, no combinatorial
+  `body[data-theme="dark"].phase-X` selector list needed. (CSS custom
+  properties can be safely redeclared further down to win a later cascade
+  point like this — same technique the light-mode block above already
+  relies on for --theme-color.)
 */
 body[data-theme="dark"] {
-  --bg-main: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --bg-glow-primary: rgba(59, 130, 246, 0.12);
+  --bg-glow-secondary: rgba(139, 92, 246, 0.08);
 }

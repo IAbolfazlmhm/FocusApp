@@ -119,6 +119,13 @@ export function calculateStats(startDate, endDate, currentTasks, currentHabits) 
   let totalExpectedLogs = 0, totalSuccessfulLogs = 0;
   let totalTasksCreated = 0, totalTasksCompleted = 0;
 
+  // Taskless-session time (see timer.js's addTasklessFocusTime) — read
+  // once per call rather than importing timer.js just for the key name,
+  // matching this file's existing convention of inlining localStorage
+  // keys (e.g. readJSON('focusTasks', ...) below) instead of a cross-
+  // module import for a single string constant.
+  const tasklessByDate = readJSON('focusTasklessTime', {});
+
   const d = new Date(startDate);
   while (d <= endDate) {
     const localDateStr = getLocalDateKey(d);
@@ -158,6 +165,13 @@ export function calculateStats(startDate, endDate, currentTasks, currentHabits) 
           totalTasksCompleted++;
         }
       });
+
+      // Taskless sessions earned this day — previously discarded
+      // entirely (nothing stored them). Counted alongside task time
+      // here since both represent real work-phase minutes; the Daily
+      // Report modal breaks the two back out separately (see
+      // openDailyReport below) for anyone who wants that distinction.
+      dailyFocus += Math.floor((tasklessByDate[localDateStr] || 0) / 60);
     }
 
     if (showHabits) {
@@ -283,6 +297,10 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
   // one reflow for the whole heatmap instead of one per day.
   const fragment = document.createDocumentFragment();
 
+  // Taskless-session time — see calculateStats() above for why this is
+  // read locally instead of imported from timer.js.
+  const tasklessByDate = readJSON('focusTasklessTime', {});
+
   days.forEach(d => {
     const dateStr = getLocalDateKey(d);
     let mins = 0;
@@ -306,6 +324,8 @@ function renderFocusHeatmap(startDate, endDate, currentTasks) {
         if (t.completed) {doneTasks++;}
       }
     });
+
+    mins += Math.floor((tasklessByDate[dateStr] || 0) / 60);
 
     const block = document.createElement('div');
     block.className = 'heatmap-block';
@@ -433,6 +453,15 @@ function openDailyReport(dateObj) {
       if (t.completed) {html += `<div class="report-item success"><span><strike>${escapeHTML(t.text)}</strike></span> <span>${timeBadge}</span></div>`;}
       else {html += `<div class="report-item failed"><span>${escapeHTML(t.text)}</span> <span>${timeBadge}</span></div>`;}
     });
+
+    // Taskless sessions (see timer.js's addTasklessFocusTime) — kept as
+    // its own line rather than folded into a task, since it's real
+    // focus time earned with no task attached to it.
+    const tasklessByDate = readJSON('focusTasklessTime', {});
+    const tasklessSeconds = tasklessByDate[localDateStr] || 0;
+    if (tasklessSeconds > 0) {
+      html += `<div class="report-item"><span>Focus time (no task)</span> <span>${formatTaskTime(tasklessSeconds)}</span></div>`;
+    }
   }
 
   if (showHabits) {
@@ -582,12 +611,12 @@ export function setupProgressEvents() {
     rangeDropdown.querySelectorAll('.dropdown-item').forEach(item => {
       item.addEventListener('click', () => {
         const selectedRange = item.dataset.range;
-        rangeDropdown.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active-sort'));
-        item.classList.add('active-sort');
 
         if (selectedRange === 'custom') {
           openCustomRangeModal();
         } else {
+          rangeDropdown.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('active-sort'));
+          item.classList.add('active-sort');
           timeRange = selectedRange;
           refDate = new Date();
           if (rangeDisplay) {rangeDisplay.textContent = item.textContent;}
@@ -602,6 +631,7 @@ export function setupProgressEvents() {
 
   const applyCustomBtn = document.getElementById('apply-custom-range');
   const closeCustomBtn = document.getElementById('close-custom-range');
+  const cancelCustomBtn = document.getElementById('cancel-custom-range');
   const rangeStartInput = document.getElementById('range-start-input');
   const rangeEndInput = document.getElementById('range-end-input');
 
@@ -629,6 +659,7 @@ export function setupProgressEvents() {
   };
 
   if (closeCustomBtn) {closeCustomBtn.addEventListener('click', closeCustomRangeModal);}
+  if (cancelCustomBtn) {cancelCustomBtn.addEventListener('click', closeCustomRangeModal);}
 
   if (applyCustomBtn && customRangeModal) {
     applyCustomBtn.addEventListener('click', () => {

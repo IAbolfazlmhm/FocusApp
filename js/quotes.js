@@ -7,7 +7,7 @@
 // feature module owning its DOM over storage.js/state.js.
 
 import { escapeHTML, showToast, customConfirm, setupSelectDropdown } from './ui-utils.js';
-import { getUserQuotes, addUserQuote, updateUserQuote, deleteUserQuote } from './motivation.js';
+import { getUserQuotes, addUserQuote, updateUserQuote, deleteUserQuote, toggleUserQuoteEnabled } from './motivation.js';
 
 const CATEGORY_LABELS = { general: 'General', focus: 'Focus', habits: 'Habits' };
 const MAX_QUOTE_LENGTH = 140;
@@ -51,7 +51,8 @@ export function setupQuotesEvents() {
 
     quotes.forEach(q => {
       const row = document.createElement('div');
-      row.className = 'quote-manage-item';
+      const isEnabled = q.enabled !== false;
+      row.className = `quote-manage-item${isEnabled ? '' : ' quote-disabled'}`;
       row.dataset.id = q.id;
       // escapeHTML on both fields — quote text and category label are the
       // only user-supplied strings in this template.
@@ -61,6 +62,9 @@ export function setupQuotesEvents() {
           <p>&ldquo;${escapeHTML(q.quote)}&rdquo;</p>
         </div>
         <div class="quote-manage-actions">
+          <button type="button" class="icon-btn toggle-quote-btn" title="${isEnabled ? 'Disable quote' : 'Enable quote'}" aria-label="${isEnabled ? 'Disable quote' : 'Enable quote'}" aria-pressed="${isEnabled}" data-sound="click">
+            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${isEnabled ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>' : '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.85M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'}</svg>
+          </button>
           <button type="button" class="icon-btn edit-quote-btn" title="Edit quote" aria-label="Edit quote" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
           </button>
@@ -69,6 +73,12 @@ export function setupQuotesEvents() {
           </button>
         </div>
       `;
+
+      row.querySelector('.toggle-quote-btn').addEventListener('click', () => {
+        const nowEnabled = toggleUserQuoteEnabled(q.id);
+        showToast(nowEnabled ? 'Quote enabled' : 'Quote disabled', 'success');
+        renderList();
+      });
 
       row.querySelector('.edit-quote-btn').addEventListener('click', () => {
         editingId = q.id;

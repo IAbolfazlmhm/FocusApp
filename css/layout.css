@@ -90,6 +90,11 @@
   gap: 40px; 
   justify-content: center; 
   flex-wrap: wrap;
+  /* Paired with showView() in ui-utils.js, which sets opacity/transform
+     inline right after toggling display — see the comment there for why
+     a tab switch needs two properties to fade+settle instead of just
+     popping into place. */
+  transition: opacity var(--transition-base), transform var(--transition-base);
 }
 
 /* --- GLOBAL HEIGHT & TEXT FIXES --- */

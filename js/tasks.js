@@ -351,11 +351,20 @@ export function addTask() {
 }
 
 function removeTask(id) {
+  // FIX: checkAutoPause() used to fire unconditionally on every removal.
+  // Its handler (timer.js) pauses the timer whenever focusedTaskId is
+  // null and the timer is running — which is now also true, legitimately,
+  // during an intentional taskless session (see timer.js). Removing some
+  // unrelated task while running taskless would have incorrectly paused
+  // that session, since focusedTaskId was already null for an unrelated
+  // reason. Only call it when the task actually being removed was the
+  // one holding focus.
+  const wasFocused = focusedTaskId === id;
   setTasks(tasks.filter(t => t.id !== id));
-  if (focusedTaskId === id) {setFocusedTaskId(null);}
+  if (wasFocused) {setFocusedTaskId(null);}
   saveTasks();
   renderTasks();
-  checkAutoPause();
+  if (wasFocused) {checkAutoPause();}
 }
 
 function toggleCompleted(id) {
@@ -364,9 +373,28 @@ function toggleCompleted(id) {
     t.completed = !t.completed;
     t.completedAt = t.completed ? Date.now() : null;
 
+    // FIX: toggleFocus() already refuses to let a completed task become
+    // focused ("Task completed!" toast below) — i.e. this app's own rule
+    // is that completed tasks aren't focusable. But completing a task
+    // that was ALREADY focused never released that focus, leaving the
+    // timer silently tracking time against a task that's now done. This
+    // makes the same rule apply going the other direction: completing
+    // the focused task releases focus too, instead of only blocking the
+    // reverse case.
+    //
+    // checkAutoPause() is likewise only called when this action actually
+    // changed focus — see the matching comment in removeTask() above;
+    // completing some unrelated task must never touch a taskless
+    // session that's already running.
+    let releasedFocus = false;
+    if (t.completed && focusedTaskId === id) {
+      setFocusedTaskId(null);
+      releasedFocus = true;
+    }
+
     saveTasks();
     renderTasks();
-    checkAutoPause();
+    if (releasedFocus) {checkAutoPause();}
   }
 }
 

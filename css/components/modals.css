@@ -24,12 +24,33 @@
   pointer-events: auto;
 }
 
+/*
+  FIX: .modal-content used to be the scrolling element itself
+  (overflow-y: auto directly on this rounded, padded box) — which put a
+  full-height straight scrollbar track inside a box with a 30px
+  border-radius. Browsers don't clip a scrollbar to a border-radius on
+  the same element it scrolls, so the track visibly ran past the curve
+  at the top and bottom corners, and the header (with the close button)
+  scrolled away with the rest of the content instead of staying put.
+
+  This element is now a plain, non-scrolling rounded shell: overflow:
+  hidden guarantees everything inside — including any child's scrollbar —
+  is clipped to the 30px radius, full stop. It's a flex column so
+  .modal-header can stay pinned (flex-shrink: 0) while .modal-body (below)
+  becomes the one scrollable region, inset from the rounded edges by the
+  shell's own padding. This is the reusable pattern: any modal using the
+  existing .modal-content > .modal-header + .modal-body structure gets
+  it automatically, with no per-modal CSS.
+*/
 .modal-content {
   background: var(--modal-bg);
   width: 90%;
   max-width: 400px;
   max-height: 85vh;
-  overflow-y: auto;
+  max-height: 85dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   border-radius: 30px;
   padding: 25px;
   box-shadow: var(--glass-shadow);
@@ -39,12 +60,31 @@
 }
 
 /*
+  The actual scroll region. flex: 1 lets it fill whatever space
+  .modal-header (pinned above) doesn't use; min-height: 0 is required
+  for a flex child to be allowed to shrink below its content's natural
+  height instead of overflowing the flex column. The negative right
+  margin + matching padding keeps the scrollbar gutter from shifting
+  body content left when a scrollbar appears (the classic "layout jumps
+  when a scrollbar shows up" issue) — width is unaffected either way,
+  since the gutter and the inset perfectly cancel out.
+*/
+.modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin-right: -8px;
+  padding-right: 8px;
+}
+
+/*
   Themed scrollbar for modals now comes from the app-wide default in
   reset.css — see the comment there. Only the width override stays here
   (6px reads better inside a modal's narrower content column than the
-  8px global default).
+  8px global default). Scoped to .modal-body now, since that's the
+  element that actually scrolls.
 */
-.modal-content::-webkit-scrollbar {
+.modal-body::-webkit-scrollbar {
   width: 6px;
 }
 
@@ -59,6 +99,7 @@
   margin-bottom: 20px;
   border-bottom: 1px solid var(--glass-border);
   padding-bottom: 15px;
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -84,7 +125,13 @@
   transition: color 0.2s;
 }
 
-.close-btn:hover {
+@media (hover: hover) {
+  .close-btn:hover {
+    color: var(--danger-color);
+  }
+}
+
+.close-btn:active {
   color: var(--danger-color);
 }
 .setting-group {
@@ -242,6 +289,19 @@ body[data-theme="dark"] #confirm-message {
   like every other themed button fixes that.
 */
 
+/*
+  Daily report modal keeps its own shorter cap (this modal tends to be
+  opened repeatedly while browsing the heatmap, so leaving more of the
+  backdrop visible reads as lighter-weight than the standard modal
+  cap). This used to be an inline style on the element
+  (style="max-height: 60vh; overflow-y: auto; padding-right: 5px") —
+  moved here now that .modal-body above already supplies the overflow/
+  scrollbar-gutter behavior; this rule only needs to override the cap.
+*/
+#report-modal-body {
+  max-height: 60vh;
+}
+
 /* --- MANAGE QUOTES MODAL ---
    A vertical list rather than the wrapped chip grid used by tags/
    categories (.tags-list-grid) — quote text runs too long per-item to
@@ -266,6 +326,14 @@ body[data-theme="dark"] #confirm-message {
   border-radius: 16px;
   background: var(--btn-bg);
   border: 1px solid var(--glass-border);
+  transition: opacity var(--transition-fast);
+}
+
+/* Disabled quotes stay in the list (so re-enabling is one click) but
+   read as visibly inactive — same "present but dimmed" language
+   .task-item.completed already uses elsewhere in the app. */
+.quote-manage-item.quote-disabled {
+  opacity: 0.55;
 }
 
 .quote-manage-text {
@@ -304,7 +372,21 @@ body[data-theme="dark"] #confirm-message {
   height: 32px;
 }
 
-.quote-manage-actions .delete-quote-btn:hover {
+@media (hover: hover) {
+  .quote-manage-actions .toggle-quote-btn:hover {
+    color: var(--theme-color, #3b82f6);
+  }
+
+  .quote-manage-actions .delete-quote-btn:hover {
+    color: var(--danger-color);
+  }
+}
+
+.quote-manage-actions .toggle-quote-btn:active {
+  color: var(--theme-color, #3b82f6);
+}
+
+.quote-manage-actions .delete-quote-btn:active {
   color: var(--danger-color);
 }
 

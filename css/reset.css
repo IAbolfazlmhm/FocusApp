@@ -93,6 +93,24 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/*
+  `html`'s own background is what mobile browsers paint behind the page
+  during rubber-band overscroll (dragging past the top/bottom edge) —
+  that gesture briefly reveals the canvas *outside* the viewport that
+  body::before's `position: fixed; inset: 0` covers, which is normally
+  the browser's default white, regardless of theme. Without this, that
+  overscroll bounce showed a white flash even in dark mode. A flat,
+  theme-correct color here (not a gradient — see --bg-base's own comment
+  in variables.css) closes that gap for both themes. overscroll-behavior-y
+  additionally suppresses the bounce/pull-to-refresh gesture itself on
+  browsers that support it, which removes the visible cause rather than
+  just recoloring it.
+*/
+html {
+  background: var(--bg-base);
+  overscroll-behavior-y: none;
+}
+
 body {
   min-height: 100vh;
   display: flex;
@@ -103,27 +121,38 @@ body {
 }
 
 /*
-  The phase gradient lives on this fixed, viewport-sized pseudo-element
+  The background lives on this fixed, viewport-sized pseudo-element
   instead of directly on <body>. body's own height grows with scrolling
   content (habit lists, heatmaps) and changes as that content renders in;
-  since a linear-gradient's endpoints are computed from its own box size,
-  painting it straight on body meant the gradient visibly recomputed
+  a background painted straight on body would visibly recompute/shift
   every time body's height changed after first paint — seen on mobile as
   the background "stopping" and repainting from a different position,
   most noticeably on the Habits and Progress tabs where content height
   varies most. Pinning it to the viewport via position:fixed removes the
-  dependency on content height entirely; it only ever needs to repaint
-  when --bg-main itself changes (tab/phase switch), which is what the
-  transition below now actually animates — background-color could never
-  do that, because these are gradients (background-image), not colors.
+  dependency on content height entirely.
+
+  The layer itself is a stable solid base (--bg-base) plus two very soft
+  radial-gradient glows — not a single saturated gradient spanning the
+  whole viewport. Phase/tab switches only nudge the glow tints and
+  --bg-accent (see variables.css), so this transitions as a gentle shift
+  in ambient color rather than a full backdrop swap. Both gradients keep
+  the same shape/stop structure across every phase (only the color
+  values differ), which is what makes them smoothly animatable here —
+  browsers can't meaningfully interpolate between two *structurally*
+  different gradients, only equivalent ones with changing colors.
 */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: var(--bg-main);
-  transition: background var(--transition-slow, 0.5s cubic-bezier(0.4, 0, 0.2, 1));
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(circle at 18% 20%, var(--bg-glow-primary), transparent 45%),
+    radial-gradient(circle at 82% 85%, var(--bg-glow-secondary), transparent 50%);
+  transition:
+    background-color var(--transition-slow, 0.5s cubic-bezier(0.4, 0, 0.2, 1)),
+    background-image var(--transition-slow, 0.5s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 /* FIX: was `transition: all` on all these elements. "all" watches every

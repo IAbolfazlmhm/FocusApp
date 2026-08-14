@@ -355,8 +355,9 @@ export function setupHabitsEvents() {
       if (fVal === 'custom') {
         document.getElementById('custom-days-picker').style.display = 'flex';
         dayOptions.forEach(d => {
-          d.classList.remove('selected');
-          if (habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day, 10))) {d.classList.add('selected');}
+          const selected = !!(habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day, 10)));
+          d.classList.toggle('selected', selected);
+          d.setAttribute('aria-pressed', String(selected));
         });
       } else {
         document.getElementById('custom-days-picker').style.display = 'none';
@@ -474,7 +475,10 @@ export function setupHabitsEvents() {
 
       // Reset color and icon selections
       if (customDaysPicker) {customDaysPicker.style.display = 'none';}
-      dayOptions.forEach(d => d.classList.remove('selected'));
+      dayOptions.forEach(d => {
+        d.classList.remove('selected');
+        d.setAttribute('aria-pressed', 'false');
+      });
 
       // FIX: this reset never actually happened — a comment claimed the
       // color/icon pickers were being reset to the first option, but no
@@ -669,7 +673,9 @@ export function setupHabitsEvents() {
   // Custom Days Interaction
   dayOptions.forEach(day => {
     day.addEventListener('click', () => {
-      day.classList.toggle('selected');
+      const nowSelected = !day.classList.contains('selected');
+      day.classList.toggle('selected', nowSelected);
+      day.setAttribute('aria-pressed', String(nowSelected));
     });
   });
 

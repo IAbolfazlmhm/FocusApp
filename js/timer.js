@@ -14,6 +14,27 @@ import { getLocalDateKey } from './date-utils.js';
 // instead of a bare "10" buried in updateDisplay().
 const TAB_TITLE_TASK_NAME_MAX_LENGTH = 24;
 
+// FIX: work/stopwatch sessions can now run without a focused task (a
+// deliberate choice — requiring a task to even start the timer was
+// blocking legitimate "just work, don't bookkeep it" sessions). Before
+// this, that time was tracked nowhere: the per-task timeSpent/timeByDate
+// block below only ever fires when focusedTaskId isn't null, so a whole
+// taskless session would complete, sound its alarm, count toward
+// completedSessions — and then vanish from every focus-time stat, since
+// nothing was ever storing it. This is a minimal, separate accumulator
+// (keyed by day, exactly like task.timeByDate) so that time counts
+// toward the Progress tab's totals/heatmap instead of being discarded.
+// Exported so progress.js can read the same key when building stats.
+export const TASKLESS_TIME_KEY = 'focusTasklessTime';
+
+function addTasklessFocusTime(seconds) {
+  if (seconds <= 0) {return;}
+  const byDate = readJSON(TASKLESS_TIME_KEY, {});
+  const todayKey = getLocalDateKey();
+  byDate[todayKey] = (byDate[todayKey] || 0) + seconds;
+  writeJSON(TASKLESS_TIME_KEY, byDate);
+}
+
 // Note: These will be exported from tasks.js in the next steps.
 // We import them here to maintain modularity.
 import { saveTasks, formatTaskTime } from './tasks.js';
@@ -338,6 +359,11 @@ export function toggleTimer() {
             const badge = document.getElementById(`badge-${activeTask.id}`);
             if (badge) {badge.innerHTML = formatTaskTime(activeTask.timeSpent);}
           }
+        }
+      } else if (deltaSeconds > 0 && focusedTaskId === null) {
+        // Taskless session — see addTasklessFocusTime()'s comment above.
+        if ((modeSelect && modeSelect.value === 'stopwatch') || currentPhase === 'work') {
+          addTasklessFocusTime(deltaSeconds);
         }
       }
 

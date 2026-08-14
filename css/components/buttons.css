@@ -64,9 +64,16 @@ svg.phase-icon {
   border-color: transparent;
 }
 
-.btn-primary:hover {
-  filter: brightness(0.92);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .btn-primary:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-primary:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
 }
 
 /* Neutral action alongside a primary/danger one — Cancel, "keep as-is". */
@@ -77,9 +84,16 @@ svg.phase-icon {
   flex: 1;
 }
 
-.btn-secondary:hover {
+@media (hover: hover) {
+  .btn-secondary:hover {
+    background: var(--glass-bg);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-secondary:active {
   background: var(--glass-bg);
-  transform: translateY(-2px);
+  transform: scale(0.97);
 }
 
 .btn-danger {
@@ -88,9 +102,16 @@ svg.phase-icon {
   border: none;
 }
 
-.btn-danger:hover {
-  filter: brightness(0.92);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .btn-danger:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-danger:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
 }
 
 .btn-warning {
@@ -99,9 +120,16 @@ svg.phase-icon {
   border: none;
 }
 
-.btn-warning:hover {
-  filter: brightness(0.92);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .btn-warning:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+.btn-warning:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
 }
 
 /* Full-width solid submit button anchoring the bottom of a modal/form
@@ -122,8 +150,14 @@ svg.phase-icon {
   transition: filter 0.2s ease;
 }
 
-.btn-block:hover {
-  filter: brightness(0.9);
+@media (hover: hover) {
+  .btn-block:hover {
+    filter: brightness(0.9);
+  }
+}
+
+.btn-block:active {
+  filter: brightness(0.85);
 }
 
 .btn-outline {
@@ -138,10 +172,17 @@ svg.phase-icon {
   transition: background-color 0.2s, transform 0.2s, color 0.2s, border-color 0.2s;
 }
 
-.btn-outline:hover {
+@media (hover: hover) {
+  .btn-outline:hover {
+    background: var(--theme-color, #3b82f6);
+    color: white;
+    transform: translateY(-2px);
+  }
+}
+
+.btn-outline:active {
   background: var(--theme-color, #3b82f6);
   color: white;
-  transform: translateY(-2px);
 }
 
 .icon-btn {
@@ -160,8 +201,15 @@ svg.phase-icon {
 }
 
 /* BUG FIX: Settings gear and arrows now hover in the phase theme color */
-.icon-btn:hover {
-  transform: scale(1.1);
+@media (hover: hover) {
+  .icon-btn:hover {
+    transform: scale(1.1);
+    color: var(--theme-color);
+  }
+}
+
+.icon-btn:active {
+  transform: scale(1.05);
   color: var(--theme-color);
 }
 
@@ -192,31 +240,65 @@ svg.phase-icon {
 }
 
 /* Phase-specific hovers for theme-circle-btn */
-body.phase-work .theme-circle-btn:hover {
+@media (hover: hover) {
+  body.phase-work .theme-circle-btn:hover {
+    background-color: #f43f5e;
+    color: #fff;
+    border-color: #f43f5e;
+  }
+
+  body.phase-short .theme-circle-btn:hover {
+    background-color: #14b8a6;
+    color: #fff;
+    border-color: #14b8a6;
+  }
+
+  body.phase-long .theme-circle-btn:hover {
+    background-color: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+  }
+
+  body.phase-stopwatch .theme-circle-btn:hover {
+    background-color: #8b5cf6;
+    color: #fff;
+    border-color: #8b5cf6;
+  }
+
+  body.phase-habits .theme-circle-btn:hover {
+    background-color: #10b981;
+    color: #fff;
+    border-color: #10b981;
+  }
+}
+
+/* Same phase colors, driven by :active instead of :hover, so touch users
+   get the identical tactile confirmation mouse users get from hover. */
+body.phase-work .theme-circle-btn:active {
   background-color: #f43f5e;
   color: #fff;
   border-color: #f43f5e;
 }
 
-body.phase-short .theme-circle-btn:hover {
+body.phase-short .theme-circle-btn:active {
   background-color: #14b8a6;
   color: #fff;
   border-color: #14b8a6;
 }
 
-body.phase-long .theme-circle-btn:hover {
+body.phase-long .theme-circle-btn:active {
   background-color: #3b82f6;
   color: #fff;
   border-color: #3b82f6;
 }
 
-body.phase-stopwatch .theme-circle-btn:hover {
+body.phase-stopwatch .theme-circle-btn:active {
   background-color: #8b5cf6;
   color: #fff;
   border-color: #8b5cf6;
 }
 
-body.phase-habits .theme-circle-btn:hover {
+body.phase-habits .theme-circle-btn:active {
   background-color: #10b981;
   color: #fff;
   border-color: #10b981;
@@ -227,9 +309,16 @@ body.phase-habits .theme-circle-btn:hover {
   background-color: #10b981;
   color: #fff;
 }
-#quick-add-habit-btn:hover {
-  filter: brightness(0.92);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  #quick-add-habit-btn:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+#quick-add-habit-btn:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
 }
 
 /* Tag Management Add button - ensure it follows theme color in light mode */
@@ -238,8 +327,15 @@ body.phase-habits .theme-circle-btn:hover {
   color: #fff;
   border: none;
 }
-#manage-add-tag-btn:hover {
-  filter: brightness(0.92);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  #manage-add-tag-btn:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+#manage-add-tag-btn:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
 }
 

@@ -58,7 +58,12 @@ function loadQuotes() {
  */
 async function getCombinedQuotes() {
   const builtIn = await loadQuotes();
-  return userQuotes.length > 0 ? builtIn.concat(userQuotes) : builtIn;
+  // Built-ins have no `enabled` field and are always eligible; a user
+  // quote is excluded only when explicitly disabled (enabled === false),
+  // so quotes added before this feature existed (enabled === undefined)
+  // keep rotating exactly as before.
+  const activeUserQuotes = userQuotes.filter(q => q.enabled !== false);
+  return activeUserQuotes.length > 0 ? builtIn.concat(activeUserQuotes) : builtIn;
 }
 
 export async function getRandomQuote(category = null) {
@@ -86,7 +91,7 @@ export function getUserQuotes() {
 }
 
 export function addUserQuote(quoteText, category) {
-  const entry = { id: generateId(), quote: quoteText, category };
+  const entry = { id: generateId(), quote: quoteText, category, enabled: true };
   const updated = [...userQuotes, entry];
   setUserQuotes(updated);
   writeJSON('focusUserQuotes', updated);
@@ -97,6 +102,21 @@ export function updateUserQuote(id, { quote: quoteText, category }) {
   const updated = userQuotes.map(q => (q.id === id ? { ...q, quote: quoteText, category } : q));
   setUserQuotes(updated);
   writeJSON('focusUserQuotes', updated);
+}
+
+// Temporarily removes a quote from rotation without losing its text —
+// distinct from deleting it. Returns the new enabled state so the caller
+// can update its UI without a second read of the list.
+export function toggleUserQuoteEnabled(id) {
+  let nowEnabled = true;
+  const updated = userQuotes.map(q => {
+    if (q.id !== id) {return q;}
+    nowEnabled = !(q.enabled !== false);
+    return { ...q, enabled: nowEnabled };
+  });
+  setUserQuotes(updated);
+  writeJSON('focusUserQuotes', updated);
+  return nowEnabled;
 }
 
 export function deleteUserQuote(id) {

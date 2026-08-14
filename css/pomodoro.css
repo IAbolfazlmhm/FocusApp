@@ -172,9 +172,16 @@
    components.css; .start-btn isn't part of the .btn family (it's the
    large dedicated timer control, not a generic action button) so it
    keeps its own copy of the same treatment here. */
-.start-btn:hover {
+@media (hover: hover) {
+  .start-btn:hover {
+    filter: brightness(0.85);
+    transform: translateY(-2px);
+  }
+}
+
+.start-btn:active {
   filter: brightness(0.85);
-  transform: translateY(-2px);
+  transform: translateY(0) scale(0.97);
 }
 
 .start-btn.pause {
@@ -183,10 +190,17 @@
   box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.start-btn.pause:hover {
+@media (hover: hover) {
+  .start-btn.pause:hover {
+    opacity: 1;
+    transform: scale(1);
+    filter: brightness(0.85);
+  }
+}
+
+.start-btn.pause:active {
   opacity: 1;
-  transform: scale(1);
-  filter: brightness(0.85);
+  filter: brightness(0.8);
 }
 
 .reset-btn {
@@ -200,11 +214,21 @@
   margin-left: 10px;
 }
 
-.reset-btn:hover {
+@media (hover: hover) {
+  .reset-btn:hover {
+    color: #3b82f6 !important;
+  }
+
+  .skip-btn:hover {
+    color: #eab308 !important;
+  }
+}
+
+.reset-btn:active {
   color: #3b82f6 !important;
 }
 
-.skip-btn:hover {
+.skip-btn:active {
   color: #eab308 !important;
 }
 
@@ -318,9 +342,20 @@
   cursor: pointer;
 }
 
-.task-item:hover {
-  border-color: var(--glass-border-hover);
-  box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2);
+/* FIX: was `border-color: var(--glass-border-hover)` — that token was
+   never defined anywhere, so this hover state silently did nothing but
+   apply its box-shadow. --theme-color matches the border-tint-on-hover
+   treatment already used by other card-like surfaces (e.g. .tag-select-btn
+   below), for a consistent hover language across the app. */
+@media (hover: hover) {
+  .task-item:hover {
+    border-color: var(--theme-color);
+    box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2);
+  }
+}
+
+.task-item:active {
+  box-shadow: 0 2px 6px rgba(142, 202, 230, 0.2);
 }
 
 /*
@@ -439,27 +474,41 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.done-btn:hover {
-  background: var(--success-color);
-  color: white;
-  border-color: var(--success-color);
-  transform: translateY(-2px);
-}
-
-.remove-btn:hover {
-  background: var(--danger-color);
-  color: white;
-  border-color: var(--danger-color);
-  transform: translateY(-2px);
-}
-
 @media (hover: hover) {
+  .done-btn:hover {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+    transform: translateY(-2px);
+  }
+
+  .remove-btn:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+    transform: translateY(-2px);
+  }
+
   .focus-btn:hover {
     background: #3b82f6;
     color: white;
     border-color: #3b82f6;
     transform: translateY(-2px);
   }
+}
+
+.done-btn:active {
+  background: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+  transform: scale(0.97);
+}
+
+.remove-btn:active {
+  background: var(--danger-color);
+  color: white;
+  border-color: var(--danger-color);
+  transform: scale(0.97);
 }
 
 .focus-btn:active {
@@ -609,12 +658,18 @@ body.phase-stopwatch .filter-bubble {
   transition: color 0.2s;
 }
 
-#pomodoro-date-display:hover, #habit-date-display:hover {
-  color: var(--theme-color) !important;
+/* FIX: the dark-mode-scoped duplicate of this rule (identical selector,
+   identical `color: var(--theme-color) !important`) was removed —
+   --theme-color already resolves to the correct per-theme value via
+   variables.css, so the duplicate was dead weight, not an actual
+   dark-mode override. */
+@media (hover: hover) {
+  #pomodoro-date-display:hover, #habit-date-display:hover {
+    color: var(--theme-color) !important;
+  }
 }
 
-body[data-theme="dark"] #pomodoro-date-display:hover,
-body[data-theme="dark"] #habit-date-display:hover {
+#pomodoro-date-display:active, #habit-date-display:active {
   color: var(--theme-color) !important;
 }
 
@@ -639,10 +694,15 @@ body.phase-work .start-btn, body.phase-work .tasks-section .btn-primary {
   border: none;
 }
 
-body.phase-work .task-item:hover {
-  border-color: var(--theme-color);
-  box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2);
-}
+/* FIX: body.phase-{work,short,long,stopwatch,habits} .task-item:hover
+   overrides removed — same dead pattern as the progress-ring-circle/
+   time-display ones already noted above. Each just re-set
+   `border-color: var(--theme-color)`, which the base `.task-item:hover`
+   rule already does (see near the top of this file), since --theme-color
+   itself is what variables.css redefines per phase. Only the box-shadow
+   tint actually differed between phases, for an effect subtle enough
+   not to be worth 5 near-duplicate blocks; the base rule's neutral
+   shadow now applies uniformly. */
 
 body.phase-short .active-bubble {
   background-color: var(--theme-color);
@@ -658,11 +718,6 @@ body.phase-short .start-btn, body.phase-short .tasks-section .btn-primary {
   border: none;
 }
 
-body.phase-short .task-item:hover {
-  border-color: var(--theme-color);
-  box-shadow: 0 4px 15px rgba(20, 184, 166, 0.2);
-}
-
 body.phase-long .active-bubble {
   background-color: var(--theme-color);
 }
@@ -675,11 +730,6 @@ body.phase-long .start-btn, body.phase-long .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
-}
-
-body.phase-long .task-item:hover {
-  border-color: var(--theme-color);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
 }
 
 /* .progress-ring-circle and .time-display stopwatch overrides removed —
@@ -702,20 +752,10 @@ body.phase-stopwatch .start-btn, body.phase-stopwatch .tasks-section .btn-primar
   border: none;
 }
 
-body.phase-stopwatch .task-item:hover {
-  border-color: var(--theme-color);
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
-}
-
 body.phase-habits .start-btn, body.phase-habits .tasks-section .btn-primary {
   background-color: var(--theme-color);
   color: white;
   border: none;
-}
-
-body.phase-habits .task-item:hover {
-  border-color: var(--theme-color);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
 
 /* --- DARK MODE UI FIXES --- */
@@ -764,9 +804,15 @@ body[data-theme="dark"] #current-phase {
   transition: all 0.2s;
 }
 
-.tag-select-btn:hover {
+@media (hover: hover) {
+  .tag-select-btn:hover {
+    border-color: var(--theme-color);
+    transform: translateY(-1px);
+  }
+}
+
+.tag-select-btn:active {
   border-color: var(--theme-color);
-  transform: translateY(-1px);
 }
 
 .tag-select-btn.selected {
