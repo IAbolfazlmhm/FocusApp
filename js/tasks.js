@@ -7,7 +7,12 @@ import { writeJSON, STORAGE_KEYS } from './storage.js';
 export let currentPomodoroDate = new Date();
 currentPomodoroDate.setHours(0, 0, 0, 0);
 
-import { showToast, icons, escapeHTML, generateId, getTagColor, centerButtonInScrollArea, setupSelectDropdown, customConfirm, setupHorizontalWheelScroll, keepInputVisibleOnMobileKeyboard } from './ui-utils.js';
+import { showToast } from './toast.js';
+import { icons, escapeHTML, generateId } from './dom-utils.js';
+import { getTagColor } from './color-utils.js';
+import { centerButtonInScrollArea, setupHorizontalWheelScroll, keepInputVisibleOnMobileKeyboard } from './scroll-utils.js';
+import { setupSelectDropdown } from './dropdown.js';
+import { customConfirm } from './modal-utils.js';
 
 // ==========================================
 // DOM ELEMENTS
@@ -498,7 +503,7 @@ export function setupTaskEvents() {
         const newName = nameInput.value.trim();
 
         if (!newName) {
-          if (typeof showToast === 'function') {showToast('Task name cannot be empty.', 'warning');}
+          showToast('Task name cannot be empty.', 'warning');
           return;
         }
 
@@ -510,7 +515,7 @@ export function setupTaskEvents() {
 
         saveTasks();
         renderTasks();
-        if (typeof renderFilters === 'function') {renderFilters();}
+        renderFilters();
 
         // Update dynamic title if the active task was edited
         if (typeof focusedTaskId !== 'undefined' && focusedTaskId === task.id) {
@@ -780,7 +785,7 @@ export function setupTaskEvents() {
 
   // --- Sort Button Logic ---
   // Opening, closing, keyboard navigation, and ARIA now live in the shared
-  // setupSelectDropdown() (ui-utils.js). This also switches the dropdown
+  // setupSelectDropdown() (dropdown.js). This also switches the dropdown
   // from a raw inline style.display toggle onto the .show class the CSS
   // already defines for every .custom-dropdown (including its popIn
   // animation), which this dropdown was previously bypassing.
@@ -818,10 +823,7 @@ export function setupTaskEvents() {
 
   // Listen for new tags added from the gear icon to update the modal
   document.addEventListener('refreshTagsManagement', () => {
-    // renderTagsManagement is defined at the bottom of tasks.js
-    if (typeof renderTagsManagement === 'function') {
-      renderTagsManagement();
-    }
+    renderTagsManagement();
   });
 }
 

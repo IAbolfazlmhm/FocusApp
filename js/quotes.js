@@ -6,7 +6,10 @@
 // persistence) lives in motivation.js, same split as every other
 // feature module owning its DOM over storage.js/state.js.
 
-import { escapeHTML, showToast, customConfirm, setupSelectDropdown } from './ui-utils.js';
+import { escapeHTML } from './dom-utils.js';
+import { showToast } from './toast.js';
+import { customConfirm } from './modal-utils.js';
+import { setupSelectDropdown } from './dropdown.js';
 import { getUserQuotes, addUserQuote, updateUserQuote, deleteUserQuote, toggleUserQuoteEnabled } from './motivation.js';
 
 const CATEGORY_LABELS = { general: 'General', focus: 'Focus', habits: 'Habits' };
@@ -151,7 +154,7 @@ export function setupQuotesEvents() {
   // Same split as settings.js's setupCustomDropdown: selection assignment
   // (what happens when an option is picked) stays local to this call
   // site; open/close/keyboard-nav/ARIA come from the shared
-  // setupSelectDropdown() in ui-utils.js.
+  // setupSelectDropdown() in dropdown.js.
   if (categoryDropdown) {
     categoryDropdown.querySelectorAll('.dropdown-item').forEach(item => {
       item.addEventListener('click', () => {

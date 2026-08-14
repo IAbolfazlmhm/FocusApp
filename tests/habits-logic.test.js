@@ -1,7 +1,7 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isHabitActiveOnDate, calculateStreak, getDateKey } from '../js/habits.js';
+import { isHabitActiveOnDate, calculateStreak, getDateKey } from '../js/habits-logic.js';
 
 // Fixed reference point so these tests don't depend on the day they
 // happen to run. A Wednesday.

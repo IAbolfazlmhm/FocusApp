@@ -3,9 +3,15 @@ import {
   setCurrentHabitDate, setHabits, setSavedHabitCategories
 } from './state.js';
 
-import { showToast, escapeHTML, generateId, centerButtonInScrollArea, setupSelectDropdown, customConfirm, registerOutsideClickTarget, setupHorizontalWheelScroll, hexToRgba, isValidHexColor, keepInputVisibleOnMobileKeyboard } from './ui-utils.js';
+import { showToast } from './toast.js';
+import { escapeHTML, generateId } from './dom-utils.js';
+import { centerButtonInScrollArea, setupHorizontalWheelScroll, keepInputVisibleOnMobileKeyboard } from './scroll-utils.js';
+import { setupSelectDropdown, registerOutsideClickTarget } from './dropdown.js';
+import { customConfirm } from './modal-utils.js';
+import { hexToRgba, isValidHexColor } from './color-utils.js';
 import { startQuoteRotation } from './motivation.js';
 import { writeJSON, readRaw, STORAGE_KEYS } from './storage.js';
+import { getDateKey, isHabitActiveOnDate, calculateStreak } from './habits-logic.js';
 
 // ==========================================
 // CENTRALIZED PERSISTENCE
@@ -22,26 +28,6 @@ export function saveHabits() {
 
 export function saveHabitCategories() {
   writeJSON(STORAGE_KEYS.HABIT_CATEGORIES, savedHabitCategories);
-}
-
-// ==========================================
-// BULLETPROOF DATE HELPER
-// ==========================================
-// FIX: this used to be `dayjs(dateObj).format('YYYY-MM-DD')`, pulling in
-// the whole dayjs library (loaded from a CDN <script> tag in index.html)
-// just for local-date formatting. That's a third-party network
-// dependency and a global (`dayjs`) the module relies on implicitly
-// without declaring it — if that CDN request is blocked, slow, or the
-// tag ever gets removed, every habit feature silently breaks with a
-// "dayjs is not defined" error. This does the exact same YYYY-MM-DD
-// local-date formatting timer.js and tasks.js already do elsewhere in
-// the app, with zero dependencies and zero network requests.
-export function getDateKey(dateObj) {
-  const d = new Date(dateObj);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
 }
 
 // ==========================================
@@ -241,7 +227,7 @@ export function renderHabits() {
     }
 
     // --- RESTORED ORIGINAL VARIABLES ---
-    // Validated before use — see isValidHexColor in ui-utils.js for why
+    // Validated before use — see isValidHexColor in color-utils.js for why
     // an unvalidated color string here would be a real injection risk,
     // not just a source of broken CSS, since it's interpolated straight
     // into a style="..." attribute below.
@@ -577,7 +563,7 @@ export function setupHabitsEvents() {
     });
 
     // FIX: this dropdown's options regenerate on every keystroke, so
-    // it doesn't fit the shared setupSelectDropdown() (ui-utils.js)
+    // it doesn't fit the shared setupSelectDropdown() (dropdown.js)
     // used by the app's other 7 dropdowns — that assumes a stable
     // option list and a trigger the dropdown opens FROM. Here the
     // list is already opened by 'input'/'focus' above, so it gets its
@@ -636,7 +622,7 @@ export function setupHabitsEvents() {
 
   // --- CUSTOM FREQUENCY DROPDOWN LOGIC ---
   // Opening, closing, keyboard navigation, and ARIA now live in the
-  // shared setupSelectDropdown() (ui-utils.js) — this block keeps only
+  // shared setupSelectDropdown() (dropdown.js) — this block keeps only
   // the selection assignment specific to this dropdown (display text,
   // hidden value, and showing/hiding the custom-days picker).
   const freqInputDisplay = document.getElementById('habit-frequency-input-display');
@@ -761,7 +747,7 @@ export function setupHabitsEvents() {
       showToast(editingHabitId ? 'Habit Updated!' : 'Habit Created!', 'success');
 
       renderHabits();
-      if (typeof renderHabitCategories === 'function') {renderHabitCategories();}
+      renderHabitCategories();
     });
   }
 
@@ -798,7 +784,7 @@ export function setupHabitsEvents() {
 
   // --- HABIT SORT BUTTON LOGIC ---
   // Opening, closing, keyboard navigation, and ARIA now live in the
-  // shared setupSelectDropdown() (ui-utils.js). This also switches the
+  // shared setupSelectDropdown() (dropdown.js). This also switches the
   // dropdown from a raw inline style.display toggle onto the .show
   // class the CSS already defines for every .custom-dropdown (including
   // its popIn animation), which this dropdown was previously bypassing.
@@ -987,7 +973,7 @@ export function setupHabitsEvents() {
 
       saveHabitsLocal();
       renderHabits();
-      if (typeof updateHabitProgress === 'function') {updateHabitProgress();}
+      updateHabitProgress();
 
       showToast("Habit removed from today.", "success", true);
     }
@@ -1008,7 +994,7 @@ export function setupHabitsEvents() {
       habit.endDate = yesterday.getTime();
       saveHabitsLocal();
       renderHabits();
-      if (typeof updateHabitProgress === 'function') {updateHabitProgress();}
+      updateHabitProgress();
       showToast("Habit archived. History preserved.", "success", true);
     }
     closeDeleteModal();
@@ -1023,7 +1009,7 @@ export function setupHabitsEvents() {
 
     saveHabitsLocal();
     renderHabits();
-    if (typeof updateHabitProgress === 'function') {updateHabitProgress();}
+    updateHabitProgress();
     showToast("Habit and all history deleted.", "success", true);
     closeDeleteModal();
   });
@@ -1068,96 +1054,6 @@ export function toggleHabitLog(habitId, dateKey, status) {
 
   saveHabits();
   renderHabits();
-}
-
-// ==========================================
-// HABIT SCHEDULING LOGIC
-// ==========================================
-export function isHabitActiveOnDate(habit, targetDate) {
-  const target = new Date(targetDate);
-  target.setHours(0, 0, 0, 0);
-
-  // Fallback to habit.id if createdAt is missing for older habits
-  const creationDate = new Date(habit.createdAt || habit.id);
-  creationDate.setHours(0, 0, 0, 0);
-
-  // Prevent rendering before the habit was actually created
-  if (target < creationDate) {return false;}
-
-  // BUG FIX (STEP 4): If the habit was "Stopped", hide it on any days AFTER the stop date!
-  if (habit.endDate && target.getTime() > habit.endDate) {
-    return false;
-  }
-
-  const dayOfWeek = target.getDay();
-  const freq = habit.frequency || 'everyday';
-
-  if (freq === 'everyday') {return true;}
-
-  if (freq === 'custom') {
-    if (!habit.customDays || habit.customDays.length === 0) {return false;}
-    return habit.customDays.map(Number).includes(dayOfWeek);
-  }
-
-  const daysMap = {
-    'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
-    'thursday': 4, 'friday': 5, 'saturday': 6
-  };
-
-  if (daysMap[freq] !== undefined) {return daysMap[freq] === dayOfWeek;}
-
-  if (freq === 'weekly') {
-    const createdDay = creationDate.getDay();
-    return createdDay === dayOfWeek;
-  }
-
-  if (freq === 'biweekly') {
-    const createdDay = creationDate.getDay();
-    if (createdDay !== dayOfWeek) {return false;}
-    // Same day-of-week as weekly, but only on every OTHER occurrence:
-    // count full weeks elapsed since creation and require an even count.
-    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-    const weeksSinceCreation = Math.round((target.getTime() - creationDate.getTime()) / msPerWeek);
-    return weeksSinceCreation % 2 === 0;
-  }
-
-  return true;
-}
-
-// ==========================================
-// STREAK CALCULATION FUNCTION (Plain JS)
-// ==========================================
-export function calculateStreak(habit) {
-  let streak = 0;
-
-  // FIX: previously built on dayjs for midnight-locking and date-walking.
-  // Rewritten with plain Date + the same getDateKey() used everywhere
-  // else in the app, so streaks keep working even if the dayjs CDN
-  // script is blocked, slow, or removed — same logic, zero dependency.
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  const creationDate = new Date(habit.createdAt || habit.id);
-  creationDate.setHours(0, 0, 0, 0);
-  const todayKey = getDateKey(new Date());
-
-  while (d.getTime() >= creationDate.getTime()) {
-
-    if (isHabitActiveOnDate(habit, d)) {
-      const dateKey = getDateKey(d);
-      const status = habit.logs && habit.logs[dateKey];
-
-      if (status === 'done') {
-        streak++;
-      } else if (status === 'skipped' || status === 'hidden') {
-        // Skips and hidden days do not break the streak
-      } else {
-        // If it's empty, and it is NOT today, the streak is broken
-        if (dateKey !== todayKey) {break;}
-      }
-    }
-    d.setDate(d.getDate() - 1);
-  }
-  return streak;
 }
 
 // ==========================================
@@ -1220,7 +1116,7 @@ export function updateHabitProgress() {
   }
 
   // Update streaks UI
-  if (typeof renderTopStreaks === 'function') {renderTopStreaks();}
+  renderTopStreaks();
 
   const activeTab = readRaw(STORAGE_KEYS.ACTIVE_TAB);
   if (activeTab === '1') {document.title = `Focus App - Habits (${completed}/${total})`;}
@@ -1299,7 +1195,7 @@ function processQuickAddHabit() {
 
   input.value = '';
   renderHabits();
-  if (typeof renderHabitCategories === 'function') {renderHabitCategories();}
+  renderHabitCategories();
 }
 
 const quickAddBtn = document.getElementById('quick-add-habit-btn');
@@ -1364,7 +1260,7 @@ export function renderHabitCategories() {
       }
 
       // Auto-scroll the container to keep the active item in view.
-      // (See centerButtonInScrollArea's comment in ui-utils.js for
+      // (See centerButtonInScrollArea's comment in scroll-utils.js for
       // why this replaced scrollIntoView — same page-scroll-on-load
       // bug as the task filter row.)
       centerButtonInScrollArea(filterContainer, this);
@@ -1428,14 +1324,13 @@ export function setHabitDate(dateObj) {
     else {display.textContent = newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
   }
   renderHabits();
-  if (typeof updateDailyOverview === 'function') {updateDailyOverview();} // eslint-disable-line no-undef
 }
 
 export function renderTopStreaks() {
   const list = document.getElementById('top-streaks-list');
   if (!list) {return;}
 
-  const habitsWithStreaks = habits.map(h => ({ ...h, currentStreak: typeof calculateStreak === 'function' ? calculateStreak(h) : 0 }));
+  const habitsWithStreaks = habits.map(h => ({ ...h, currentStreak: calculateStreak(h) }));
   habitsWithStreaks.sort((a, b) => b.currentStreak - a.currentStreak);
 
   // Grab top 3

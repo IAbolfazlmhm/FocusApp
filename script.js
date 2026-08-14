@@ -1,4 +1,5 @@
-import { setupTabs, setupModalAccessibility, initConfirmModal, closeTopmostModal } from './js/ui-utils.js';
+import { setupTabs } from './js/tabs.js';
+import { setupModalAccessibility, initConfirmModal, closeTopmostModal } from './js/modal-utils.js';
 import { loadSettings, setupSettingsEvents, applySettingsToTimer } from './js/settings.js';
 import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from './js/timer.js';
 import { renderFilters, renderTasks, setupTaskEvents } from './js/tasks.js';

@@ -5,7 +5,8 @@ import {
 } from './state.js';
 
 import { playAlarm } from './audio.js';
-import { showToast, icons } from './ui-utils.js';
+import { showToast } from './toast.js';
+import { icons } from './dom-utils.js';
 import { readJSON, writeJSON, readRaw, remove, STORAGE_KEYS } from './storage.js';
 import { getLocalDateKey } from './date-utils.js';
 

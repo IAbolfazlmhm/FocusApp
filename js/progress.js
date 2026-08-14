@@ -1,16 +1,9 @@
-import { formatTaskTime, setTaskDate } from './tasks.js';
-import { setHabitDate, isHabitActiveOnDate, getDateKey } from './habits.js';
-import { showToast, escapeHTML, setupSelectDropdown } from './ui-utils.js';
+import { showToast } from './toast.js';
+import { setupSelectDropdown } from './dropdown.js';
 import { saveSettings } from './settings.js';
 import { readJSON, readRaw, STORAGE_KEYS } from './storage.js';
-import { getLocalDateKey } from './date-utils.js';
-
-// FIX: this used to be its own copy of the same safe-parse logic that
-// lives in storage.js (readJSON) — duplicated because this file needed
-// "must be an array" validation and state.js's original safeParse wasn't
-// shared code yet. Now that storage.js exports readJSON with the same
-// 'array' type check, this local copy is redundant; call sites below use
-// readJSON(STORAGE_KEYS.TASKS, [], 'array') directly instead.
+import { calculateStats } from './progress-stats.js';
+import { renderFocusHeatmap, renderHabitHeatmap } from './progress-heatmap.js';
 
 // Global Progress State
 let timeRange = 'weekly';
@@ -24,62 +17,6 @@ let pendingCustomEnd = null;
 let showPomodoro = true;
 let showHabits = true;
 let compareMode = true;
-
-// --- SMART JS TOOLTIP ENGINE ---
-let globalTooltip = document.getElementById('heatmap-tooltip');
-if (!globalTooltip) {
-  globalTooltip = document.createElement('div');
-  globalTooltip.id = 'heatmap-tooltip';
-  globalTooltip.style.cssText = 'position: fixed; z-index: 99999; background: #1e293b; color: #f8fafc; padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: bold; pointer-events: none; opacity: 0; transition: opacity 0.15s ease-out; box-shadow: 0 4px 15px rgba(0,0,0,0.2); white-space: nowrap; line-height: 1.4;';
-  document.body.appendChild(globalTooltip);
-}
-
-// Tooltip HTML content keyed by block element, rather than round-tripped
-// through a `data-*` attribute. `data-*` attributes are meant to hold data,
-// not markup — storing HTML there and reading it back into innerHTML was a
-// pattern that had silently opted out of this codebase's escapeHTML()
-// discipline (see FocusApp-Senior-Audit.md, Finding M4). Every value here
-// is still app-generated today, but escapeHTML() is applied to the one
-// piece of it (the date label) regardless, so this stays safe if the
-// tooltip is ever extended to include a task or habit name.
-const tooltipContent = new WeakMap();
-
-function attachSmartTooltip(block, html) {
-  tooltipContent.set(block, html);
-  block.addEventListener('mouseenter', () => {
-    globalTooltip.innerHTML = tooltipContent.get(block) || '';
-    const rect = block.getBoundingClientRect();
-
-    let left = rect.left + (rect.width / 2) - (globalTooltip.offsetWidth / 2);
-    const top = rect.top - globalTooltip.offsetHeight - 10;
-
-    if (left + globalTooltip.offsetWidth > window.innerWidth - 15) {left = window.innerWidth - globalTooltip.offsetWidth - 15;}
-    if (left < 15) {left = 15;}
-
-    globalTooltip.style.left = left + 'px';
-    globalTooltip.style.top = top + 'px';
-    globalTooltip.style.opacity = '1';
-  });
-
-  block.addEventListener('mouseleave', () => {
-    globalTooltip.style.opacity = '0';
-  });
-}
-
-// ==========================================
-// DUAL-ENGINE DATE PARSERS (The Bug Fixes)
-// ==========================================
-
-// Parser 1: For Pomodoro (Matches exact local creation time) — provided
-// by the shared getLocalDateKey() (date-utils.js); previously its own
-// separately-duplicated copy of the same logic that also lived in
-// timer.js.
-
-// Parser 2: For Habits (delegates to habits.js's getDateKey so both files
-// can never drift apart on how a "day" is defined). This used to be its
-// own `dayjs(dateObj).format('YYYY-MM-DD')` call — removed along with the
-// dayjs CDN dependency; see the FIX note on getDateKey() in habits.js.
-const getHabitLogKey = getDateKey;
 
 // ==========================================
 // CORE RENDER FUNCTION
@@ -101,102 +38,14 @@ export function renderProgressDashboard() {
   }
   const prevBounds = getDateBounds(prevRefDate, timeRange);
 
-  const currentStats = calculateStats(bounds.start, bounds.end, currentTasks, currentHabits);
-  const prevStats = calculateStats(prevBounds.start, prevBounds.end, currentTasks, currentHabits);
+  const currentStats = calculateStats(bounds.start, bounds.end, currentTasks, currentHabits, showPomodoro, showHabits);
+  const prevStats = calculateStats(prevBounds.start, prevBounds.end, currentTasks, currentHabits, showPomodoro, showHabits);
 
   updateLeftPanelUI(currentStats, prevStats, bounds);
-  renderFocusHeatmap(bounds.start, bounds.end, currentTasks);
-  renderHabitHeatmap(bounds.start, bounds.end, currentHabits);
+  renderFocusHeatmap(bounds.start, bounds.end, currentTasks, showPomodoro, showHabits);
+  renderHabitHeatmap(bounds.start, bounds.end, currentHabits, showPomodoro, showHabits);
 
   if (readRaw(STORAGE_KEYS.ACTIVE_TAB) === '2') {document.title = 'Focus App - Dashboard';}
-}
-
-// ==========================================
-// DATA CALCULATION ENGINE
-// ==========================================
-export function calculateStats(startDate, endDate, currentTasks, currentHabits) {
-  let focusMinutes = 0, itemsCompleted = 0, perfectDaysCount = 0;
-  let totalExpectedLogs = 0, totalSuccessfulLogs = 0;
-  let totalTasksCreated = 0, totalTasksCompleted = 0;
-
-  // Taskless-session time (see timer.js's addTasklessFocusTime, which
-  // writes this same key) — read locally rather than importing a value
-  // from timer.js, since STORAGE_KEYS (storage.js) is already the single
-  // shared source of truth for the key name itself.
-  const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
-
-  const d = new Date(startDate);
-  while (d <= endDate) {
-    const localDateStr = getLocalDateKey(d);
-    const habitLogKey = getHabitLogKey(d);
-
-    let dailyFocus = 0, dailyTasksDone = 0, dailyHabitsExpected = 0, dailyHabitsDone = 0;
-
-    if (showPomodoro) {
-      currentTasks.forEach(t => {
-        // TIME: attribute focus minutes to the day they were actually
-        // earned (timeByDate), not the task's creation day. Tasks
-        // created before this tracking existed have no timeByDate at
-        // all — for those only, fall back to the old behavior
-        // (all-time total credited to createdAt) so their existing
-        // historical numbers aren't silently zeroed out.
-        const dayTimeSeconds = t.timeByDate
-        ? (t.timeByDate[localDateStr] || 0)
-        : (getLocalDateKey(t.createdAt) === localDateStr ? (t.timeSpent || 0) : 0);
-        dailyFocus += Math.floor(dayTimeSeconds / 60);
-
-        // CREATED: still the day the task was made.
-        if (getLocalDateKey(t.createdAt) === localDateStr) {
-          totalTasksCreated++;
-        }
-
-        // COMPLETED: the day it was actually marked done (completedAt),
-        // not the day it was created. Legacy tasks completed before
-        // completedAt existed fall back to createdAt so they don't
-        // silently stop counting anywhere.
-        const completedOnThisDay = t.completed && (
-          t.completedAt
-          ? getLocalDateKey(t.completedAt) === localDateStr
-          : getLocalDateKey(t.createdAt) === localDateStr
-        );
-        if (completedOnThisDay) {
-          dailyTasksDone++;
-          totalTasksCompleted++;
-        }
-      });
-
-      // Taskless sessions earned this day — previously discarded
-      // entirely (nothing stored them). Counted alongside task time
-      // here since both represent real work-phase minutes; the Daily
-      // Report modal breaks the two back out separately (see
-      // openDailyReport below) for anyone who wants that distinction.
-      dailyFocus += Math.floor((tasklessByDate[localDateStr] || 0) / 60);
-    }
-
-    if (showHabits) {
-      currentHabits.forEach(h => {
-        const created = new Date(h.createdAt || h.id).setHours(0,0,0,0);
-        if (d.getTime() >= created) {
-          if (isHabitActiveOnDate(h, d)) {
-            dailyHabitsExpected++;
-            if (h.logs && h.logs[habitLogKey] === 'done') {dailyHabitsDone++;}
-          }
-        }
-      });
-    }
-
-    focusMinutes += dailyFocus;
-    itemsCompleted += (dailyTasksDone + dailyHabitsDone);
-    totalExpectedLogs += dailyHabitsExpected;
-    totalSuccessfulLogs += dailyHabitsDone;
-
-    if (showHabits && dailyHabitsExpected > 0 && dailyHabitsDone === dailyHabitsExpected) {perfectDaysCount++;}
-    else if (!showHabits && dailyTasksDone > 0) {perfectDaysCount++;}
-
-    d.setDate(d.getDate() + 1);
-  }
-
-  return { focusMinutes, itemsCompleted, perfectDaysCount, totalExpectedLogs, totalSuccessfulLogs, totalTasksCreated, totalTasksCompleted };
 }
 
 function updateLeftPanelUI(curr, prev, bounds) {
@@ -278,251 +127,6 @@ function updateDeltaBadge(elementId, currVal, prevVal, suffix) {
 }
 
 // ==========================================
-// HEATMAP RENDERING
-// ==========================================
-function renderFocusHeatmap(startDate, endDate, currentTasks) {
-  const container = document.getElementById('prog-focus-container');
-  const heatmap = document.getElementById('focus-heatmap');
-  if (!container || !heatmap) {return;}
-
-  if (!showPomodoro) { container.style.display = 'none'; return; }
-  container.style.display = 'flex';
-  heatmap.innerHTML = '';
-
-  const days = getDaysArray(startDate, endDate);
-  // Building blocks in a DocumentFragment and appending once (instead of
-  // appendChild per block) avoids up to ~365 separate reflow-triggering
-  // insertions into a live, visible list on every date-range change —
-  // one reflow for the whole heatmap instead of one per day.
-  const fragment = document.createDocumentFragment();
-
-  // Taskless-session time — see calculateStats() above for why this is
-  // read locally instead of imported from timer.js.
-  const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
-
-  days.forEach(d => {
-    const dateStr = getLocalDateKey(d);
-    let mins = 0;
-    let totalTasks = 0;
-    let doneTasks = 0;
-
-    currentTasks.forEach(t => {
-      const dayTimeSeconds = t.timeByDate
-      ? (t.timeByDate[dateStr] || 0)
-      : (getLocalDateKey(t.createdAt) === dateStr ? (t.timeSpent || 0) : 0);
-      mins += Math.floor(dayTimeSeconds / 60);
-
-      // totalTasks/doneTasks are a matched pair used only for this
-      // tile's completion-rate color — both stay scoped to "created
-      // that day" so the rate can never read as more than 100%. The
-      // day-accurate completion count itself is fixed in
-      // calculateStats() above, which isn't a rate and has no such
-      // constraint.
-      if (getLocalDateKey(t.createdAt) === dateStr) {
-        totalTasks++;
-        if (t.completed) {doneTasks++;}
-      }
-    });
-
-    mins += Math.floor((tasklessByDate[dateStr] || 0) / 60);
-
-    const block = document.createElement('div');
-    block.className = 'heatmap-block';
-    const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    const completionRate = totalTasks === 0 ? 0 : (doneTasks / totalTasks);
-
-    // Dynamic Tooltip
-    let tooltipHTML = `<span class="report-date-label">${escapeHTML(displayDate)}</span><br/>`;
-    if (totalTasks > 0) {tooltipHTML += `${doneTasks}/${totalTasks} tasks done (${Math.round(completionRate*100)}%)<br/>${mins}m focus time`;}
-    else if (mins > 0) {tooltipHTML += `0 tasks, ${mins}m focus time`;}
-    else {tooltipHTML += `No activity`;}
-
-    // BUG FIX: Color is now based strictly on Completion Rate!
-    if (totalTasks > 0) {
-      if (completionRate > 0 && completionRate < 0.5) {block.classList.add('focus-level-1');}
-      else if (completionRate >= 0.5 && completionRate < 1) {block.classList.add('focus-level-2');}
-      else if (completionRate === 1) {block.classList.add('focus-level-3');}
-    } else if (mins > 0) {
-      block.classList.add('focus-level-1'); // Fallback if they focused without tasks
-    }
-
-    block.addEventListener('click', () => openDailyReport(d));
-    attachSmartTooltip(block, tooltipHTML);
-    fragment.appendChild(block);
-  });
-
-  heatmap.appendChild(fragment);
-}
-
-function renderHabitHeatmap(startDate, endDate, currentHabits) {
-  const container = document.getElementById('prog-habit-container');
-  const heatmap = document.getElementById('habit-heatmap');
-  if (!container || !heatmap) {return;}
-
-  if (!showHabits) { container.style.display = 'none'; return; }
-  container.style.display = 'flex';
-  heatmap.innerHTML = '';
-
-  const days = getDaysArray(startDate, endDate);
-  // See renderFocusHeatmap above for why this batches into a fragment
-  // instead of appending each block directly.
-  const fragment = document.createDocumentFragment();
-
-  days.forEach(d => {
-    const logKey = getHabitLogKey(d);
-    let doneCount = 0;
-    let activeCount = 0;
-
-    currentHabits.forEach(h => {
-      const created = new Date(h.createdAt || h.id).setHours(0,0,0,0);
-      if (d.getTime() >= created) {
-        // BUG FIX: Accurate scheduling
-        if (isHabitActiveOnDate(h, d)) {
-          activeCount++;
-          if (h.logs && h.logs[logKey] === 'done') {doneCount++;}
-        }
-      }
-    });
-
-    const block = document.createElement('div');
-    block.className = 'heatmap-block';
-    const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-    let tooltipHTML = `<span class="report-date-label">${escapeHTML(displayDate)}</span><br/>`;
-    if (activeCount > 0) {
-      const completionRate = Math.round((doneCount / activeCount) * 100);
-      tooltipHTML += `${doneCount}/${activeCount} habits done (${completionRate}%)`;
-    } else {
-      tooltipHTML += `No scheduled habits`;
-    }
-
-    if (doneCount > 0) {
-      const rate = doneCount / activeCount;
-      if (rate > 0 && rate <= 0.33) {block.classList.add('habit-level-1');}
-      else if (rate > 0.33 && rate <= 0.66) {block.classList.add('habit-level-2');}
-      else if (rate > 0.66) {block.classList.add('habit-level-3');}
-    }
-
-    block.addEventListener('click', () => openDailyReport(d));
-    attachSmartTooltip(block, tooltipHTML);
-    fragment.appendChild(block);
-  });
-
-  heatmap.appendChild(fragment);
-}
-
-// ==========================================
-// DAILY REPORT MODAL
-// ==========================================
-function openDailyReport(dateObj) {
-  const modal = document.getElementById('daily-report-modal');
-  const title = document.getElementById('report-date-title');
-  const body = document.getElementById('report-modal-body');
-  if (!modal) {return;}
-
-  const currentTasks = readJSON(STORAGE_KEYS.TASKS, [], 'array');
-  const currentHabits = readJSON(STORAGE_KEYS.HABITS, [], 'array');
-
-  const localDateStr = getLocalDateKey(dateObj);
-  const habitLogKey = getHabitLogKey(dateObj);
-
-  title.textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-
-  let html = '';
-
-  if (showPomodoro) {
-    html += `<div class="report-section-title">Pomodoro Tasks</div>`;
-    // A task belongs on this day's report if it was CREATED that day,
-    // OR if focus time was actually logged for it that day (timeByDate) —
-    // previously only createdAt was checked, so working on an
-    // older task today wouldn't show up in today's report at all.
-    const dayTasks = currentTasks.filter(t =>
-      getLocalDateKey(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
-    );
-    if (dayTasks.length === 0) {html += `<p class="report-empty-msg">No tasks recorded.</p>`;}
-    dayTasks.forEach(t => {
-      // Show THIS day's time, not the task's all-time total — legacy
-      // tasks with no timeByDate fall back to their full total since
-      // that's all we ever recorded for them.
-      const dayTimeSeconds = t.timeByDate
-      ? (t.timeByDate[localDateStr] || 0)
-      : (t.timeSpent || 0);
-      const timeBadge = formatTaskTime(dayTimeSeconds);
-      if (t.completed) {html += `<div class="report-item success"><span><strike>${escapeHTML(t.text)}</strike></span> <span>${timeBadge}</span></div>`;}
-      else {html += `<div class="report-item failed"><span>${escapeHTML(t.text)}</span> <span>${timeBadge}</span></div>`;}
-    });
-
-    // Taskless sessions (see timer.js's addTasklessFocusTime) — kept as
-    // its own line rather than folded into a task, since it's real
-    // focus time earned with no task attached to it.
-    const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
-    const tasklessSeconds = tasklessByDate[localDateStr] || 0;
-    if (tasklessSeconds > 0) {
-      html += `<div class="report-item"><span>Focus time (no task)</span> <span>${formatTaskTime(tasklessSeconds)}</span></div>`;
-    }
-  }
-
-  if (showHabits) {
-    html += `<div class="report-section-title spaced">Habits</div>`;
-    let habitFound = false;
-    currentHabits.forEach(h => {
-      const created = new Date(h.createdAt || h.id).setHours(0,0,0,0);
-      if (dateObj.getTime() >= created && isHabitActiveOnDate(h, dateObj)) {
-        habitFound = true;
-        const status = h.logs && h.logs[habitLogKey];
-        if (status === 'done') {html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Done</span></div>`;}
-        else if (status === 'skipped') {html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Skipped</span></div>`;}
-        else {html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Missed</span></div>`;}
-      }
-    });
-    if (!habitFound) {html += `<p class="report-empty-msg">No habits scheduled.</p>`;}
-  }
-
-  // BUG FIX: Only show buttons for active sections
-  let buttonsHTML = '';
-  if (showPomodoro) {
-    buttonsHTML += `<button class="btn report-goto-btn focus" id="goto-focus-btn">Go to Pomodoro</button>`;
-  }
-  if (showHabits) {
-    buttonsHTML += `<button class="btn report-goto-btn habits" id="goto-habits-btn">Go to Habits</button>`;
-  }
-
-  if (buttonsHTML !== '') {
-    html += `
-      <div class="report-actions">
-        ${buttonsHTML}
-      </div>
-    `;
-  }
-
-  body.innerHTML = html;
-  modal.classList.add('show');
-
-  // Safely attach event listeners only if the buttons exist
-  // FIX: used to navigate by hardcoded tab index ([0], [1]), which breaks
-  // silently if the tab order or count in the HTML ever changes. Now uses
-  // semantic IDs that are tied to the actual tab elements.
-  const gotoFocusBtn = document.getElementById('goto-focus-btn');
-  if (gotoFocusBtn) {
-    gotoFocusBtn.addEventListener('click', () => {
-      document.getElementById('close-report-modal').click();
-      document.getElementById('tab-pomodoro').click();
-      setTaskDate(dateObj);
-    });
-  }
-
-  const gotoHabitsBtn = document.getElementById('goto-habits-btn');
-  if (gotoHabitsBtn) {
-    gotoHabitsBtn.addEventListener('click', () => {
-      document.getElementById('close-report-modal').click();
-      document.getElementById('tab-habits').click();
-      setHabitDate(dateObj);
-    });
-  }
-}
-
-// ==========================================
 // DATE HELPERS
 // ==========================================
 function getDateBounds(date, range) {
@@ -544,16 +148,6 @@ function getDateBounds(date, range) {
     return { start, end };
   }
   if (range === 'custom') {return { start: customStartDate || new Date(), end: customEndDate || new Date() };}
-}
-
-function getDaysArray(start, end) {
-  const arr = [];
-  const d = new Date(start);
-  while (d <= end) {
-    arr.push(new Date(d));
-    d.setDate(d.getDate() + 1);
-  }
-  return arr;
 }
 
 // ==========================================
@@ -756,9 +350,7 @@ export function setupProgressEvents() {
           // Forcefully shrink the start date to be exactly 60 days from the end date
           customStartDate = new Date(customEndDate);
           customStartDate.setDate(customStartDate.getDate() - 59);
-          if (typeof showToast === 'function') {
-            showToast("Range automatically adjusted to 60 days to fit both charts.", "warning");
-          }
+          showToast("Range automatically adjusted to 60 days to fit both charts.", "warning");
         }
       }
 

@@ -11,7 +11,7 @@
 
 import { userQuotes, setUserQuotes } from './state.js';
 import { writeJSON, STORAGE_KEYS } from './storage.js';
-import { generateId } from './ui-utils.js';
+import { generateId } from './dom-utils.js';
 
 const MOTIVATION_URL = 'assets/motivation.json';
 

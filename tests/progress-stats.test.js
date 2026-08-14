@@ -1,7 +1,7 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateStats } from '../js/progress.js';
+import { calculateStats } from '../js/progress-stats.js';
 import { getLocalDateKey } from '../js/date-utils.js';
 
 function dayAt(y, m, d) {

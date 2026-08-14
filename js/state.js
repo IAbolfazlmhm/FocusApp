@@ -28,7 +28,7 @@ export let focusedTaskId = readJSON(STORAGE_KEYS.FOCUSED_TASK_ID, null);
 export let savedTags = readJSON(STORAGE_KEYS.TAGS_LIST, ['Work', 'Study', 'Personal'], 'array');
 // Custom user-picked colors, keyed by tag name (e.g. { "Work": "#3b82f6" }).
 // A tag with no entry here just falls back to its deterministic hash color
-// (see getTagColor in ui-utils.js) — this only needs to store the tags
+// (see getTagColor in color-utils.js) — this only needs to store the tags
 // someone has actually chosen to override.
 export let tagColors = readJSON(STORAGE_KEYS.TAG_COLORS, {});
 export let currentFilter = 'all';

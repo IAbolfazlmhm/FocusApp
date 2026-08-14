@@ -6,7 +6,9 @@ import {
   updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState, stopTimer
 } from './timer.js';
 
-import { showToast, setupSelectDropdown, customConfirm } from './ui-utils.js';
+import { showToast } from './toast.js';
+import { setupSelectDropdown } from './dropdown.js';
+import { customConfirm } from './modal-utils.js';
 import { readJSON, writeJSON, STORAGE_KEYS } from './storage.js';
 
 // ==========================================
@@ -280,13 +282,13 @@ export function setupSettingsEvents() {
 
   // Catch event from other tabs to reload settings securely
   document.addEventListener('reloadSettingsUI', () => {
-    if (typeof loadSettings === 'function') {loadSettings();}
+    loadSettings();
   });
 
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
       // BUG FIX: Reset visually to the true saved state in case of unsaved clicks
-      if (typeof loadSettings === 'function') {loadSettings();}
+      loadSettings();
       if (settingsModal) {settingsModal.classList.add('show');}
     });
   }
@@ -342,7 +344,7 @@ export function setupSettingsEvents() {
   // Selection assignment (what happens when an option is picked) stays
   // here, since it's specific to this call site. Opening, closing,
   // keyboard navigation, and ARIA now live in the shared
-  // setupSelectDropdown() (ui-utils.js) so all 4 "select-replacement"
+  // setupSelectDropdown() (dropdown.js) so all 4 "select-replacement"
   // dropdowns in the app get identical, keyboard-accessible behavior
   // from one implementation instead of four.
   function setupCustomDropdown(wrapperId, displayId, inputId, dropdownId) {
