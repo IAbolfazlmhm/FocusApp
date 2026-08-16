@@ -40,6 +40,23 @@ export let habits = readJSON(STORAGE_KEYS.HABITS, [], 'array');
 export let savedHabitCategories = readJSON(STORAGE_KEYS.HABIT_CATEGORIES, ['Health', 'Learning', 'Productivity', 'Mindfulness'], 'array');
 export let currentHabitDate = new Date();
 currentHabitDate.setHours(0, 0, 0, 0);
+// The habits-tab equivalents of currentFilter/currentSort/sortOrder above
+// — previously local `let`s inside habits.js itself rather than
+// centralized here with their task-state counterparts.
+export let currentHabitFilter = 'all';
+export let currentHabitSort = 'newest';
+export let habitSortOrder = 'desc';
+
+// --- POMODORO/TASKS DATE STATE ---
+// FIX: used to be an `export let` living directly in tasks.js — the one
+// piece of shared date state that wasn't centralized here alongside its
+// sibling currentHabitDate above. Moved here for the same reason
+// everything else in this file is here: any other module that needs to
+// read or change it does so through this single source of truth, instead
+// of importing it from whichever feature file happened to declare it
+// first.
+export let currentPomodoroDate = new Date();
+currentPomodoroDate.setHours(0, 0, 0, 0);
 
 // --- QUOTES STATE ---
 // User-created quotes only. Built-in quotes are loaded separately by
@@ -70,5 +87,9 @@ export function setSortOrder(val) { sortOrder = val; }
 export function setHabits(val) { habits = val; }
 export function setSavedHabitCategories(val) { savedHabitCategories = val; }
 export function setCurrentHabitDate(val) { currentHabitDate = val; }
+export function setCurrentPomodoroDate(val) { currentPomodoroDate = val; }
+export function setCurrentHabitFilter(val) { currentHabitFilter = val; }
+export function setCurrentHabitSort(val) { currentHabitSort = val; }
+export function setHabitSortOrder(val) { habitSortOrder = val; }
 
 export function setUserQuotes(val) { userQuotes = val; }

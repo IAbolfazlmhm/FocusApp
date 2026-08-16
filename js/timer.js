@@ -35,9 +35,8 @@ function addTasklessFocusTime(seconds) {
   writeJSON(STORAGE_KEYS.TASKLESS_TIME, byDate);
 }
 
-// Note: These will be exported from tasks.js in the next steps.
-// We import them here to maintain modularity.
-import { saveTasks, formatTaskTime } from './tasks.js';
+import { saveTasks } from './tasks-storage.js';
+import { formatTaskTime } from './tasks-render.js';
 
 // ==========================================
 // DOM ELEMENTS & INITIALIZATION

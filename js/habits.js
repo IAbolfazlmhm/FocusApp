@@ -1,17 +1,18 @@
 import {
-  habits, savedHabitCategories, currentHabitDate,
-  setCurrentHabitDate, setHabits, setSavedHabitCategories
+  habits, savedHabitCategories, currentHabitDate, currentHabitFilter, currentHabitSort, habitSortOrder,
+  setCurrentHabitDate, setHabits, setSavedHabitCategories, setCurrentHabitFilter, setCurrentHabitSort, setHabitSortOrder
 } from './state.js';
 
 import { showToast } from './toast.js';
 import { escapeHTML, generateId } from './dom-utils.js';
-import { centerButtonInScrollArea, setupHorizontalWheelScroll, keepInputVisibleOnMobileKeyboard } from './scroll-utils.js';
+import { keepInputVisibleOnMobileKeyboard } from './scroll-utils.js';
 import { setupSelectDropdown, registerOutsideClickTarget } from './dropdown.js';
 import { customConfirm } from './modal-utils.js';
-import { hexToRgba, isValidHexColor } from './color-utils.js';
 import { startQuoteRotation } from './motivation.js';
 import { writeJSON, readRaw, STORAGE_KEYS } from './storage.js';
-import { getDateKey, isHabitActiveOnDate, calculateStreak } from './habits-logic.js';
+import { getDateKey } from './habits-logic.js';
+import { habitIconsDict } from './habit-icons.js';
+import { renderHabits, updateHabitProgress, renderHabitCategories } from './habits-render.js';
 
 // ==========================================
 // CENTRALIZED PERSISTENCE
@@ -51,7 +52,6 @@ const habitCategoryDropdown = document.getElementById('habit-category-dropdown')
 const habitCategoryWrapper = document.getElementById('habit-category-wrapper');
 
 let editingHabitId = null;
-let currentHabitSort = 'newest';
 // Tracks the picked color independently of which DOM element is
 // visually marked .selected — needed because the custom native color
 // input has no dataset.color to read back at save time the way the
@@ -69,24 +69,6 @@ function setCustomSwatchSelected(isSelected) {
   habitColorCustomInput?.classList.toggle('selected', isSelected);
   habitColorCustomWrapper?.classList.toggle('selected', isSelected);
 }
-let habitSortOrder = 'desc';
-export let currentHabitFilter = 'all';
-
-// ==========================================
-// ICON DICTIONARY & HELPERS
-// ==========================================
-export const habitIconsDict = {
-  'book': `<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>`,
-  'activity': `<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>`,
-  'droplet': `<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>`,
-  'heart': `<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>`,
-  'star': `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>`,
-  'coffee': `<path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line>`,
-  'moon': `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`,
-  'sun': `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`,
-  'monitor': `<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>`,
-  'music': `<path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle>`
-};
 
 // ==========================================
 // DATE NAVIGATION LOGIC
@@ -148,147 +130,6 @@ function showHabitCategoryDropdown() {
       habitCategoryInput.focus();
     });
   });
-}
-
-// ==========================================
-// RENDER HABITS
-// ==========================================
-export function renderHabits() {
-  if (!habitListContainer) {return;}
-  habitListContainer.innerHTML = '';
-
-  const activeHabits = habits.filter(habit => isHabitActiveOnDate(habit, currentHabitDate));
-  const dateStr = getDateKey(currentHabitDate);
-
-  // Safely Apply Filtering
-  const filteredHabits = activeHabits.filter(h => {
-    const status = (h.logs && h.logs[dateStr]) ? h.logs[dateStr] : null;
-    if (status === 'hidden') {return false;}
-    if (currentHabitFilter === 'active') {return status !== 'done' && status !== 'skipped';}
-    if (currentHabitFilter === 'done') {return status === 'done';}
-    if (currentHabitFilter !== 'all') {return h.category === currentHabitFilter;}
-    return true;
-  });
-
-  // Safely Apply Sorting (Done/Skipped automatically sink to the bottom)
-  filteredHabits.sort((a, b) => {
-    const statusA = (a.logs && a.logs[dateStr]) ? a.logs[dateStr] : null;
-    const statusB = (b.logs && b.logs[dateStr]) ? b.logs[dateStr] : null;
-    const isCompletedA = (statusA === 'done' || statusA === 'skipped');
-    const isCompletedB = (statusB === 'done' || statusB === 'skipped');
-
-    // 1. Primary Sort: Sink completed to bottom
-    if (isCompletedA !== isCompletedB) {return isCompletedA ? 1 : -1;}
-
-    // 2. Secondary Sort: User's chosen order
-    let val = 0;
-    if (currentHabitSort === 'newest') {val = new Date(a.createdAt || a.id).getTime() - new Date(b.createdAt || b.id).getTime();}
-    else if (currentHabitSort === 'az') {val = a.name.localeCompare(b.name);}
-    else if (currentHabitSort === 'category') {val = (a.category || '').localeCompare(b.category || '');}
-    else if (currentHabitSort === 'streak') {val = calculateStreak(a) - calculateStreak(b);}
-
-    return habitSortOrder === 'asc' ? val : -val;
-  });
-
-  if (!filteredHabits || filteredHabits.length === 0) {
-    habitListContainer.innerHTML = `
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <p>No habits scheduled for this day.</p>
-      </div>
-    `;
-    return;
-  }
-
-  // Habit Item Click (to Edit) — attached once in setupHabitsEvents(), not here.
-  // (Previously this whole listener lived inside renderHabits(), which runs
-  // after nearly every action — add, complete, delete, skip. Since the
-  // container element itself is never recreated, only its children, every
-  // re-render was stacking ANOTHER click listener on the same container.
-  // After enough actions, a single click on a habit would fire the "open
-  // edit modal" logic multiple times in a row.)
-
-  // Built up in a fragment and appended once — see the matching comment
-  // in tasks.js's renderTasks(), which has the same pattern.
-  const fragment = document.createDocumentFragment();
-
-  filteredHabits.forEach(habit => {
-    const currentStreak = calculateStreak(habit);
-    const status = habit.logs && habit.logs[dateStr] ? habit.logs[dateStr] : null;
-
-    const habitDiv = document.createElement('div');
-    habitDiv.className = 'task-item habit-item';
-    habitDiv.dataset.id = habit.id;
-
-    if (status === 'done') {
-      habitDiv.classList.add('completed');
-    } else if (status === 'skipped') {
-      habitDiv.style.opacity = '0.5';
-    }
-
-    // --- RESTORED ORIGINAL VARIABLES ---
-    // Validated before use — see isValidHexColor in color-utils.js for why
-    // an unvalidated color string here would be a real injection risk,
-    // not just a source of broken CSS, since it's interpolated straight
-    // into a style="..." attribute below.
-    const safeColor = isValidHexColor(habit.color) ? habit.color : '#3b82f6';
-    const bgRgba = hexToRgba(safeColor, 0.15);
-    const iconSvgContent = habitIconsDict[habit.icon] || `<circle cx="12" cy="12" r="10"/>`;
-
-    // 1. Generate Category Pill (with ellipsis and optical padding fix)
-    let catHTML = '';
-    if (habit.category && habit.category !== 'Uncategorized') {
-      catHTML = `<span class="habit-category-badge" title="${escapeHTML(habit.category)}">${escapeHTML(habit.category)}</span>`;
-    }
-
-    habitDiv.style.cursor = 'pointer';
-    // FIX: same gap as task cards — clicking a card opens the edit
-    // modal but there was no keyboard equivalent. See setupHabitsEvents()
-    // below for the matching keydown handler.
-    habitDiv.tabIndex = 0;
-    habitDiv.setAttribute('role', 'button');
-    habitDiv.setAttribute('aria-label', `Edit habit: ${habit.name}`);
-
-    // 2. Pristine 2-Row Layout WITH Original Streak SVG
-    habitDiv.innerHTML = `
-      <div class="habit-info">
-
-        <!-- Left Side: Original Icon Wrapper -->
-        <div class="habit-icon-circle" style="--habit-bg:${bgRgba}; --habit-color:${safeColor};">
-          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${iconSvgContent}</svg>
-        </div>
-
-        <!-- Right Side: Text Stack -->
-        <div class="habit-details">
-
-          <!-- Top Row: Habit Name -->
-          <span class="habit-name" title="${escapeHTML(habit.name)}">${escapeHTML(habit.name)}</span>
-
-          <!-- Bottom Row: Category & Original Streak SVG -->
-          <div class="habit-meta-row">
-            ${catHTML}
-            <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="Current Streak">
-              <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-              <span>${currentStreak}</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="task-actions">
-        <button class="remove-btn advanced-delete-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-        <button class="focus-btn skip-habit-btn" title="Skip Today" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
-        <button class="done-btn done-habit-btn" title="Done!" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-      </div>
-    `;
-
-    fragment.appendChild(habitDiv);
-  });
-
-  habitListContainer.appendChild(fragment);
-
-  updateHabitProgress();
 }
 
 // ==========================================
@@ -796,10 +637,10 @@ export function setupHabitsEvents() {
       item.addEventListener('click', () => {
         const clickedSort = item.getAttribute('data-sort');
         if (currentHabitSort === clickedSort) {
-          habitSortOrder = habitSortOrder === 'asc' ? 'desc' : 'asc';
+          setHabitSortOrder(habitSortOrder === 'asc' ? 'desc' : 'asc');
         } else {
-          currentHabitSort = clickedSort;
-          habitSortOrder = (clickedSort === 'az' || clickedSort === 'category') ? 'asc' : 'desc';
+          setCurrentHabitSort(clickedSort);
+          setHabitSortOrder((clickedSort === 'az' || clickedSort === 'category') ? 'asc' : 'desc');
         }
 
         habitSortDropdown.querySelectorAll('.dropdown-item').forEach(i => {
@@ -855,7 +696,7 @@ export function setupHabitsEvents() {
           saveHabitCategories();
           saveHabits();
 
-          if (currentHabitFilter === cat) {currentHabitFilter = 'all';}
+          if (currentHabitFilter === cat) {setCurrentHabitFilter('all');}
 
           renderCategoriesManagement();
           renderHabitCategories();
@@ -1057,111 +898,6 @@ export function toggleHabitLog(habitId, dateKey, status) {
 }
 
 // ==========================================
-// PROGRESS UPDATE FUNCTION
-// ==========================================
-export function updateHabitProgress() {
-  const activeHabits = habits.filter(habit => isHabitActiveOnDate(habit, currentHabitDate));
-  const total = activeHabits.length;
-  let completed = 0;
-
-  const dateStr = getDateKey(currentHabitDate);
-
-  activeHabits.forEach(habit => {
-    if (habit.logs && habit.logs[dateStr] === 'done') {
-      completed++;
-    }
-  });
-
-  const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-
-  // 1. Update the SVG Ring
-  const ring = document.querySelector('.overview-ring');
-  if (ring) {
-    const radius = ring.r.baseVal.value;
-    const circumference = radius * 2 * Math.PI;
-    const offset = circumference - (percentage / 100) * circumference;
-
-    ring.style.strokeDasharray = `${circumference} ${circumference}`;
-    ring.style.strokeDashoffset = offset;
-
-    // Set both states explicitly instead of falling back to the CSS class
-    // default (--theme-color) for the "not complete" case — that fallback
-    // only happens to render the same color as --success-color today
-    // because both variables happen to equal #10b981. Nothing enforces
-    // that they stay equal, so relying on the coincidence would silently
-    // break (two different greens) if either value ever changes.
-    ring.style.stroke = (percentage === 100 && total > 0)
-      ? 'var(--success-color)'
-      : 'var(--theme-color)';
-  }
-
-  // 2. Animate the Percentage Number (Bulletproof Version)
-  const percentageText = document.querySelector('#habit-detail-panel .time-display');
-  if (percentageText) {
-    const prevVal = parseInt(percentageText.dataset.currentVal || 0);
-    // CRITICAL: Update the target immediately so rapid clicks don't break the tracking
-    percentageText.dataset.currentVal = percentage;
-
-    if (prevVal !== percentage) {
-      animatePercentage(percentageText, prevVal, percentage, 800); // Faster, smoother duration
-    } else if (percentageText.textContent === '') {
-      percentageText.textContent = `${percentage}%`;
-    }
-  }
-
-  // 3. Update the text counters (e.g., "2/4 Completed")
-  const statsText = document.querySelector('.dashboard-stats-text strong');
-  if (statsText) {
-    statsText.textContent = `${completed}/${total} Completed`;
-  }
-
-  // Update streaks UI
-  renderTopStreaks();
-
-  const activeTab = readRaw(STORAGE_KEYS.ACTIVE_TAB);
-  if (activeTab === '1') {document.title = `Focus App - Habits (${completed}/${total})`;}
-}
-
-// ==========================================
-// ANIMATION FUNCTION
-// ==========================================
-export function animatePercentage(element, start, end, duration) {
-  // BUG FIX: Cancel previous animation loop if user clicks quickly
-  if (element.animationId) {
-    window.cancelAnimationFrame(element.animationId);
-  }
-
-  // Snap immediately if there's no change needed
-  if (start === end) {
-    element.textContent = `${end}%`;
-    return;
-  }
-
-  let startTimestamp = null;
-  const step = (timestamp) => {
-    if (!startTimestamp) {startTimestamp = timestamp;}
-    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-
-    // Smooth easing curve
-    const easeProgress = 1 - Math.pow(1 - progress, 4);
-    const currentVal = Math.floor(easeProgress * (end - start) + start);
-
-    element.textContent = `${currentVal}%`;
-
-    if (progress < 1) {
-      element.animationId = window.requestAnimationFrame(step);
-    } else {
-      element.textContent = `${end}%`;
-      if (end === 100) {
-        element.classList.add('pop-success-anim');
-        setTimeout(() => element.classList.remove('pop-success-anim'), 600);
-      }
-    }
-  };
-  element.animationId = window.requestAnimationFrame(step);
-}
-
-// ==========================================
 // Quick Add Logic
 // ==========================================
 function processQuickAddHabit() {
@@ -1216,93 +952,14 @@ if (quickHabitInput) {
 // FIX: removed a dead `updateHabitFilterBubble()` function + a top-level
 // `document.querySelectorAll('#habit-filter-container .filter-btn')...`
 // listener block that used to sit here. Both ran once at module import
-// time, before renderHabitCategories() (called later, at the bottom of
-// this file) ever populates #habit-filter-container — so the
+// time, before renderHabitCategories() (habits-render.js, called
+// immediately below) ever populates #habit-filter-container — so the
 // querySelectorAll always matched zero elements and this code never did
-// anything. The real, working version of this exact logic already lives
-// inside renderHabitCategories() below, which re-attaches listeners every
-// time the filter buttons are actually re-rendered.
-
-export function renderHabitCategories() {
-  const filterContainer = document.getElementById('habit-filter-container');
-  if (!filterContainer) {return;}
-
-  // Maintain current active filter state, default to 'all'
-  const currentFilter = filterContainer.querySelector('.filter-btn.active')?.dataset.filter || 'all';
-
-  const bubbleHTML = '<div class="filter-bubble" id="habit-filter-bubble"></div>';
-  const usedCats = habits.map(h => h.category || 'Uncategorized');
-  const uniqueCategories = [...new Set([...savedHabitCategories, ...usedCats])].filter(cat => cat && cat.trim() !== '');
-
-  let buttonsHTML = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">All</button>`;
-  buttonsHTML += `<button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">Active</button>`;
-  buttonsHTML += `<button class="filter-btn ${currentFilter === 'done' ? 'active' : ''}" data-filter="done" data-sound="click">Done</button>`;
-
-  uniqueCategories.forEach(cat => {
-    buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${escapeHTML(cat)}" data-sound="click">${escapeHTML(cat)}</button>`;
-  });
-
-  filterContainer.innerHTML = bubbleHTML + buttonsHTML;
-
-  // Add horizontal wheel scroll support for desktop
-  setupHorizontalWheelScroll(filterContainer);
-
-  // Attach click listeners and auto-scroll
-  filterContainer.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      filterContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-
-      const bubble = document.getElementById('habit-filter-bubble');
-      if (bubble) {
-        bubble.style.width = `${this.offsetWidth}px`;
-        bubble.style.left = `${this.offsetLeft}px`;
-      }
-
-      // Auto-scroll the container to keep the active item in view.
-      // (See centerButtonInScrollArea's comment in scroll-utils.js for
-      // why this replaced scrollIntoView — same page-scroll-on-load
-      // bug as the task filter row.)
-      centerButtonInScrollArea(filterContainer, this);
-
-      // NOTE: Add your habit filtering logic here based on this.dataset.filter later!
-      currentHabitFilter = this.dataset.filter;
-      renderHabits();
-    });
-  });
-
-  // Initialize Bubble position seamlessly
-  setTimeout(() => {
-    const activeBtn = filterContainer.querySelector('.filter-btn.active');
-    const bubble = document.getElementById('habit-filter-bubble');
-    if (activeBtn && bubble) {
-      bubble.style.transition = 'none'; // Turn off animation
-      bubble.style.width = `${activeBtn.offsetWidth}px`;
-      bubble.style.left = `${activeBtn.offsetLeft}px`;
-      void bubble.offsetWidth; // Force CSS refresh
-      bubble.style.transition = ''; // Turn animation back on
-      centerButtonInScrollArea(filterContainer, activeBtn);
-    }
-  }, 50);
-}
+// anything. The real, working version of this exact logic lives inside
+// renderHabitCategories() itself, which re-attaches listeners every time
+// the filter buttons are actually re-rendered.
 
 renderHabitCategories();
-
-// Recalculate bubble position when switching to the Habits tab
-document.addEventListener('habitsTabOpened', () => {
-  const filterContainer = document.getElementById('habit-filter-container');
-  if (!filterContainer) {return;}
-  const activeBtn = filterContainer.querySelector('.filter-btn.active');
-  const bubble = document.getElementById('habit-filter-bubble');
-
-  if (activeBtn && bubble) {
-    bubble.style.transition = 'none';
-    bubble.style.width = `${activeBtn.offsetWidth}px`;
-    bubble.style.left = `${activeBtn.offsetLeft}px`;
-    void bubble.offsetWidth; // force css refresh
-    bubble.style.transition = '';
-  }
-});
 
 // --- TOP STREAKS & DEEP LINKING EXPORT ---
 export function setHabitDate(dateObj) {
@@ -1326,48 +983,3 @@ export function setHabitDate(dateObj) {
   renderHabits();
 }
 
-export function renderTopStreaks() {
-  const list = document.getElementById('top-streaks-list');
-  if (!list) {return;}
-
-  const habitsWithStreaks = habits.map(h => ({ ...h, currentStreak: calculateStreak(h) }));
-  habitsWithStreaks.sort((a, b) => b.currentStreak - a.currentStreak);
-
-  // Grab top 3
-  const top3 = habitsWithStreaks.filter(h => h.currentStreak > 0).slice(0, 3);
-
-  list.innerHTML = '';
-
-  // ALWAYS render 3 slots to permanently lock the layout height
-  for (let i = 0; i < 3; i++) {
-    const pill = document.createElement('div');
-    pill.className = 'stat-row fixed-height';
-
-    if (top3[i]) {
-      const h = top3[i];
-      const safeStreakColor = isValidHexColor(h.color) ? h.color : '#10b981';
-      pill.innerHTML = `
-        <div class="stat-icon mini" style="color: ${safeStreakColor}; background: ${safeStreakColor}20;">
-          <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${habitIconsDict[h.icon] || habitIconsDict['activity']}</svg>
-        </div>
-        <div class="stat-row-right">
-          <span class="stat-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; display:block;">${escapeHTML(h.name)}</span>
-          <div class="streak-flame active lg">
-            <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-            <span>${h.currentStreak}</span>
-          </div>
-        </div>
-      `;
-    } else {
-      // Empty transparent placeholder
-      pill.classList.add('empty-slot');
-      pill.innerHTML = `
-        <div class="stat-icon mini" style="background: transparent;"></div>
-        <div class="stat-details">
-          <span class="stat-label">Empty</span>
-        </div>
-      `;
-    }
-    list.appendChild(pill);
-  }
-}

@@ -1,7 +1,8 @@
 // ==========================================
 // PROGRESS: DAILY REPORT MODAL
 // ==========================================
-import { formatTaskTime, setTaskDate } from './tasks.js';
+import { setTaskDate } from './tasks.js';
+import { formatTaskTime } from './tasks-render.js';
 import { setHabitDate } from './habits.js';
 import { isHabitActiveOnDate } from './habits-logic.js';
 import { escapeHTML } from './dom-utils.js';
