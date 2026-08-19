@@ -171,7 +171,7 @@ for real persisted app data.
 - **Design tokens** — spacing/radius/shadow/typography scale in `variables.css`, alongside the existing theme/phase color system
 - **No runtime dependencies** — zero CDN scripts, fully self-contained; the Inter font is self-hosted rather than pulled from a CDN
 - **Sprite-based icons** — gear, close, and target icons defined once as `<symbol>`, referenced via `<use>`
-- **Audio** — real `.wav` assets decoded once into cached `AudioBuffer`s and played via Web Audio; a missing/failed asset falls back to the original procedural synthesis for that same sound rather than going silent
+- **Audio** — real `.mp3` assets decoded once into cached `AudioBuffer`s and played via Web Audio; a missing/failed asset falls back to the original procedural synthesis for that same sound rather than going silent
 
 ## Development
 

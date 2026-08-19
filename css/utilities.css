@@ -121,12 +121,26 @@
   cursor: pointer;
 }
 
+/*
+  On desktop Chrome, showPicker() anchors the calendar popup to this
+  input's own bounding rect, not to the "Today" label it sits under.
+  A collapsed 0x0 rect gives Chrome nothing to anchor against, so it
+  falls back to the top-left corner of the page instead of opening
+  under the button — mobile browsers show the picker as an OS-level
+  sheet instead, so they never hit this. Sizing the input to fill its
+  relatively-positioned wrapper (same footprint as the visible "Today"
+  text) gives Chrome a real, correctly-placed rect to anchor to, while
+  opacity: 0 and pointer-events: none keep it invisible and unclickable
+  — the visible span still owns the click.
+*/
 .native-date-input {
   position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   pointer-events: none;
-  width: 0;
-  height: 0;
   border: none;
 }
 

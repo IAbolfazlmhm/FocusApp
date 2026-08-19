@@ -1,7 +1,7 @@
 // ==========================================
 // AUDIO SERVICE
 // ==========================================
-// Plays real sound assets (assets/sounds/*.wav) through the Web Audio
+// Plays real sound assets (assets/sounds/*.mp3) through the Web Audio
 // API, decoded once into an AudioBuffer and cached — not a new
 // HTMLAudioElement or oscillator graph per play. If an asset is missing,
 // fails to fetch, or fails to decode, playback falls back to the
@@ -9,12 +9,12 @@
 // silently silent; see synthesizeUI/synthesizeAlarm at the bottom.
 
 const SOUND_FILES = {
-  click: 'assets/sounds/click.wav',
-  success: 'assets/sounds/success.wav',
-  trash: 'assets/sounds/trash.wav',
-  bell: 'assets/sounds/bell.wav',
-  digital: 'assets/sounds/digital.wav',
-  bird: 'assets/sounds/bird.wav',
+  click: 'assets/sounds/click.mp3',
+  success: 'assets/sounds/success.mp3',
+  trash: 'assets/sounds/trash.mp3',
+  bell: 'assets/sounds/bell.mp3',
+  digital: 'assets/sounds/digital.mp3',
+  bird: 'assets/sounds/bird.mp3',
 };
 
 // Created lazily on first use, not at module load — creating an
@@ -142,7 +142,7 @@ export function playAlarm(type) {
 }
 
 // --- Synthesis fallback ---
-// Identical in design to the sounds baked into assets/sounds/*.wav — this
+// Identical in design to the sounds baked into assets/sounds/*.mp3 — this
 // only ever runs for someone whose browser/server can't deliver those
 // files, so it needs to sound like the same instrument, not be a
 // generic "beep" placeholder.
