@@ -50,18 +50,40 @@ export function isHabitActiveOnDate(habit, targetDate) {
 
   if (freq === 'custom') {
     if (!habit.customDays || habit.customDays.length === 0) {return false;}
-    return habit.customDays.map(Number).includes(dayOfWeek);
-  }
+    if (!habit.customDays.map(Number).includes(dayOfWeek)) {return false;}
 
-  if (freq === 'interval') {
-    // "Repeat every N days" — due on creation day and every Nth day
-    // after it, regardless of day-of-week (habits.js clamps intervalDays
-    // to 2-365 at save time; 3 here is just a defensive fallback for
-    // any pre-existing record that somehow lacks it).
-    const intervalDays = habit.intervalDays || 3;
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const daysSinceCreation = Math.round((target.getTime() - creationDate.getTime()) / msPerDay);
-    return daysSinceCreation % intervalDays === 0;
+    // "Every: [N] [Week(s)/Month(s)]" — replaces the old separate
+    // "Custom Interval" frequency (habit.repeatEvery didn't exist before
+    // this). Missing/invalid data defaults to every 1 week, i.e. exactly
+    // the old plain "Custom Days" behavior with no skipping, so existing
+    // custom-day habits saved before this feature keep working unchanged.
+    const repeatEvery = habit.repeatEvery;
+    const everyValue = Math.max(1, parseInt(repeatEvery && repeatEvery.value, 10) || 1);
+    const everyUnit = (repeatEvery && repeatEvery.unit === 'month') ? 'month' : 'week';
+
+    if (everyValue <= 1) {return true;}
+
+    if (everyUnit === 'month') {
+      // Active only in months where monthsSinceCreation is a multiple of
+      // everyValue — every selected weekday within a qualifying month.
+      const monthsSinceCreation = (target.getFullYear() - creationDate.getFullYear()) * 12
+        + (target.getMonth() - creationDate.getMonth());
+      return monthsSinceCreation % everyValue === 0;
+    }
+
+    // 'week' (default): align to the Sunday-starting week of creation —
+    // same week-counting approach as the 'biweekly' preset below — so
+    // every selected weekday stays in sync with the same "week block"
+    // instead of drifting against each other.
+    const weekStart = (d) => {
+      const s = new Date(d);
+      s.setDate(s.getDate() - s.getDay());
+      s.setHours(0, 0, 0, 0);
+      return s;
+    };
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const weeksSinceCreation = Math.round((weekStart(target).getTime() - weekStart(creationDate).getTime()) / msPerWeek);
+    return weeksSinceCreation % everyValue === 0;
   }
 
   const daysMap = {

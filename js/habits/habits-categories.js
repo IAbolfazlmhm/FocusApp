@@ -18,6 +18,7 @@ import { getTagColor, suggestTagColor } from '../ui/color-utils.js';
 import { moveToTrash } from '../trash/trash.js';
 import { saveHabits, saveHabitCategories } from './habits-storage.js';
 import { renderHabits, renderHabitCategories } from './habits-render.js';
+import { animateNewListItem } from '../core/dom-utils.js';
 
 function renderCategoriesManagement() {
   const categoriesManagementList = document.getElementById('categories-management-list');
@@ -34,6 +35,7 @@ function renderCategoriesManagement() {
   validCategories.forEach(cat => {
     const chip = document.createElement('div');
     chip.className = 'tag-chip deletable manageable';
+    chip.dataset.category = cat;
 
     const currentColor = getTagColor(cat, categoryColors[cat]);
 
@@ -51,6 +53,11 @@ function renderCategoriesManagement() {
       renderCategoriesManagement();
     });
     swatch.addEventListener('click', (e) => e.stopPropagation());
+    // FIX: see the matching fix + comment on the tag chip's swatch in
+    // tasks-tags-modal.js — keydown bubbles to the chip's own listener
+    // before Enter/Space opens the native picker, so without stopping
+    // it here the chip's delete handler fired instead.
+    swatch.addEventListener('keydown', (e) => e.stopPropagation());
 
     const label = document.createElement('span');
     label.className = 'tag-chip-label';
@@ -75,6 +82,8 @@ function renderCategoriesManagement() {
         renderHabits();
         renderCategoriesManagement();
       });
+      // FIX: same bubbling issue as the swatch above (see its comment).
+      resetBtn.addEventListener('keydown', (e) => e.stopPropagation());
       chip.appendChild(resetBtn);
     }
 
@@ -181,6 +190,7 @@ export function setupCategoryManagement() {
         saveHabitCategories();
         manageNewCategoryInput.value = '';
         renderCategoriesManagement();
+        animateNewListItem(document.getElementById('categories-management-list'), capitalizedCat, 'data-category');
         renderHabitCategories();
         refreshSuggestedCategoryColor();
         showToast(collision ? 'Category added — that color is already in use.' : 'Category added', collision ? 'warning' : 'success');

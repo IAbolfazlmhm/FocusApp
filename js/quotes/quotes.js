@@ -6,7 +6,7 @@
 // persistence) lives in motivation.js, same split as every other
 // feature module owning its DOM over storage.js/state.js.
 
-import { escapeHTML } from '../core/dom-utils.js';
+import { escapeHTML, animateNewListItem } from '../core/dom-utils.js';
 import { showToast } from '../ui/toast.js';
 import { customConfirm } from '../ui/modal-utils.js';
 import { setupSelectDropdown } from '../ui/dropdown.js';
@@ -208,9 +208,10 @@ export function setupQuotesEvents() {
       }
       showToast('Quote updated', 'success');
     } else {
-      addUserQuote(text, category);
+      const newQuote = addUserQuote(text, category);
       showToast('Quote added', 'success');
       renderList();
+      animateNewListItem(listEl, newQuote.id);
     }
 
     resetForm();

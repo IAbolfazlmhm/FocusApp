@@ -27,7 +27,8 @@ export default [
         CustomEvent: "readonly",
         FileReader: "readonly",
         location: "readonly",
-        fetch: "readonly"
+        fetch: "readonly",
+        CSS: "readonly"
       }
     },
     rules: {

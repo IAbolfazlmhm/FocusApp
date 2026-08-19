@@ -114,7 +114,7 @@
 }
 
 .tag-color-swatch.lg.selected {
-  border: 3px solid var(--text-main);
+  border: 3px solid var(--theme-color, #3b82f6);
   transform: scale(1.15);
 }
 
@@ -146,6 +146,36 @@
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
+/*
+  Every .tag-color-swatch is a real <input type="color"> — already
+  keyboard-focusable and operable (Tab lands on it, Enter/Space opens the
+  native picker) with zero extra JS needed. What was actually missing:
+  reset.css blanket-disables the default outline on ALL <input> focus
+  (`input:focus { outline: none; }`) with nothing restoring it for color
+  inputs specifically, so a keyboard user could land on one with no
+  visible sign of it. This restores a ring on the two plain,
+  always-visible swatches (Manage Tags / Manage Categories "new" row, and
+  each existing chip's own swatch) using the same :focus-visible
+  convention as every other control in this app (see reset.css) — shown
+  for keyboard focus only, not mouse clicks.
+*/
+.tag-color-swatch:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/*
+  The habit modal's "custom" swatch (#habit-color-custom) is the same
+  kind of input, but sits at opacity:0 right below (see the next rule) —
+  an outline on an opacity:0 element is invisible too, so the ring needs
+  to show on the wrapper instead, whenever the input inside it has
+  focus-visible.
+*/
+.custom-color-swatch-wrapper:has(input:focus-visible) {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 3px;
+}
+
 .custom-color-swatch-wrapper .tag-color-swatch.lg {
   position: absolute;
   inset: 2px;
@@ -164,7 +194,7 @@
      selection since it was added, but nothing in CSS ever read it
      before this. */
   background: var(--custom-color, #3b82f6);
-  outline: 2px solid var(--text-main);
+  outline: 2px solid var(--theme-color, #3b82f6);
   outline-offset: 2px;
   transform: scale(1.12);
   box-shadow: 0 0 0 1px var(--glass-border), 0 5px 12px rgba(0, 0, 0, 0.18);

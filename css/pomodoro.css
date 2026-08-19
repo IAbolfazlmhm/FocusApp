@@ -340,6 +340,59 @@
   min-width: 0;
 }
 
+/*
+  Shown above the Add-Task input while converting a "Focus time (no
+  task)" Progress entry into a real task (see beginTasklessConversion(),
+  tasks.js) — makes it clear why the input just got focused/cleared and
+  gives an explicit way out instead of the pending conversion silently
+  attaching to whatever gets typed next.
+*/
+.taskless-convert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.15);
+  background: color-mix(in srgb, var(--theme-color, #3b82f6) 15%, transparent);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border: 1px solid color-mix(in srgb, var(--theme-color, #3b82f6) 35%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--text-main);
+}
+
+.taskless-convert-cancel {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.taskless-convert-cancel .ui-icon {
+  width: 12px;
+  height: 12px;
+}
+
+@media (hover: hover) {
+  .taskless-convert-cancel:hover {
+    background: rgba(0, 0, 0, 0.15);
+    color: var(--text-main);
+  }
+}
+
 /* --- TASK ITEMS (CARDS) ---
    min-height only (not a fixed height): metadata (tag + time badge, or a
    habit's category + streak) needs to be free to wrap onto a second line

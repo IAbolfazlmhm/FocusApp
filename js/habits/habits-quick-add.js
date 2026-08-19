@@ -2,7 +2,7 @@
 // QUICK ADD HABIT
 // ==========================================
 import { habits, setHabits } from '../core/state.js';
-import { generateId } from '../core/dom-utils.js';
+import { generateId, animateNewListItem } from '../core/dom-utils.js';
 import { showToast } from '../ui/toast.js';
 import { keepInputVisibleOnMobileKeyboard } from '../ui/scroll-utils.js';
 import { habitIconsDict } from './habit-icons.js';
@@ -40,6 +40,14 @@ function processQuickAddHabit(input) {
   input.value = '';
   renderHabits();
   renderHabitCategories();
+
+  // FIX: the full Create Habit modal (habits-modal-save.js) plays the
+  // "created" feedback — success toast (which triggers the success
+  // sound) + the item-enter animation on the new row — but this
+  // quick-add path skipped both and only ever wired the warning case.
+  // Same creation, same feedback.
+  showToast('Habit Created!', 'success');
+  animateNewListItem(document.getElementById('habit-list-container'), newHabit.id);
 }
 
 // FIX: this used to run at module top level (i.e. the instant habits.js

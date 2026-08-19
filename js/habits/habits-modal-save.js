@@ -11,17 +11,17 @@ import {
   habits, setHabits, savedHabitCategories, setSavedHabitCategories
 } from '../core/state.js';
 import { showToast } from '../ui/toast.js';
-import { generateId } from '../core/dom-utils.js';
+import { generateId, animateNewListItem } from '../core/dom-utils.js';
 import { renderHabits, renderHabitCategories } from './habits-render.js';
 import { saveHabits, saveHabitCategories } from './habits-storage.js';
 import { habitModalState } from './habits-modal-state.js';
 
-// Custom Interval frequency ("repeat every N days") — 2 is the floor
-// since 1 is just "Every Day" under a different name, and a generous
-// but finite ceiling keeps the number sane for the streak/heatmap math.
-function clampInterval(n) {
-  if (Number.isNaN(n)) {return 3;}
-  return Math.min(365, Math.max(2, n));
+// "Every: [N] [Week(s)/Month(s)]" cadence on Custom Days habits — 1 is
+// the floor (repeat every single week/month, i.e. no skipping) and 52 is
+// a generous but finite ceiling.
+function clampRepeatEvery(n) {
+  if (Number.isNaN(n)) {return 1;}
+  return Math.min(52, Math.max(1, n));
 }
 
 export function setupHabitModalSave() {
@@ -51,6 +51,7 @@ export function setupHabitModalSave() {
     const icon = selectedIcon ? selectedIcon.dataset.icon : 'book';
 
     const customDays = [];
+    let repeatEvery = { value: 1, unit: 'week' };
     if (frequency === 'custom') {
       document.querySelectorAll('.day-option.selected').forEach(d => {
           customDays.push(parseInt(d.dataset.day));
@@ -59,13 +60,14 @@ export function setupHabitModalSave() {
         showToast('Please select at least one day.', 'warning');
         return;
       }
-    }
 
-    let intervalDays = 3;
-    if (frequency === 'interval') {
-      const intervalInput = document.getElementById('habit-interval-input');
-      intervalDays = clampInterval(intervalInput ? parseInt(intervalInput.value, 10) : NaN);
-      if (intervalInput) {intervalInput.value = intervalDays;}
+      const repeatEveryInput = document.getElementById('habit-repeat-every-input');
+      const repeatUnitValueInput = document.getElementById('habit-repeat-unit-value');
+      repeatEvery = {
+        value: clampRepeatEvery(repeatEveryInput ? parseInt(repeatEveryInput.value, 10) : NaN),
+        unit: (repeatUnitValueInput && repeatUnitValueInput.value === 'month') ? 'month' : 'week'
+      };
+      if (repeatEveryInput) {repeatEveryInput.value = repeatEvery.value;}
     }
 
     if (!name) {
@@ -74,6 +76,7 @@ export function setupHabitModalSave() {
     }
 
     const editingHabitId = habitModalState.editingHabitId;
+    let newHabitId = null;
 
     if (editingHabitId) {
       // Update existing habit
@@ -84,8 +87,10 @@ export function setupHabitModalSave() {
         habits[habitIndex].frequency = frequency;
         habits[habitIndex].color = color;
         habits[habitIndex].icon = icon;
-        if (frequency === 'custom') {habits[habitIndex].customDays = customDays;}
-        if (frequency === 'interval') {habits[habitIndex].intervalDays = intervalDays;}
+        if (frequency === 'custom') {
+          habits[habitIndex].customDays = customDays;
+          habits[habitIndex].repeatEvery = repeatEvery;
+        }
 
         // Also sync custom category to savedHabitCategories on EDIT
         if (category && category.trim() !== '' && category !== 'Uncategorized' && !savedHabitCategories.includes(category)) {
@@ -101,7 +106,7 @@ export function setupHabitModalSave() {
         category: category,
         frequency: frequency,
         customDays: frequency === 'custom' ? customDays : [],
-        intervalDays: frequency === 'interval' ? intervalDays : undefined,
+        repeatEvery: frequency === 'custom' ? repeatEvery : undefined,
         color: color,
         icon: icon,
         logs: {},
@@ -109,6 +114,7 @@ export function setupHabitModalSave() {
         createdAt: new Date(new Date().setHours(0,0,0,0)).toISOString()
       };
       setHabits([...habits, newHabit]);
+      newHabitId = newHabit.id;
 
       if (category && category.trim() !== '' && category !== 'Uncategorized' && !savedHabitCategories.includes(category)) {
         setSavedHabitCategories([...savedHabitCategories, category]);
@@ -123,5 +129,6 @@ export function setupHabitModalSave() {
 
     renderHabits();
     renderHabitCategories();
+    if (newHabitId) {animateNewListItem(document.getElementById('habit-list-container'), newHabitId);}
   });
 }

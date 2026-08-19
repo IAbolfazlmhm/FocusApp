@@ -12,7 +12,7 @@ import {
   setSavedTags, setTagColors, setCurrentFilter
 } from '../core/state.js';
 import { showToast } from '../ui/toast.js';
-import { icons } from '../core/dom-utils.js';
+import { icons, animateNewListItem } from '../core/dom-utils.js';
 import { getTagColor, suggestTagColor } from '../ui/color-utils.js';
 import { customConfirm } from '../ui/modal-utils.js';
 import { moveToTrash } from '../trash/trash.js';
@@ -27,6 +27,7 @@ export function renderTagsManagement() {
   savedTags.forEach(tag => {
     const chip = document.createElement('div');
     chip.className = 'tag-chip deletable manageable';
+    chip.dataset.tag = tag;
 
     const currentColor = getTagColor(tag, tagColors[tag]);
 
@@ -50,6 +51,12 @@ export function renderTagsManagement() {
       renderTagsManagement();
     });
     swatch.addEventListener('click', (e) => e.stopPropagation());
+    // FIX: keydown bubbles up to the chip's own keydown listener before
+    // the browser turns Enter/Space into the native color picker opening
+    // — without stopping it here, pressing Enter while focused on the
+    // swatch triggered the chip's delete handler instead of opening the
+    // picker. click/input above only cover the mouse path.
+    swatch.addEventListener('keydown', (e) => e.stopPropagation());
 
     const label = document.createElement('span');
     label.className = 'tag-chip-label';
@@ -85,6 +92,11 @@ export function renderTagsManagement() {
         renderTasks();
         renderTagsManagement();
       });
+      // FIX: same bubbling issue as the swatch above — a <button>'s
+      // Enter/Space keydown still bubbles to the chip's listener before
+      // the browser synthesizes the click, so without this the chip's
+      // delete handler fired instead of (or in addition to) reset.
+      resetBtn.addEventListener('keydown', (e) => e.stopPropagation());
       chip.appendChild(resetBtn);
     }
 
@@ -224,6 +236,7 @@ export function setupTagsManagement() {
         saveTasks();
         renderTagsManagement();
         renderFilters();
+        animateNewListItem(document.getElementById('tags-management-list'), finalName, 'data-tag');
         manageNewTagInput.value = '';
         refreshSuggestedTagColor();
         showToast(collision ? 'Tag added — that color is already in use by another tag.' : 'Tag added', collision ? 'warning' : 'success');

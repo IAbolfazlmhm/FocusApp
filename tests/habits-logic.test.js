@@ -67,20 +67,37 @@ test('isHabitActiveOnDate: "biweekly" skips alternate weeks', () => {
   assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 14)), true); // week 2 — active
 });
 
-test('isHabitActiveOnDate: "interval" is active on creation day and every Nth day after', () => {
-  const habit = makeHabit({ frequency: 'interval', intervalDays: 3, createdAt: WED.getTime() });
-  assert.equal(isHabitActiveOnDate(habit, WED), true); // day 0
-  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 1)), false); // day 1
-  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 2)), false); // day 2
-  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 3)), true); // day 3
-  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 6)), true); // day 6
+test('isHabitActiveOnDate: "custom" with no repeatEvery configured behaves like every week (no skipping)', () => {
+  const habit = makeHabit({ frequency: 'custom', customDays: [1, 3] });
+  assert.equal(isHabitActiveOnDate(habit, WED), true); // Wednesday
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 7)), true); // Wednesday next week — still active
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 1)), false); // Thursday — not a selected day
 });
 
-test('isHabitActiveOnDate: "interval" with no intervalDays configured falls back to every 3rd day', () => {
-  const habit = makeHabit({ frequency: 'interval', createdAt: WED.getTime() });
-  assert.equal(isHabitActiveOnDate(habit, WED), true);
-  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 3)), true);
-  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 1)), false);
+test('isHabitActiveOnDate: "custom" with repeatEvery {value:2, unit:"week"} skips alternate weeks on every selected day', () => {
+  const habit = makeHabit({
+    frequency: 'custom',
+    customDays: [1, 3], // Monday, Wednesday
+    repeatEvery: { value: 2, unit: 'week' },
+    createdAt: WED.getTime(), // Wed Aug 5 2026 — week 0
+  });
+  assert.equal(isHabitActiveOnDate(habit, WED), true); // Wed, week 0 — active
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 5)), false); // Mon, week 1 — skipped
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 7)), false); // Wed, week 1 — skipped
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 12)), true); // Mon, week 2 — active
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 14)), true); // Wed, week 2 — active
+});
+
+test('isHabitActiveOnDate: "custom" with repeatEvery {value:2, unit:"month"} is active only every other month', () => {
+  const habit = makeHabit({
+    frequency: 'custom',
+    customDays: [3], // Wednesday
+    repeatEvery: { value: 2, unit: 'month' },
+    createdAt: WED.getTime(), // Wed Aug 5 2026 — month 0
+  });
+  assert.equal(isHabitActiveOnDate(habit, WED), true); // August — month 0, active
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 28)), false); // September — month 1, skipped
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 63)), true); // October — month 2, active
 });
 
 test('isHabitActiveOnDate: a stopped habit (endDate) is inactive after that date', () => {

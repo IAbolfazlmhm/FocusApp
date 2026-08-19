@@ -92,8 +92,10 @@
 }
 
 .dropdown-item.active-sort {
-  color: #3b82f6;
+  color: var(--theme-color, #3b82f6);
+  /* Fallback for browsers without color-mix() support (pre-Safari 16.4/Chrome 111/Firefox 113) */
   background: rgba(59, 130, 246, 0.1);
+  background: color-mix(in srgb, var(--theme-color, #3b82f6) 12%, transparent);
 }
 
 /*
@@ -104,10 +106,18 @@
   that attribute. Only .active-sort (the Sort dropdowns' own separate,
   manually-toggled class) had a visual treatment, so every dropdown
   built on the shared component silently showed no selection at all.
+
+  FIX 2: both this and .active-sort above were hardcoded to a fixed
+  blue (#3b82f6) regardless of the active tab/phase — every other
+  "selected" state in the app (.tag-chip.selectable.selected,
+  .tag-select-btn.selected, etc.) themes to var(--theme-color), the
+  variable each tab/phase already redefines (see variables.css), so
+  these are brought in line with that instead of staying a fixed color.
 */
 .dropdown-item[aria-selected="true"] {
-  color: #3b82f6;
+  color: var(--theme-color, #3b82f6);
   background: rgba(59, 130, 246, 0.1);
+  background: color-mix(in srgb, var(--theme-color, #3b82f6) 12%, transparent);
 }
 
 

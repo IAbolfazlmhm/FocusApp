@@ -141,8 +141,8 @@
   border-top: 1px solid var(--glass-border);
 }
 
-/* Small muted helper text under a control — e.g. the Custom Interval
-   habit picker's "e.g. 3 = due every 3rd day" line. */
+/* Small muted helper text under a control — e.g. the Custom Days habit
+   picker's "e.g. Sat + Mon, every 2 weeks" line. */
 .field-hint {
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -152,7 +152,7 @@
 /*
   −/value/+ STEPPER CONTROL
   Shared by the Pomodoro settings' Work Duration and the habit modal's
-  Custom Interval — a plain number input the user can type into
+  Custom Days "Every:" row — a plain number input the user can type into
   directly, flanked by buttons for a quick single click or a
   press-and-hold repeat (see js/stepper-utils.js).
 */
@@ -234,6 +234,58 @@
   font-size: 0.85rem;
   color: var(--text-muted);
   flex-shrink: 0;
+}
+
+/*
+  "Every: [N] [Week(s)/Month(s)]" row nested inside the habit modal's
+  Custom Days picker (replaced the old standalone "Custom Interval"
+  frequency — see habits-logic.js's isHabitActiveOnDate() for how
+  customDays + repeatEvery combine). Smaller stepper than the Pomodoro
+  duration one since this is a secondary control sharing a row with a
+  unit dropdown, not the modal's main focus; flex-wrap keeps it from
+  overflowing on narrow phones instead of clipping.
+*/
+.repeat-every-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.repeat-every-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.stepper-control-sm {
+  flex-shrink: 0;
+}
+
+.stepper-control-sm .stepper-btn {
+  width: 30px;
+  height: 30px;
+}
+
+.stepper-control-sm .stepper-btn .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.stepper-control-sm .stepper-value {
+  min-width: 28px;
+}
+
+.stepper-control-sm .stepper-input {
+  font-size: 1rem;
+  width: 2.5ch;
+}
+
+.repeat-unit-wrapper {
+  flex: 1;
+  min-width: 100px;
 }
 
 /*

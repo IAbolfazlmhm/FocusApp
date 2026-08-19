@@ -124,7 +124,7 @@
             <button class="icon-btn focus-mode-toggle-btn" id="focus-mode-toggle-btn" title="Focus Mode" aria-label="Enter Focus Mode" aria-pressed="false" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-glasses"/></svg>
             </button>
-            <button class="icon-btn settings-btn" title="Settings" aria-label="Settings">
+            <button class="icon-btn settings-btn" title="Settings" aria-label="Settings" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
             </button>
           </div>
@@ -213,6 +213,13 @@
           <div id="guide-text" class="guide-text">
             Your tasks will be grouped by date here...
           </div>
+        </div>
+
+        <div class="taskless-convert-banner" id="taskless-convert-banner" style="display: none;">
+          <span id="taskless-convert-banner-text"></span>
+          <button type="button" class="taskless-convert-cancel" id="taskless-convert-cancel-btn" aria-label="Cancel converting this focus time into a task" data-sound="click">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
+          </button>
         </div>
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
@@ -489,11 +496,11 @@
         </div>
         <div class="setting-group toggle-group">
           <label for="dark-mode-toggle">Dark mode</label>
-          <label class="switch"><input type="checkbox" id="dark-mode-toggle" role="switch" aria-checked="false"><span class="slider round"></span></label>
+          <label class="switch"><input type="checkbox" id="dark-mode-toggle" data-sound="click" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="sound-toggle">Sound Effects (Haptics):</label>
-          <label class="switch"><input type="checkbox" id="sound-toggle" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          <label class="switch"><input type="checkbox" id="sound-toggle" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
 
         <div id="pomodoro-settings-wrapper">
@@ -515,11 +522,11 @@
 
           <div class="setting-group toggle-group">
             <label for="breaks-toggle">Enable Breaks (Short/Long):</label>
-            <label class="switch"><input type="checkbox" id="breaks-toggle" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+            <label class="switch"><input type="checkbox" id="breaks-toggle" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
           </div>
           <div class="setting-group toggle-group">
             <label for="autostart-breaks-toggle">Auto-start Breaks:</label>
-            <label class="switch"><input type="checkbox" id="autostart-breaks-toggle" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+            <label class="switch"><input type="checkbox" id="autostart-breaks-toggle" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
           </div>
 
           <div class="setting-group dropdown-anchor" id="sound-wrapper">
@@ -553,7 +560,6 @@
             <button type="button" class="btn-outline flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-sound="click">Import Data</button>
           </div>
           <input type="file" id="import-data-input" accept="application/json" style="display:none;">
-          <button type="button" class="btn-outline" id="clear-taskless-btn" aria-label="Clear all no-task focus time" data-sound="click" style="width:100%; margin-top: 10px;">Clear No-Task Focus Time</button>
           <button type="button" class="btn-outline" id="open-trash-btn" aria-label="Open Trash" data-sound="click" style="width:100%; margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             <span>Trash</span>
@@ -679,7 +685,6 @@
               <div class="dropdown-item" data-val="saturday" data-sound="click">Every Saturday</div>
               <div class="dropdown-item" data-val="sunday" data-sound="click">Every Sunday</div>
               <div class="dropdown-item" data-val="custom" data-sound="click">Custom Days...</div>
-              <div class="dropdown-item" data-val="interval" data-sound="click">Custom Interval...</div>
             </div>
           </div>
         </div>
@@ -695,23 +700,31 @@
             <button type="button" class="day-option" data-day="6" aria-pressed="false" aria-label="Saturday" data-sound="click">S</button>
             <button type="button" class="day-option" data-day="0" aria-pressed="false" aria-label="Sunday" data-sound="click">S</button>
           </div>
-        </div>
 
-        <div class="setting-group" id="custom-interval-picker" style="display: none; margin-bottom: 20px;">
-          <label for="habit-interval-input">Repeat Every</label>
-          <div class="stepper-control" id="habit-interval-stepper">
-            <button type="button" class="stepper-btn" id="habit-interval-minus" aria-label="Decrease interval" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
-            <div class="stepper-value">
-              <input type="number" id="habit-interval-input" class="stepper-input" value="3" min="2" max="365" step="1" inputmode="numeric" aria-label="Repeat every N days">
-              <span class="stepper-unit">days</span>
+          <div class="repeat-every-row">
+            <span class="repeat-every-label">Every</span>
+            <div class="stepper-control stepper-control-sm" id="habit-repeat-every-stepper">
+              <button type="button" class="stepper-btn stepper-btn-sm" id="habit-repeat-every-minus" aria-label="Decrease repeat interval" data-sound="click">
+                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <div class="stepper-value">
+                <input type="number" id="habit-repeat-every-input" class="stepper-input" value="1" min="1" max="52" step="1" inputmode="numeric" aria-label="Repeat every N weeks or months">
+              </div>
+              <button type="button" class="stepper-btn stepper-btn-sm" id="habit-repeat-every-plus" aria-label="Increase repeat interval" data-sound="click">
+                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
             </div>
-            <button type="button" class="stepper-btn" id="habit-interval-plus" aria-label="Increase interval" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </button>
+
+            <div class="repeat-unit-wrapper" id="habit-repeat-unit-wrapper" style="position: relative;">
+              <input type="text" id="habit-repeat-unit-display" class="custom-select" value="Week(s)" readonly aria-label="Repeat unit" style="cursor: pointer;">
+              <input type="hidden" id="habit-repeat-unit-value" value="week">
+              <div id="habit-repeat-unit-dropdown" class="custom-dropdown glass-effect">
+                <div class="dropdown-item" data-val="week" data-sound="click">Week(s)</div>
+                <div class="dropdown-item" data-val="month" data-sound="click">Month(s)</div>
+              </div>
+            </div>
           </div>
-          <p class="field-hint">e.g. 3 = due every 3rd day, starting today</p>
+          <p class="field-hint">e.g. Sat + Mon, every 2 weeks</p>
         </div>
 
         <div class="setting-group">
@@ -888,24 +901,24 @@
       <div class="modal-body">
         <div class="setting-group toggle-group">
           <label for="prog-dark-mode">Global Dark Mode</label>
-          <label class="switch" for="prog-dark-mode"><input type="checkbox" id="prog-dark-mode" role="switch" aria-checked="false"><span class="slider round"></span></label>
+          <label class="switch" for="prog-dark-mode"><input type="checkbox" id="prog-dark-mode" data-sound="click" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="prog-sound-toggle">Sound Effects</label>
-          <label class="switch" for="prog-sound-toggle"><input type="checkbox" id="prog-sound-toggle" role="switch" aria-checked="false"><span class="slider round"></span></label>
+          <label class="switch" for="prog-sound-toggle"><input type="checkbox" id="prog-sound-toggle" data-sound="click" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 15px 0;">
         <div class="setting-group toggle-group">
           <label for="prog-toggle-focus">Show Pomodoro Data</label>
-          <label class="switch" for="prog-toggle-focus"><input type="checkbox" id="prog-toggle-focus" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          <label class="switch" for="prog-toggle-focus"><input type="checkbox" id="prog-toggle-focus" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="prog-toggle-habits">Show Habits Data</label>
-          <label class="switch" for="prog-toggle-habits"><input type="checkbox" id="prog-toggle-habits" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          <label class="switch" for="prog-toggle-habits"><input type="checkbox" id="prog-toggle-habits" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
           <label for="prog-toggle-compare">Show Comparisons (↑↓)</label>
-          <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
 
         <button class="btn-block" id="save-prog-settings" data-sound="success">Save & Apply</button>

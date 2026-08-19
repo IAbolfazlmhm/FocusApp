@@ -1,7 +1,7 @@
 // ==========================================
 // PROGRESS: DAILY REPORT MODAL
 // ==========================================
-import { setTaskDate } from '../tasks/tasks.js';
+import { setTaskDate, beginTasklessConversion } from '../tasks/tasks.js';
 import { formatTaskTime } from '../tasks/tasks-render.js';
 import { setHabitDate } from '../habits/habits.js';
 import { isHabitActiveOnDate } from '../habits/habits-logic.js';
@@ -27,6 +27,7 @@ export function openDailyReport(dateObj, showPomodoro = true, showHabits = true)
 
   const localDateStr = getLocalDateKey(dateObj);
   const habitLogKey = getHabitLogKey(dateObj);
+  let tasklessSeconds = 0;
 
   title.textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
@@ -61,9 +62,9 @@ export function openDailyReport(dateObj, showPomodoro = true, showHabits = true)
     // the app that surfaces it at all — a stray entry from testing the
     // timer with nothing selected has nowhere else to go.
     const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
-    const tasklessSeconds = tasklessByDate[localDateStr] || 0;
+    tasklessSeconds = tasklessByDate[localDateStr] || 0;
     if (tasklessSeconds > 0) {
-      html += `<div class="report-item report-item-deletable"><span>Focus time (no task)</span> <span class="report-item-value"><span>${formatTaskTime(tasklessSeconds)}</span><button type="button" class="icon-btn report-delete-taskless-btn" id="delete-taskless-btn" title="Delete this entry" aria-label="Delete this no-task focus time entry" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></span></div>`;
+      html += `<div class="report-item report-item-deletable"><span>Focus time (no task)</span> <span class="report-item-value"><span>${formatTaskTime(tasklessSeconds)}</span><button type="button" class="icon-btn report-edit-taskless-btn" id="edit-taskless-btn" title="Turn into a task" aria-label="Turn this no-task focus time into a task" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button><button type="button" class="icon-btn report-delete-taskless-btn" id="delete-taskless-btn" title="Delete this entry" aria-label="Delete this no-task focus time entry" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></span></div>`;
     }
   }
 
@@ -122,6 +123,19 @@ export function openDailyReport(dateObj, showPomodoro = true, showHabits = true)
       document.getElementById('close-report-modal').click();
       document.getElementById('tab-habits').click();
       setHabitDate(dateObj);
+    });
+  }
+
+  // Replaces the old blanket "Clear No-Task Focus Time" button that used
+  // to live in Settings — instead of just discarding a stray taskless
+  // session, this hands it off to Pomodoro as a real, nameable task that
+  // keeps the same amount of time (see beginTasklessConversion(), tasks.js).
+  const editTasklessBtn = document.getElementById('edit-taskless-btn');
+  if (editTasklessBtn) {
+    editTasklessBtn.addEventListener('click', () => {
+      document.getElementById('close-report-modal').click();
+      document.getElementById('tab-pomodoro').click();
+      beginTasklessConversion(dateObj, tasklessSeconds);
     });
   }
 

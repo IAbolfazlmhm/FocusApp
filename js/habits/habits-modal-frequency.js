@@ -1,8 +1,8 @@
 // ==========================================
 // HABIT MODAL — FREQUENCY (repeat schedule)
 // ==========================================
-// The frequency dropdown (Every Day / Once a Week / .../ Custom Days /
-// Custom Interval) and the two pickers it reveals. Read/validated at
+// The frequency dropdown (Every Day / Once a Week / .../ Custom Days)
+// and the picker it reveals. Read/validated at
 // save time by habits-modal-save.js; scheduling itself is
 // habits-logic.js's isHabitActiveOnDate().
 
@@ -19,7 +19,6 @@ export function setupHabitFrequencyPicker() {
   const freqValue = document.getElementById('habit-frequency-value');
   const freqDropdown = document.getElementById('habit-frequency-dropdown');
   const customDaysPicker = document.getElementById('custom-days-picker');
-  const customIntervalPicker = document.getElementById('custom-interval-picker');
   const dayOptions = document.querySelectorAll('.day-option');
 
   if (freqInputDisplay && freqDropdown) {
@@ -46,9 +45,6 @@ export function setupHabitFrequencyPicker() {
         if (customDaysPicker) {
           customDaysPicker.style.display = (val === 'custom') ? 'flex' : 'none';
         }
-        if (customIntervalPicker) {
-          customIntervalPicker.style.display = (val === 'interval') ? 'flex' : 'none';
-        }
       });
     });
 
@@ -60,11 +56,34 @@ export function setupHabitFrequencyPicker() {
     });
   }
 
-  // --- CUSTOM INTERVAL STEPPER (+/-) ---
+  // --- CUSTOM DAYS "EVERY:" STEPPER (+/-) + UNIT DROPDOWN ---
   // Same press-and-hold pattern as the Pomodoro settings duration
   // stepper (settings.js's setupDurationStepper) — kept small and
   // inline here since it's the only stepper habits.js owns.
-  setupStepperButtons('habit-interval-minus', 'habit-interval-plus', 'habit-interval-input', 2, 365);
+  setupStepperButtons('habit-repeat-every-minus', 'habit-repeat-every-plus', 'habit-repeat-every-input', 1, 52);
+
+  const repeatUnitDisplay = document.getElementById('habit-repeat-unit-display');
+  const repeatUnitValue = document.getElementById('habit-repeat-unit-value');
+  const repeatUnitDropdown = document.getElementById('habit-repeat-unit-dropdown');
+  if (repeatUnitDisplay && repeatUnitDropdown) {
+    repeatUnitDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', () => {
+        repeatUnitDisplay.value = item.textContent;
+        if (repeatUnitValue) {
+          repeatUnitValue.value = item.getAttribute('data-val');
+          repeatUnitValue.dispatchEvent(new Event('change'));
+        }
+        repeatUnitDropdown.classList.remove('show');
+      });
+    });
+
+    setupSelectDropdown({
+      wrapperId: 'habit-repeat-unit-wrapper',
+      triggerId: 'habit-repeat-unit-display',
+      dropdownId: 'habit-repeat-unit-dropdown',
+      valueInputId: 'habit-repeat-unit-value'
+    });
+  }
 
   // Custom Days Interaction
   dayOptions.forEach(day => {

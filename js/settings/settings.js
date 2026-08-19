@@ -3,8 +3,7 @@ import {
 } from '../core/state.js';
 
 import {
-  updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState, stopTimer,
-  clearAllTasklessTime
+  updateDisplay, updateCircle, updatePhaseText, updatePhaseColors, saveTimerState, stopTimer
 } from '../timer/timer.js';
 
 import { showToast } from '../ui/toast.js';
@@ -389,17 +388,6 @@ export function setupSettingsEvents() {
     openTrashBtn.addEventListener('click', () => {
       settingsModal.classList.remove('show');
       openTrashModal();
-    });
-  }
-
-  const clearTasklessBtn = document.getElementById('clear-taskless-btn');
-  if (clearTasklessBtn) {
-    clearTasklessBtn.addEventListener('click', () => {
-      customConfirm('Clear all no-task focus time across every day? This cannot be undone.', () => {
-        clearAllTasklessTime();
-        document.dispatchEvent(new Event('dataUpdated'));
-        showToast('No-task focus time cleared.', 'success', true);
-      });
     });
   }
 }

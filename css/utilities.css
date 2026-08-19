@@ -301,3 +301,31 @@
 .locked-task-label.lg {
   font-size: 1.05rem;
 }
+
+/*
+  Entrance animation for a just-added list item (task, habit, tag,
+  category, quote — see animateNewListItem(), dom-utils.js). Every list
+  in this app rebuilds itself entirely from its data array on every
+  render (renderTasks(), renderHabits(), etc. all wipe and rebuild
+  .innerHTML), so there's no framework-level concept of "this one node
+  is new" — animateNewListItem() applies this class imperatively, once,
+  to only the specific element that was just created, right after the
+  render call that built it. A slight lift + scale + fade reads as the
+  item "landing" from the direction of the input it was typed into,
+  similar to a message bubble appearing after you hit send.
+  prefers-reduced-motion already neutralizes this globally (reset.css).
+*/
+@keyframes itemEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.item-enter {
+  animation: itemEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}

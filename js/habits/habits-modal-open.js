@@ -31,7 +31,7 @@ function openHabitEditModal(habitId) {
     everyday: 'Every Day', weekly: 'Once a Week', biweekly: 'Every 2 Weeks',
     monday: 'Every Monday', tuesday: 'Every Tuesday', wednesday: 'Every Wednesday',
     thursday: 'Every Thursday', friday: 'Every Friday', saturday: 'Every Saturday',
-    sunday: 'Every Sunday', custom: 'Custom Days...', interval: 'Custom Interval...'
+    sunday: 'Every Sunday', custom: 'Custom Days...'
   };
   document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
   // FIX: setting .value above doesn't fire 'change' on its own, and
@@ -71,20 +71,21 @@ function openHabitEditModal(habitId) {
 
   if (fVal === 'custom') {
     document.getElementById('custom-days-picker').style.display = 'flex';
-    document.getElementById('custom-interval-picker').style.display = 'none';
     dayOptions.forEach(d => {
       const selected = !!(habitToEdit.customDays && habitToEdit.customDays.includes(parseInt(d.dataset.day, 10)));
       d.classList.toggle('selected', selected);
       d.setAttribute('aria-pressed', String(selected));
     });
-  } else if (fVal === 'interval') {
-    document.getElementById('custom-days-picker').style.display = 'none';
-    document.getElementById('custom-interval-picker').style.display = 'flex';
-    const intervalInput = document.getElementById('habit-interval-input');
-    if (intervalInput) {intervalInput.value = habitToEdit.intervalDays || 3;}
+    const repeatEvery = habitToEdit.repeatEvery || { value: 1, unit: 'week' };
+    const repeatEveryInput = document.getElementById('habit-repeat-every-input');
+    if (repeatEveryInput) {repeatEveryInput.value = repeatEvery.value || 1;}
+    const repeatUnitValue = document.getElementById('habit-repeat-unit-value');
+    const repeatUnitDisplay = document.getElementById('habit-repeat-unit-display');
+    const isMonth = repeatEvery.unit === 'month';
+    if (repeatUnitValue) {repeatUnitValue.value = isMonth ? 'month' : 'week';}
+    if (repeatUnitDisplay) {repeatUnitDisplay.value = isMonth ? 'Month(s)' : 'Week(s)';}
   } else {
     document.getElementById('custom-days-picker').style.display = 'none';
-    document.getElementById('custom-interval-picker').style.display = 'none';
   }
 
   document.getElementById('habit-modal').classList.add('show');
@@ -160,11 +161,13 @@ export function setupHabitModalOpenClose() {
 
       // Reset color and icon selections
       const customDaysPicker = document.getElementById('custom-days-picker');
-      const customIntervalPicker = document.getElementById('custom-interval-picker');
       if (customDaysPicker) {customDaysPicker.style.display = 'none';}
-      if (customIntervalPicker) {customIntervalPicker.style.display = 'none';}
-      const intervalResetInput = document.getElementById('habit-interval-input');
-      if (intervalResetInput) {intervalResetInput.value = 3;}
+      const repeatEveryResetInput = document.getElementById('habit-repeat-every-input');
+      if (repeatEveryResetInput) {repeatEveryResetInput.value = 1;}
+      const repeatUnitResetValue = document.getElementById('habit-repeat-unit-value');
+      const repeatUnitResetDisplay = document.getElementById('habit-repeat-unit-display');
+      if (repeatUnitResetValue) {repeatUnitResetValue.value = 'week';}
+      if (repeatUnitResetDisplay) {repeatUnitResetDisplay.value = 'Week(s)';}
       dayOptions.forEach(d => {
         d.classList.remove('selected');
         d.setAttribute('aria-pressed', 'false');

@@ -48,11 +48,6 @@ export function clearTasklessTime(dateKey) {
   writeJSON(STORAGE_KEYS.TASKLESS_TIME, byDate);
 }
 
-/** Wipes taskless focus time across every day — Settings > Your Data. */
-export function clearAllTasklessTime() {
-  writeJSON(STORAGE_KEYS.TASKLESS_TIME, {});
-}
-
 import { saveTasks } from '../tasks/tasks-storage.js';
 import { formatTaskTime } from '../tasks/tasks-render.js';
 

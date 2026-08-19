@@ -240,7 +240,7 @@
 }
 
 .color-option.selected {
-  border: 3px solid var(--text-main);
+  border: 3px solid var(--theme-color, #3b82f6);
   transform: scale(1.15);
 }
 
@@ -269,9 +269,9 @@
 }
 
 .icon-option.selected {
-  background: var(--text-main);
-  color: var(--bg-base);
-  border-color: var(--text-main);
+  background: var(--theme-color, #3b82f6);
+  color: #ffffff;
+  border-color: var(--theme-color, #3b82f6);
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
@@ -433,9 +433,9 @@ body[data-theme="dark"] .overview-ring {
 }
 
 .day-option.selected {
-  background: var(--text-main);
-  color: var(--bg-base);
-  border-color: var(--text-main);
+  background: var(--theme-color, #3b82f6);
+  color: #ffffff;
+  border-color: var(--theme-color, #3b82f6);
 }
 
 /* --- UNIFIED DROPDOWNS (Category & Goal) --- */

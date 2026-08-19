@@ -25,6 +25,22 @@ import { generateId } from '../core/dom-utils.js';
 // edge, rather than the user ever having to notice a cap being hit.
 const MAX_TRASH_ITEMS = 200;
 
+// FIX: the Trash badge (Settings > Trash button — trash-ui.js) only ever
+// refreshed itself from inside the Trash modal's own restore/delete/empty
+// handlers. Every OTHER place that sends something to Trash — removeTask,
+// tag/category delete, quote delete, etc. — calls straight into
+// moveToTrash() here and had no way to tell the badge to update, so it
+// stayed stale until the modal was next opened or the page reloaded.
+// This file deliberately owns no DOM (see file header), so instead of
+// importing trash-ui.js back in here (circular, and the wrong direction
+// of dependency) this dispatches a custom event the same way
+// dataUpdated is already used elsewhere (habits.js, trash-ui.js) —
+// trash-ui.js listens for it and re-renders the badge whenever the bin's
+// contents actually change, from anywhere in the app.
+function notifyTrashChanged() {
+  document.dispatchEvent(new Event('trashUpdated'));
+}
+
 export function getTrash() {
   return readJSON(STORAGE_KEYS.TRASH, [], 'array');
 }
@@ -48,6 +64,7 @@ export function moveToTrash(type, label, data) {
   const entry = { id: generateId(), type, label, data, deletedAt: Date.now() };
   const updated = [entry, ...trash].slice(0, MAX_TRASH_ITEMS);
   writeJSON(STORAGE_KEYS.TRASH, updated);
+  notifyTrashChanged();
   return entry;
 }
 
@@ -55,6 +72,7 @@ export function moveToTrash(type, label, data) {
 export function permanentlyDelete(id) {
   const updated = getTrash().filter(e => e.id !== id);
   writeJSON(STORAGE_KEYS.TRASH, updated);
+  notifyTrashChanged();
 }
 
 /** Removes an entry from the bin because it's being restored elsewhere — same effect as permanentlyDelete, named for what the caller is doing. */
@@ -64,6 +82,7 @@ export function removeFromTrash(id) {
 
 export function emptyTrash() {
   writeJSON(STORAGE_KEYS.TRASH, []);
+  notifyTrashChanged();
 }
 
 export function findTrashEntry(id) {

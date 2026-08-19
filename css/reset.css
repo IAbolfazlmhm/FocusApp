@@ -253,6 +253,30 @@ input:focus, .custom-select:focus {
 }
 
 /*
+  FIX: .task-item (task/habit cards), and the tag/category chips in
+  Manage Tags/Manage Categories (.tag-chip.manageable), are DIVs given
+  tabIndex + role="button" so keyboard users can reach them (see the
+  FIX comments at their tabIndex assignments in tasks-render.js,
+  habits-render.js, tasks-tags-modal.js, habits-categories.js) — but
+  the `button:focus`/`button:focus-visible` rules above only match real
+  <button> elements, not div[role="button"]. Nothing here ever touched
+  their focus outline at all, so both a mouse click AND keyboard focus
+  fell through to the browser's own default outline (a plain black/dark
+  ring that ignores the app's theme entirely) instead of the themed,
+  keyboard-only ring every other control in the app uses.
+*/
+.task-item:focus,
+.tag-chip.manageable:focus {
+  outline: none;
+}
+
+.task-item:focus-visible,
+.tag-chip.manageable:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/*
   .task-input has no border of its own (it sits inside a .glass-pill
   container), so instead of ringing the input we glow the pill around it
   via :focus-within — that's the shape the user actually sees. Opacity

@@ -16,12 +16,14 @@ import {
   setTasks, setFocusedTaskId, setSavedTags, setCurrentPomodoroDate
 } from '../core/state.js';
 import { showToast } from '../ui/toast.js';
-import { generateId } from '../core/dom-utils.js';
+import { generateId, animateNewListItem } from '../core/dom-utils.js';
 import { keepInputVisibleOnMobileKeyboard } from '../ui/scroll-utils.js';
 import { customConfirm } from '../ui/modal-utils.js';
 import { saveTasks } from './tasks-storage.js';
 import { renderTasks, renderFilters, setTaskHandlers } from './tasks-render.js';
 import { moveToTrash } from '../trash/trash.js';
+import { clearTasklessTime } from '../timer/timer.js';
+import { getLocalDateKey } from '../core/date-utils.js';
 import { quickTagState } from './tasks-quick-tag-state.js';
 import { setupTaskEditModal } from './tasks-edit-modal.js';
 import { setupTagsManagement } from './tasks-tags-modal.js';
@@ -31,6 +33,53 @@ import { setupTaskSort } from './tasks-sort.js';
 
 const taskInput = document.getElementById('task-input');
 const addBtn = document.getElementById('add-task-btn');
+const taskListContainer = document.querySelector('.task-list-container');
+
+// Set by beginTasklessConversion() (called from the Daily Report modal's
+// pencil button — see progress-report.js) when the user turns a
+// "Focus time (no task)" Progress entry into a real task instead of just
+// deleting it. The next task created via addTask() picks this up and
+// inherits that day's untracked time — see both functions below.
+let pendingTasklessConversion = null; // { dateKey, seconds } | null
+
+function formatMinutesSeconds(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  if (m === 0) {return `${s}s`;}
+  if (s === 0) {return `${m}m`;}
+  return `${m}m ${s}s`;
+}
+
+/**
+ * Switches to the given day in the Pomodoro tab and arms the task input
+ * so the next task the user creates inherits `seconds` of focus time on
+ * that day instead of starting at zero (see addTask() below for where
+ * that's applied). The taskless-convert-banner (index.html) makes this
+ * state visible, with its own cancel button — see cancelTasklessConversion.
+ */
+export function beginTasklessConversion(dateObj, seconds) {
+  setTaskDate(dateObj);
+  pendingTasklessConversion = { dateKey: getLocalDateKey(dateObj), seconds };
+
+  const banner = document.getElementById('taskless-convert-banner');
+  const bannerText = document.getElementById('taskless-convert-banner-text');
+  if (bannerText) {
+    const label = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    bannerText.textContent = `Name this task to give it the ${formatMinutesSeconds(seconds)} of focus time from ${label}.`;
+  }
+  if (banner) {banner.style.display = 'flex';}
+
+  if (taskInput) {
+    taskInput.value = '';
+    taskInput.focus();
+  }
+}
+
+function cancelTasklessConversion() {
+  pendingTasklessConversion = null;
+  const banner = document.getElementById('taskless-convert-banner');
+  if (banner) {banner.style.display = 'none';}
+}
 
 // ==========================================
 // CORE ACTIONS
@@ -71,7 +120,7 @@ export function addTask() {
   const now = new Date();
   taskDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
 
-  setTasks([...tasks, {
+  const newTask = {
     id: generateId(),
     text,
     tag: finalTag,
@@ -79,10 +128,33 @@ export function addTask() {
     timeSpent: 0,
     timeByDate: {},
     createdAt: taskDate.getTime()
-  }]);
+  };
+
+  // Carry over a pending "Focus time (no task)" conversion, if one is
+  // armed (see beginTasklessConversion() above) — this new task inherits
+  // that day's untracked time instead of starting at zero, and the
+  // original taskless entry is cleared so the same minutes aren't
+  // counted twice in Progress totals.
+  let convertedSeconds = 0;
+  if (pendingTasklessConversion) {
+    const { dateKey, seconds } = pendingTasklessConversion;
+    newTask.timeSpent = seconds;
+    newTask.timeByDate[dateKey] = seconds;
+    convertedSeconds = seconds;
+    clearTasklessTime(dateKey);
+    cancelTasklessConversion();
+  }
+
+  setTasks([...tasks, newTask]);
   saveTasks();
   renderFilters();
   renderTasks();
+  animateNewListItem(taskListContainer, newTask.id);
+
+  if (convertedSeconds > 0) {
+    document.dispatchEvent(new Event('dataUpdated'));
+    showToast(`Task created with ${formatMinutesSeconds(convertedSeconds)} carried over.`, 'success');
+  }
 
   if (taskInput) {taskInput.value = '';}
 }
@@ -205,6 +277,27 @@ export function setupTaskEvents() {
     });
     keepInputVisibleOnMobileKeyboard(taskInput);
   }
+
+  const tasklessConvertCancelBtn = document.getElementById('taskless-convert-cancel-btn');
+  if (tasklessConvertCancelBtn) {
+    tasklessConvertCancelBtn.addEventListener('click', cancelTasklessConversion);
+  }
+
+  // Safety net: if the user navigates away from the Pomodoro tab while a
+  // conversion (see beginTasklessConversion() above) is still pending,
+  // drop it — otherwise it would silently attach to whatever task gets
+  // created next, on an unrelated day. tabs.js dispatches 'tabChanged'
+  // BEFORE it actually swaps the .active class over, so the check itself
+  // is deferred a tick to see the tab state that's actually settled in.
+  document.addEventListener('tabChanged', () => {
+    if (!pendingTasklessConversion) {return;}
+    setTimeout(() => {
+      const pomodoroTab = document.getElementById('tab-pomodoro');
+      if (pendingTasklessConversion && pomodoroTab && !pomodoroTab.classList.contains('active')) {
+        cancelTasklessConversion();
+      }
+    }, 0);
+  });
 
   // External trigger for focusing from timer
   document.addEventListener('autoFocusTask', (e) => {

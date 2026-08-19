@@ -143,5 +143,11 @@ export function setupTrashEvents() {
     });
   });
 
+  // FIX: keeps the badge correct when something is trashed/restored/
+  // purged from anywhere else in the app (removeTask, tag/category
+  // delete, quote delete, ...) — not just from actions taken inside
+  // this modal. See notifyTrashChanged()'s comment in trash.js.
+  document.addEventListener('trashUpdated', updateTrashBadge);
+
   updateTrashBadge();
 }

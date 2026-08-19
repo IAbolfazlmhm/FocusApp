@@ -335,6 +335,20 @@ body[data-theme="dark"] .heatmap-block:not(.focus-level-1):not(.focus-level-2):n
   flex-shrink: 0;
 }
 
+.report-edit-taskless-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
+  color: var(--text-muted);
+}
+
+.report-edit-taskless-btn .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
 .report-delete-taskless-btn {
   width: 26px;
   height: 26px;
