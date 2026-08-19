@@ -63,18 +63,34 @@
   The actual scroll region. flex: 1 lets it fill whatever space
   .modal-header (pinned above) doesn't use; min-height: 0 is required
   for a flex child to be allowed to shrink below its content's natural
-  height instead of overflowing the flex column. The negative right
-  margin + matching padding keeps the scrollbar gutter from shifting
-  body content left when a scrollbar appears (the classic "layout jumps
-  when a scrollbar shows up" issue) — width is unaffected either way,
-  since the gutter and the inset perfectly cancel out.
+  height instead of overflowing the flex column.
+
+  FIX: setting overflow-y here makes the browser compute overflow-x as
+  'auto' too (CSS spec: an axis left at 'visible' while the other isn't
+  gets promoted to 'auto') — there's no way to scroll vertically here
+  without also clipping horizontally. That silently hard-cut anything
+  that visually extends past this box: a dropdown's glass-shadow glow
+  (see .custom-dropdown, dropdowns.css) opening flush against the left
+  edge (e.g. Settings' Work Duration picker), and an input's
+  :focus-visible ring (see .custom-select, reset.css) sitting flush
+  against the top-left corner of a modal body (e.g. Manage Tags' name
+  field) — top/bottom clip the same way since that's overflow-y's
+  actual job here, not a side effect, but the fix is identical.
+
+  margin/padding on all four sides now gives that bleed somewhere to
+  go: the margin pulls this box's edges outward into modal-content's
+  own padding, and the matching padding pushes content back in by the
+  same amount, so nothing visually shifts — only the invisible clip
+  boundary moves further out. Right side does double duty, also
+  covering the scrollbar gutter so its appearance doesn't shift content
+  left when a scrollbar appears.
 */
 .modal-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  margin-right: -8px;
-  padding-right: 8px;
+  margin: -12px;
+  padding: 12px;
 }
 
 /*
@@ -108,6 +124,224 @@
   gap: 8px;
   font-size: 1.2rem;
   color: var(--text-main);
+}
+
+/*
+  Mirrors .modal-header above (flex-shrink: 0, pinned outside the
+  scrolling .modal-body) so a modal's primary action — Save, Apply,
+  etc. — never scrolls out of reach the way it used to when it was just
+  the last child inside .modal-body. Any modal that wants this simply
+  moves its action button(s) here, as a sibling of .modal-body instead
+  of a child of it; no other markup change needed.
+*/
+.modal-footer {
+  flex-shrink: 0;
+  padding-top: 15px;
+  margin-top: 5px;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Small muted helper text under a control — e.g. the Custom Interval
+   habit picker's "e.g. 3 = due every 3rd day" line. */
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 6px 2px 0;
+}
+
+/*
+  −/value/+ STEPPER CONTROL
+  Shared by the Pomodoro settings' Work Duration and the habit modal's
+  Custom Interval — a plain number input the user can type into
+  directly, flanked by buttons for a quick single click or a
+  press-and-hold repeat (see js/stepper-utils.js).
+*/
+.stepper-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepper-btn {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.stepper-btn .ui-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.stepper-btn:hover {
+  border-color: var(--theme-color);
+  color: var(--theme-color);
+}
+
+.stepper-btn:active {
+  transform: scale(0.92);
+  border-color: var(--theme-color);
+}
+
+.stepper-value {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.stepper-input {
+  width: 4.5ch;
+  min-width: 0;
+  flex-shrink: 1;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  background: transparent;
+  border: none;
+  padding: 0;
+  /* Hide the native up/down spinner — the stepper's own +/- buttons
+     already cover that, and the browser's tiny built-in arrows read as
+     a second, redundant, much-harder-to-tap control right next to it. */
+  -moz-appearance: textfield;
+}
+
+.stepper-input::-webkit-outer-spin-button,
+.stepper-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper-input:focus-visible {
+  outline: 2px solid var(--theme-color);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.stepper-unit {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/*
+  TRASH LIST (Settings > Trash)
+*/
+.trash-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--theme-color);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.trash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.trash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.trash-item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.trash-item-type-badge {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: rgba(128, 128, 128, 0.15);
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.trash-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.trash-item-time {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.trash-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.trash-restore-btn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  width: auto;
+  min-height: 0;
+}
+
+.trash-delete-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.trash-delete-btn .ui-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 420px) {
+  .trash-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .trash-item-actions {
+    justify-content: flex-end;
+  }
+  .trash-item-label {
+    max-width: none;
+  }
 }
 
 .modal-divider {
@@ -148,6 +382,8 @@
 }
 
 .custom-select {
+  width: 100%;
+  box-sizing: border-box;
   padding: 10px;
   border-radius: 15px;
   border: 1px solid var(--glass-border);
@@ -168,6 +404,62 @@
 body[data-theme="dark"] .custom-select option {
   background: #1e293b;
   color: #f8fafc;
+}
+
+/*
+  SEGMENTED DATE INPUT (MM / DD / YYYY) — Custom Range modal
+  Replaces what used to be a bare <input type="date"> (see
+  js/date-segment-input.js for why: a native date input's width doesn't
+  reliably fill a flex-stretched container the way a plain input does,
+  and its year segment could keep accepting digits past 4 rather than
+  capping and moving on — neither is something CSS/JS can reach into and
+  fix on the browser-drawn control). Styled to look like one continuous
+  .custom-select field even though it's three separate inputs.
+*/
+.date-segment-group {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+}
+
+.date-segment-group:focus-within {
+  border-color: var(--theme-color);
+}
+
+.date-segment {
+  width: 2.4ch;
+  flex: 0 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+}
+
+.date-segment-year {
+  width: 4.4ch;
+}
+
+.date-segment::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.date-segment-sep {
+  color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .toggle-group {
@@ -262,6 +554,7 @@ input:checked + .slider:before {
 /* --- MODAL ROW FIXES --- */
 .add-tag-row {
   display: flex;
+  align-items: center;
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -359,6 +652,30 @@ body[data-theme="dark"] #confirm-message {
   border: 1px solid var(--glass-border);
   border-radius: 20px;
   padding: 2px 8px;
+}
+
+/* Marks a quote from the shipped default set, in the "Default Quotes"
+   section of Manage Quotes — distinguishes it from ones the user wrote,
+   since editing/disabling it behaves slightly differently (see
+   motivation.js's built-in override layer). */
+.quote-default-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--theme-color);
+  /* Fallback for browsers without color-mix() support */
+  background: var(--glass-bg);
+  background: color-mix(in srgb, var(--theme-color) 15%, transparent);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.quote-manage-actions .reset-quote-btn:hover {
+  color: var(--theme-color, #3b82f6);
+}
+
+.quote-manage-actions .reset-quote-btn:active {
+  color: var(--theme-color, #3b82f6);
 }
 
 .quote-manage-actions {

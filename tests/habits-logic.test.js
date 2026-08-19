@@ -1,7 +1,7 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isHabitActiveOnDate, calculateStreak, getDateKey } from '../js/habits-logic.js';
+import { isHabitActiveOnDate, calculateStreak, getDateKey } from '../js/habits/habits-logic.js';
 
 // Fixed reference point so these tests don't depend on the day they
 // happen to run. A Wednesday.
@@ -65,6 +65,22 @@ test('isHabitActiveOnDate: "biweekly" skips alternate weeks', () => {
   assert.equal(isHabitActiveOnDate(habit, WED), true); // week 0 — active
   assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 7)), false); // week 1 — skipped
   assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 14)), true); // week 2 — active
+});
+
+test('isHabitActiveOnDate: "interval" is active on creation day and every Nth day after', () => {
+  const habit = makeHabit({ frequency: 'interval', intervalDays: 3, createdAt: WED.getTime() });
+  assert.equal(isHabitActiveOnDate(habit, WED), true); // day 0
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 1)), false); // day 1
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 2)), false); // day 2
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 3)), true); // day 3
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 6)), true); // day 6
+});
+
+test('isHabitActiveOnDate: "interval" with no intervalDays configured falls back to every 3rd day', () => {
+  const habit = makeHabit({ frequency: 'interval', createdAt: WED.getTime() });
+  assert.equal(isHabitActiveOnDate(habit, WED), true);
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 3)), true);
+  assert.equal(isHabitActiveOnDate(habit, dayOffset(WED, 1)), false);
 });
 
 test('isHabitActiveOnDate: a stopped habit (endDate) is inactive after that date', () => {

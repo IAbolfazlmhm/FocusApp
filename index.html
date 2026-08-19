@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
   <title>Focus App</title>
   <meta name="description" content="A Pomodoro timer, task manager, and habit tracker with focus sessions, streaks, heatmaps, and data export. All data stored locally in your browser.">
   <meta name="theme-color" content="#3b82f6">
@@ -44,6 +44,21 @@
     </symbol>
     <symbol id="icon-glasses" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="6" cy="15" r="4"/><circle cx="18" cy="15" r="4"/><path d="M10 15h4"/><path d="M2 15l2-7a2 2 0 0 1 2-1"/><path d="M22 15l-2-7a2 2 0 0 0-2-1"/>
+    </symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+    </symbol>
+    <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </symbol>
+    <symbol id="icon-info-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+    </symbol>
+    <symbol id="icon-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+    </symbol>
+    <symbol id="icon-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
     </symbol>
   </svg>
 
@@ -203,7 +218,7 @@
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div class="pill-icon-btn-wrapper">
             <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" aria-label="Set Tag" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-tag"/></svg>
             </button>
           </div>
 
@@ -309,7 +324,7 @@
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div class="pill-icon-btn-wrapper">
             <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
+              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
           </div>
 
@@ -482,16 +497,19 @@
         </div>
 
         <div id="pomodoro-settings-wrapper">
-          <div class="setting-group dropdown-anchor" id="duration-wrapper">
-            <label>Work Duration:</label>
-            <input type="text" id="duration-display" class="custom-select" value="25 Minutes (Default)" readonly style="cursor: pointer;">
-            <input type="hidden" id="work-duration" value="25">
-            <div id="duration-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="10" data-sound="click">10 Minutes</div>
-              <div class="dropdown-item" data-val="15" data-sound="click">15 Minutes</div>
-              <div class="dropdown-item" data-val="25" data-sound="click">25 Minutes (Default)</div>
-              <div class="dropdown-item" data-val="45" data-sound="click">45 Minutes</div>
-              <div class="dropdown-item" data-val="60" data-sound="click">60 Minutes</div>
+          <div class="setting-group" id="duration-wrapper">
+            <label for="work-duration">Work Duration:</label>
+            <div class="stepper-control" id="duration-stepper">
+              <button type="button" class="stepper-btn" id="duration-minus" aria-label="Decrease work duration by 1 minute" data-sound="click">
+                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
+              <div class="stepper-value">
+                <input type="number" id="work-duration" class="stepper-input" value="25" min="1" max="180" step="1" inputmode="numeric" aria-label="Work duration in minutes">
+                <span class="stepper-unit">min</span>
+              </div>
+              <button type="button" class="stepper-btn" id="duration-plus" aria-label="Increase work duration by 1 minute" data-sound="click">
+                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              </button>
             </div>
           </div>
 
@@ -520,7 +538,7 @@
         <div class="setting-group" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
           <label style="display:block; margin-bottom: 8px;">Motivational Quotes</label>
           <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
-            Add your own quotes to the rotation shown in Focus Mode and the Habits tab, or edit and remove ones you've added.
+            Add your own quotes to the rotation, or edit, disable, and remove any quote — including the built-in ones.
           </p>
           <button type="button" class="btn-outline" id="manage-quotes-btn" aria-label="Manage motivational quotes" data-sound="click" style="width:100%;">Manage Quotes</button>
         </div>
@@ -535,8 +553,39 @@
             <button type="button" class="btn-outline flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-sound="click">Import Data</button>
           </div>
           <input type="file" id="import-data-input" accept="application/json" style="display:none;">
+          <button type="button" class="btn-outline" id="clear-taskless-btn" aria-label="Clear all no-task focus time" data-sound="click" style="width:100%; margin-top: 10px;">Clear No-Task Focus Time</button>
+          <button type="button" class="btn-outline" id="open-trash-btn" aria-label="Open Trash" data-sound="click" style="width:100%; margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Trash</span>
+            <span class="trash-count-badge" id="trash-count-badge" style="display:none;">0</span>
+          </button>
         </div>
+      </div>
+
+      <div class="modal-footer">
         <button class="btn-block" id="save-settings" data-sound="success">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="trash-modal">
+    <div class="modal-content glass-effect">
+      <div class="modal-header">
+        <h2>
+          <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          Trash
+        </h2>
+        <button class="close-btn" id="close-trash-modal" title="Close" aria-label="Close" data-sound="click">
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="field-hint" id="trash-empty-message">Nothing in the Trash. Deleted tasks, habits, tags, categories, and quotes show up here.</p>
+        <div id="trash-list" class="trash-list"></div>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 12px;">
+        <button class="btn btn-secondary flex-1" id="close-trash-modal-btn" data-sound="click">Close</button>
+        <button class="btn btn-danger flex-1" id="empty-trash-btn" data-sound="trash">Empty Trash</button>
       </div>
     </div>
   </div>
@@ -549,6 +598,7 @@
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
+          <input type="color" id="manage-new-tag-color" class="tag-color-swatch" title="Tag color" aria-label="New tag color">
           <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select flex-1" maxlength="20">
           <button id="manage-add-tag-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
         </div>
@@ -629,6 +679,7 @@
               <div class="dropdown-item" data-val="saturday" data-sound="click">Every Saturday</div>
               <div class="dropdown-item" data-val="sunday" data-sound="click">Every Sunday</div>
               <div class="dropdown-item" data-val="custom" data-sound="click">Custom Days...</div>
+              <div class="dropdown-item" data-val="interval" data-sound="click">Custom Interval...</div>
             </div>
           </div>
         </div>
@@ -644,6 +695,23 @@
             <button type="button" class="day-option" data-day="6" aria-pressed="false" aria-label="Saturday" data-sound="click">S</button>
             <button type="button" class="day-option" data-day="0" aria-pressed="false" aria-label="Sunday" data-sound="click">S</button>
           </div>
+        </div>
+
+        <div class="setting-group" id="custom-interval-picker" style="display: none; margin-bottom: 20px;">
+          <label for="habit-interval-input">Repeat Every</label>
+          <div class="stepper-control" id="habit-interval-stepper">
+            <button type="button" class="stepper-btn" id="habit-interval-minus" aria-label="Decrease interval" data-sound="click">
+              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+            <div class="stepper-value">
+              <input type="number" id="habit-interval-input" class="stepper-input" value="3" min="2" max="365" step="1" inputmode="numeric" aria-label="Repeat every N days">
+              <span class="stepper-unit">days</span>
+            </div>
+            <button type="button" class="stepper-btn" id="habit-interval-plus" aria-label="Increase interval" data-sound="click">
+              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </button>
+          </div>
+          <p class="field-hint">e.g. 3 = due every 3rd day, starting today</p>
         </div>
 
         <div class="setting-group">
@@ -673,10 +741,36 @@
             <button type="button" class="icon-option" data-icon="sun" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></button>
             <button type="button" class="icon-option" data-icon="monitor" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></button>
             <button type="button" class="icon-option" data-icon="music" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></button>
+            <button type="button" class="icon-option" data-icon="zap" aria-pressed="false" aria-label="Energy" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></button>
+            <button type="button" class="icon-option" data-icon="target" aria-pressed="false" aria-label="Target" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></button>
+            <button type="button" class="icon-option" data-icon="trending-up" aria-pressed="false" aria-label="Progress" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></button>
+            <button type="button" class="icon-option" data-icon="check-circle" aria-pressed="false" aria-label="Checklist" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></button>
+            <button type="button" class="icon-option" data-icon="calendar" aria-pressed="false" aria-label="Calendar" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
+            <button type="button" class="icon-option" data-icon="edit-3" aria-pressed="false" aria-label="Journal" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="dollar-sign" aria-pressed="false" aria-label="Finance" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="smile" aria-pressed="false" aria-label="Mood" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></button>
+            <button type="button" class="icon-option" data-icon="briefcase" aria-pressed="false" aria-label="Work" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="code" aria-pressed="false" aria-label="Coding" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></button>
+            <button type="button" class="icon-option" data-icon="home" aria-pressed="false" aria-label="Home" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
+            <button type="button" class="icon-option" data-icon="award" aria-pressed="false" aria-label="Achievement" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></button>
+            <button type="button" class="icon-option" data-icon="bell" aria-pressed="false" aria-label="Reminder" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="book-open" aria-pressed="false" aria-label="Reading" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="compass" aria-pressed="false" aria-label="Mindfulness" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></button>
+            <button type="button" class="icon-option" data-icon="flag" aria-pressed="false" aria-label="Goal" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg></button>
+            <button type="button" class="icon-option" data-icon="globe" aria-pressed="false" aria-label="Language" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="headphones" aria-pressed="false" aria-label="Podcast" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="map-pin" aria-pressed="false" aria-label="Walk" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>
+            <button type="button" class="icon-option" data-icon="repeat" aria-pressed="false" aria-label="Routine" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="watch" aria-pressed="false" aria-label="Time" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="users" aria-pressed="false" aria-label="Social" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
+            <button type="button" class="icon-option" data-icon="camera" aria-pressed="false" aria-label="Photography" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></button>
+            <button type="button" class="icon-option" data-icon="shopping-bag" aria-pressed="false" aria-label="Shopping" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></button>
           </div>
         </div>
 
-        <button class="btn-block" id="save-habit-btn" style="margin-top: 15px;" data-sound="success">Save Habit</button>
+        <div class="modal-footer">
+          <button class="btn-block" id="save-habit-btn" data-sound="success">Save Habit</button>
+        </div>
       </div>
     </div>
   </div>
@@ -684,7 +778,7 @@
   <div class="modal-overlay" id="quick-tag-modal">
     <div class="modal-content glass-effect">
       <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Set Task Tag</h2>
+        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-tag"/></svg> Set Task Tag</h2>
         <button class="close-btn" id="close-quick-tag-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
@@ -706,6 +800,7 @@
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
+          <input type="color" id="manage-new-category-color" class="tag-color-swatch" title="Category color" aria-label="New category color">
           <input type="text" id="manage-new-category-input" placeholder="New category name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
           <button id="manage-add-category-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
         </div>
@@ -738,8 +833,13 @@
           <button id="add-quote-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
+        <label style="display:block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted);">Your Quotes</label>
         <div id="user-quotes-list" class="quotes-management-list"></div>
         <p id="user-quotes-empty" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; text-align: center;">You haven't added any quotes yet.</p>
+
+        <hr class="modal-divider">
+        <label style="display:block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted);">Default Quotes</label>
+        <div id="builtin-quotes-list" class="quotes-management-list"></div>
       </div>
     </div>
   </div>
@@ -752,16 +852,28 @@
       </div>
       <div class="modal-body">
         <div class="setting-group">
-          <label>Start Date</label>
-          <input type="date" id="range-start-input" class="custom-select">
+          <label for="range-start-month">Start Date</label>
+          <div class="date-segment-group" id="range-start-group">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-start-month" placeholder="MM" maxlength="2" aria-label="Start month" autocomplete="off">
+            <span class="date-segment-sep">/</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-start-day" placeholder="DD" maxlength="2" aria-label="Start day" autocomplete="off">
+            <span class="date-segment-sep">/</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment date-segment-year" id="range-start-year" placeholder="YYYY" maxlength="4" aria-label="Start year" autocomplete="off">
+          </div>
         </div>
         <div class="setting-group">
-          <label>End Date</label>
-          <input type="date" id="range-end-input" class="custom-select">
+          <label for="range-end-month">End Date</label>
+          <div class="date-segment-group" id="range-end-group">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-end-month" placeholder="MM" maxlength="2" aria-label="End month" autocomplete="off">
+            <span class="date-segment-sep">/</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-end-day" placeholder="DD" maxlength="2" aria-label="End day" autocomplete="off">
+            <span class="date-segment-sep">/</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment date-segment-year" id="range-end-year" placeholder="YYYY" maxlength="4" aria-label="End year" autocomplete="off">
+          </div>
         </div>
         <div style="display: flex; gap: 12px;">
           <button class="btn btn-secondary" id="cancel-custom-range" data-sound="click">Cancel</button>
-          <button class="btn-block" id="apply-custom-range" style="flex: 1;" data-sound="success">Apply Range</button>
+          <button class="btn btn-primary" id="apply-custom-range" style="flex: 1;" data-sound="success">Apply Range</button>
         </div>
       </div>
     </div>
@@ -834,6 +946,6 @@
     </div>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

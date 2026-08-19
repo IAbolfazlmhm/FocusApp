@@ -9,6 +9,19 @@
   }
 }
 
+/*
+  FIX: touch devices trigger :active, not :hover — habits.css's base
+  .date-selector-btn:active (unscoped to any tab, since Habits is where
+  that button first shipped) was the only rule touch taps here ever
+  matched, so tapping this on a phone showed habits' green instead of
+  Progress's own purple even though the :hover override above already
+  had it right for mouse users. Same fix, same reasoning, just for the
+  state touch actually triggers.
+*/
+body.phase-progress .date-selector-btn:active {
+  color: #8b5cf6;
+}
+
 /* --- PROGRESS TAB THEME COLORS --- */
 body.phase-progress .active-bubble { 
   background-color: #8b5cf6; 
@@ -305,6 +318,40 @@ body[data-theme="dark"] .heatmap-block:not(.focus-level-1):not(.focus-level-2):n
 
 .report-item.failed { 
   border-left: 4px solid var(--danger-color); 
+}
+
+/*
+  The "Focus time (no task)" row (progress-report.js) is the one report
+  row with a delete action — a stray taskless session (e.g. from testing
+  the timer) had no way to be corrected once logged. `.report-item`'s
+  own `justify-content: space-between` already spaces its two direct
+  children apart; this just gives the second one (value + delete
+  button) its own small flex row instead of being bare text.
+*/
+.report-item-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.report-delete-taskless-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
+  color: var(--text-muted);
+}
+
+.report-delete-taskless-btn .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.report-delete-taskless-btn:hover,
+.report-delete-taskless-btn:active {
+  color: var(--danger-color);
 }
 
 /* Small uppercase date label shown in heatmap tooltips. */

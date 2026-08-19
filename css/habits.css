@@ -3,6 +3,15 @@
 /* ========================================== */
 
 /* --- HABITS SPECIFIC UI --- */
+/* FIX: this used to also carry margin-right: 12px on top of the 12px
+   gap .habit-info (below) already puts between its flex children (this
+   circle and .habit-details) — a redundant double gap unique to habit
+   pills, since task-item has no equivalent icon column to compare
+   against. That stacked 24px was quietly eating into .habit-details'
+   already-tighter width on every screen size; removing the duplicate
+   here keeps the visual gap the same (still 12px, just from one source
+   instead of two) while giving the name/category/streak text back the
+   room the second copy was taking from it. */
 .habit-icon-circle {
   width: 44px;
   height: 44px;
@@ -11,7 +20,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-right: 12px;
   background: var(--habit-bg, rgba(59, 130, 246, 0.15));
   color: var(--habit-color, #3b82f6);
 }
@@ -64,12 +72,12 @@
 }
 
 .habit-category-badge {
-  background: var(--glass-bg);
+  background: var(--cat-bg, var(--glass-bg));
   padding: 3px 9px 3px 11px;
   border-radius: 12px;
   font-size: 0.75rem;
-  color: var(--text-muted);
-  border: 1px solid var(--glass-border);
+  color: var(--cat-color, var(--text-muted));
+  border: 1px solid var(--cat-border, var(--glass-border));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -78,6 +86,40 @@
   flex: 0 0 auto;
   display: inline-block;
   line-height: 1;
+}
+
+/*
+  FIX: habit pills were noticeably tighter than task pills on a narrow
+  phone screen — task-item has no icon column at all, while a habit
+  pill spends 44px (icon) + 12px (gap) on one before .habit-details even
+  starts, on top of the same action-button cluster both pill types
+  share (see pomodoro.css's matching max-width: 480px block, which
+  tightens that shared cluster for both tabs). That left as little as
+  ~80px for the name + category badge + streak on a 375px-wide screen —
+  enough to read as "just delete/skip/done and an icon, nothing else"
+  the way it was described. Shrinking the icon and tightening the
+  gaps/badge cap here gets that text column meaningfully more room back.
+*/
+@media (max-width: 480px) {
+  .habit-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  .habit-icon-circle .ui-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .habit-info {
+    gap: 10px;
+    padding-right: 8px;
+  }
+
+  .habit-category-badge {
+    max-width: 84px;
+  }
 }
 
 .streak-flame {
@@ -142,19 +184,36 @@
 }
 
 /*
-  The 7-day picker's justify-content:space-between above only reads well
-  as a single full row, which is what it stays on wider screens. Once
-  .picker-grid's flex-wrap sends the overflow days to a second row on a
-  narrow phone, space-between stretches that leftover couple of days to
-  the far edges instead of grouping them together — centering reads
-  better once it's two rows. (This has to live after the rule above,
-  not just inside a media query in another file — same #id specificity
-  means whichever rule is later in the loaded stylesheet order wins
-  regardless of a media query matching, and habits.css loads after
-  layout.css.)
+  FIX: at the base 32px size + 12px gap, 7 day-options (296px) or the 6
+  color swatches (252px) don't fit in one row inside a phone-width modal
+  — .modal-content is 90vw capped at 400px, minus its own 25px padding
+  each side, leaves ~238px of usable width at a 320px viewport. That
+  forced an awkward 2-row wrap (this rule used to just re-center the
+  leftover day(s) on their own second row rather than fix the fit), and
+  the still-desktop-sized pills read as bulky/cramped once wrapped.
+  Shrinking both the pill size and the gap keeps the 7-day and 6-color
+  rows to one row down to a 320px-wide phone (7×26 + 6×6 = 218px and
+  6×28 + 5×8 = 208px respectively) — #custom-days-grid's own
+  justify-content: space-between (above) now reads correctly as one
+  full row instead of needing the center override this replaces.
+  Icon grid (9 icons) still wraps regardless — shrinking it too just
+  brings that down from 3 rows to 2.
 */
 @media (max-width: 420px) {
-  #custom-days-grid { justify-content: center; }
+  .picker-grid {
+    gap: 8px;
+  }
+
+  .day-option {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+
+  .color-option, .icon-option, .custom-color-swatch-wrapper {
+    width: 28px;
+    height: 28px;
+  }
 }
 
 .color-option {
@@ -217,15 +276,18 @@
 }
 
 /* --- HABITS THEME & DASHBOARD HARMONY --- */
-.habit-settings-btn, #prev-day-btn, #next-day-btn {
-  color: var(--text-muted);
-}
+/*
+  FIX: used to set its own muted->text-main color pair here, which fought
+  the app-wide .icon-btn:hover rule (buttons.css) that now themes every
+  icon button — including these — to var(--theme-color) on hover. Same
+  element, same :hover, different color values on the same property:
+  .icon-btn:hover's color always lost to this ID selector's higher
+  specificity, so these three buttons were the one place in the app that
+  didn't hover into the current phase color. Removed — .icon-btn already
+  owns both states correctly, nothing habit-specific needed here.
+*/
 
 @media (hover: hover) {
-  .habit-settings-btn:hover, #prev-day-btn:hover, #next-day-btn:hover {
-    color: var(--text-main);
-  }
-
   body.phase-habits .habit-item:hover {
     border-color: #10b981;
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
@@ -240,6 +302,17 @@
     color: white;
     border-color: #10b981;
   }
+}
+
+/* Touch/click equivalent of the :hover block above — mirrors it exactly
+   rather than falling through to .task-item:active's generic neutral
+   shadow (pomodoro.css), the same way the hover rule above already
+   overrides .task-item:hover's generic one for this tab. Without this,
+   tapping a habit pill on a touchscreen (which triggers :active, not
+   :hover) never got the themed green feedback a mouse user sees. */
+body.phase-habits .habit-item:active {
+  border-color: #10b981;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
 }
 
 .overview-ring {
@@ -347,6 +420,16 @@ body[data-theme="dark"] .overview-ring {
   transition: all 0.2s;
   appearance: none;
   -webkit-appearance: none;
+}
+
+/* FIX: had no hover state at all (only :active, above) — its sibling
+   picker .icon-option gets this exact treatment, this one had just
+   been missed. */
+@media (hover: hover) {
+  .day-option:hover {
+    background: var(--btn-hover);
+    color: var(--text-main);
+  }
 }
 
 .day-option.selected {

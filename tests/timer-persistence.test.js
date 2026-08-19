@@ -1,11 +1,11 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { saveTimerState, loadTimerState } from '../js/timer.js';
+import { saveTimerState, loadTimerState } from '../js/timer/timer.js';
 import {
   setTimeLeft, setTotalTime, setCurrentPhase, setCompletedSessions,
-} from '../js/state.js';
-import * as state from '../js/state.js';
+} from '../js/core/state.js';
+import * as state from '../js/core/state.js';
 
 test('saveTimerState then loadTimerState restores the saved values', () => {
   setTimeLeft(742);

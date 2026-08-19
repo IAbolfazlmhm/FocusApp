@@ -15,6 +15,10 @@
   pointer-events: none;
   width: auto;
   align-items: center;
+  /* FIX: no width cap at all before — a long message just kept the pill
+     growing horizontally until it ran past the viewport edge (clipped,
+     since the container itself doesn't scroll) instead of wrapping. */
+  max-width: min(92vw, 420px);
 }
 
 /* backdrop-filter removed (see FocusApp-Senior-Audit.md, Finding P1): this
@@ -27,9 +31,10 @@
   background: var(--modal-bg);
   color: var(--text-main);
   padding: 10px 20px;
-  border-radius: 50px;
+  border-radius: var(--radius-lg);
   font-size: 0.9rem;
   font-weight: 500;
+  line-height: 1.45;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   border: 1px solid var(--glass-border);
   display: flex;
@@ -38,7 +43,31 @@
   opacity: 0;
   transform: translateY(20px) scale(0.9);
   animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  /*
+    FIX: was a fully-round 50px pill, which read fine for a short single
+    line but had no width cap (see #toast-container above), so a longer
+    message had nowhere to go but wrap inside that same tall pill — same
+    corner radius on a now-multi-line box just looks like a bloated
+    capsule ("thicker"). --radius-lg (the rounded-rect used elsewhere in
+    the app) stays proportionate whether the toast ends up one line or
+    three, instead of needing to detect which happened. width: fit-content
+    still keeps genuinely short toasts hugging their content rather than
+    stretching to the container's full max-width.
+  */
+  width: fit-content;
+  max-width: 100%;
+  align-self: center;
 }
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.toast.success .toast-icon { color: var(--success-color); }
+.toast.warning .toast-icon { color: #f59e0b; }
+.toast.info .toast-icon { color: var(--text-muted); }
 
 @keyframes toastIn {
   to {

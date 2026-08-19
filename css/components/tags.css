@@ -20,7 +20,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   background: var(--btn-bg); color: var(--text-main);
+}
+
+/*
+  FIX: Set Task Tag never marked any chip as the task's current tag when
+  the modal opened — every chip rendered identically regardless of what
+  was already picked. Themed to --theme-color (the active Pomodoro
+  phase's color) rather than a fixed color, and kept visually distinct
+  from the amber :hover treatment below so "currently selected" and
+  "hovering" don't look like the same state.
+*/
+.tag-chip.selectable.selected {
+  background: color-mix(in srgb, var(--theme-color) 15%, var(--btn-bg));
+  border-color: var(--theme-color);
+  color: var(--theme-color);
+  font-weight: 600;
 }
 
 @media (hover: hover) {

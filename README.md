@@ -95,27 +95,79 @@ FocusApp/
 │   └── progress.css        # Heatmaps, legends, delta badges
 
 ├── js/
-│   ├── state.js         # Global mutable state + setters (ESM live bindings)
-│   ├── storage.js       # localStorage wrapper with try/catch + JSON safety
-│   ├── date-utils.js    # Shared YYYY-MM-DD local date key
-│   ├── audio.js         # AudioService: real assets via Web Audio, synth fallback
-│   ├── motivation.js    # Loads assets/motivation.json, shared quote rotation
-│   ├── focus-mode.js    # Focus Mode toggle + state
-│   ├── ui-utils.js      # escapeHTML, icons, toasts, tabs, modals, dropdowns, confirm
-│   ├── settings.js      # Settings modal, export/import, apply to timer
-│   ├── timer.js         # Drift-corrected Pomodoro engine
-│   ├── tasks.js         # Task CRUD, filtering, sorting, tagging
-│   ├── habits.js        # Habit CRUD, recurrence, streaks, heatmaps
-│   └── progress.js      # Dashboard rendering, stats, custom ranges
-└── script.js            # App bootstrap, global listeners (module entrypoint)
+│   ├── main.js               # App bootstrap, global listeners (module entrypoint)
+│   ├── core/
+│   │   ├── state.js          # Global mutable state + setters (ESM live bindings)
+│   │   ├── storage.js        # localStorage wrapper with try/catch + JSON safety
+│   │   ├── dom-utils.js      # escapeHTML, icons, generateId
+│   │   └── date-utils.js     # Shared YYYY-MM-DD local date key
+│   ├── ui/                   # Generic, feature-agnostic UI infrastructure
+│   │   ├── modal-utils.js       # Modal accessibility (focus trap, ESC), confirm modal
+│   │   ├── dropdown.js          # Shared custom-select dropdown behavior
+│   │   ├── toast.js             # Toast notifications
+│   │   ├── tabs.js              # Tab switching
+│   │   ├── scroll-utils.js      # Mobile-keyboard input-visibility helper
+│   │   ├── color-utils.js       # Tag/category color hashing + suggestion
+│   │   ├── stepper-utils.js     # Shared −/value/+ stepper control
+│   │   ├── date-segment-input.js # Shared MM/DD/YYYY segmented date input
+│   │   └── audio.js             # AudioService: real assets via Web Audio, synth fallback
+│   ├── timer/
+│   │   ├── timer.js          # Drift-corrected Pomodoro engine
+│   │   └── focus-mode.js     # Focus Mode toggle + state
+│   ├── tasks/                 # Pomodoro tab: tasks
+│   │   ├── tasks.js              # CRUD orchestrator + setupTaskEvents()
+│   │   ├── tasks-render.js       # Task list/filter rendering
+│   │   ├── tasks-storage.js      # saveTasks()
+│   │   ├── tasks-edit-modal.js   # Rename/retag modal
+│   │   ├── tasks-tags-modal.js   # Manage Tags modal
+│   │   ├── tasks-quick-tag-modal.js  # Gear-icon quick tag picker
+│   │   ├── tasks-quick-tag-state.js  # Shared transient state for the picker above
+│   │   ├── tasks-date-nav.js     # Prev/next day + calendar picker
+│   │   └── tasks-sort.js         # Sort dropdown
+│   ├── habits/                # Habits tab
+│   │   ├── habits.js              # CRUD orchestrator + setupHabitsEvents()
+│   │   ├── habits-render.js       # Habit list rendering
+│   │   ├── habits-logic.js        # Recurrence scheduling (isHabitActiveOnDate, streaks)
+│   │   ├── habits-storage.js      # saveHabits()/saveHabitCategories()
+│   │   ├── habit-icons.js         # Icon name → SVG path dictionary
+│   │   ├── habits-modal-open.js   # Create/edit modal open+close
+│   │   ├── habits-modal-pickers.js   # Color/icon/category pickers
+│   │   ├── habits-modal-frequency.js # Frequency dropdown + custom days/interval
+│   │   ├── habits-modal-save.js   # Modal save/validation
+│   │   ├── habits-modal-state.js  # Shared transient state for the modal split above
+│   │   ├── habits-delete-modal.js # Clear-today / archive / delete-all-history
+│   │   ├── habits-categories.js   # Manage Categories modal
+│   │   ├── habits-sort.js         # Sort dropdown
+│   │   └── habits-quick-add.js    # Quick-add input row
+│   ├── progress/
+│   │   ├── progress.js          # Dashboard init, custom range, comparison mode
+│   │   ├── progress-stats.js    # Stat calculation
+│   │   ├── progress-heatmap.js  # Focus/habit heatmap rendering
+│   │   └── progress-report.js   # Daily report modal
+│   ├── settings/
+│   │   └── settings.js       # Settings modal, export/import, apply to timer
+│   ├── quotes/
+│   │   ├── motivation.js     # Loads assets/motivation.json, shared quote rotation
+│   │   └── quotes.js         # Manage Quotes modal (user + built-in)
+│   └── trash/
+│       ├── trash.js          # Soft-delete store (move/restore/permanently-delete)
+│       └── trash-ui.js       # Trash modal UI
 ```
+
+Each domain folder groups a single feature's own CRUD, rendering, and UI-event
+wiring together; `core/` and `ui/` hold the feature-agnostic infrastructure
+every domain depends on. A handful of files per domain (`*-modal-state.js`,
+`*-quick-tag-state.js`) exist solely to share a couple of small, transient
+values — e.g. which record is currently being edited — across that domain's
+own split-out files without reaching into `core/state.js`, which is reserved
+for real persisted app data.
 
 ## Architecture Notes
 
-- **ES Modules** throughout (`<script type="module" src="script.js">`)
+- **ES Modules** throughout (`<script type="module" src="js/main.js">`)
 - **Feature-based modules** — no circular imports, clean DAG
-- **Centralized storage** — all `localStorage` access via `storage.js` with defensive parsing
-- **Shared utilities** — `ui-utils.js` owns modals, dropdowns, toasts, tabs, icons
+- **Centralized storage** — all `localStorage` access via `core/storage.js` with defensive parsing
+- **Shared utilities** — `ui/` owns modals, dropdowns, toasts, tabs, and the other cross-feature widgets
 - **Design tokens** — spacing/radius/shadow/typography scale in `variables.css`, alongside the existing theme/phase color system
 - **No runtime dependencies** — zero CDN scripts, fully self-contained; the Inter font is self-hosted rather than pulled from a CDN
 - **Sprite-based icons** — gear, close, and target icons defined once as `<symbol>`, referenced via `<use>`

@@ -1,7 +1,7 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isValidHexColor, hexToRgba, getTagColor } from '../js/color-utils.js';
+import { isValidHexColor, hexToRgba, getTagColor } from '../js/ui/color-utils.js';
 
 test('isValidHexColor accepts well-formed 3- and 6-digit hex colors', () => {
   assert.equal(isValidHexColor('#3b82f6'), true);

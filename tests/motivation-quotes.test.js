@@ -3,8 +3,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getUserQuotes, addUserQuote, updateUserQuote, deleteUserQuote, getRandomQuote,
-} from '../js/motivation.js';
-import { readJSON, remove } from '../js/storage.js';
+} from '../js/quotes/motivation.js';
+import { readJSON, remove } from '../js/core/storage.js';
 
 // motivation.js's built-in quote fetch (assets/motivation.json) has no
 // real server to hit in this Node test environment, so it always falls

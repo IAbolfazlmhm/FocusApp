@@ -26,7 +26,34 @@
   align-items: center;
   height: clamp(580px, 68vh, 720px);
   max-height: 85vh;
+  /* dvh reflects the actual visible viewport (browser chrome and, on
+     capable browsers, the on-screen keyboard already excluded) rather
+     than the layout viewport vh is defined against — falls back to the
+     vh values above on browsers that don't support it. */
+  height: clamp(580px, 68dvh, 720px);
+  max-height: 85dvh;
   justify-content: space-between;
+}
+
+/*
+  FIX: neither side of this pair had anywhere for its own content to go
+  if the section's height (above) ever ended up shorter than that
+  content's natural height — a real possibility on a short viewport, or
+  on a mobile browser that shrinks the layout viewport (and therefore
+  these dvh/vh values) when the on-screen keyboard opens for a focused
+  input in one of the input rows below.
+
+  .tasks-section already degraded gracefully: its inner
+  .task-list-container is flex: 1 with its own overflow-y: auto, so it
+  simply scrolls. .timer-section had no such inner scroll region — its
+  children (a 250px timer ring, header, controls, quote) have no room
+  to shrink, so instead of scrolling they burst straight past this
+  section's own rounded card border. overflow-y here gives it the same
+  fallback .tasks-section already had, so if it's ever forced smaller
+  than its content, it scrolls instead of overflowing.
+*/
+.timer-section {
+  overflow-y: auto;
 }
 
 /* --- TIMER LEFT SIDE --- */
@@ -266,6 +293,13 @@
   margin-left: -10px;
   padding: 10px;
   flex: 1;
+  /* A flex item's default min-height is auto (i.e. its content's
+     natural height), which blocks it from ever shrinking past that —
+     forcing .tasks-section itself to overflow instead of this, its one
+     designated scroll region, doing the job. min-height: 0 is what
+     actually lets flex: 1 above shrink this on a short/keyboard-shrunk
+     viewport, same fix as .timer-section's overflow-y just above. */
+  min-height: 0;
   padding-bottom: 30px;
   margin-bottom: 20px;
   overflow-y: auto;
@@ -355,6 +389,7 @@
 }
 
 .task-item:active {
+  border-color: var(--theme-color);
   box-shadow: 0 2px 6px rgba(142, 202, 230, 0.2);
 }
 
@@ -474,6 +509,29 @@
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/*
+  Task and habit pills share this exact action-button cluster (see the
+  matching max-width: 480px block in habits.css, which tightens the
+  habit-pill-specific icon/text side of the same card on narrow
+  screens). Shrinking it here — rather than per-tab — keeps both pill
+  types identically sized at every breakpoint, and hands back ~26px of
+  width to whichever side of the card needs it most on a small phone.
+*/
+@media (max-width: 480px) {
+  .task-item {
+    padding: 15px 14px;
+  }
+
+  .done-btn, .remove-btn, .focus-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .task-actions {
+    gap: 6px;
+  }
+}
+
 @media (hover: hover) {
   .done-btn:hover {
     background: var(--success-color);
@@ -589,6 +647,18 @@ body.phase-habits .task-item.completed {
   transition: color 0.3s;
   z-index: 2;
   position: relative;
+}
+
+/* FIX: had no hover state at all — background stays out of it since
+   .filter-bubble (below) already owns the "active" background via its
+   own slide animation; a hover background here would fight that on
+   the actually-active pill. Text-color-only matches the same muted->
+   main treatment used elsewhere for this kind of label (see
+   .habit-settings-btn, .date-selector-btn in habits.css). */
+@media (hover: hover) {
+  .filter-btn:hover {
+    color: var(--text-main);
+  }
 }
 
 .filter-btn.active {

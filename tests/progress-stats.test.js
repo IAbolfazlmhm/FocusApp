@@ -1,8 +1,9 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateStats } from '../js/progress-stats.js';
-import { getLocalDateKey } from '../js/date-utils.js';
+import { calculateStats } from '../js/progress/progress-stats.js';
+import { getLocalDateKey } from '../js/core/date-utils.js';
+import { writeJSON, STORAGE_KEYS } from '../js/core/storage.js';
 
 function dayAt(y, m, d) {
   const date = new Date(y, m, d);
@@ -25,6 +26,26 @@ test('calculateStats sums focus minutes across the date range from timeByDate', 
   ];
   const stats = calculateStats(start, end, tasks, []);
   assert.equal(stats.focusMinutes, 30);
+  assert.equal(stats.focusSeconds, 1800);
+});
+
+test('calculateStats.focusSeconds keeps sub-minute precision that focusMinutes floors away', () => {
+  const day = dayAt(2026, 7, 1);
+  const tasks = [
+    { createdAt: day.getTime(), completed: false, timeByDate: { [getLocalDateKey(day)]: 95 } }, // 1m 35s
+  ];
+  const stats = calculateStats(day, day, tasks, []);
+  assert.equal(stats.focusMinutes, 1); // floored, per-existing behavior
+  assert.equal(stats.focusSeconds, 95); // exact
+});
+
+test('calculateStats.focusSeconds includes taskless focus time at full precision', () => {
+  const day = dayAt(2026, 7, 1);
+  writeJSON(STORAGE_KEYS.TASKLESS_TIME, { [getLocalDateKey(day)]: 50 }); // 50s, no task
+  const stats = calculateStats(day, day, [], []);
+  assert.equal(stats.focusSeconds, 50);
+  assert.equal(stats.focusMinutes, 0); // floors to 0 minutes, same as before this field existed
+  writeJSON(STORAGE_KEYS.TASKLESS_TIME, {}); // reset for later tests
 });
 
 test('calculateStats falls back to timeSpent (all attributed to createdAt) for legacy tasks with no timeByDate', () => {
@@ -85,6 +106,7 @@ test('calculateStats returns all zeros for an empty range with no tasks or habit
   const stats = calculateStats(day, day, [], []);
   assert.deepEqual(stats, {
     focusMinutes: 0,
+    focusSeconds: 0,
     itemsCompleted: 0,
     perfectDaysCount: 0,
     totalExpectedLogs: 0,
