@@ -1,9 +1,9 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateStats } from '../js/progress/progress-stats.js';
-import { getLocalDateKey } from '../js/core/date-utils.js';
-import { writeJSON, STORAGE_KEYS } from '../js/core/storage.js';
+import { calculateStats } from '../src/features/progress/progress-stats.js';
+import { getLocalDateKey } from '../src/core/date-utils.js';
+import { writeJSON, STORAGE_KEYS } from '../src/core/storage.js';
 
 function dayAt(y, m, d) {
   const date = new Date(y, m, d);

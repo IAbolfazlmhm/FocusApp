@@ -1,0 +1,259 @@
+/* ========================================== */
+/* TAG CHIPS                                   */
+/* ========================================== */
+
+/* --- TAG CHIPS --- */
+.tags-list-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.tag-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--btn-bg); color: var(--text-main);
+}
+
+/*
+  FIX: Set Task Tag never marked any chip as the task's current tag when
+  the modal opened — every chip rendered identically regardless of what
+  was already picked. Themed to --theme-color (the active Pomodoro
+  phase's color) rather than a fixed color, and kept visually distinct
+  from the amber :hover treatment below so "currently selected" and
+  "hovering" don't look like the same state.
+*/
+.tag-chip.selectable.selected {
+  background: color-mix(in srgb, var(--theme-color) 15%, var(--btn-bg));
+  border-color: var(--theme-color);
+  color: var(--theme-color);
+  font-weight: 600;
+}
+
+@media (hover: hover) {
+  .tag-chip.deletable:hover {
+    background: #fee2e2;
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    text-decoration: line-through;
+  }
+
+  .tag-chip.selectable:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #d97706;
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  }
+}
+
+/* Tag color picker (Manage Tags modal) */
+.tag-chip.manageable {
+  gap: 8px;
+  padding: 6px 10px 6px 6px;
+}
+
+.tag-chip.manageable .tag-chip-label {
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .tag-chip.manageable:hover .tag-chip-label {
+    text-decoration: none;
+  }
+}
+.tag-color-swatch {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+}
+
+/*
+  Native color inputs render a swatch inside padding by default in
+  Chromium/WebKit — strip that so the circular border above is the only
+  visible edge and the color fills the whole circle.
+*/
+.tag-color-swatch::-webkit-color-swatch-wrapper {
+  padding: 0;
+  border-radius: 50%;
+}
+
+.tag-color-swatch::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.tag-color-swatch::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+/* Larger variant, sized to match .color-option, for the Habit color
+   picker's "custom" swatch — same native-color-input pattern as tags,
+   just sitting in a grid of bigger preset circles. */
+.tag-color-swatch.lg {
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tag-color-swatch.lg.selected {
+  border: 3px solid var(--theme-color, #3b82f6);
+  transform: scale(1.15);
+}
+
+/*
+  Custom habit color swatch: a plain purple circle didn't communicate
+  "pick any color you want" — a conic-gradient reads as the standard
+  "custom/any color" affordance (the same idea as a color-wheel icon in
+  a design tool). The gradient lives on this wrapper label, not the
+  input itself: a native <input type="color">'s own swatch always
+  renders its current *value*, not an arbitrary background, so the
+  input is layered on top at opacity:0 (still the real clickable
+  element — a <label> wrapping it forwards clicks with no JS needed)
+  while the wrapper supplies the visible rainbow underneath it.
+*/
+.custom-color-swatch-wrapper {
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  cursor: pointer;
+  background: conic-gradient(
+    #f43f5e, #f59e0b, #facc15, #10b981, #06b6d4,
+    #3b82f6, #8b5cf6, #d946ef, #f43f5e
+  );
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border: 0;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/*
+  Every .tag-color-swatch is a real <input type="color"> — already
+  keyboard-focusable and operable (Tab lands on it, Enter/Space opens the
+  native picker) with zero extra JS needed. What was actually missing:
+  reset.css blanket-disables the default outline on ALL <input> focus
+  (`input:focus { outline: none; }`) with nothing restoring it for color
+  inputs specifically, so a keyboard user could land on one with no
+  visible sign of it. This restores a ring on the two plain,
+  always-visible swatches (Manage Tags / Manage Categories "new" row, and
+  each existing chip's own swatch) using the same :focus-visible
+  convention as every other control in this app (see reset.css) — shown
+  for keyboard focus only, not mouse clicks.
+*/
+.tag-color-swatch:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}
+
+/*
+  The habit modal's "custom" swatch (#habit-color-custom) is the same
+  kind of input, but sits at opacity:0 right below (see the next rule) —
+  an outline on an opacity:0 element is invisible too, so the ring needs
+  to show on the wrapper instead, whenever the input inside it has
+  focus-visible.
+*/
+.custom-color-swatch-wrapper:has(input:focus-visible) {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 3px;
+}
+
+.custom-color-swatch-wrapper .tag-color-swatch.lg {
+  position: absolute;
+  inset: 2px;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+  opacity: 0;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.custom-color-swatch-wrapper.selected {
+  /* One source of truth for "what color did you pick": once selected,
+     the wrapper shows the actual --custom-color value solid, instead of
+     the generic rainbow — JS has set this custom property on every
+     selection since it was added, but nothing in CSS ever read it
+     before this. */
+  background: var(--custom-color, #3b82f6);
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+  transform: scale(1.12);
+  box-shadow: 0 0 0 1px var(--glass-border), 0 5px 12px rgba(0, 0, 0, 0.18);
+}
+
+@media (hover: hover) {
+  .custom-color-swatch-wrapper:hover {
+    transform: scale(1.08);
+  }
+}
+
+.tag-color-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .tag-color-reset:hover {
+    background: rgba(0, 0, 0, 0.15);
+    color: var(--text-main);
+  }
+}
+
+.tag-color-reset:active {
+  transform: scale(0.92);
+}
+
+.custom-color-swatch-wrapper:active {
+  transform: scale(0.96);
+}
+
+
+/*
+  FIX: .tag-chip.manageable (the delete-chip in Manage Tags/Manage
+  Categories) is a DIV given tabIndex + role="button" so keyboard users
+  can reach it — but the shared button:focus/:focus-visible rules only
+  match real <button> elements. Without this, a keyboard user landed on
+  it with only the browser's default outline (a plain ring ignoring the
+  app's theme) instead of the themed one every other control uses.
+  Moved here from the old shared reset.css — this is this component's
+  own concern, not a generic reset.
+*/
+.tag-chip.manageable:focus {
+  outline: none;
+}
+
+.tag-chip.manageable:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}

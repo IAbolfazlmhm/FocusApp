@@ -1,0 +1,76 @@
+/* ========================================== */
+/* LAYOUT, NAV & STRUCTURE                    */
+/* ========================================== */
+
+/* ========================================== */
+/* LAYOUT, NAV & STRUCTURE                    */
+/* ========================================== */
+
+.header-container {
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  gap: 15px; 
+  width: 100%; 
+  max-width: 900px; 
+  margin-bottom: 28px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.container {
+  display: flex; 
+  width: 100%; 
+  max-width: 1040px; 
+  gap: 40px;
+  justify-content: center; 
+  flex-wrap: nowrap;
+}
+
+.view-section {
+  display: flex; 
+  width: 100%; 
+  gap: 40px; 
+  justify-content: center; 
+  flex-wrap: wrap;
+  /* Paired with showView() in ui-utils.js, which sets opacity/transform
+     inline right after toggling display — see the comment there for why
+     a tab switch needs two properties to fade+settle instead of just
+     popping into place. */
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+/* --- GLOBAL HEIGHT & TEXT FIXES --- */
+
+/* ========================================== */
+/* RESPONSIVE / MOBILE                        */
+/* ========================================== */
+/* 
+  FIX: there were no media queries anywhere in the app before this. It
+  didn't overflow horizontally on a phone-width screen — .view-section
+  already had `flex-wrap: wrap`, so the timer/tasks (or habit
+  detail/list, or progress) panels do drop onto their own line once the
+  viewport is too narrow for both side by side — but every panel kept
+  `height: 550px` regardless, a size that only made sense to force two
+  side-by-side desktop columns to match heights. Once stacked on one
+  phone-width column instead, that fixed height just left a large dead
+  gap of blank gradient below whatever content happened to be shorter
+  than 550px (very visible on the Habits detail panel and the Progress
+  overview panel, both fairly short). This lets stacked panels size to
+  their own content instead, and tightens spacing/sizing that was tuned
+  for a spacious two-column desktop layout — the rest of that story
+  (the .timer-section/.tasks-section/.timer-circle/.modal-content parts
+  of these same two breakpoints) now lives with each of those
+  components instead: shared/split-panel.css, features/timer/timer.css,
+  shared/modal/modal.css.
+*/
+@media (max-width: 768px) {
+  .header-container { 
+    margin-bottom: 20px; 
+  }
+
+  .container, .view-section { 
+    gap: 20px; 
+  }
+}

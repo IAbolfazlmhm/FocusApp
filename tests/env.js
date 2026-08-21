@@ -20,3 +20,13 @@ const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
 global.window = dom.window;
 global.document = dom.window.document;
 global.localStorage = dom.window.localStorage;
+// FIX: Node has its own built-in global Event/CustomEvent (separate from
+// jsdom's), so `new Event(...)` used product-code-side (trash.js,
+// tabs.js, timer.js, ...) built a Node-realm Event — but
+// dom.window.document.dispatchEvent() only accepts an instance of
+// *jsdom's* Event class, from this same dom.window realm. A real browser
+// never has two competing Event classes, so this mismatch is purely a
+// test-environment gap; the fix is here, not in the product code that
+// correctly assumes one realm.
+global.Event = dom.window.Event;
+global.CustomEvent = dom.window.CustomEvent;

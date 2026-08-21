@@ -1,0 +1,116 @@
+/* ========================================== */
+/* MANAGE QUOTES MODAL                         */
+/* ========================================== */
+
+/* --- MANAGE QUOTES MODAL ---
+   A vertical list rather than the wrapped chip grid used by tags/
+   categories (.tags-list-grid) — quote text runs too long per-item to
+   read well as an inline chip. Capped height + its own scroll so a long
+   list doesn't push the Add row and category select off-screen inside
+   the outer modal-content scroll. */
+.quotes-management-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.quote-manage-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+  transition: opacity var(--transition-fast);
+}
+
+/* Disabled quotes stay in the list (so re-enabling is one click) but
+   read as visibly inactive — same "present but dimmed" language
+   .task-item.completed already uses elsewhere in the app. */
+.quote-manage-item.quote-disabled {
+  opacity: 0.55;
+}
+
+.quote-manage-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.quote-manage-text p {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  overflow-wrap: break-word;
+}
+
+.quote-category-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+/* Marks a quote from the shipped default set, in the "Default Quotes"
+   section of Manage Quotes — distinguishes it from ones the user wrote,
+   since editing/disabling it behaves slightly differently (see
+   motivation.js's built-in override layer). */
+.quote-default-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--theme-color);
+  /* Fallback for browsers without color-mix() support */
+  background: var(--glass-bg);
+  background: color-mix(in srgb, var(--theme-color) 15%, transparent);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+.quote-manage-actions .reset-quote-btn:hover {
+  color: var(--theme-color, #3b82f6);
+}
+
+.quote-manage-actions .reset-quote-btn:active {
+  color: var(--theme-color, #3b82f6);
+}
+
+.quote-manage-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.quote-manage-actions .icon-btn {
+  width: 32px;
+  height: 32px;
+}
+
+@media (hover: hover) {
+  .quote-manage-actions .toggle-quote-btn:hover {
+    color: var(--theme-color, #3b82f6);
+  }
+
+  .quote-manage-actions .delete-quote-btn:hover {
+    color: var(--danger-color);
+  }
+}
+
+.quote-manage-actions .toggle-quote-btn:active {
+  color: var(--theme-color, #3b82f6);
+}
+
+.quote-manage-actions .delete-quote-btn:active {
+  color: var(--danger-color);
+}
+

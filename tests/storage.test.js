@@ -1,7 +1,7 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readJSON, writeJSON, readRaw, writeRaw, remove } from '../js/core/storage.js';
+import { readJSON, writeJSON, readRaw, writeRaw, remove } from '../src/core/storage.js';
 
 test('writeJSON then readJSON round-trips a value', () => {
   writeJSON('test:roundtrip', { a: 1, b: [1, 2, 3] });

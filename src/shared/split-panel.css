@@ -1,0 +1,158 @@
+/* ========================================== */
+/* SPLIT PANEL (shared two-column tab layout)  */
+/* ========================================== */
+/* .timer-section / .tasks-section is the detail+list card pair reused,
+   under the same literal class names, by all three tabs that have this
+   shape: Pomodoro (timer + task list), Habits (habit detail + habit
+   list), and Progress (overview + dashboard). The names are legacy —
+   they stuck from wherever this pair was first built — but the classes
+   themselves are genuinely this app's shared layout primitive, not
+   Pomodoro-specific, so the CSS lives here rather than with any one
+   feature. Each tab's own feature file only holds what's unique to its
+   content *inside* this shared shell. */
+
+/* ========================================== */
+/* POMODORO & TASKS UI                        */
+/* ========================================== */
+
+/* --- CONTAINERS ---
+   Sizing eased up a step from the original 900px container / 550px
+   fixed panel height, which centered a fairly small, tightly-bounded
+   pair of cards on anything wider than a laptop screen. height uses
+   clamp() instead of a fixed value so panels still shrink gracefully on
+   short viewports (the max-height below is the real safety net there)
+   while getting more breathing room on tall ones, rather than sitting
+   at a fixed height regardless of available space.
+*/
+.timer-section, .tasks-section {
+  flex: 1;
+  min-width: 320px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  padding: 30px;
+  border-radius: 50px;
+  box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: clamp(580px, 68vh, 720px);
+  max-height: 85vh;
+  /* dvh reflects the actual visible viewport (browser chrome and, on
+     capable browsers, the on-screen keyboard already excluded) rather
+     than the layout viewport vh is defined against — falls back to the
+     vh values above on browsers that don't support it. */
+  height: clamp(580px, 68dvh, 720px);
+  max-height: 85dvh;
+  justify-content: space-between;
+}
+
+/*
+  FIX: neither side of this pair had anywhere for its own content to go
+  if the section's height (above) ever ended up shorter than that
+  content's natural height — a real possibility on a short viewport, or
+  on a mobile browser that shrinks the layout viewport (and therefore
+  these dvh/vh values) when the on-screen keyboard opens for a focused
+  input in one of the input rows below.
+
+  .tasks-section already degraded gracefully: its inner
+  .task-list-container is flex: 1 with its own overflow-y: auto, so it
+  simply scrolls. .timer-section had no such inner scroll region — its
+  children (a 250px timer ring, header, controls, quote) have no room
+  to shrink, so instead of scrolling they burst straight past this
+  section's own rounded card border. overflow-y here gives it the same
+  fallback .tasks-section already had, so if it's ever forced smaller
+  than its content, it scrolls instead of overflowing.
+*/
+.timer-section {
+  overflow-y: auto;
+}
+
+
+/* --- TIMER LEFT SIDE --- */
+.timer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 15px;
+  margin-bottom: 20px;
+}
+
+.timer-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.locked-task-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.locked-task-label strong {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* --- TASKS RIGHT SIDE --- */
+.tasks-section {
+  justify-content: space-between;
+  align-items: stretch;
+}
+
+
+.timer-header, .date-nav-full {
+  height: 56px !important;
+  min-height: 56px !important;
+}
+
+
+/* "Daily Overview" (Habits) / "This Week" (Progress) — same heading
+   role in both tabs' detail panel, reused by name rather than
+   duplicated per tab. */
+.dashboard-title-text, .dashboard-stats-text strong {
+  color: var(--text-main);
+}
+
+
+.locked-task-label svg {
+  color: var(--text-muted);
+}
+
+.dashboard-stats-text {
+  color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .timer-section, .tasks-section {
+    flex: 1 1 100%;
+    min-width: 0;
+    width: 100%;
+    max-height: none;
+    padding: 22px;
+  }
+}
+
+/*
+  Slightly tighter still on small phones — keeps the timer circle and
+  its clock text comfortably inside the panel's padding instead of
+  crowding the edges.
+*/
+@media (max-width: 420px) {
+  .timer-section, .tasks-section {
+    padding: 18px;
+  }
+}

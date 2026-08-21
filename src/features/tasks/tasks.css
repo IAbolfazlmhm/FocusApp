@@ -1,0 +1,262 @@
+/* ========================================== */
+/* TASKS (Pomodoro's task list)                */
+/* ========================================== */
+/* The shared card/pill this list's items are built from lives in
+   shared/pill.css — this file only holds what's unique to a Pomodoro
+   task specifically (its name/tag row, not Habits' equivalent). */
+
+.task-list-container {
+  width: calc(100% + 20px);
+  margin-left: -10px;
+  padding: 10px;
+  flex: 1;
+  /* A flex item's default min-height is auto (i.e. its content's
+     natural height), which blocks it from ever shrinking past that —
+     forcing .tasks-section itself to overflow instead of this, its one
+     designated scroll region, doing the job. min-height: 0 is what
+     actually lets flex: 1 above shrink this on a short/keyboard-shrunk
+     viewport, same fix as .timer-section's overflow-y just above. */
+  min-height: 0;
+  padding-bottom: 30px;
+  margin-bottom: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.task-list-container::-webkit-scrollbar {
+  display: none;
+}
+
+
+.guide-text {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 15px;
+  order: 3;
+}
+
+
+.add-task-area {
+  display: flex;
+  width: 100%;
+  padding: 6px 6px 6px 20px;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  outline: none;
+  color: var(--text-main);
+  min-width: 0;
+}
+
+/*
+  Shown above the Add-Task input while converting a "Focus time (no
+  task)" Progress entry into a real task (see beginTasklessConversion(),
+  tasks.js) — makes it clear why the input just got focused/cleared and
+  gives an explicit way out instead of the pending conversion silently
+  attaching to whatever gets typed next.
+*/
+.taskless-convert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 14px;
+  margin-bottom: 8px;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.15);
+  background: color-mix(in srgb, var(--theme-color, #3b82f6) 15%, transparent);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border: 1px solid color-mix(in srgb, var(--theme-color, #3b82f6) 35%, transparent);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--text-main);
+}
+
+.taskless-convert-cancel {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.taskless-convert-cancel .ui-icon {
+  width: 12px;
+  height: 12px;
+}
+
+@media (hover: hover) {
+  .taskless-convert-cancel:hover {
+    background: rgba(0, 0, 0, 0.15);
+    color: var(--text-main);
+  }
+}
+
+
+/*
+  Left side of a task card: name on top, tag + time badge below. This used
+  to be ".task-info" with a conflicting CSS rule (align-items:flex-start,
+  gap:5px) that every task-item template silently overrode via inline
+  styles (flex-direction:column, gap:8px) — the class rule never actually
+  took effect, it just sat there as dead/misleading CSS.
+*/
+.task-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  padding-right: 15px;
+}
+
+.task-name {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 1.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+}
+
+/*
+  Row holding the tag pill + time badge (or, on the Habits tab, the
+  category badge + streak). flex-wrap was `nowrap`: with a long tag name
+  and a wide time/streak value both set to never shrink, the row could
+  exceed .task-info's width and spill out past it, sliding under
+  .task-actions instead of staying contained. Wrapping the badge onto its
+  own line keeps every piece of metadata fully visible and never lets it
+  reach the action buttons, regardless of text length — the card simply
+  grows a little taller (.task-item above has no fixed height anymore).
+*/
+.task-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/*
+  Per-tag color (background/text/border) is the one thing that's genuinely
+  per-instance data, not a fixed style — set via CSS custom properties
+  from JS (--tag-bg/--tag-color/--tag-border) instead of a full inline
+  style block, with sane defaults if a tag has no custom color.
+*/
+.task-tag {
+  padding: 3px 9px 3px 11px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: fit-content;
+  max-width: 120px;
+  flex: 0 0 auto;
+  display: inline-block;
+  height: max-content;
+  line-height: 1;
+  background: var(--tag-bg, var(--glass-bg));
+  color: var(--tag-color, var(--text-muted));
+  border: 1px solid var(--tag-border, var(--glass-border));
+}
+
+.task-time-badge {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+
+.task-item.active-focus {
+  order: 1;
+  border-color: var(--text-main);
+  background-color: var(--glass-bg);
+  border-left: 6px solid var(--text-main);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+
+.task-item.completed .task-name {
+  text-decoration: none;
+}
+
+/* --- EDIT TASK MODAL TAGS --- */
+.tag-select-btn {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+@media (hover: hover) {
+  .tag-select-btn:hover {
+    border-color: var(--theme-color);
+    transform: translateY(-1px);
+  }
+}
+
+.tag-select-btn:active {
+  border-color: var(--theme-color);
+}
+
+.tag-select-btn.selected {
+  background: var(--theme-color);
+  color: #ffffff;
+  border-color: var(--theme-color);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+
+/* Tag Management Add button — moved from the old shared components/buttons.css
+   for the same reason as habits.css's #quick-add-habit-btn: a one-off
+   override of one specific button, not a reused pattern. */
+#manage-add-tag-btn {
+  background-color: var(--theme-color, #3b82f6);
+  color: #fff;
+  border: none;
+}
+@media (hover: hover) {
+  #manage-add-tag-btn:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+#manage-add-tag-btn:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
+}

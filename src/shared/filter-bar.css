@@ -1,0 +1,96 @@
+/* ========================================== */
+/* FILTER BAR (shared All/Active/Done row)     */
+/* ========================================== */
+/* .filter-scroll-area / .filter-btn / .filter-bubble are reused as-is
+   by both Tasks' and Habits' filter row — see habits-render.js, which
+   builds the same classes rather than its own. */
+
+/* --- FILTER NAV --- */
+.filter-scroll-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  flex: 1;
+  gap: 5px;
+  scrollbar-width: none;
+  padding: 5px;
+  background: var(--glass-bg);
+  border-radius: 40px;
+  border: 1px solid var(--glass-border);
+}
+
+.filter-scroll-area::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 40px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.3s;
+  z-index: 2;
+  position: relative;
+}
+
+/* FIX: had no hover state at all — background stays out of it since
+   .filter-bubble (below) already owns the "active" background via its
+   own slide animation; a hover background here would fight that on
+   the actually-active pill. Text-color-only matches the same muted->
+   main treatment used elsewhere for this kind of label (see
+   .habit-settings-btn, .date-selector-btn in habits.css). */
+@media (hover: hover) {
+  .filter-btn:hover {
+    color: var(--text-main);
+  }
+}
+
+.filter-btn.active {
+  color: white;
+}
+
+.filter-bubble {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  height: calc(100% - 10px);
+  background: var(--text-main);
+  border-radius: 40px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+body.phase-work .filter-bubble {
+  background-color: var(--theme-color); color: white; border-color: var(--theme-color);
+}
+
+body.phase-short .filter-bubble {
+  background-color: var(--theme-color); color: white; border-color: var(--theme-color);
+}
+
+body.phase-long .filter-bubble {
+  background-color: var(--theme-color); color: white; border-color: var(--theme-color);
+}
+
+body.phase-stopwatch .filter-bubble {
+  background-color: var(--theme-color);
+  color: white;
+  border-color: var(--theme-color);
+}
+
+
+/* Habits' own tinting of this same shared filter bar. */
+body.phase-habits .filter-bubble {
+  background-color: #10b981 !important;
+}
+
+body.phase-habits .filter-btn.active {
+  color: #ffffff !important;
+}

@@ -1,0 +1,130 @@
+/* ========================================== */
+/* TAB BAR                                     */
+/* ========================================== */
+/* See shared/tabs/tabs.js for the JS half. The active-tab indicator's
+   phase-tinted color used to be scattered across 4 different feature
+   files (one rule per phase, each living wherever that phase's other
+   CSS happened to be) — consolidated here so this component's complete
+   behavior, tint included, is readable in one place. */
+
+.glass-tabs-container {
+  display: flex; 
+  position: relative; 
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px); 
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); 
+  border-radius: 50px;
+  padding: 5px; 
+  box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
+  width: 100%; 
+  max-width: 400px;
+}
+
+.tab {
+  flex: 1; 
+  text-align: center; 
+  padding: 12px 0; 
+  border: none;
+  background: transparent; 
+  color: var(--text-muted); 
+  font-weight: bold;
+  font-size: 1rem; 
+  cursor: pointer; 
+  border-radius: 40px; 
+  z-index: 1;
+  transition: color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tab.active { 
+  color: #ffffff; 
+}
+
+/* 
+  FIX: was `transition: all` + JS moving it via `left`/`width`. Animating
+  `left` forces a layout recalculation on every frame, and this element
+  sits inside a `backdrop-filter: blur()` container, so every one of
+  those frames also re-runs an expensive blur repaint — the combination
+  is what made the slide feel laggy/stuttery instead of smooth. It now
+  sits at a fixed `left: 0` and is moved purely with `transform:
+  translateX()` (see updateBubble() in ui-utils.js), which the browser
+  can animate on the compositor (GPU) without touching layout at all.
+  `transition` is now scoped to just the two properties that actually
+  change (transform for position, background-color for phase-color
+  swaps) instead of `all`, which used to also (harmlessly but
+  pointlessly) watch box-shadow/border-radius/z-index for changes. 
+*/
+.active-bubble {
+  position: absolute; 
+  top: 5px; 
+  left: 0; 
+  height: calc(100% - 10px);
+  background: var(--text-main); 
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+  z-index: 0;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
+  will-change: transform;
+}
+
+/* --- TIMER & PHASE OVERRIDES --- */
+/* FIX: body.phase-work .progress-ring-circle and .time-display overrides
+   removed — they hardcoded #f43f5e but the base rules already use
+   var(--theme-color), which variables.css redefines per phase to the exact
+   same value. The overrides were doing nothing except making the file longer
+   and harder to trust. */
+
+body.phase-work .active-bubble {
+  background-color: var(--theme-color);
+}
+
+body.phase-work .tab.active {
+  color: white;
+}
+
+
+body.phase-short .active-bubble {
+  background-color: var(--theme-color);
+}
+
+body.phase-short .tab.active {
+  color: white;
+}
+
+
+body.phase-long .active-bubble {
+  background-color: var(--theme-color);
+}
+
+body.phase-long .tab.active {
+  color: white;
+}
+
+
+body.phase-stopwatch .active-bubble {
+  background-color: var(--theme-color);
+}
+
+body.phase-stopwatch .tab.active {
+  color: white;
+}
+
+
+/* --- MISSING HABITS BUBBLE THEMES --- */
+body.phase-habits .active-bubble {
+  background-color: #10b981;
+}
+
+body.phase-habits .tab.active {
+  color: white;
+}
+
+/* --- PROGRESS TAB THEME COLORS --- */
+body.phase-progress .active-bubble { 
+  background-color: #8b5cf6; 
+}
+
+body.phase-progress .tab.active { 
+  color: white; 
+}
+

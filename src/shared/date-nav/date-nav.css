@@ -1,0 +1,100 @@
+/* ========================================== */
+/* DATE NAVIGATION TRIGGER                     */
+/* ========================================== */
+/* Two related but visually distinct patterns, both about navigating a
+   date/period, both reused across tabs, kept together here rather than
+   in whichever feature file happened to introduce them: the
+   "Today/Yesterday" style label (#pomodoro-date-display /
+   #habit-date-display, shared by Pomodoro + Habits) and the "Weekly ▾"
+   style trigger (.date-selector-btn, shared by Habits + Progress). */
+
+#habit-date-display {
+  color: var(--text-main);
+}
+
+
+/* --- DATE SELECTOR & PICKERS ---
+   font-size explicitly matches .date-display-toggle (components.css) —
+   "Weekly" here and "Today" there are the same role (the nav label next
+   to a tab's date/range picker) and need to sit at the same typographic
+   weight. This button previously hardcoded 1.1rem while the other used
+   the browser default 1rem, a small but visible mismatch between tabs.
+*/
+.date-selector-btn {
+  font-size: var(--font-size-md);
+  margin: 0;
+  min-width: 90px;
+  text-align: center;
+  color: var(--text-main);
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transition: transform 0.2s ease, color 0.2s ease; user-select: none;
+}
+
+@media (hover: hover) {
+  .date-selector-btn:hover {
+    color: var(--success-color);
+  }
+}
+
+.date-selector-btn:active {
+  color: var(--success-color);
+}
+
+/* BUG FIX: Date text hover color matches phase */
+#pomodoro-date-display, #habit-date-display {
+  transition: color 0.2s;
+}
+
+/* FIX: the dark-mode-scoped duplicate of this rule (identical selector,
+   identical `color: var(--theme-color) !important`) was removed —
+   --theme-color already resolves to the correct per-theme value via
+   variables.css, so the duplicate was dead weight, not an actual
+   dark-mode override. */
+@media (hover: hover) {
+  #pomodoro-date-display:hover, #habit-date-display:hover {
+    color: var(--theme-color) !important;
+  }
+}
+
+#pomodoro-date-display:active, #habit-date-display:active {
+  color: var(--theme-color) !important;
+}
+
+
+#pomodoro-date-display, #habit-date-display { 
+  color: var(--text-main); 
+}
+
+body[data-theme="dark"] #pomodoro-date-display, body[data-theme="dark"] #habit-date-display { 
+  color: #f8fafc !important; 
+}
+
+/* ========================================== */
+/* PROGRESS DASHBOARD                         */
+/* ========================================== */
+
+/* Override Habits Green Hover & Remove Scale Animation */
+@media (hover: hover) {
+  body.phase-progress .date-selector-btn:hover {
+    color: #8b5cf6;
+  }
+}
+
+/*
+  FIX: touch devices trigger :active, not :hover — habits.css's base
+  .date-selector-btn:active (unscoped to any tab, since Habits is where
+  that button first shipped) was the only rule touch taps here ever
+  matched, so tapping this on a phone showed habits' green instead of
+  Progress's own purple even though the :hover override above already
+  had it right for mouse users. Same fix, same reasoning, just for the
+  state touch actually triggers.
+*/
+body.phase-progress .date-selector-btn:active {
+  color: #8b5cf6;
+}
+

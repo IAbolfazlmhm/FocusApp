@@ -1,0 +1,467 @@
+/* ========================================== */
+/* HABITS                                      */
+/* ========================================== */
+/* The shared card/pill this list's items are built from lives in
+   shared/pill.css — this file only holds what's unique to a habit
+   specifically (its icon/category/streak, not Tasks' equivalent). */
+
+/* ========================================== */
+/* HABITS UI & DASHBOARD                      */
+/* ========================================== */
+
+/* --- HABITS SPECIFIC UI --- */
+/* FIX: this used to also carry margin-right: 12px on top of the 12px
+   gap .habit-info (below) already puts between its flex children (this
+   circle and .habit-details) — a redundant double gap unique to habit
+   pills, since task-item has no equivalent icon column to compare
+   against. That stacked 24px was quietly eating into .habit-details'
+   already-tighter width on every screen size; removing the duplicate
+   here keeps the visual gap the same (still 12px, just from one source
+   instead of two) while giving the name/category/streak text back the
+   room the second copy was taking from it. */
+.habit-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--habit-bg, rgba(59, 130, 246, 0.15));
+  color: var(--habit-color, #3b82f6);
+}
+
+
+/* Left column: icon circle + name/category/streak text stack. */
+.habit-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  padding-right: 15px;
+}
+
+.habit-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.habit-name {
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 1.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+}
+
+/*
+  Same overflow risk as .task-tag-row in pomodoro.css: a long category
+  name plus a large streak number could exceed .habit-details' width
+  with nowrap. Wrapping keeps both fully visible and off .habit-actions.
+*/
+.habit-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.habit-category-badge {
+  background: var(--cat-bg, var(--glass-bg));
+  padding: 3px 9px 3px 11px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--cat-color, var(--text-muted));
+  border: 1px solid var(--cat-border, var(--glass-border));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: fit-content;
+  max-width: 120px;
+  flex: 0 0 auto;
+  display: inline-block;
+  line-height: 1;
+}
+
+/*
+  FIX: habit pills were noticeably tighter than task pills on a narrow
+  phone screen — task-item has no icon column at all, while a habit
+  pill spends 44px (icon) + 12px (gap) on one before .habit-details even
+  starts, on top of the same action-button cluster both pill types
+  share (see pomodoro.css's matching max-width: 480px block, which
+  tightens that shared cluster for both tabs). That left as little as
+  ~80px for the name + category badge + streak on a 375px-wide screen —
+  enough to read as "just delete/skip/done and an icon, nothing else"
+  the way it was described. Shrinking the icon and tightening the
+  gaps/badge cap here gets that text column meaningfully more room back.
+*/
+@media (max-width: 480px) {
+  .habit-icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+  }
+
+  .habit-icon-circle .ui-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .habit-info {
+    gap: 10px;
+    padding-right: 8px;
+  }
+
+  .habit-category-badge {
+    max-width: 84px;
+  }
+}
+
+.streak-flame {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-weight: bold;
+  font-size: 0.85rem;
+  flex: 0 0 auto;
+}
+
+.streak-flame .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.streak-flame span {
+  font-variant-numeric: tabular-nums;
+}
+
+.streak-flame.active {
+  color: #f97316;
+  text-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);
+}
+
+/* Slightly larger variant used in the "top streaks" mini pills. */
+.streak-flame.lg {
+  font-size: 0.95rem;
+}
+
+.stat-icon.mini {
+  width: 32px;
+  height: 32px;
+}
+
+/*
+  FIX: no flex-wrap here before — on a narrow phone, the 7-circle custom
+  day-of-week picker (justify-content: space-between, no wrap) had
+  nowhere to go but shrink each circle via the default flex-shrink,
+  squeezing already-small 32px tap targets down further on the
+  smallest screens. Wrapping instead keeps every swatch/day-circle at a
+  comfortable, consistent tap size regardless of viewport width.
+*/
+.picker-grid {
+  display:
+  flex;
+  gap: 12px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+/*
+  Was an inline style="justify-content: space-between" on this specific
+  grid in index.html — moved here so the mobile override below (which
+  centers it once it wraps to two rows) can actually take effect; an
+  inline style attribute always wins over an external stylesheet rule,
+  media query or not.
+*/
+#custom-days-grid {
+  justify-content: space-between;
+}
+
+/*
+  FIX: at the base 32px size + 12px gap, 7 day-options (296px) or the 6
+  color swatches (252px) don't fit in one row inside a phone-width modal
+  — .modal-content is 90vw capped at 400px, minus its own 25px padding
+  each side, leaves ~238px of usable width at a 320px viewport. That
+  forced an awkward 2-row wrap (this rule used to just re-center the
+  leftover day(s) on their own second row rather than fix the fit), and
+  the still-desktop-sized pills read as bulky/cramped once wrapped.
+  Shrinking both the pill size and the gap keeps the 7-day and 6-color
+  rows to one row down to a 320px-wide phone (7×26 + 6×6 = 218px and
+  6×28 + 5×8 = 208px respectively) — #custom-days-grid's own
+  justify-content: space-between (above) now reads correctly as one
+  full row instead of needing the center override this replaces.
+  Icon grid (9 icons) still wraps regardless — shrinking it too just
+  brings that down from 3 rows to 2.
+*/
+@media (max-width: 420px) {
+  .picker-grid {
+    gap: 8px;
+  }
+
+  .day-option {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+
+  .color-option, .icon-option, .custom-color-swatch-wrapper {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.color-option {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+@media (hover: hover) {
+  .color-option:hover {
+    transform: scale(1.1);
+  }
+}
+
+.color-option:active, .icon-option:active, .day-option:active {
+  transform: scale(0.96);
+}
+
+.color-option.selected {
+  border: 3px solid var(--theme-color, #3b82f6);
+  transform: scale(1.15);
+}
+
+.icon-option {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+@media (hover: hover) {
+  .icon-option:hover {
+    background: var(--btn-hover);
+    color: var(--text-main);
+  }
+}
+
+.icon-option.selected {
+  background: var(--theme-color, #3b82f6);
+  color: #ffffff;
+  border-color: var(--theme-color, #3b82f6);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+
+.overview-ring {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
+body[data-theme="dark"] .overview-ring {
+  stroke: var(--success-color) !important;
+}
+
+.habit-quote-text {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--text-muted);
+  transition: opacity 0.8s ease-in-out;
+  opacity: 1;
+}
+
+.habit-quote-text.fade-out {
+  opacity: 0;
+}
+
+
+/*
+  FIX: this selector referenced #habit-overview-dashboard, an id that
+  doesn't exist anywhere in the HTML (a leftover from before this
+  section was renamed to #habit-detail-panel — see habits.js, which
+  already correctly targets `#habit-detail-panel .time-display` when
+  updating this number). Because the rule never matched, the ring's
+  percentage text was falling back to a hardcoded inline
+  `style="color: #10b981"` on the element itself, which is exactly the
+  --success-color token this rule was already trying to apply — so
+  fixing the selector and removing the inline style land on the same
+  color by design, they just do it through one real, theme-aware place
+  instead of a dead rule plus a hardcoded duplicate. --success-color is
+  the same value in both themes (see variables.css), and this selector's
+  specificity (id + class) already beats the base .time-display
+  rule in either theme, so no dark-mode-specific !important duplicate
+  is needed here.
+*/
+#habit-detail-panel .time-display {
+  display: inline-block;
+  transition: color 0.3s ease;
+  color: var(--success-color);
+}
+
+
+.day-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* FIX: had no hover state at all (only :active, above) — its sibling
+   picker .icon-option gets this exact treatment, this one had just
+   been missed. */
+@media (hover: hover) {
+  .day-option:hover {
+    background: var(--btn-hover);
+    color: var(--text-main);
+  }
+}
+
+.day-option.selected {
+  background: var(--theme-color, #3b82f6);
+  color: #ffffff;
+  border-color: var(--theme-color, #3b82f6);
+}
+
+
+/* --- UNIFIED DROPDOWNS (Category & Goal) --- */
+/* FIX: removed !important from position/size rules — the ID selectors
+   here (#habit-category-dropdown, #habit-frequency-dropdown) already
+   have higher specificity than the base .custom-dropdown rule in
+   components.css, so !important was never needed for the cascade to
+   resolve correctly. */
+#habit-category-wrapper, #habit-frequency-wrapper {
+  position: relative;
+}
+
+#habit-category-dropdown, #habit-frequency-dropdown {
+  top: calc(100% + 8px);
+  bottom: auto;
+  left: 0;
+  width: 100%;
+  max-height: 180px;
+  padding: 5px;
+  z-index: 99999;
+}
+
+#habit-category-dropdown .dropdown-item, #habit-frequency-dropdown .dropdown-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+
+#habit-category-dropdown {
+  width: max-content;
+  min-width: 100%;
+  padding-right: 15px;
+  white-space: nowrap;
+}
+
+
+/*
+  "Every: [N] [Week(s)/Month(s)]" row nested inside the habit modal's
+  Custom Days picker (replaced the old standalone "Custom Interval"
+  frequency — see habits-logic.js's isHabitActiveOnDate() for how
+  customDays + repeatEvery combine). Smaller stepper than the Pomodoro
+  duration one since this is a secondary control sharing a row with a
+  unit dropdown, not the modal's main focus; flex-wrap keeps it from
+  overflowing on narrow phones instead of clipping.
+*/
+.repeat-every-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.repeat-every-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.stepper-control-sm {
+  flex-shrink: 0;
+}
+
+.stepper-control-sm .stepper-btn {
+  width: 30px;
+  height: 30px;
+}
+
+.stepper-control-sm .stepper-btn .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.stepper-control-sm .stepper-value {
+  min-width: 28px;
+}
+
+.stepper-control-sm .stepper-input {
+  font-size: 1rem;
+  width: 2.5ch;
+}
+
+.repeat-unit-wrapper {
+  flex: 1;
+  min-width: 100px;
+}
+
+/* Habit quick-add override — moved from the old shared components/buttons.css,
+   since this is a one-off theme-color override for one specific button
+   unique to this feature, not something other tabs reuse. */
+#quick-add-habit-btn {
+  background-color: #10b981;
+  color: #fff;
+}
+@media (hover: hover) {
+  #quick-add-habit-btn:hover {
+    filter: brightness(0.92);
+    transform: translateY(-2px);
+  }
+}
+
+#quick-add-habit-btn:active {
+  filter: brightness(0.85);
+  transform: scale(0.97);
+}

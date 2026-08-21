@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { getLocalDateKey } from '../js/core/date-utils.js';
+import { getLocalDateKey } from '../src/core/date-utils.js';
 
 test('getLocalDateKey formats a date as YYYY-MM-DD', () => {
   assert.equal(getLocalDateKey(new Date(2026, 0, 5)), '2026-01-05');

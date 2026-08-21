@@ -8,19 +8,30 @@
   <meta name="theme-color" content="#3b82f6">
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/fonts.css">
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/reset.css">
-  <link rel="stylesheet" href="css/components/buttons.css">
-  <link rel="stylesheet" href="css/components/toasts.css">
-  <link rel="stylesheet" href="css/components/modals.css">
-  <link rel="stylesheet" href="css/components/dropdowns.css">
-  <link rel="stylesheet" href="css/components/tags.css">
-  <link rel="stylesheet" href="css/utilities.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/pomodoro.css">
-  <link rel="stylesheet" href="css/habits.css">
-  <link rel="stylesheet" href="css/progress.css">
+  <link rel="stylesheet" href="src/styles/fonts.css">
+  <link rel="stylesheet" href="src/styles/variables.css">
+  <link rel="stylesheet" href="src/styles/reset.css">
+  <link rel="stylesheet" href="src/styles/utilities.css">
+  <link rel="stylesheet" href="src/styles/layout.css">
+  <link rel="stylesheet" href="src/shared/buttons.css">
+  <link rel="stylesheet" href="src/shared/toast/toast.css">
+  <link rel="stylesheet" href="src/shared/dropdown/dropdown.css">
+  <link rel="stylesheet" href="src/shared/tag-chip/tag-chip.css">
+  <link rel="stylesheet" href="src/shared/stepper/stepper.css">
+  <link rel="stylesheet" href="src/shared/date-segment-input/date-segment-input.css">
+  <link rel="stylesheet" href="src/shared/modal/modal.css">
+  <link rel="stylesheet" href="src/shared/split-panel.css">
+  <link rel="stylesheet" href="src/shared/pill.css">
+  <link rel="stylesheet" href="src/shared/filter-bar.css">
+  <link rel="stylesheet" href="src/shared/tabs/tabs.css">
+  <link rel="stylesheet" href="src/shared/date-nav/date-nav.css">
+  <link rel="stylesheet" href="src/features/timer/timer.css">
+  <link rel="stylesheet" href="src/features/tasks/tasks.css">
+  <link rel="stylesheet" href="src/features/habits/habits.css">
+  <link rel="stylesheet" href="src/features/progress/progress.css">
+  <link rel="stylesheet" href="src/features/quotes/quotes.css">
+  <link rel="stylesheet" href="src/features/trash/trash.css">
+  <link rel="stylesheet" href="src/features/help/help.css">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 </head>
 <body class="preload">
@@ -59,6 +70,12 @@
     </symbol>
     <symbol id="icon-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/>
+    </symbol>
+    <symbol id="icon-help-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </symbol>
+    <symbol id="icon-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"/>
     </symbol>
   </svg>
 
@@ -137,8 +154,8 @@
 
         <div class="timer-circle">
           <svg class="progress-ring" viewBox="0 0 250 250" width="250" height="250">
-            <circle class="progress-ring-track" stroke-width="8" fill="transparent" r="110" cx="125" cy="125"/>
-            <circle class="progress-ring-circle" stroke-width="10" fill="transparent" r="110" cx="125" cy="125"/>
+            <circle class="progress-ring-track" stroke-width="12" fill="transparent" r="110" cx="125" cy="125"/>
+            <circle class="progress-ring-circle" stroke-width="12" fill="transparent" r="110" cx="125" cy="125"/>
           </svg>
           <span class="time-display" id="time-left">25:00</span>
         </div>
@@ -167,7 +184,7 @@
           <div class="date-nav-full glass-pill">
             <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <div class="date-display-toggle">
-              <span id="pomodoro-date-display">Today</span>
+              <button type="button" class="date-display-button" id="pomodoro-date-display" aria-haspopup="dialog" aria-expanded="false">Today</button>
               <input type="date" id="pomodoro-date-picker" class="native-date-input">
             </div>
             <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
@@ -284,7 +301,7 @@
           <div class="date-nav-full glass-pill">
             <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <div class="date-display-toggle">
-              <span id="habit-date-display">Today</span>
+              <button type="button" class="date-display-button" id="habit-date-display" aria-haspopup="dialog" aria-expanded="false">Today</button>
               <input type="date" id="native-date-picker" class="native-date-input">
             </div>
             <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
@@ -542,6 +559,17 @@
           </div>
         </div>
 
+        <div class="setting-group help-settings-row" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
+          <label style="display:block; margin-bottom: 8px;">Help</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
+            New here, or just want a refresher? Open the guide to see how the timer, tasks, habits, and progress dashboard all work.
+          </p>
+          <button type="button" class="btn-outline" id="open-help-btn" aria-label="Open Help and Guide" data-sound="click" style="width:100%;">
+            <svg class="ui-icon icon-inline-sm" aria-hidden="true"><use href="#icon-help-circle"/></svg>
+            <span>Help &amp; Guide</span>
+          </button>
+        </div>
+
         <div class="setting-group" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
           <label style="display:block; margin-bottom: 8px;">Motivational Quotes</label>
           <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
@@ -570,6 +598,138 @@
 
       <div class="modal-footer">
         <button class="btn-block" id="save-settings" data-sound="success">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="help-modal">
+    <div class="modal-content glass-effect">
+      <div class="modal-header">
+        <h2>
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-help-circle"/></svg>
+          Help &amp; Guide
+        </h2>
+        <button class="close-btn" id="close-help-modal" title="Close" aria-label="Close" data-sound="click">
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="help-intro" id="help-intro-text">
+          FocusApp has three parts: a Pomodoro timer for focused work sessions, a habit tracker, and a progress dashboard. Everything below is a quick reference — tap a section to expand it, or jump straight to one.
+        </p>
+
+        <details class="help-section" id="help-getting-started" open>
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-check-circle"/></svg>
+            <span>Getting Started</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <p>The three tabs at the top switch between the app's main sections: <strong>Pomodoro</strong> (timer + today's tasks), <strong>Habits</strong> (daily/weekly habit tracking), and <strong>Progress</strong> (your stats over time).</p>
+            <p>Everything you create — tasks, habits, tags, quotes — is saved only in this browser, automatically, as you go. There's no account and nothing is sent anywhere.</p>
+            <p>Whenever you're unsure what something does, tap the <strong>?</strong> icon at the top of any section, or open <strong>Settings → Help &amp; Guide</strong> to come back here.</p>
+          </div>
+        </details>
+
+        <details class="help-section" id="help-pomodoro">
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-target"/></svg>
+            <span>Pomodoro Timer</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <p>Tap <strong>Start</strong> to begin a work session. The ring fills in as time passes, and the app cycles automatically through Work → Short Break → Long Break (shown in the session tracker, e.g. "Work 1/4").</p>
+            <ul>
+              <li><strong>Skip</strong> jumps straight to the next phase.</li>
+              <li><strong>Reset</strong> resets the current phase; double-click or press and hold it for a full session reset.</li>
+              <li>The glasses icon opens <strong>Focus Mode</strong> — a distraction-free full timer view.</li>
+              <li>The target icon shows which task is currently locked in as your focus.</li>
+            </ul>
+            <p>In Settings you can switch to <strong>Stopwatch</strong> mode (count up instead of down), change the work duration, enable/disable breaks, auto-start breaks, and pick the alert sound.</p>
+          </div>
+        </details>
+
+        <details class="help-section" id="help-tasks">
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-tag"/></svg>
+            <span>Tasks</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <p>Type a task into the input at the bottom of the Pomodoro tab and tap <strong>Add</strong>. Tap a task to lock it in as your current focus — its name then shows next to the target icon above the timer, and completed focus time is tracked against it.</p>
+            <ul>
+              <li>The tag icon next to the input lets you assign a color tag before adding.</li>
+              <li>Use the sliders icon to <strong>Manage Tags</strong> (create, recolor, rename, delete).</li>
+              <li>The sort icon lets you order tasks by Newest, Time Spent, A-Z, or by Tag.</li>
+              <li>Use the arrows next to the date to review or plan tasks for other days.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="help-section" id="help-habits">
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <span>Habits</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <p>Use <strong>Quick add habit</strong> at the bottom for a simple daily habit, or open the pencil icon next to it for full control over a habit's name, category, icon, and goal cadence.</p>
+            <ul>
+              <li><strong>Goal</strong> can be Every Day, a specific weekday, Custom Days (pick any combination), or Every N Weeks/Months.</li>
+              <li>Tap a habit to mark it done for the selected day; your streak builds as long as you keep meeting the goal.</li>
+              <li>The sliders icon opens <strong>Manage Categories</strong> to group habits and color-code them.</li>
+              <li>The ring and "Top Streaks" panel above the list summarize how the selected day (or your best streaks) are going.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="help-section" id="help-progress">
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <span>Progress Dashboard</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <p>This tab summarizes your Focus Time, Items Completed, and Perfect Days over a date range, with a consistency ring showing your overall success rate.</p>
+            <ul>
+              <li>Switch the date range (e.g. This Week) or pick a Custom Range from the date navigator below the stats.</li>
+              <li>Tap any day in the list to open its <strong>Daily Report</strong> — a full breakdown of that day's tasks and habits.</li>
+              <li>The gear icon opens Dashboard Settings, where you can toggle Dark Mode, sound effects, and which data (Pomodoro/Habits/comparison arrows) the dashboard shows.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="help-section" id="help-data">
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            <span>Your Data &amp; Backup</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <p>Everything is stored only in this browser (localStorage) — there's no cloud sync. Clearing site data, private browsing, or resetting the browser can erase it.</p>
+            <ul>
+              <li><strong>Export Data</strong> (in Settings) downloads a JSON backup you can keep or move to another browser/device.</li>
+              <li><strong>Import Data</strong> restores from a backup file — this replaces what's currently saved, so use it carefully.</li>
+              <li><strong>Trash</strong> holds deleted tasks, habits, tags, categories, and quotes so you can restore them, until you empty it.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="help-section" id="help-tips">
+          <summary class="help-section-summary">
+            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-sliders"/></svg>
+            <span>Tips &amp; Shortcuts</span>
+            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
+          </summary>
+          <div class="help-section-body">
+            <ul>
+              <li><span class="help-kbd">Space</span> starts or pauses the timer (when you're not typing in a field).</li>
+              <li><span class="help-kbd">Esc</span> closes the topmost open dialog, or exits Focus Mode if nothing is open.</li>
+              <li>Press and hold the Reset button for a full session reset instead of just the current phase.</li>
+              <li>Dark Mode and Sound Effects can be toggled from either Settings or the Progress dashboard's own settings.</li>
+            </ul>
+          </div>
+        </details>
       </div>
     </div>
   </div>
@@ -618,9 +778,9 @@
   <div class="modal-overlay" id="confirm-modal">
     <div class="modal-content glass-effect" style="max-width: 320px; text-align: center; padding: 30px 20px;">
       <h3 id="confirm-message" style="margin-bottom: 25px; font-size: 1.2rem; font-weight: bold;">Are you sure?</h3>
-      <div style="display: flex; gap: 15px; justify-content: center;">
+      <div style="display: flex; gap: 12px;">
         <button id="confirm-no-btn" class="btn btn-secondary" data-sound="click">Cancel</button>
-        <button id="confirm-yes-btn" class="btn btn-danger" style="flex: 1;" data-sound="trash">Yes, Delete</button>
+        <button id="confirm-yes-btn" class="btn btn-danger" data-sound="trash">Yes, Delete</button>
       </div>
     </div>
   </div>
@@ -644,6 +804,8 @@
           <div id="edit-task-tag-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
           </div>
         </div>
+      </div>
+      <div class="modal-footer">
         <button class="btn-block" id="save-task-edit-btn" data-sound="success">Save Changes</button>
       </div>
     </div>
@@ -920,7 +1082,8 @@
           <label for="prog-toggle-compare">Show Comparisons (↑↓)</label>
           <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
-
+      </div>
+      <div class="modal-footer">
         <button class="btn-block" id="save-prog-settings" data-sound="success">Save & Apply</button>
       </div>
     </div>
@@ -959,6 +1122,6 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>

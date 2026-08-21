@@ -1,0 +1,260 @@
+/* ========================================== */
+/* PILL (shared task/habit list-item card)     */
+/* ========================================== */
+/* .task-item is the base card for BOTH a Pomodoro task and a Habit —
+   habits-render.js sets className = 'task-item habit-item', reusing
+   this component wholesale rather than building its own. .task-actions
+   and the .done-btn/.remove-btn/.focus-btn cluster are shared the same
+   way. Each tab's own feature file only adds what's unique on top
+   (features/tasks/tasks.css's .task-name/.task-tag-row content, or
+   features/habits/habits.css's .habit-info/.habit-icon-circle content). */
+
+/* --- TASK ITEMS (CARDS) ---
+   min-height only (not a fixed height): metadata (tag + time badge, or a
+   habit's category + streak) needs to be free to wrap onto a second line
+   for long tag names/large numbers without sliding under .task-actions —
+   see the .task-tag-row comment below. A hard height clipped that second
+   line instead of ever letting it exist.
+
+   PERFORMANCE: no backdrop-filter on this rule, even though every card
+   is meant to read as frosted glass. This card is nested inside
+   .tasks-section, which already blurs the raw page background once —
+   each card re-blurring that already-blurred backdrop is visually
+   redundant (blurring a blur reveals nothing new) but costs its own GPU
+   compositing pass, and unlike the header/control pills (see .glass-pill
+   in components.css) this one is rendered once per task or habit, so
+   the cost scales directly with list length. A long list previously
+   meant a blur pass per row on every scroll/animation frame — a real,
+   measurable mobile cost for no visible difference, since
+   background + border already read as a frosted card against the
+   panel's own blur.
+*/
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  width: 100%;
+  margin-bottom: 12px;
+  border: 2px solid var(--glass-border);
+  border-radius: 50px;
+  background: var(--glass-bg);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  order: 2;
+  min-height: 76px;
+  cursor: pointer;
+}
+
+/* FIX: was `border-color: var(--glass-border-hover)` — that token was
+   never defined anywhere, so this hover state silently did nothing but
+   apply its box-shadow. --theme-color matches the border-tint-on-hover
+   treatment already used by other card-like surfaces (e.g. .tag-select-btn
+   below), for a consistent hover language across the app. */
+@media (hover: hover) {
+  .task-item:hover {
+    border-color: var(--theme-color);
+    box-shadow: 0 4px 10px rgba(142, 202, 230, 0.2);
+  }
+}
+
+.task-item:active {
+  border-color: var(--theme-color);
+  box-shadow: 0 2px 6px rgba(142, 202, 230, 0.2);
+}
+
+
+.task-actions {
+  display: flex;
+  gap: 10px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) {
+  .task-item:hover .task-actions {
+    opacity: 1;
+  }
+}
+
+.task-item:focus-within .task-actions,
+.task-item:active .task-actions {
+  opacity: 1;
+}
+
+
+.done-btn, .remove-btn, .focus-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/*
+  Task and habit pills share this exact action-button cluster (see the
+  matching max-width: 480px block in habits.css, which tightens the
+  habit-pill-specific icon/text side of the same card on narrow
+  screens). Shrinking it here — rather than per-tab — keeps both pill
+  types identically sized at every breakpoint, and hands back ~26px of
+  width to whichever side of the card needs it most on a small phone.
+*/
+@media (max-width: 480px) {
+  .task-item {
+    padding: 15px 14px;
+  }
+
+  .done-btn, .remove-btn, .focus-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .task-actions {
+    gap: 6px;
+  }
+}
+
+@media (hover: hover) {
+  .done-btn:hover {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+    transform: translateY(-2px);
+  }
+
+  .remove-btn:hover {
+    background: var(--danger-color);
+    color: white;
+    border-color: var(--danger-color);
+    transform: translateY(-2px);
+  }
+
+  .focus-btn:hover {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+  }
+}
+
+.done-btn:active {
+  background: var(--success-color);
+  color: white;
+  border-color: var(--success-color);
+  transform: scale(0.97);
+}
+
+.remove-btn:active {
+  background: var(--danger-color);
+  color: white;
+  border-color: var(--danger-color);
+  transform: scale(0.97);
+}
+
+.focus-btn:active {
+  transform: scale(0.97);
+}
+
+.task-actions svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+.task-item.completed {
+  background-color: var(--btn-bg);
+  opacity: 0.55;
+  border-color: var(--glass-border);
+}
+
+body.phase-work .task-item.completed {
+  background: rgba(244, 63, 94, 0.08); border-color: rgba(244, 63, 94, 0.15);
+}
+
+body.phase-short .task-item.completed {
+  background: rgba(20, 184, 166, 0.08); border-color: rgba(20, 184, 166, 0.15);
+}
+
+body.phase-long .task-item.completed {
+  background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15);
+}
+body.phase-stopwatch .task-item.completed {
+  background: rgba(139, 92, 246, 0.08); border-color: rgba(139, 92, 246, 0.15);
+}
+
+body.phase-habits .task-item.completed {
+  background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15);
+}
+
+
+/* Habits' own touch/hover tinting of this same shared pill — kept with
+   the rest of pill.css's phase variants above rather than in
+   features/habits/habits.css, so this component's full behavior across
+   every tab that uses it stays in one place. */
+/* --- HABITS THEME & DASHBOARD HARMONY --- */
+/*
+  FIX: used to set its own muted->text-main color pair here, which fought
+  the app-wide .icon-btn:hover rule (buttons.css) that now themes every
+  icon button — including these — to var(--theme-color) on hover. Same
+  element, same :hover, different color values on the same property:
+  .icon-btn:hover's color always lost to this ID selector's higher
+  specificity, so these three buttons were the one place in the app that
+  didn't hover into the current phase color. Removed — .icon-btn already
+  owns both states correctly, nothing habit-specific needed here.
+*/
+
+@media (hover: hover) {
+  body.phase-habits .habit-item:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+  }
+
+  body.phase-habits .icon-btn:hover {
+    color: #10b981;
+  }
+
+  body.phase-habits .done-btn:hover {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+  }
+}
+
+/* Touch/click equivalent of the :hover block above — mirrors it exactly
+   rather than falling through to .task-item:active's generic neutral
+   shadow (pomodoro.css), the same way the hover rule above already
+   overrides .task-item:hover's generic one for this tab. Without this,
+   tapping a habit pill on a touchscreen (which triggers :active, not
+   :hover) never got the themed green feedback a mouse user sees. */
+body.phase-habits .habit-item:active {
+  border-color: #10b981;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+}
+
+
+/*
+  FIX: .task-item (and .habit-item, which reuses it) is a DIV given
+  tabIndex + role="button" so keyboard users can reach it — but the
+  shared button:focus/:focus-visible rules only match real <button>
+  elements. Without this, a keyboard user landed on it with only the
+  browser's default outline (a plain ring that ignores the app's theme
+  entirely) instead of the themed, keyboard-only ring every other
+  control in the app uses. Moved here from the old shared reset.css —
+  this is this component's own concern, not a generic reset. The
+  .tag-chip.manageable half of this same original rule lives in
+  shared/tag-chip/tag-chip.css instead, for the same reason.
+*/
+.task-item:focus {
+  outline: none;
+}
+
+.task-item:focus-visible {
+  outline: 2px solid var(--theme-color, #3b82f6);
+  outline-offset: 2px;
+}

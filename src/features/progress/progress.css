@@ -1,0 +1,455 @@
+/* ========================================== */
+/* PROGRESS                                    */
+/* ========================================== */
+
+@media (hover: hover) {
+  body.phase-progress .dropdown-item:hover {
+    background: rgba(139, 92, 246, 0.15);
+    color: #8b5cf6;
+    transform: translateX(3px);
+  }
+}
+
+body.phase-progress .dropdown-item.active-sort { 
+  color: #8b5cf6; 
+  background: rgba(139, 92, 246, 0.1); 
+}
+
+/* 
+  Dark-mode-specific purple variants removed at the user's request — see
+  the equivalent note in pomodoro.css. The light-mode colors immediately
+  above (#8b5cf6) now apply unchanged in dark mode too; nothing here
+  redefines --theme-color or a phase accent color for dark mode anymore.
+*/
+
+/* --- LAYOUT & SIZING (Scrollbar fix) --- */
+.progress-hero { 
+  display: flex; 
+  justify-content: center; 
+  width: 100%; 
+  margin-bottom: 10px; 
+}
+
+.stat-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  background: var(--glass-bg); 
+  padding: 8px 15px; 
+  border-radius: 20px; 
+  border: 1px solid var(--glass-border); 
+  transition: transform 0.2s; 
+}
+
+/* 
+  Always-3-slots "top streaks" widget locks a fixed height so the layout
+  doesn't jump around as habits gain/lose streaks. 
+*/
+.stat-row.fixed-height { 
+  height: 48px; 
+}
+
+.stat-row.empty-slot { 
+  background: transparent; 
+  border: 1px dashed var(--glass-border); 
+  opacity: 0.5; 
+}
+
+.stat-row-right { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+}
+
+@media (hover: hover) {
+  .stat-row:hover {
+    transform: translateX(5px);
+  }
+}
+
+.stat-icon { 
+  width: 36px; 
+  height: 36px; 
+  border-radius: 12px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  flex-shrink: 0; 
+}
+
+.stat-details { 
+  display: flex; 
+  flex-direction: column; 
+  flex: 1; 
+}
+
+.stat-label { 
+  font-size: 0.75rem; 
+  color: var(--text-muted); 
+  font-weight: bold; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px; 
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* --- DROPDOWN Z-INDEX & OPACITY FIX --- */
+.sort-wrapper { 
+  position: relative; 
+  z-index: 1000; 
+}
+
+#prog-range-dropdown {
+  top: calc(100% + 8px);
+  bottom: auto;
+  z-index: 99999;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* --- HEATMAP GRIDS --- */
+.chart-block { 
+  background: var(--glass-bg); 
+  border-radius: 30px; 
+  border: 1px solid var(--glass-border); 
+  display: flex; 
+  flex-direction: column; 
+  flex: 1; 
+  justify-content: center; 
+}
+
+/* Changed Grid to Flex-Wrap so long custom dates wrap to the next line automatically! */
+.heatmap-grid { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 5px; 
+  margin: 10px 0; 
+  width: 100%; 
+  justify-content: center; 
+  position: relative; 
+  z-index: 1; 
+}
+
+.heatmap-block { 
+  width: 22px; 
+  height: 22px; 
+  border-radius: 5px; 
+  background: rgba(148, 163, 184, 0.2); 
+  border: 1px solid rgba(148, 163, 184, 0.1); 
+  transition: transform 0.2s, box-shadow 0.2s; 
+  cursor: pointer; 
+  position: relative; 
+}
+
+@media (hover: hover) {
+  .heatmap-block:hover {
+    transform: scale(1.25);
+    z-index: 50;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+}
+
+.heatmap-block:active {
+  transform: scale(1.08);
+}
+
+/* Kill the empty popup on the Legend items */
+.heatmap-legend .heatmap-block { 
+  pointer-events: none !important; 
+}
+
+.heatmap-legend .heatmap-block { 
+  width: 12px; 
+  height: 12px; 
+  cursor: default; 
+}
+
+.heatmap-legend .legend-label { 
+  font-size: 0.7rem; 
+  color: var(--text-muted); 
+  font-weight: bold; 
+}
+
+/* Habit Colors (Green) */
+.habit-level-1 { 
+  background: rgba(16, 185, 129, 0.3); 
+  border-color: rgba(16, 185, 129, 0.4); 
+}
+
+.habit-level-2 { 
+  background: rgba(16, 185, 129, 0.6); 
+  border-color: rgba(16, 185, 129, 0.7); 
+}
+
+.habit-level-3 { 
+  background: #10b981; 
+  border-color: #059669; 
+}
+
+/* Focus Colors (Blue) */
+.focus-level-1 { 
+  background: rgba(59, 130, 246, 0.3); 
+  border-color: rgba(59, 130, 246, 0.4); 
+}
+
+.focus-level-2 { 
+  background: rgba(59, 130, 246, 0.6); 
+  border-color: rgba(59, 130, 246, 0.7); 
+}
+
+.focus-level-3 { 
+  background: #3b82f6; 
+  border-color: #2563eb; 
+}
+
+.heatmap-legend { 
+  display: flex; 
+  align-items: center; 
+  justify-content: flex-end; 
+  gap: 5px; 
+  margin-top: auto; 
+}
+
+/* Prevent dark mode from overriding the colored blocks */
+body[data-theme="dark"] .heatmap-block:not(.focus-level-1):not(.focus-level-2):not(.focus-level-3):not(.habit-level-1):not(.habit-level-2):not(.habit-level-3) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: transparent !important;
+}
+
+/* --- DELTA BADGES --- */
+.delta-badge { 
+  font-size: 0.7rem; 
+  font-weight: bold; 
+  padding: 2px 6px; 
+  border-radius: 8px; 
+  display: inline-flex; 
+  align-items: center; 
+  gap: 3px; opacity: 0; 
+  transition: opacity 0.3s; 
+}
+
+.delta-badge.show { 
+  opacity: 1; 
+}
+
+.delta-badge.positive { 
+  background: rgba(16, 185, 129, 0.2); 
+  color: #10b981; 
+}
+
+.delta-badge.negative { 
+  background: rgba(244, 63, 94, 0.2); 
+  color: #f43f5e; 
+}
+
+.delta-badge.neutral { 
+  background: rgba(148, 163, 184, 0.2); 
+  color: var(--text-muted); 
+}
+
+/* --- DAILY REPORT MODAL ITEMS --- */
+.report-section-title { 
+  font-size: 0.85rem; 
+  color: var(--text-muted); 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+  font-weight: bold; 
+  margin: 15px 0 8px 0; 
+  border-bottom: 1px solid var(--glass-border); 
+  padding-bottom: 5px; 
+}
+
+.report-item { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  padding: 8px 12px; 
+  background: var(--btn-bg); 
+  border-radius: 12px; 
+  margin-bottom: 6px; 
+  font-size: 0.9rem; 
+  color: var(--text-main); 
+  border: 1px solid var(--glass-border); 
+}
+
+.report-item.success { 
+  border-left: 4px solid var(--success-color); 
+}
+
+.report-item.skipped { 
+  border-left: 4px solid var(--text-muted); 
+  opacity: 0.7; 
+}
+
+.report-item.failed { 
+  border-left: 4px solid var(--danger-color); 
+}
+
+/*
+  The "Focus time (no task)" row (progress-report.js) is the one report
+  row with a delete action — a stray taskless session (e.g. from testing
+  the timer) had no way to be corrected once logged. `.report-item`'s
+  own `justify-content: space-between` already spaces its two direct
+  children apart; this just gives the second one (value + delete
+  button) its own small flex row instead of being bare text.
+*/
+.report-item-value {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.report-edit-taskless-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
+  color: var(--text-muted);
+}
+
+.report-edit-taskless-btn .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.report-delete-taskless-btn {
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
+  color: var(--text-muted);
+}
+
+.report-delete-taskless-btn .ui-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.report-delete-taskless-btn:hover,
+.report-delete-taskless-btn:active {
+  color: var(--danger-color);
+}
+
+/* Small uppercase date label shown in heatmap tooltips. */
+.report-date-label { 
+  color: #94a3b8; 
+  font-size: 0.65rem; 
+  text-transform: uppercase; 
+  letter-spacing: 1px; 
+}
+
+/* "No tasks recorded." / "No habits scheduled." placeholder text. */
+.report-empty-msg { 
+  color: var(--text-muted); 
+  font-size: 0.85rem; 
+}
+
+/* Extra top margin before the second (Habits) section title in the report. */
+.report-section-title.spaced { 
+  margin-top: 20px; 
+}
+
+/* The small "Done"/"Skipped"/"Missed" label on each habit report row. */
+.report-status-label { 
+  font-size: 0.75rem; 
+}
+
+/* 
+  "Go to Focus" / "Go to Habits" buttons at the bottom of the report modal.
+  These use fixed brand colors (not --theme-color) on purpose — they're
+  links to a specific OTHER section, so they should look like that
+  section's identity regardless of which tab/phase the modal was opened
+  from, the same way the rest of the app already uses fixed phase colors
+*/
+.report-actions { 
+  display: flex; 
+  gap: 10px; 
+  margin-top: 20px; 
+  padding-top: 15px; 
+  border-top: 1px solid var(--glass-border); 
+}
+
+.report-goto-btn { 
+  flex: 1; 
+  color: white; 
+  border: none; 
+  padding: 10px; 
+}
+
+/* 
+  Specificity note: body.phase-work .btn-primary (etc.) has specificity
+  0,2,1 (the `body` element selector counts too) which beats a plain
+  2-class selector here — these buttons would silently change color with
+  the current Pomodoro phase instead of staying fixed. Using all three
+  classes actually present on the button (.btn.report-goto-btn.focus =
+  0,3,0) correctly outranks it regardless of load order. 
+*/
+.btn.report-goto-btn.focus { 
+  background: #3b82f6; 
+}
+.btn.report-goto-btn.habits {
+  background: #10b981;
+}
+
+@media (hover: hover) {
+  .report-goto-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(0.95);
+  }
+}
+
+.report-goto-btn:active {
+  transform: scale(0.98);
+}
+
+/* --- DATE HEADER & SORT BTN --- */
+.date-header {
+  position: relative;
+  width: 100%;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--text-muted);
+  margin: 15px 0 8px 0;
+  padding-left: 5px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.date-header-line {
+  flex-grow: 1;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.4);
+  margin-left: 15px;
+  position: relative;
+  z-index: 10;
+  pointer-events: none;
+}
+
+
+/*
+  Daily report modal keeps its own shorter cap (this modal tends to be
+  opened repeatedly while browsing the heatmap, so leaving more of the
+  backdrop visible reads as lighter-weight than the standard modal
+  cap). This used to be an inline style on the element
+  (style="max-height: 60vh; overflow-y: auto; padding-right: 5px") —
+  moved here now that .modal-body above already supplies the overflow/
+  scrollbar-gutter behavior; this rule only needs to override the cap.
+*/
+#report-modal-body {
+  max-height: 60vh;
+}
+

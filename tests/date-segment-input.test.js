@@ -1,7 +1,7 @@
 import '../tests/env.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { setupDateSegmentInput } from '../js/ui/date-segment-input.js';
+import { setupDateSegmentInput } from '../src/shared/date-segment-input/date-segment-input.js';
 
 function makeSegmentInputs() {
   const month = document.createElement('input');

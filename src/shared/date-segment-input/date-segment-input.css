@@ -1,0 +1,60 @@
+/* ========================================== */
+/* SEGMENTED DATE INPUT (MM / DD / YYYY)       */
+/* ========================================== */
+/* See shared/date-segment-input/date-segment-input.js for the JS half —
+   currently used by Progress's Custom Range modal, built as reusable
+   shared infrastructure rather than one-off Progress styling. Replaces
+   what used to be a bare <input type="date">: a native date input's
+   width doesn't reliably fill a flex-stretched container the way a
+   plain input does, and its year segment could keep accepting digits
+   past 4 rather than capping and moving on — neither is something
+   CSS/JS can reach into and fix on the browser-drawn control. Styled to
+   look like one continuous .custom-select field even though it's three
+   separate inputs. */
+
+.date-segment-group {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--glass-border);
+  background: var(--btn-bg);
+}
+
+.date-segment-group:focus-within {
+  border-color: var(--theme-color);
+}
+
+.date-segment {
+  width: 2.4ch;
+  flex: 0 1 auto;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-main);
+}
+
+.date-segment-year {
+  width: 4.4ch;
+}
+
+.date-segment::placeholder {
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.date-segment-sep {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+

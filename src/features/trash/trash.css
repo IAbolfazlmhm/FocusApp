@@ -1,0 +1,111 @@
+/* ========================================== */
+/* TRASH (Settings > Trash)                    */
+/* ========================================== */
+
+/*
+  TRASH LIST (Settings > Trash)
+*/
+.trash-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--theme-color);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.trash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.trash-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: var(--btn-bg);
+  border: 1px solid var(--glass-border);
+}
+
+.trash-item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.trash-item-type-badge {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: rgba(128, 128, 128, 0.15);
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.trash-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  color: var(--text-main);
+  font-size: 0.9rem;
+}
+
+.trash-item-time {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.trash-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.trash-restore-btn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  width: auto;
+  min-height: 0;
+}
+
+.trash-delete-btn {
+  width: 36px;
+  height: 36px;
+}
+
+.trash-delete-btn .ui-icon {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 420px) {
+  .trash-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .trash-item-actions {
+    justify-content: flex-end;
+  }
+  .trash-item-label {
+    max-width: none;
+  }
+}

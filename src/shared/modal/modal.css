@@ -1,0 +1,348 @@
+/* ========================================== */
+/* SHARED MODAL CHROME & FORM CONTROLS         */
+/* ========================================== */
+/* Generic modal overlay/content/header/body/footer structure, plus the
+   form primitives every modal's settings use (.setting-group,
+   .custom-select, .switch toggle, .add-tag-row, the confirm-modal).
+   Feature-specific modal CONTENT lives with its own feature instead —
+   see features/quotes/quotes.css and features/trash/trash.css, which
+   used to live in this same file (as the old components/modals.css)
+   before this split. */
+
+/* ========================================== */
+/* MODALS & SETTINGS                          */
+/* ========================================== */
+
+/* --- MODALS & SETTINGS --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/*
+  FIX: .modal-content used to be the scrolling element itself
+  (overflow-y: auto directly on this rounded, padded box) — which put a
+  full-height straight scrollbar track inside a box with a 30px
+  border-radius. Browsers don't clip a scrollbar to a border-radius on
+  the same element it scrolls, so the track visibly ran past the curve
+  at the top and bottom corners, and the header (with the close button)
+  scrolled away with the rest of the content instead of staying put.
+
+  This element is now a plain, non-scrolling rounded shell: overflow:
+  hidden guarantees everything inside — including any child's scrollbar —
+  is clipped to the 30px radius, full stop. It's a flex column so
+  .modal-header can stay pinned (flex-shrink: 0) while .modal-body (below)
+  becomes the one scrollable region, inset from the rounded edges by the
+  shell's own padding. This is the reusable pattern: any modal using the
+  existing .modal-content > .modal-header + .modal-body structure gets
+  it automatically, with no per-modal CSS.
+*/
+.modal-content {
+  background: var(--modal-bg);
+  width: 90%;
+  max-width: 400px;
+  max-height: 85vh;
+  max-height: 85dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border-radius: 30px;
+  padding: 25px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  transform: translateY(-20px);
+  transition: transform 0.3s ease;
+}
+
+/*
+  The actual scroll region. flex: 1 lets it fill whatever space
+  .modal-header (pinned above) doesn't use; min-height: 0 is required
+  for a flex child to be allowed to shrink below its content's natural
+  height instead of overflowing the flex column.
+
+  FIX: setting overflow-y here makes the browser compute overflow-x as
+  'auto' too (CSS spec: an axis left at 'visible' while the other isn't
+  gets promoted to 'auto') — there's no way to scroll vertically here
+  without also clipping horizontally. That silently hard-cut anything
+  that visually extends past this box: a dropdown's glass-shadow glow
+  (see .custom-dropdown, dropdowns.css) opening flush against the left
+  edge (e.g. Settings' Work Duration picker), and an input's
+  :focus-visible ring (see .custom-select, reset.css) sitting flush
+  against the top-left corner of a modal body (e.g. Manage Tags' name
+  field) — top/bottom clip the same way since that's overflow-y's
+  actual job here, not a side effect, but the fix is identical.
+
+  margin/padding on all four sides now gives that bleed somewhere to
+  go: the margin pulls this box's edges outward into modal-content's
+  own padding, and the matching padding pushes content back in by the
+  same amount, so nothing visually shifts — only the invisible clip
+  boundary moves further out. Right side does double duty, also
+  covering the scrollbar gutter so its appearance doesn't shift content
+  left when a scrollbar appears.
+*/
+.modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: -12px;
+  padding: 12px;
+}
+
+/*
+  Themed scrollbar for modals now comes from the app-wide default in
+  reset.css — see the comment there. Only the width override stays here
+  (6px reads better inside a modal's narrower content column than the
+  8px global default). Scoped to .modal-body now, since that's the
+  element that actually scrolls.
+*/
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-overlay.show .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 15px;
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.2rem;
+  color: var(--text-main);
+}
+
+/*
+  Mirrors .modal-header above (flex-shrink: 0, pinned outside the
+  scrolling .modal-body) so a modal's primary action — Save, Apply,
+  etc. — never scrolls out of reach the way it used to when it was just
+  the last child inside .modal-body. Any modal that wants this simply
+  moves its action button(s) here, as a sibling of .modal-body instead
+  of a child of it; no other markup change needed.
+*/
+.modal-footer {
+  flex-shrink: 0;
+  padding-top: 15px;
+  margin-top: 5px;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* Small muted helper text under a control — e.g. the Custom Days habit
+   picker's "e.g. Sat + Mon, every 2 weeks" line. */
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 6px 2px 0;
+}
+
+
+.modal-divider {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  margin: 15px 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+@media (hover: hover) {
+  .close-btn:hover {
+    color: var(--danger-color);
+  }
+}
+
+.close-btn:active {
+  color: var(--danger-color);
+}
+.setting-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.setting-group label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.custom-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid var(--glass-border);
+  outline: none;
+  font-size: 1rem;
+  background: var(--btn-bg);
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.custom-select option {
+  background: #ffffff;
+  color: #2b2d42;
+  font-weight: 500;
+  padding: 10px;
+}
+
+body[data-theme="dark"] .custom-select option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+
+.toggle-group {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.disabled-settings {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* .save-settings-btn removed — was a "settings" name reused for Save
+   Habit / Save Changes / Apply Range / Save & Apply. Superseded by
+   .btn-block (see the BUTTONS section above), which names what the
+   component actually is: a full-width solid modal submit button. */
+
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/*
+  Off-state used to be flat #ccc regardless of theme — a soft themed tint
+  reads as "part of this app" instead of a generic gray widget, while
+  staying clearly distinguishable from the solid "on" state.
+*/
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Fallback for browsers without color-mix() support */
+  background-color: rgba(59, 130, 246, 0.15);
+  background-color: color-mix(in srgb, var(--theme-color, #3b82f6) 15%, var(--glass-bg));
+  border: 1px solid var(--glass-border);
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider {
+  background-color: var(--theme-color, #3b82f6);
+  border-color: var(--theme-color, #3b82f6);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+/* Focus indicator for toggle switches (accessibility) */
+.switch input:focus-visible + .slider {
+  outline: 2px solid var(--theme-color);
+  outline-offset: 2px;
+}
+
+#confirm-modal {
+  z-index: 10000;
+}
+
+.add-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+
+#confirm-message {
+  color: var(--text-main);
+  font-size: 1.1rem;
+  transition: color 0.3s;
+}
+
+body[data-theme="dark"] #confirm-message {
+  color: #f8fafc;
+}
+
+/*
+  Cancel/neutral styling now comes from .btn-secondary (see the BUTTONS
+  section above) — no dark-mode-specific override here anymore. The
+  Pomodoro confirm modal's Cancel button used to get a manually dimmed
+  dark-mode background (rgba(255,255,255,0.05), independent of --btn-bg,
+  which is already rgba(255,255,255,0.1) in dark mode) that no other
+  button received, which is why it looked inconsistent next to the
+  Habits delete modal's buttons. Letting it inherit --btn-bg/--btn-hover
+  like every other themed button fixes that.
+*/
+
+@media (max-width: 420px) {
+  .modal-content { 
+    padding: 20px; 
+  }
+}
