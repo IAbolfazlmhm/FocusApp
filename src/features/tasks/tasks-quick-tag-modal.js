@@ -3,6 +3,7 @@
 // ==========================================
 import { savedTags, setSavedTags } from '../../core/state.js';
 import { showToast } from '../../shared/toast/toast.js';
+import { t } from '../../core/i18n.js';
 import { escapeHTML } from '../../core/dom-utils.js';
 import { saveTasks } from './tasks-storage.js';
 import { renderFilters } from './tasks-render.js';
@@ -25,11 +26,15 @@ export function setupQuickTagModal() {
     const noTagBtn = document.createElement('button');
     noTagBtn.type = 'button';
     noTagBtn.className = 'tag-chip selectable';
-    noTagBtn.setAttribute('aria-label', 'No tag');
+    noTagBtn.setAttribute('aria-label', t('no_tag'));
     // FIX: was a literal ❌ emoji — swapped for the app's own close-icon
     // SVG so it renders consistently across platforms instead of
     // whichever emoji glyph the OS happens to supply.
-    noTagBtn.innerHTML = '<svg class="ui-icon" aria-hidden="true" style="width:14px;height:14px;"><use href="#icon-close"/></svg> No Tag';
+    // FIX: the visible label and aria-label here were hardcoded English
+    // ("No tag" / "No Tag") even though a matching no_tag locale key
+    // already existed, unused — this was the one tag-chip in the picker
+    // that never translated.
+    noTagBtn.innerHTML = `<svg class="ui-icon" aria-hidden="true" style="width:14px;height:14px;"><use href="#icon-close"/></svg> ${t('no_tag')}`;
     noTagBtn.dataset.sound = 'click';
     noTagBtn.onclick = () => selectQuickTag(null);
     // FIX: reopening this modal always rendered every chip in its plain,
@@ -49,7 +54,7 @@ export function setupQuickTagModal() {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'tag-chip selectable';
-      btn.setAttribute('aria-label', `Select tag ${tag}`);
+      btn.setAttribute('aria-label', t('select_tag_aria', { tag }));
       btn.textContent = `#${tag}`;
       btn.dataset.sound = 'click';
       btn.onclick = () => selectQuickTag(tag);
@@ -65,7 +70,7 @@ export function setupQuickTagModal() {
     if (quickTagModal) {quickTagModal.classList.remove('show');}
     if (taskInput) {taskInput.focus();}
 
-    if (tag) {showToast(`Tag #${escapeHTML(tag)} selected`, 'success');}
+    if (tag) {showToast(t('tag_selected', { tag: escapeHTML(tag) }), 'success');}
   }
 
   if (advancedTaskBtn) {
@@ -90,7 +95,7 @@ export function setupQuickTagModal() {
     const newTagRaw = quickModalTagInput.value.trim();
 
     if (!newTagRaw) {
-      showToast('Please enter a valid tag name.', 'warning');
+      showToast(t('invalid_tag_name_warning'), 'warning');
       return;
     }
 

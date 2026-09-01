@@ -9,12 +9,23 @@
 import { currentSort, setCurrentSort, sortOrder, setSortOrder } from '../../core/state.js';
 import { setupSelectDropdown } from '../../shared/dropdown/dropdown.js';
 import { renderTasks } from './tasks-render.js';
+import { saveTaskViewPrefs } from './tasks-storage.js';
 
 export function setupTaskSort() {
   const taskSortBtn = document.getElementById('task-sort-btn');
   const sortDropdown = document.getElementById('sort-dropdown');
 
   if (!taskSortBtn || !sortDropdown) {return;}
+
+  // Sync initial visual state with persisted sort preferences
+  sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+    const isCurrent = item.dataset.sort === currentSort;
+    item.classList.toggle('active-sort', isCurrent);
+    const sortDir = item.querySelector('.sort-dir');
+    if (sortDir) {
+      sortDir.textContent = isCurrent ? (sortOrder === 'asc' ? '↑' : '↓') : '';
+    }
+  });
 
   sortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -37,6 +48,7 @@ export function setupTaskSort() {
       item.querySelector('.sort-dir').textContent = sortOrder === 'asc' ? '↑' : '↓';
 
       sortDropdown.classList.remove('show');
+      saveTaskViewPrefs();
       renderTasks();
     });
   });

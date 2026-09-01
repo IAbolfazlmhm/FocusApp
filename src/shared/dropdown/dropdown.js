@@ -45,6 +45,18 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
   syncSelectedState();
   if (valueInput) {valueInput.addEventListener('change', syncSelectedState);}
 
+  // FIX: these dropdowns show their current selection in a readonly
+  // "display" input whose .value is set imperatively at selection time —
+  // translateDOM() re-translates the .dropdown-item options (they carry
+  // data-i18n) but can never touch an input's value, so after a language
+  // switch the closed preview stayed in the old language until the user
+  // re-picked an option. Registering every value-backed dropdown here
+  // lets syncDropdownDisplays() re-derive the preview from the (already
+  // re-translated) matching option on every languageChanged.
+  if (valueInput) {
+    displaySyncTargets.push({ triggerEl: trigger, valueInputEl: valueInput, dropdownEl: dropdown });
+  }
+
   // Keep aria-expanded truthful no matter which path closes the dropdown
   // (an item's own click handler, an outside click, Escape, etc.) — same
   // MutationObserver pattern modal-utils.js uses for modal .show/inert sync.
@@ -116,6 +128,27 @@ export function setupSelectDropdown({ wrapperId, triggerId, dropdownId, valueInp
 // that were scattered across tasks.js, habits.js (3), settings.js,
 // progress.js.
 const outsideClickTargets = new Map(); // wrapperEl -> { dropdownEl, valueInputId? }
+
+// Every value-backed dropdown registered via setupSelectDropdown(), so a
+// single syncDropdownDisplays() pass can refresh all their readonly
+// display inputs at once (see the registration note inside
+// setupSelectDropdown). Not used for dropdowns without a valueInput
+// (sort buttons, progress range — those own their own display logic).
+const displaySyncTargets = [];
+
+// Re-derive each registered dropdown's display preview from its current
+// hidden value, reading the matching .dropdown-item's textContent — the
+// items themselves are re-translated by translateDOM() on every
+// languageChanged (they carry data-i18n), so by the time this runs the
+// preview text it copies is already in the new language. Called from
+// main.js's languageChanged cascade.
+export function syncDropdownDisplays() {
+  displaySyncTargets.forEach(({ triggerEl, valueInputEl, dropdownEl }) => {
+    if (!triggerEl.isConnected) {return;}
+    const match = dropdownEl.querySelector(`.dropdown-item[data-val="${valueInputEl.value}"]`);
+    if (match) {triggerEl.value = match.textContent;}
+  });
+}
 
 export function registerOutsideClickTarget(wrapperEl, dropdownEl, valueInputId) {
   if (!wrapperEl || !dropdownEl) {return;}

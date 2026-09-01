@@ -1,75 +1,16 @@
 /* ========================================== */
 /* HELP & GUIDE MODAL                         */
 /* ========================================== */
-/* Reuses the app's existing modal shell (.modal-overlay/.modal-content/
-   .modal-header/.modal-body from modals.css) and design tokens
-   (variables.css) — nothing here redefines those, it only styles the
-   content that lives inside #help-modal so it matches every other modal
-   in the app instead of looking like a bolted-on component. */
 
 .help-intro {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 16px;
 }
 
-/* Horizontally-scrolling row of "jump to section" chips — same scroll
-   pattern as .filter-scroll-area (tasks/habits filter rows), so it
-   behaves identically on a phone: swipe instead of wrap. */
-.help-jump-row {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--glass-border);
-  scrollbar-width: none;
-}
-
-.help-jump-row::-webkit-scrollbar {
-  display: none;
-}
-
-.help-jump-chip {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  min-height: 36px;
-  border-radius: var(--radius-pill);
-  background: var(--btn-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--text-main);
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
-}
-
-.help-jump-chip .ui-icon {
-  width: 14px;
-  height: 14px;
-}
-
-@media (hover: hover) {
-  .help-jump-chip:hover {
-    background: var(--btn-hover);
-    color: var(--theme-color);
-  }
-}
-
-.help-jump-chip:active {
-  background: var(--btn-hover);
-}
-
 /* Each topic is a native <details> — free keyboard support, free
-   expand/collapse, and (unlike a JS-driven accordion) nothing to wire up
-   or break if a future edit adds/removes a section. Collapsed by default
-   keeps the modal short on a phone screen; only the first section starts
-   open (via the `open` attribute in the markup). */
+   expand/collapse, and collapsed by default keeps the modal short. */
 .help-section {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -86,14 +27,12 @@
   padding: 12px 14px;
   min-height: 44px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-main);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Remove default disclosure triangle so the custom chevron below is the
-   only affordance shown, on every browser. */
 .help-section-summary::-webkit-details-marker {
   display: none;
 }
@@ -114,53 +53,48 @@
   transition: transform var(--transition-fast);
 }
 
+[dir="rtl"] .help-section-summary .help-chevron {
+  margin-left: 0;
+  margin-right: auto;
+}
+
 .help-section[open] .help-chevron {
   transform: rotate(180deg);
 }
 
 .help-section-body {
   padding: 0 14px 14px 42px;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
-.help-section-body p {
-  margin: 0 0 8px 0;
-}
-
-.help-section-body p:last-child {
-  margin-bottom: 0;
+[dir="rtl"] .help-section-body {
+  padding: 0 42px 14px 14px;
 }
 
 .help-section-body ul {
-  margin: 0 0 8px 0;
+  margin: 0;
   padding-left: 18px;
 }
 
+[dir="rtl"] .help-section-body ul {
+  padding-left: 0;
+  padding-right: 18px;
+}
+
 .help-section-body li {
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+}
+
+.help-section-body li:last-child {
+  margin-bottom: 0;
 }
 
 .help-section-body strong {
   color: var(--text-main);
 }
 
-.help-kbd {
-  display: inline-block;
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: var(--btn-bg);
-  border: 1px solid var(--glass-border);
-  font-size: 0.75rem;
-  color: var(--text-main);
-  font-family: inherit;
-}
-
-/* Small "?" entry point reused in the Pomodoro/Habits/Progress headers
-   and inside the Settings modal — same sizing as every other .icon-btn,
-   just a distinct look-and-feel isn't needed since the icon itself
-   (info-circle) already reads as "help" next to gear/target/glasses. */
 .help-settings-row .btn-outline {
   display: flex;
   align-items: center;
@@ -173,9 +107,4 @@
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   touch-action: pan-y;
-}
-
-.help-jump-row {
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
 }

@@ -18,19 +18,30 @@
 // just on click.
 export function centerButtonInScrollArea(container, btn) {
   if (!container || !btn) {return;}
+  const isRtl = typeof document !== 'undefined' && (document.documentElement.dir === 'rtl' || (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function' && window.getComputedStyle(container).direction === 'rtl'));
   const target = btn.offsetLeft - (container.clientWidth / 2) + (btn.offsetWidth / 2);
-  container.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+
+  if (isRtl) {
+    const minScroll = -(container.scrollWidth - container.clientWidth);
+    container.scrollTo({ left: Math.max(minScroll, Math.min(0, target)), behavior: 'smooth' });
+  } else {
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    container.scrollTo({ left: Math.min(maxScroll, Math.max(0, target)), behavior: 'smooth' });
+  }
 }
 
-// Horizontal wheel scroll for filter bars (desktop) — a vertical mouse
-// wheel over a horizontally-scrolling row does nothing by default, since
-// the row has no vertical overflow for the wheel event to act on.
+// Horizontal wheel scroll for filter bars (desktop)
 export function setupHorizontalWheelScroll(container) {
   if (!container) {return;}
   container.addEventListener('wheel', (e) => {
     if (e.deltaY !== 0) {
       e.preventDefault();
-      container.scrollLeft += e.deltaY;
+      const isRtl = typeof document !== 'undefined' && (document.documentElement.dir === 'rtl' || (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function' && window.getComputedStyle(container).direction === 'rtl'));
+      if (isRtl) {
+        container.scrollLeft -= e.deltaY;
+      } else {
+        container.scrollLeft += e.deltaY;
+      }
     }
   }, { passive: false });
 }

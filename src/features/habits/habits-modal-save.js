@@ -11,10 +11,12 @@ import {
   habits, setHabits, savedHabitCategories, setSavedHabitCategories
 } from '../../core/state.js';
 import { showToast } from '../../shared/toast/toast.js';
+import { readNumericValue } from '../../shared/stepper/stepper-utils.js';
 import { generateId, animateNewListItem } from '../../core/dom-utils.js';
 import { renderHabits, renderHabitCategories } from './habits-render.js';
 import { saveHabits, saveHabitCategories } from './habits-storage.js';
 import { habitModalState } from './habits-modal-state.js';
+import { t } from '../../core/i18n.js';
 
 // "Every: [N] [Week(s)/Month(s)]" cadence on Custom Days habits — 1 is
 // the floor (repeat every single week/month, i.e. no skipping) and 52 is
@@ -57,21 +59,27 @@ export function setupHabitModalSave() {
           customDays.push(parseInt(d.dataset.day));
         });
       if (customDays.length === 0) {
-        showToast('Please select at least one day.', 'warning');
+        showToast(t('please_select_one_day'), 'warning');
         return;
       }
 
       const repeatEveryInput = document.getElementById('habit-repeat-every-input');
       const repeatUnitValueInput = document.getElementById('habit-repeat-unit-value');
+      // FIX: parseInt(repeatEveryInput.value, 10) directly used to work
+      // fine since the input was always plain ASCII digits — but now
+      // that it displays Persian glyphs under fa locale (see
+      // stepper-utils.js), parseInt() can't read those at all and would
+      // silently return NaN. readNumericValue() (the same helper the
+      // stepper itself uses) parses either script correctly.
       repeatEvery = {
-        value: clampRepeatEvery(repeatEveryInput ? parseInt(repeatEveryInput.value, 10) : NaN),
+        value: clampRepeatEvery(repeatEveryInput ? readNumericValue(repeatEveryInput) : NaN),
         unit: (repeatUnitValueInput && repeatUnitValueInput.value === 'month') ? 'month' : 'week'
       };
       if (repeatEveryInput) {repeatEveryInput.value = repeatEvery.value;}
     }
 
     if (!name) {
-      showToast('Please enter a habit name', 'warning');
+      showToast(t('please_enter_habit_name'), 'warning');
       return;
     }
 
@@ -125,7 +133,7 @@ export function setupHabitModalSave() {
     saveHabits();
 
     if (habitModal) {habitModal.classList.remove('show');}
-    showToast(editingHabitId ? 'Habit Updated!' : 'Habit Created!', 'success');
+    showToast(editingHabitId ? t('habit_updated_toast') : t('habit_created_toast'), 'success');
 
     renderHabits();
     renderHabitCategories();

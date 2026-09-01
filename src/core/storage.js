@@ -35,6 +35,9 @@ export const STORAGE_KEYS = {
   TRASH: 'focusTrash',
   BUILT_IN_QUOTE_OVERRIDES: 'focusBuiltInQuoteOverrides',
   HELP_STATE: 'focusHelpState',
+  PROGRESS_VIEW_PREFS: 'focusProgressViewPrefs',
+  TASK_VIEW_PREFS: 'focusTaskViewPrefs',
+  HABIT_VIEW_PREFS: 'focusHabitViewPrefs'
 };
 
 /**

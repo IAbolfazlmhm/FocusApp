@@ -4,6 +4,7 @@
 import { currentHabitDate, setCurrentHabitDate } from '../../core/state.js';
 import { renderHabits } from './habits-render.js';
 import { openDatePickerPopover } from '../../shared/date-nav/date-picker-popover.js';
+import { t, formatDate } from '../../core/i18n.js';
 
 // Also used by habits.js's setHabitDate() (the Progress tab's "go to
 // this day" deep link) — kept here rather than in habits.js itself
@@ -22,15 +23,15 @@ export function updateDateDisplayUI() {
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    dateDisplayBtn.textContent = 'Today';
+    dateDisplayBtn.textContent = t('today');
   } else if (diffDays === -1) {
-    dateDisplayBtn.textContent = 'Yesterday';
+    dateDisplayBtn.textContent = t('yesterday');
   } else if (diffDays === 1) {
-    dateDisplayBtn.textContent = 'Tomorrow';
+    dateDisplayBtn.textContent = t('tomorrow');
   } else {
     // If it's further away, format it nicely (e.g., "Jun 5")
     const options = { month: 'short', day: 'numeric' };
-    dateDisplayBtn.textContent = currentHabitDate.toLocaleDateString('en-US', options);
+    dateDisplayBtn.textContent = formatDate(currentHabitDate, options);
   }
 }
 

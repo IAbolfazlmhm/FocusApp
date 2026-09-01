@@ -9,12 +9,23 @@
 import { currentHabitSort, setCurrentHabitSort, habitSortOrder, setHabitSortOrder } from '../../core/state.js';
 import { setupSelectDropdown } from '../../shared/dropdown/dropdown.js';
 import { renderHabits } from './habits-render.js';
+import { saveHabitViewPrefs } from './habits-storage.js';
 
 export function setupHabitSort() {
   const habitSortBtn = document.getElementById('habit-sort-btn');
   const habitSortDropdown = document.getElementById('habit-sort-dropdown');
 
   if (!habitSortBtn || !habitSortDropdown) {return;}
+
+  // Sync initial visual state with persisted sort preferences
+  habitSortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
+    const isCurrent = item.dataset.sort === currentHabitSort;
+    item.classList.toggle('active-sort', isCurrent);
+    const sortDir = item.querySelector('.sort-dir');
+    if (sortDir) {
+      sortDir.textContent = isCurrent ? (habitSortOrder === 'asc' ? '↑' : '↓') : '';
+    }
+  });
 
   habitSortDropdown.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -27,14 +38,17 @@ export function setupHabitSort() {
       }
 
       habitSortDropdown.querySelectorAll('.dropdown-item').forEach(i => {
-          i.classList.remove('active-sort');
-          i.querySelector('.sort-dir').textContent = '';
-        });
+        i.classList.remove('active-sort');
+        const dirSpan = i.querySelector('.sort-dir');
+        if (dirSpan) {dirSpan.textContent = '';}
+      });
 
       item.classList.add('active-sort');
-      item.querySelector('.sort-dir').textContent = habitSortOrder === 'asc' ? '↑' : '↓';
+      const activeDirSpan = item.querySelector('.sort-dir');
+      if (activeDirSpan) {activeDirSpan.textContent = habitSortOrder === 'asc' ? '↑' : '↓';}
 
       habitSortDropdown.classList.remove('show');
+      saveHabitViewPrefs();
       renderHabits();
     });
   });

@@ -1,11 +1,21 @@
 // ==========================================
-// MODAL STACK (for Escape-key handling — close only the topmost modal)
+// MODAL STACK (for Escape-key handling & body scroll locking)
 // ==========================================
 const openModals = [];
+
+function updateBodyScrollLock() {
+  if (typeof document === 'undefined') {return;}
+  if (openModals.length > 0) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+}
 
 export function registerModalOpen(modal) {
   if (modal && !openModals.includes(modal)) {
     openModals.push(modal);
+    updateBodyScrollLock();
   }
 }
 
@@ -13,6 +23,7 @@ export function registerModalClose(modal) {
   const index = openModals.indexOf(modal);
   if (index !== -1) {
     openModals.splice(index, 1);
+    updateBodyScrollLock();
   }
 }
 

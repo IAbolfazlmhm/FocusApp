@@ -35,6 +35,30 @@
   pointer-events: auto;
 }
 
+/* FIX: the Progress Dashboard toggles (Show Pomodoro/Habits/Compare) only
+   make sense when #settings-modal was opened from Progress's own gear
+   button — showing them when opened from Habits or Pomodoro made no
+   sense and wasn't the intent. Hidden by default; settings.js/habits.js/
+   progress.js each control whether '.progress-context' is present on
+   #settings-modal right before showing it (see their gear-button click
+   handlers) so this is the only thing that differs between the three
+   entry points into the same shared modal.
+   FIX: the hide rule below used to be plain '.progress-dashboard-section'
+   (specificity 0-1-0) — .setting-group's own 'display: flex' rule further
+   down this same file has the exact same specificity and comes later in
+   source order, so it silently won the cascade and the section stayed
+   visible everywhere regardless of this rule's intent. Scoping to
+   '#settings-modal .progress-dashboard-section' (0-1-1, ID + class) makes
+   this win unconditionally, independent of where either rule sits in the
+   file. */
+#settings-modal .progress-dashboard-section {
+  display: none;
+}
+
+#settings-modal.progress-context .progress-dashboard-section {
+  display: block;
+}
+
 /*
   FIX: .modal-content used to be the scrolling element itself
   (overflow-y: auto directly on this rounded, padded box) — which put a
@@ -137,6 +161,47 @@
   color: var(--text-main);
 }
 
+/* Modal sizing modifiers */
+.modal-content.modal-sm {
+  max-width: 320px;
+}
+
+.modal-content.modal-md {
+  max-width: 400px;
+}
+
+.modal-content.modal-lg {
+  max-width: 440px;
+}
+
+/* Standard Modal Action Containers */
+.modal-actions-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.modal-actions-row > .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-left: 12px;
+  padding-right: 12px;
+  white-space: nowrap;
+  text-align: center;
+  justify-content: center;
+}
+
+.modal-actions-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.modal-actions-col > .btn {
+  width: 100%;
+}
+
 /*
   Mirrors .modal-header above (flex-shrink: 0, pinned outside the
   scrolling .modal-body) so a modal's primary action — Save, Apply,
@@ -150,6 +215,21 @@
   padding-top: 15px;
   margin-top: 5px;
   border-top: 1px solid var(--glass-border);
+}
+
+.confirm-modal-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  text-align: center;
+}
+
+.confirm-modal-message {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 /* Small muted helper text under a control — e.g. the Custom Days habit

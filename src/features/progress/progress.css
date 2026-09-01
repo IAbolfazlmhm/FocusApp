@@ -278,17 +278,17 @@ body[data-theme="dark"] .heatmap-block:not(.focus-level-1):not(.focus-level-2):n
   border: 1px solid var(--glass-border); 
 }
 
-.report-item.success { 
-  border-left: 4px solid var(--success-color); 
+.report-item.success {
+  border-inline-start: 4px solid var(--success-color);
 }
 
-.report-item.skipped { 
-  border-left: 4px solid var(--text-muted); 
-  opacity: 0.7; 
+.report-item.skipped {
+  border-inline-start: 4px solid var(--text-muted);
+  opacity: 0.7;
 }
 
-.report-item.failed { 
-  border-left: 4px solid var(--danger-color); 
+.report-item.failed {
+  border-inline-start: 4px solid var(--danger-color);
 }
 
 /*

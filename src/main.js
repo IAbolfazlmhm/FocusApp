@@ -1,19 +1,28 @@
 import { setupTabs } from './shared/tabs/tabs.js';
 import { setupModalAccessibility, initConfirmModal, closeTopmostModal } from './shared/modal/modal-utils.js';
+import { syncDropdownDisplays } from './shared/dropdown/dropdown.js';
 import { loadSettings, setupSettingsEvents, applySettingsToTimer } from './features/settings/settings.js';
-import { loadTimerState, updatePhaseColors, toggleTimer, setupTimerEvents } from './features/timer/timer.js';
+import { loadTimerState, updatePhaseColors, updatePhaseText, updateDisplay, toggleTimer, setupTimerEvents } from './features/timer/timer.js';
 import { setupTaskEvents } from './features/tasks/tasks.js';
 import { renderFilters, renderTasks } from './features/tasks/tasks-render.js';
+import { updatePomodoroDateUI } from './features/tasks/tasks-date-nav.js';
 import { setupHabitsEvents, initHabitQuotes } from './features/habits/habits.js';
-import { renderHabits } from './features/habits/habits-render.js';
-import { setupProgressEvents } from './features/progress/progress.js';
+import { renderHabits, renderHabitCategories } from './features/habits/habits-render.js';
+import { updateHabitIconPickerLabels } from './features/habits/habit-icons.js';
+import { updateDateDisplayUI } from './features/habits/habits-date-nav.js';
+import { setupProgressEvents, renderProgressDashboard } from './features/progress/progress.js';
 import { playUI } from './shared/audio.js';
-import { setupFocusMode, exitFocusMode, isFocusModeActive } from './features/timer/focus-mode.js';
+import { setupFocusMode, exitFocusMode, isFocusModeActive, refreshFocusModeQuoteIfActive } from './features/timer/focus-mode.js';
 import { setupQuotesEvents } from './features/quotes/quotes.js';
 import { setupTrashEvents } from './features/trash/trash-ui.js';
-import { setupHelpEvents } from './features/help/help.js';
+import { setupHelpEvents, renderHelpContent } from './features/help/help.js';
+import { initLocale, translateDOM } from './core/i18n.js';
 
-window.addEventListener('DOMContentLoaded', () => {
+function initApp() {
+  // 0. i18n Initialization
+  initLocale();
+  translateDOM();
+
   // 1. Settings Initialization
   loadSettings();
   setupSettingsEvents();
@@ -43,11 +52,52 @@ window.addEventListener('DOMContentLoaded', () => {
   setupFocusMode();
   setupGlobalShortcuts();
   setupHelpEvents();
-});
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
 
 // Inter-module event listener for updating background themes
 document.addEventListener('updateColors', () => {
   updatePhaseColors();
+});
+
+// Inter-module event listener for language change
+document.addEventListener('languageChanged', () => {
+  translateDOM();
+  // FIX: dropdown preview inputs (habit frequency, repeat unit, settings
+  // language/mode/sound, quote category) hold their selected option's
+  // text as an imperative .value that translateDOM() can't reach — only
+  // the .dropdown-item options themselves carry data-i18n. Re-derive
+  // every preview from its (now re-translated) matching option; without
+  // this the closed dropdown kept showing the old language until the
+  // user re-picked an option.
+  syncDropdownDisplays();
+  updatePhaseText();
+  // FIX: this call was missing — updatePhaseText() only covers
+  // #current-phase/#next-phase, not the main #time-left countdown
+  // digits (those live in updateDisplay(), never previously part of
+  // this cascade). While the timer is actively running this self-heals
+  // within a second anyway, since the tick interval calls updateDisplay()
+  // constantly — which is exactly why it looked fine from inside Focus
+  // Mode (timer running) but stayed stuck in the old locale's digits
+  // whenever the timer was paused/idle, needing an unrelated tab switch
+  // to trigger a fresh render before it caught up.
+  updateDisplay();
+  updatePomodoroDateUI();
+  updateDateDisplayUI();
+  renderFilters();
+  renderTasks();
+  renderHabitCategories();
+  renderHabits();
+  updateHabitIconPickerLabels();
+  renderProgressDashboard();
+  renderHelpContent();
+  refreshFocusModeQuoteIfActive();
+  if (typeof initHabitQuotes === 'function') {initHabitQuotes();}
 });
 
 // Global Keyboard Shortcuts

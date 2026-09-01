@@ -169,68 +169,41 @@
   comfortable, consistent tap size regardless of viewport width.
 */
 .picker-grid {
-  display:
-  flex;
+  display: flex;
+  align-items: center;
   gap: 12px;
   margin-top: 5px;
   flex-wrap: wrap;
 }
 
-/*
-  Was an inline style="justify-content: space-between" on this specific
-  grid in index.html — moved here so the mobile override below (which
-  centers it once it wraps to two rows) can actually take effect; an
-  inline style attribute always wins over an external stylesheet rule,
-  media query or not.
-*/
-#custom-days-grid {
-  justify-content: space-between;
+#habit-color-picker {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
 }
 
-/*
-  FIX: at the base 32px size + 12px gap, 7 day-options (296px) or the 6
-  color swatches (252px) don't fit in one row inside a phone-width modal
-  — .modal-content is 90vw capped at 400px, minus its own 25px padding
-  each side, leaves ~238px of usable width at a 320px viewport. That
-  forced an awkward 2-row wrap (this rule used to just re-center the
-  leftover day(s) on their own second row rather than fix the fit), and
-  the still-desktop-sized pills read as bulky/cramped once wrapped.
-  Shrinking both the pill size and the gap keeps the 7-day and 6-color
-  rows to one row down to a 320px-wide phone (7×26 + 6×6 = 218px and
-  6×28 + 5×8 = 208px respectively) — #custom-days-grid's own
-  justify-content: space-between (above) now reads correctly as one
-  full row instead of needing the center override this replaces.
-  Icon grid (9 icons) still wraps regardless — shrinking it too just
-  brings that down from 3 rows to 2.
-*/
-@media (max-width: 420px) {
-  .picker-grid {
-    gap: 8px;
-  }
-
-  .day-option {
-    width: 26px;
-    height: 26px;
-    font-size: 0.75rem;
-  }
-
-  .color-option, .icon-option, .custom-color-swatch-wrapper {
-    width: 28px;
-    height: 28px;
-  }
+#custom-days-grid {
+  justify-content: space-between;
 }
 
 .color-option {
   appearance: none;
   -webkit-appearance: none;
   padding: 0;
+  margin: 0;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid transparent;
-  transition: all 0.2s;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+  transition: transform 0.2s, border-color 0.2s;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  flex-shrink: 0;
 }
 
 @media (hover: hover) {
@@ -245,7 +218,7 @@
 
 .color-option.selected {
   border: 3px solid var(--theme-color, #3b82f6);
-  transform: scale(1.15);
+  transform: scale(1.12);
 }
 
 .icon-option {
@@ -263,6 +236,7 @@
   cursor: pointer;
   color: var(--text-muted);
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 @media (hover: hover) {
@@ -278,7 +252,6 @@
   border-color: var(--theme-color, #3b82f6);
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
-
 
 .overview-ring {
   stroke-linecap: round;
@@ -301,31 +274,6 @@ body[data-theme="dark"] .overview-ring {
   opacity: 0;
 }
 
-
-/*
-  FIX: this selector referenced #habit-overview-dashboard, an id that
-  doesn't exist anywhere in the HTML (a leftover from before this
-  section was renamed to #habit-detail-panel — see habits.js, which
-  already correctly targets `#habit-detail-panel .time-display` when
-  updating this number). Because the rule never matched, the ring's
-  percentage text was falling back to a hardcoded inline
-  `style="color: #10b981"` on the element itself, which is exactly the
-  --success-color token this rule was already trying to apply — so
-  fixing the selector and removing the inline style land on the same
-  color by design, they just do it through one real, theme-aware place
-  instead of a dead rule plus a hardcoded duplicate. --success-color is
-  the same value in both themes (see variables.css), and this selector's
-  specificity (id + class) already beats the base .time-display
-  rule in either theme, so no dark-mode-specific !important duplicate
-  is needed here.
-*/
-#habit-detail-panel .time-display {
-  display: inline-block;
-  transition: color 0.3s ease;
-  color: var(--success-color);
-}
-
-
 .day-option {
   width: 32px;
   height: 32px;
@@ -342,11 +290,9 @@ body[data-theme="dark"] .overview-ring {
   transition: all 0.2s;
   appearance: none;
   -webkit-appearance: none;
+  flex-shrink: 0;
 }
 
-/* FIX: had no hover state at all (only :active, above) — its sibling
-   picker .icon-option gets this exact treatment, this one had just
-   been missed. */
 @media (hover: hover) {
   .day-option:hover {
     background: var(--btn-hover);
@@ -358,6 +304,29 @@ body[data-theme="dark"] .overview-ring {
   background: var(--theme-color, #3b82f6);
   color: #ffffff;
   border-color: var(--theme-color, #3b82f6);
+}
+
+@media (max-width: 420px) {
+  .picker-grid {
+    gap: 8px;
+    align-items: center;
+  }
+
+  .day-option {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.75rem;
+  }
+
+  .color-option, .custom-color-swatch-wrapper {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .icon-option {
+    width: 32px !important;
+    height: 32px !important;
+  }
 }
 
 

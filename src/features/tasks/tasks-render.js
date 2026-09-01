@@ -6,7 +6,8 @@ import { icons, escapeHTML } from '../../core/dom-utils.js';
 import { getTagColor } from '../../shared/color-utils.js';
 import { centerButtonInScrollArea, setupHorizontalWheelScroll } from '../../shared/scroll-utils.js';
 import { showToast } from '../../shared/toast/toast.js';
-import { saveTasks } from './tasks-storage.js';
+import { saveTasks, saveTaskViewPrefs } from './tasks-storage.js';
+import { t, formatNumber } from '../../core/i18n.js';
 
 const taskListContainer = document.querySelector('.task-list-container');
 const tasksSection = document.querySelector('.tasks-section');
@@ -17,7 +18,7 @@ export function formatTaskTime(totalSeconds) {
   if (totalSeconds === 0) {return '';}
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
-  return `${icons.clock} ${m}m ${s}s`;
+  return `${icons.clock} ${formatNumber(m)}m ${formatNumber(s)}s`;
 }
 
 // ==========================================
@@ -42,9 +43,9 @@ export function renderFilters() {
 
   let html = `
     <div class="filter-bubble"></div>
-    <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">All</button>
-    <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">Active</button>
-    <button class="filter-btn ${currentFilter === 'completed' ? 'active' : ''}" data-filter="completed" data-sound="click">Done</button>
+    <button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">${t('filter_all')}</button>
+    <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">${t('filter_active')}</button>
+    <button class="filter-btn ${currentFilter === 'completed' ? 'active' : ''}" data-filter="completed" data-sound="click">${t('filter_done')}</button>
   `;
 
   savedTags.forEach(tag => {
@@ -57,6 +58,7 @@ export function renderFilters() {
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       setCurrentFilter(btn.dataset.filter);
+      saveTaskViewPrefs();
 
       btns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -72,13 +74,33 @@ export function renderFilters() {
   const bubble = filterListEl.querySelector('.filter-bubble');
   if (bubble) {
     bubble.style.transition = 'none';
-    updateFilterBubble();
+    // FIX: this used to call updateFilterBubble() synchronously, right
+    // here. renderFilters() is one of the functions the languageChanged
+    // cascade calls (main.js), and switching to fa can be the very first
+    // time Persian text — and its fallback-chain font, Vazirmatn — has
+    // ever needed to render (see the identical fix and explanation in
+    // tabs.js's languageChanged listener). Measuring offsetWidth/
+    // offsetLeft before that font finishes loading gives the wrong
+    // numbers, which is exactly why the bubble could vanish/misplace
+    // itself on a language switch and only reappear correctly once a
+    // filter click ran updateFilterBubble() again — by then the font had
+    // long since finished loading. document.fonts.ready resolves
+    // immediately when nothing's actually loading, so this costs nothing
+    // on every other call to renderFilters() (initial load, tag/filter
+    // changes, tab switches).
+    const waitForFonts = (typeof document.fonts !== 'undefined' && document.fonts.ready)
+      ? document.fonts.ready
+      : Promise.resolve();
+    waitForFonts.then(() => {
+      requestAnimationFrame(() => {
+        updateFilterBubble();
+        void bubble.offsetWidth; // Force reflow
+        bubble.style.transition = '';
+      });
+    });
 
     const event = new CustomEvent('updateColors');
     document.dispatchEvent(event);
-
-    void bubble.offsetWidth; // Force reflow
-    bubble.style.transition = '';
   }
 
   // Add horizontal wheel scroll support for desktop
@@ -106,6 +128,20 @@ export function updateFilterBubble() {
     centerButtonInScrollArea(filterListEl, activeBtn);
   }
 }
+
+// FIX: renderFilters() is one of the functions the languageChanged cascade
+// (main.js) calls, and it re-measures the bubble via offsetWidth/offsetLeft
+// while it runs. When the language is switched from a different tab, the
+// Pomodoro view is display:none at that moment, so every measurement comes
+// back 0 and the bubble collapses — invisible until the user clicked a
+// filter to trigger a fresh updateFilterBubble(). Same failure shape as
+// the habits filter bubble, which already has a habitsTabOpened listener
+// for exactly this; the Pomodoro tab just never got its equivalent.
+// tabs.js now dispatches 'pomodoroTabOpened' on every switch to the
+// Pomodoro tab, so re-measure here once the view is actually visible.
+document.addEventListener('pomodoroTabOpened', () => {
+  updateFilterBubble();
+});
 
 // ==========================================
 // RENDER TASKS ENGINE
@@ -174,20 +210,17 @@ export function renderTasks() {
     let actionButtons = '';
     if (!isToday && !task.completed) {
       actionButtons += `
-        <button class="focus-btn reschedule-btn" title="Move to Today" aria-label="Move task to today" data-sound="success">
+        <button class="focus-btn reschedule-btn" title="${t('reschedule_to_today')}" aria-label="${t('reschedule_to_today')}" data-sound="success">
           <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
         </button>
       `;
     }
 
-    // Focus is independent from the task's calendar date. Always expose a
-    // real toggle so a focused task from an older day can be unfocused
-    // directly without moving it or creating a replacement task.
     const isFocused = task.id === focusedTaskId;
     actionButtons += `
       <button class="focus-btn focus-action ${isFocused ? 'is-focused' : ''}"
-        title="${isFocused ? 'Unfocus' : 'Focus'}"
-        aria-label="${isFocused ? 'Unfocus task' : 'Focus task'}"
+        title="${isFocused ? t('unfocus_task') : t('focus_task')}"
+        aria-label="${isFocused ? t('unfocus_task') : t('focus_task')}"
         aria-pressed="${isFocused}"
         data-sound="click">
         <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
@@ -196,20 +229,10 @@ export function renderTasks() {
 
     taskDiv.style.cursor = 'pointer';
     taskDiv.dataset.id = task.id;
-    // FIX: the card opens an edit modal on click, but had no keyboard
-    // equivalent — a keyboard-only user could tab past it and never
-    // reach the edit action at all. tabindex + role="button" + the
-    // Enter/Space handler below (delegated, added once in
-    // setupTaskEvents) makes it behave like a real button.
     taskDiv.tabIndex = 0;
     taskDiv.setAttribute('role', 'button');
-    taskDiv.setAttribute('aria-label', `Edit task: ${task.text}`);
+    taskDiv.setAttribute('aria-label', `${t('edit_task')}: ${task.text}`);
 
-    // Layout/spacing for this card lives in .task-info, .task-name,
-    // .task-tag-row, .task-tag, .task-time-badge (see pomodoro.css) —
-    // flex-wrap:nowrap on the tag row and tabular-nums on the time
-    // badge (which prevent layout breaking and the digits wiggling)
-    // are part of those classes now, not repeated inline every render.
     taskDiv.innerHTML = `
       <div class="task-info">
 
@@ -223,25 +246,22 @@ export function renderTasks() {
       </div>
       <div class="task-actions">
         ${actionButtons}
-        <button class="done-btn" title="Done" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
-        <button class="remove-btn" title="Remove"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+        <button class="done-btn" title="${t('done')}" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="remove-btn" title="${t('remove')}"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
       </div>
     `;
 
-    // Wire up the dynamic buttons — these call the handlers registered via
-    // setTaskHandlers() (see the comment at the top of this file for why
-    // this is an injected callback rather than a direct import of
-    // toggleFocus/toggleCompleted/removeTask from tasks.js).
+    // Wire up the dynamic buttons
     const focusBtn = taskDiv.querySelector('.focus-action');
     if (focusBtn) {focusBtn.addEventListener('click', () => taskHandlers.onFocus(task.id));}
 
     const rescheduleBtn = taskDiv.querySelector('.reschedule-btn');
     if (rescheduleBtn) {
       rescheduleBtn.addEventListener('click', () => {
-        task.createdAt = Date.now(); // Updates timestamp to "Right Now"
+        task.createdAt = Date.now();
         saveTasks();
         renderTasks();
-        showToast('Task moved to Today!', 'success');
+        showToast(t('task_moved_to_today'), 'success');
       });
     }
 
@@ -256,26 +276,26 @@ export function renderTasks() {
   // 5. Handle UI states
   if (focusedTaskId) {
     if (tasksSection) {tasksSection.classList.add('zen-mode');}
-    const t = tasks.find(x => x.id === focusedTaskId);
-    if (currentTaskNameEl) {currentTaskNameEl.textContent = t ? t.text : 'Nothing';}
+    const tTask = tasks.find(x => x.id === focusedTaskId);
+    if (currentTaskNameEl) {currentTaskNameEl.textContent = tTask ? tTask.text : t('focus_nothing');}
     if (taskListContainer) {taskListContainer.scrollTop = 0;}
   } else {
     if (tasksSection) {tasksSection.classList.remove('zen-mode');}
-    if (currentTaskNameEl) {currentTaskNameEl.textContent = 'Nothing';}
+    if (currentTaskNameEl) {currentTaskNameEl.textContent = t('focus_nothing');}
   }
 
   if (filtered.length === 0) {
     let msg;
     if (tasks.length === 0) {
-      msg = "No tasks yet. Take a deep breath and start planning!";
+      msg = t('no_tasks_empty');
     } else if (currentFilter === 'completed') {
-      msg = "No completed tasks yet. Finish one to see it here!";
+      msg = t('no_completed_tasks_empty');
     } else if (currentFilter === 'active') {
-      msg = "All caught up! No active tasks remain.";
+      msg = t('no_active_tasks_empty');
     } else if (currentFilter !== 'all') {
-      msg = `No tasks tagged #${escapeHTML(currentFilter)}.`;
+      msg = t('no_tasks_tagged_empty', { tag: escapeHTML(currentFilter) });
     } else {
-      msg = "No tasks match the current filter.";
+      msg = t('no_tasks_match_filter');
     }
     taskListContainer.innerHTML = `
       <div class="empty-state lg">

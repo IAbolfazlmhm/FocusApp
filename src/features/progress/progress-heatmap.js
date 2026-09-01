@@ -7,6 +7,7 @@ import { readJSON, STORAGE_KEYS } from '../../core/storage.js';
 import { getLocalDateKey } from '../../core/date-utils.js';
 import { getDaysArray, getHabitLogKey } from './progress-stats.js';
 import { openDailyReport } from './progress-report.js';
+import { t, formatDate } from '../../core/i18n.js';
 
 // --- SMART JS TOOLTIP ENGINE ---
 let globalTooltip = document.getElementById('heatmap-tooltip');
@@ -130,15 +131,21 @@ export function renderFocusHeatmap(startDate, endDate, currentTasks, showPomodor
 
     const block = document.createElement('div');
     block.className = 'heatmap-block';
-    const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const displayDate = formatDate(d, { month: 'short', day: 'numeric' });
 
     const completionRate = totalTasks === 0 ? 0 : (doneTasks / totalTasks);
 
     // Dynamic Tooltip
     let tooltipHTML = `<span class="report-date-label">${escapeHTML(displayDate)}</span><br/>`;
-    if (totalTasks > 0) {tooltipHTML += `${doneTasks}/${totalTasks} tasks done (${Math.round(completionRate*100)}%)<br/>${mins}m focus time`;}
-    else if (mins > 0) {tooltipHTML += `0 tasks, ${mins}m focus time`;}
-    else {tooltipHTML += `No activity`;}
+    if (totalTasks > 0) {
+      const taskDoneText = t('tasks_done_tooltip', { done: doneTasks, total: totalTasks, percent: Math.round(completionRate * 100) });
+      const timeText = t('focus_time_tooltip', { mins });
+      tooltipHTML += `${taskDoneText}<br/>${timeText}`;
+    } else if (mins > 0) {
+      tooltipHTML += `${t('focus_time_tooltip', { mins })}`;
+    } else {
+      tooltipHTML += t('no_activity_tooltip');
+    }
 
     // BUG FIX: Color is now based strictly on Completion Rate!
     if (totalTasks > 0) {
@@ -189,14 +196,14 @@ export function renderHabitHeatmap(startDate, endDate, currentHabits, showPomodo
 
     const block = document.createElement('div');
     block.className = 'heatmap-block';
-    const displayDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const displayDate = formatDate(d, { month: 'short', day: 'numeric' });
 
     let tooltipHTML = `<span class="report-date-label">${escapeHTML(displayDate)}</span><br/>`;
     if (activeCount > 0) {
       const completionRate = Math.round((doneCount / activeCount) * 100);
-      tooltipHTML += `${doneCount}/${activeCount} habits done (${completionRate}%)`;
+      tooltipHTML += t('habits_done_tooltip', { done: doneCount, total: activeCount, percent: completionRate });
     } else {
-      tooltipHTML += `No scheduled habits`;
+      tooltipHTML += t('no_scheduled_habits_tooltip');
     }
 
     if (doneCount > 0) {

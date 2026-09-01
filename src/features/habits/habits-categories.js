@@ -19,8 +19,9 @@ import { moveToTrash } from '../trash/trash.js';
 import { saveHabits, saveHabitCategories } from './habits-storage.js';
 import { renderHabits, renderHabitCategories } from './habits-render.js';
 import { animateNewListItem } from '../../core/dom-utils.js';
+import { t } from '../../core/i18n.js';
 
-function renderCategoriesManagement() {
+export function renderCategoriesManagement() {
   const categoriesManagementList = document.getElementById('categories-management-list');
   if (!categoriesManagementList) {return;}
   categoriesManagementList.innerHTML = '';
@@ -43,8 +44,8 @@ function renderCategoriesManagement() {
     swatch.type = 'color';
     swatch.className = 'tag-color-swatch';
     swatch.value = currentColor.hex;
-    swatch.title = `Choose a color for ${cat}`;
-    swatch.setAttribute('aria-label', `Color for category ${cat}`);
+    swatch.title = t('choose_color_for_category', { category: cat });
+    swatch.setAttribute('aria-label', t('color_for_category', { category: cat }));
     swatch.addEventListener('input', (e) => e.stopPropagation());
     swatch.addEventListener('change', (e) => {
       setCategoryColors({ ...categoryColors, [cat]: e.target.value });
@@ -70,8 +71,8 @@ function renderCategoriesManagement() {
       const resetBtn = document.createElement('button');
       resetBtn.type = 'button';
       resetBtn.className = 'tag-color-reset';
-      resetBtn.title = `Reset ${cat} to its default color`;
-      resetBtn.setAttribute('aria-label', `Reset color for category ${cat}`);
+      resetBtn.title = t('reset_category_color', { category: cat });
+      resetBtn.setAttribute('aria-label', t('reset_category_color_aria', { category: cat }));
       resetBtn.innerHTML = '↺';
       resetBtn.dataset.sound = 'click';
       resetBtn.addEventListener('click', (e) => {
@@ -89,9 +90,9 @@ function renderCategoriesManagement() {
 
     chip.setAttribute('role', 'button');
     chip.setAttribute('tabindex', '0');
-    chip.setAttribute('aria-label', `Delete category ${cat}`);
+    chip.setAttribute('aria-label', t('delete_category_aria', { category: cat }));
     const requestDelete = () => {
-      customConfirm(`Delete category "${cat}"?`, () => {
+      customConfirm(t('delete_category_confirm', { category: cat }), () => {
         // SECURE FIX: Mutate array using splice, do NOT reassign
         const targetIndex = savedHabitCategories.indexOf(cat);
         if (targetIndex > -1) {
@@ -165,7 +166,7 @@ export function setupCategoryManagement() {
 
       // Empty Warning
       if (!newCat) {
-        showToast('Please enter a valid category name.', 'warning');
+        showToast(t('please_enter_category_name'), 'warning');
         return;
       }
 
@@ -193,9 +194,9 @@ export function setupCategoryManagement() {
         animateNewListItem(document.getElementById('categories-management-list'), capitalizedCat, 'data-category');
         renderHabitCategories();
         refreshSuggestedCategoryColor();
-        showToast(collision ? 'Category added — that color is already in use.' : 'Category added', collision ? 'warning' : 'success');
+        showToast(collision ? t('category_color_collision_warning') : t('category_added'), collision ? 'warning' : 'success');
       } else {
-        showToast('That category already exists.', 'warning');
+        showToast(t('category_already_exists'), 'warning');
       }
     });
   }
@@ -209,4 +210,16 @@ export function setupCategoryManagement() {
       }
     });
   }
+
+  // FIX: renderCategoriesManagement() was exported (in anticipation of
+  // this, it looks like) but never actually wired to languageChanged —
+  // this modal's per-category aria-labels/titles (now localized above)
+  // stayed in the old locale if a language switch happened while it was
+  // open. Mirrors the same fix already in quotes.js's setupQuotesEvents:
+  // only re-render while actually open, so this never runs pointlessly.
+  document.addEventListener('languageChanged', () => {
+    if (categoriesModal && categoriesModal.classList.contains('show')) {
+      renderCategoriesManagement();
+    }
+  });
 }

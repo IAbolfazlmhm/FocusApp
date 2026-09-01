@@ -11,6 +11,18 @@
 const SOUND_FILES = {
   click: 'assets/sounds/click.mp3',
   success: 'assets/sounds/success.mp3',
+  // FIX: warning/error toasts (blocked validation, e.g. "task name can't
+  // be empty") used to reuse the plain 'click' sound — the same neutral
+  // tap that plays for a completely ordinary button press, with nothing
+  // distinguishing "that didn't work" from "that worked". Its own
+  // distinct sound now covers every showToast(..., 'warning') call in
+  // the app at once, since toast.js is the one place that decides which
+  // sound a toast type gets. assets/sounds/error.mp3 is a real generated
+  // file (two 220Hz square-wave beeps, exponential decay) — not just
+  // relying on the synthesizeUI() fallback below, though that fallback
+  // uses the same waveform and will still sound right if the asset is
+  // ever missing.
+  error: 'assets/sounds/error.mp3',
   trash: 'assets/sounds/trash.mp3',
   bell: 'assets/sounds/bell.mp3',
   digital: 'assets/sounds/digital.mp3',
@@ -106,6 +118,23 @@ export function playUI(type) {
   if (!isSoundEnabled()) {return;}
   if (shouldDebounce(type)) {return;}
 
+  // FIX: main.js's global [data-sound] click delegate fires 'click' on
+  // every click unconditionally, regardless of what the click's own
+  // handler decided to do — so a blocked/failed action (data-sound=
+  // "click" + a showToast(..., 'warning') call inside the same handler)
+  // played both the generic tap AND the new distinct error sound,
+  // almost simultaneously. The handler's own playUI('error'/'success'/
+  // etc.) always runs first (target-phase handlers fire before the
+  // event bubbles to the document-level delegate), so stamping 'click'
+  // as "just played" here means the delegate's later playUI('click')
+  // for the very same click gets caught by the debounce check above and
+  // silently skipped — exactly one sound per click, not two competing
+  // ones. Only stamps for non-'click' types, since self-debouncing
+  // 'click' against itself is already handled by shouldDebounce() above.
+  if (type !== 'click') {
+    lastPlayedTimes.click = Date.now();
+  }
+
   const cached = bufferCache.get(type);
   if (cached) {
     playBuffer(cached, 0.5);
@@ -179,6 +208,23 @@ function synthesizeUI(type) {
     gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
     oscillator.start(now);
     oscillator.stop(now + 0.2);
+  } else if (type === 'error') {
+    // Two short descending square-wave beeps — deliberately harsher
+    // (square, not sine/triangle) and lower-pitched than 'click' or
+    // 'success' so it reads unambiguously as "that didn't work" rather
+    // than blending in with ordinary interaction feedback.
+    [0, 0.12].forEach(offset => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(220, now + offset);
+      gain.gain.setValueAtTime(0.12, now + offset);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + offset + 0.1);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + offset);
+      osc.stop(now + offset + 0.1);
+    });
   }
 }
 

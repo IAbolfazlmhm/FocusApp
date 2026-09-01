@@ -26,6 +26,7 @@ import { setupCategoryManagement } from './habits-categories.js';
 import { setupHabitSort } from './habits-sort.js';
 import { setupQuickAddHabit } from './habits-quick-add.js';
 import { getDateKey } from './habits-logic.js';
+import { t, formatDate } from '../../core/i18n.js';
 
 /**
  * Puts a trashed habit back into the live list exactly as it was
@@ -51,9 +52,24 @@ export function restoreHabitCategory(categoryData) {
   renderHabits();
 }
 
+// Tracks the currently-running habit quote rotation so repeat calls to
+// initHabitQuotes() (page load, then again on every languageChanged) don't
+// stack duplicate setIntervals on top of each other — see FIX note below.
+let stopHabitQuoteRotationFn = null;
+
 export function initHabitQuotes() {
+  // FIX: initHabitQuotes() is called on load AND on every languageChanged
+  // event, but never used to clean up its previous rotation — each call
+  // left the old setInterval running and started a new one alongside it,
+  // so the quote's fade/duration got faster and more erratic the more you
+  // switched language. Stop any rotation already in flight first, exactly
+  // like focus-mode.js already does for its own quote rotation.
+  if (stopHabitQuoteRotationFn) {
+    stopHabitQuoteRotationFn();
+    stopHabitQuoteRotationFn = null;
+  }
   const quoteElement = document.getElementById('motivational-quote');
-  startQuoteRotation(quoteElement, { category: 'habits' });
+  stopHabitQuoteRotationFn = startQuoteRotation(quoteElement, { category: 'habits' });
 }
 
 /**
@@ -92,10 +108,10 @@ export function setHabitDate(dateObj) {
     today.setHours(0,0,0,0);
     const diffDays = Math.ceil((newDate - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {display.textContent = 'Today';}
-    else if (diffDays === -1) {display.textContent = 'Yesterday';}
-    else if (diffDays === 1) {display.textContent = 'Tomorrow';}
-    else {display.textContent = newDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
+    if (diffDays === 0) {display.textContent = t('today');}
+    else if (diffDays === -1) {display.textContent = t('yesterday');}
+    else if (diffDays === 1) {display.textContent = t('tomorrow');}
+    else {display.textContent = formatDate(newDate, { month: 'short', day: 'numeric' });}
   }
   renderHabits();
 }
@@ -144,6 +160,10 @@ export function setupHabitsEvents() {
     habitSettingsBtn.addEventListener('click', () => {
       // BUG FIX: Revert unsaved changes when opening from Habits!
       document.dispatchEvent(new Event('reloadSettingsUI'));
+      // FIX: Progress's dashboard toggles don't belong in the modal
+      // opened from here — see the matching note in settings.js's
+      // settingsBtn handler for the full explanation.
+      settingsModal.classList.remove('progress-context');
       settingsModal.classList.add('show');
     });
   }

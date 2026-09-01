@@ -4,6 +4,21 @@
 import { currentPomodoroDate, setCurrentPomodoroDate } from '../../core/state.js';
 import { renderTasks } from './tasks-render.js';
 import { openDatePickerPopover } from '../../shared/date-nav/date-picker-popover.js';
+import { t, formatDate } from '../../core/i18n.js';
+
+export function updatePomodoroDateUI() {
+  const pomodoroDisplayBtn = document.getElementById('pomodoro-date-display');
+  if (!pomodoroDisplayBtn) {return;}
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const diffTime = currentPomodoroDate.getTime() - today.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {pomodoroDisplayBtn.textContent = t('today');}
+  else if (diffDays === -1) {pomodoroDisplayBtn.textContent = t('yesterday');}
+  else if (diffDays === 1) {pomodoroDisplayBtn.textContent = t('tomorrow');}
+  else {pomodoroDisplayBtn.textContent = formatDate(currentPomodoroDate, { month: 'short', day: 'numeric' });}
+}
 
 export function setupPomodoroDateNav() {
   const pomodoroDisplayBtn = document.getElementById('pomodoro-date-display');
@@ -11,18 +26,7 @@ export function setupPomodoroDateNav() {
   const pomodoroPrevDate = document.getElementById('pomodoro-prev-date');
   const pomodoroNextDate = document.getElementById('pomodoro-next-date');
 
-  function updatePomodoroDateUI() {
-    if (!pomodoroDisplayBtn) {return;}
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const diffTime = currentPomodoroDate.getTime() - today.getTime();
-    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {pomodoroDisplayBtn.textContent = 'Today';}
-    else if (diffDays === -1) {pomodoroDisplayBtn.textContent = 'Yesterday';}
-    else if (diffDays === 1) {pomodoroDisplayBtn.textContent = 'Tomorrow';}
-    else {pomodoroDisplayBtn.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
-  }
+  updatePomodoroDateUI();
 
   // 1. Arrows
   if (pomodoroPrevDate) {

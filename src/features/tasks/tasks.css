@@ -201,7 +201,7 @@
   order: 1;
   border-color: var(--text-main);
   background-color: var(--glass-bg);
-  border-left: 6px solid var(--text-main);
+  border-inline-start: 6px solid var(--text-main);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 

@@ -133,10 +133,16 @@
   width: 32px;
   height: 32px;
   padding: 2px;
+  margin: 0;
   border-radius: 50%;
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   position: relative;
   cursor: pointer;
+  transform-origin: center;
   background: conic-gradient(
     #f43f5e, #f59e0b, #facc15, #10b981, #06b6d4,
     #3b82f6, #8b5cf6, #d946ef, #f43f5e

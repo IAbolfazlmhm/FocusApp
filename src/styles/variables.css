@@ -36,12 +36,10 @@
   --success-color: #10b981;
 
   /* --- Typography scale ---
-     One named step per role actually used in the UI, not an arbitrary
-     numeric ramp. Existing fixed font-sizes elsewhere in the app (task
-     names, the timer digits, etc.) are left as-is; this scale exists so
-     new/shared components (buttons, nav/section labels, Focus Mode) pull
-     from one source instead of picking a fresh rem value each time. */
-  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, Tahoma, Geneva, Verdana, sans-serif;
+     Multi-script font stack: Ubuntu Sans / Inter for Latin, Vazirmatn for Persian/Arabic
+     (scoped strictly via unicode-range in fonts.css), with the original Segoe UI / system-ui fallbacks.
+     Restores the exact original Latin feel and weight while rendering Persian text cleanly. */
+  --font-sans: 'Ubuntu Sans', 'Inter', 'Vazirmatn', 'Segoe UI', system-ui, -apple-system, Tahoma, Geneva, Verdana, sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.85rem;
   --font-size-base: 1rem;
@@ -96,17 +94,13 @@ body[data-theme="dark"] {
 }
 
 /* --- DYNAMIC PHASE ACCENTS & THEME COLORS ---
-   Phases used to swap in an entirely different saturated linear-gradient
-   as --bg-main — a strong "gradient wallpaper" identity that also had to
-   be recomputed as the page/body grew (a source of the mobile background
-   bugs this file used to carry workarounds for). Now phases only ever
-   nudge two low-opacity glow tints + one accent hue; --bg-base never
-   changes. The actual painting happens once, in the body::before layer
-   defined in reset.css. */
-body {
+   Root-level theme color variables so html, scrollbars, and browser surfaces
+   all inherit the active theme color seamlessly. */
+:root {
   --theme-color: #3b82f6;
 }
 
+:root:has(body.phase-work),
 body.phase-work {
   --bg-glow-primary: rgba(244, 63, 94, 0.14);
   --bg-glow-secondary: rgba(251, 113, 133, 0.10);
@@ -114,6 +108,7 @@ body.phase-work {
   --theme-color: #f43f5e;
 }
 
+:root:has(body.phase-short),
 body.phase-short {
   --bg-glow-primary: rgba(20, 184, 166, 0.14);
   --bg-glow-secondary: rgba(45, 212, 191, 0.10);
@@ -121,6 +116,7 @@ body.phase-short {
   --theme-color: #14b8a6;
 }
 
+:root:has(body.phase-long),
 body.phase-long {
   --bg-glow-primary: rgba(59, 130, 246, 0.14);
   --bg-glow-secondary: rgba(96, 165, 250, 0.10);
@@ -128,6 +124,7 @@ body.phase-long {
   --theme-color: #3b82f6;
 }
 
+:root:has(body.phase-stopwatch),
 body.phase-stopwatch {
   --bg-glow-primary: rgba(139, 92, 246, 0.14);
   --bg-glow-secondary: rgba(167, 139, 250, 0.10);
@@ -135,6 +132,7 @@ body.phase-stopwatch {
   --theme-color: #8b5cf6;
 }
 
+:root:has(body.phase-habits),
 body.phase-habits {
   --bg-glow-primary: rgba(16, 185, 129, 0.14);
   --bg-glow-secondary: rgba(52, 211, 153, 0.10);
@@ -142,6 +140,7 @@ body.phase-habits {
   --theme-color: #10b981;
 }
 
+:root:has(body.phase-progress),
 body.phase-progress {
   --bg-glow-primary: rgba(139, 92, 246, 0.14);
   --bg-glow-secondary: rgba(167, 139, 250, 0.10);

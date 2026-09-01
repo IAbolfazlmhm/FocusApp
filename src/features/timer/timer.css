@@ -344,12 +344,12 @@ body.focus-mode-active .focus-mode-quote-wrap {
 }
 
 @media (max-width: 420px) {
-  .timer-circle { 
-    width: 210px; 
-    height: 210px; 
+  .timer-circle {
+    width: 210px;
+    height: 210px;
   }
 
-  .time-display { 
-    font-size: 2.75rem; 
+  .time-display {
+    font-size: 2.75rem;
   }
 }

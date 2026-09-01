@@ -4,6 +4,7 @@
 import { habits, setHabits } from '../../core/state.js';
 import { generateId, animateNewListItem } from '../../core/dom-utils.js';
 import { showToast } from '../../shared/toast/toast.js';
+import { t } from '../../core/i18n.js';
 import { keepInputVisibleOnMobileKeyboard } from '../../shared/scroll-utils.js';
 import { habitIconsDict } from './habit-icons.js';
 import { saveHabits } from './habits-storage.js';
@@ -13,7 +14,7 @@ function processQuickAddHabit(input) {
   const name = input.value.trim();
 
   if (!name) {
-    showToast('Please enter a valid habit name.', 'warning');
+    showToast(t('please_enter_habit_name'), 'warning');
     return;
   }
 
@@ -46,7 +47,7 @@ function processQuickAddHabit(input) {
   // sound) + the item-enter animation on the new row — but this
   // quick-add path skipped both and only ever wired the warning case.
   // Same creation, same feedback.
-  showToast('Habit Created!', 'success');
+  showToast(t('habit_created_toast'), 'success');
   animateNewListItem(document.getElementById('habit-list-container'), newHabit.id);
 }
 

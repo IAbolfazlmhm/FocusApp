@@ -9,6 +9,7 @@ import { savedHabitCategories } from '../../core/state.js';
 import { escapeHTML } from '../../core/dom-utils.js';
 import { registerOutsideClickTarget } from '../../shared/dropdown/dropdown.js';
 import { habitModalState, setCustomSwatchSelected } from './habits-modal-state.js';
+import { renderHabitIconPicker } from './habit-icons.js';
 
 function showHabitCategoryDropdown(habitCategoryInput, habitCategoryDropdown) {
   if (!habitCategoryInput || !habitCategoryDropdown) {return;}
@@ -46,12 +47,15 @@ export function setupHabitModalPickers() {
   const colorOptions = document.querySelectorAll('.color-option');
   const habitColorCustomInput = document.getElementById('habit-color-custom');
   const habitColorCustomWrapper = document.getElementById('habit-color-custom-wrapper');
-  const iconOptions = document.querySelectorAll('.icon-option');
+  const iconPickerGrid = document.getElementById('habit-icon-picker');
   const habitCategoryInput = document.getElementById('habit-category-input');
   const habitCategoryDropdown = document.getElementById('habit-category-dropdown');
   const habitCategoryWrapper = document.getElementById('habit-category-wrapper');
 
-  // Modal Pickers
+  // Render habit icons dynamically from habit-icons.js dictionary
+  renderHabitIconPicker();
+
+  // Modal Color Pickers
   colorOptions.forEach(option => {
     option.addEventListener('click', () => {
       colorOptions.forEach(opt => {
@@ -81,16 +85,19 @@ export function setupHabitModalPickers() {
     });
   }
 
-  iconOptions.forEach(option => {
-    option.addEventListener('click', () => {
-      iconOptions.forEach(opt => {
+  // Delegated click listener for dynamic icon options
+  if (iconPickerGrid) {
+    iconPickerGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.icon-option');
+      if (!btn) {return;}
+      iconPickerGrid.querySelectorAll('.icon-option').forEach(opt => {
         opt.classList.remove('selected');
         opt.setAttribute('aria-pressed', 'false');
       });
-      option.classList.add('selected');
-      option.setAttribute('aria-pressed', 'true');
+      btn.classList.add('selected');
+      btn.setAttribute('aria-pressed', 'true');
     });
-  });
+  }
 
   // Categories Auto-Clear & Dropdown
   if (habitCategoryInput) {

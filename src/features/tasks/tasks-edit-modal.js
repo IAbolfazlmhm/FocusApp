@@ -3,6 +3,7 @@
 // ==========================================
 import { tasks, savedTags, focusedTaskId } from '../../core/state.js';
 import { showToast } from '../../shared/toast/toast.js';
+import { t } from '../../core/i18n.js';
 import { escapeHTML } from '../../core/dom-utils.js';
 import { saveTasks } from './tasks-storage.js';
 import { renderTasks, renderFilters } from './tasks-render.js';
@@ -55,7 +56,7 @@ export function setupTaskEditModal() {
       // by renderTagsManagement() and renderQuickTagModal() (tasks-tags-modal.js
       // / tasks-quick-tag-modal.js).
       const noneSelected = !task.tag ? 'selected' : '';
-      let html = `<button class="tag-select-btn ${noneSelected}" data-tag="" data-sound="click">None</button>`;
+      let html = `<button class="tag-select-btn ${noneSelected}" data-tag="" data-sound="click">${t('no_tag')}</button>`;
       savedTags.forEach(tag => {
         const isSelected = task.tag === tag ? 'selected' : '';
         html += `<button class="tag-select-btn ${isSelected}" data-tag="${escapeHTML(tag)}" data-sound="click">${escapeHTML(tag)}</button>`;
@@ -87,7 +88,7 @@ export function setupTaskEditModal() {
         const newName = nameInput.value.trim();
 
         if (!newName) {
-          showToast('Task name cannot be empty.', 'warning');
+          showToast(t('task_name_empty_warning'), 'warning');
           return;
         }
 

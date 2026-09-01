@@ -12,6 +12,7 @@ import { showToast } from '../../shared/toast/toast.js';
 import { moveToTrash } from '../trash/trash.js';
 import { saveHabits } from './habits-storage.js';
 import { renderHabits, updateHabitProgress } from './habits-render.js';
+import { t } from '../../core/i18n.js';
 
 export function setupHabitDeleteModal() {
   const habitListContainer = document.getElementById('habit-list-container');
@@ -61,7 +62,7 @@ export function setupHabitDeleteModal() {
       renderHabits();
       updateHabitProgress();
 
-      showToast("Habit removed from today.", "success", true);
+      showToast(t('habit_removed_today_toast'), "success", true);
     }
     closeDeleteModal();
   });
@@ -81,7 +82,7 @@ export function setupHabitDeleteModal() {
       saveHabitsLocal();
       renderHabits();
       updateHabitProgress();
-      showToast("Habit archived. History preserved.", "success", true);
+      showToast(t('habit_archived_toast'), "success", true);
     }
     closeDeleteModal();
   });
@@ -100,7 +101,7 @@ export function setupHabitDeleteModal() {
     saveHabitsLocal();
     renderHabits();
     updateHabitProgress();
-    showToast("Habit and all history moved to Trash.", "success", true);
+    showToast(t('habit_all_deleted_toast'), "success", true);
     closeDeleteModal();
   });
 

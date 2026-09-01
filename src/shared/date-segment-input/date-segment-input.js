@@ -1,117 +1,160 @@
 // ==========================================
-// SEGMENTED DATE INPUT (MM / DD / YYYY)
+// SEGMENTED DATE INPUT (MM / DD / YYYY or YYYY / MM / DD)
 // ==========================================
-// Replaces a native <input type="date"> with three plain numeric inputs
-// this app fully controls — used by the Progress tab's Custom Range
-// modal (progress.js). A native date input is an opaque, browser-drawn
-// control: its intrinsic width doesn't reliably fill a flex-stretched
-// container (Start/End were reported as not filling the full line, and
-// sitting oddly positioned within it), and on at least some browsers
-// the year segment keeps accepting more digits past 4 if the person
-// keeps typing rather than capping and moving on. Neither is something
-// CSS or JS can reach into and fix on the native widget — three plain
-// inputs this file owns outright fixes both directly.
+// Replaces native date inputs with three plain numeric inputs that work
+// with Gregorian calendar (en) and Iranian Shamsi/Jalali calendar (fa).
 
-const DAYS_IN_MONTH = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+import { getLocale } from '../../core/i18n.js';
+import {
+  gregorianToJalali, jalaliToGregorian, parsePersianDigits, toPersianDigits, jalaliDaysInMonth
+} from '../../core/date-utils.js';
+
+const DAYS_IN_MONTH_GREGORIAN = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 function clamp(n, min, max) {
   return Math.min(max, Math.max(min, n));
 }
 
-function daysInMonth(month, year) {
+function daysInMonth(month, year, isJalali = false) {
+  if (isJalali) {return jalaliDaysInMonth(month, year);}
+
   if (month === 2) {
     const leap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     return leap ? 29 : 28;
   }
-  return DAYS_IN_MONTH[month - 1];
+  return DAYS_IN_MONTH_GREGORIAN[month - 1] || 30;
+}
+
+// Writes a plain-digit string to a segment field, displaying it in Persian
+// glyphs under fa locale (Latin otherwise). Every place that used to do
+// `el.value = someDigitString` now goes through this instead, so typed
+// input, blur-clamping, and setValue() (populating the fields when the
+// picker opens) all render consistently.
+function setSegmentValue(el, rawStr) {
+  el.value = getLocale() === 'fa' ? toPersianDigits(rawStr) : rawStr;
 }
 
 function digitsOnly(el, maxLen) {
-  el.value = el.value.replace(/\D/g, '').slice(0, maxLen);
+  // Accepts Persian/Eastern-Arabic digits as typed (parsePersianDigits
+  // normalizes them for parsing) but keeps the box's *displayed* text in
+  // Persian glyphs under fa locale, instead of snapping every keystroke to
+  // Latin digits — matching how numbers render everywhere else in the app.
+  // toPersianDigits (not formatNumber) is deliberate here: it maps digit-
+  // for-digit and preserves leading zeros ('04' stays 2 chars), which the
+  // length-based auto-advance-to-next-field logic below depends on.
+  const normalized = parsePersianDigits(el.value).replace(/\D/g, '').slice(0, maxLen);
+  setSegmentValue(el, normalized);
 }
 
-/**
- * Wires a {month, day, year} trio of plain text inputs into one
- * cohesive date field: typing the last digit a segment can hold
- * auto-advances focus to the next one (fixing the native control's
- * "keeps accepting digits past 4 in the year" issue by construction —
- * there's no fifth digit to type once focus has already moved on),
- * Backspace on an empty segment moves back to the previous one, and
- * each segment clamps/zero-pads once the person moves on (blur), not
- * on every keystroke, so they can freely type "1" on the way to "12"
- * without it snapping back at the halfway point.
- *
- * Returns { getValue(): 'YYYY-MM-DD' | null, setValue(dateStr), focus() }
- * — the same shape callers previously read off a native date input's
- * .value, so progress.js's surrounding logic barely changes.
- */
-export function setupDateSegmentInput(monthEl, dayEl, yearEl) {
+// The plain ASCII digits currently in a segment field, regardless of
+// which script it's displaying them in. No caching here on purpose —
+// deriving it fresh from el.value every time (rather than stashing it in
+// a dataset attribute alongside each write) means it can never go stale
+// if something sets .value directly instead of going through
+// setSegmentValue/digitsOnly. parsePersianDigits() round-trips correctly
+// either way: plain ASCII digits pass through unchanged.
+function rawValue(el) {
+  return parsePersianDigits(el.value).replace(/\D/g, '');
+}
+
+export function setupDateSegmentInput(yearEl, monthEl, dayEl) {
   if (!monthEl || !dayEl || !yearEl) {
     return { getValue: () => null, setValue: () => {}, focus: () => {} };
   }
 
+  // FIX: reordered from month->day->year (MM/DD/YYYY) to year->month->day
+  // (YYYY/MM/DD) throughout — typing/auto-advance, backspace, arrow-key
+  // navigation, and focus() all follow this order now, matching the new
+  // visual order in index.html. Both locales share the same logical
+  // YYYY/MM/DD order; only the visual left-to-right vs right-to-left flow
+  // differs, and that's handled by the browser's own bidi layout once
+  // dir="rtl" is set on the page (see setLocale in i18n.js) — nothing
+  // date-specific needed here for that part.
+  yearEl.addEventListener('input', () => {
+    digitsOnly(yearEl, 4);
+    if (rawValue(yearEl).length === 4) {monthEl.focus(); monthEl.select();}
+  });
   monthEl.addEventListener('input', () => {
     digitsOnly(monthEl, 2);
-    if (monthEl.value.length === 2) {dayEl.focus(); dayEl.select();}
+    if (rawValue(monthEl).length === 2) {dayEl.focus(); dayEl.select();}
   });
   dayEl.addEventListener('input', () => {
     digitsOnly(dayEl, 2);
-    if (dayEl.value.length === 2) {yearEl.focus(); yearEl.select();}
-  });
-  yearEl.addEventListener('input', () => {
-    digitsOnly(yearEl, 4);
   });
 
+  yearEl.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' && yearEl.selectionStart === yearEl.value.length) {monthEl.focus();}
+  });
   monthEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && rawValue(monthEl) === '') {yearEl.focus();}
+    if (e.key === 'ArrowLeft' && monthEl.selectionStart === 0) {yearEl.focus();}
     if (e.key === 'ArrowRight' && monthEl.selectionStart === monthEl.value.length) {dayEl.focus();}
   });
   dayEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Backspace' && dayEl.value === '') {monthEl.focus();}
+    if (e.key === 'Backspace' && rawValue(dayEl) === '') {monthEl.focus();}
     if (e.key === 'ArrowLeft' && dayEl.selectionStart === 0) {monthEl.focus();}
-    if (e.key === 'ArrowRight' && dayEl.selectionStart === dayEl.value.length) {yearEl.focus();}
-  });
-  yearEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Backspace' && yearEl.value === '') {dayEl.focus();}
-    if (e.key === 'ArrowLeft' && yearEl.selectionStart === 0) {dayEl.focus();}
   });
 
+  yearEl.addEventListener('blur', () => {
+    if (rawValue(yearEl) === '') {return;}
+    const isJalali = getLocale() === 'fa';
+    const minYear = isJalali ? 1300 : 1970;
+    const maxYear = isJalali ? 1500 : 2100;
+    const defaultYear = isJalali ? 1405 : new Date().getFullYear();
+    setSegmentValue(yearEl, String(clamp(parseInt(rawValue(yearEl), 10) || defaultYear, minYear, maxYear)).padStart(4, '0'));
+  });
   monthEl.addEventListener('blur', () => {
-    if (monthEl.value === '') {return;}
-    monthEl.value = String(clamp(parseInt(monthEl.value, 10) || 1, 1, 12)).padStart(2, '0');
+    if (rawValue(monthEl) === '') {return;}
+    setSegmentValue(monthEl, String(clamp(parseInt(rawValue(monthEl), 10) || 1, 1, 12)).padStart(2, '0'));
   });
   dayEl.addEventListener('blur', () => {
-    if (dayEl.value === '') {return;}
-    const month = parseInt(monthEl.value, 10) || 1;
-    const year = parseInt(yearEl.value, 10) || new Date().getFullYear();
-    dayEl.value = String(clamp(parseInt(dayEl.value, 10) || 1, 1, daysInMonth(month, year))).padStart(2, '0');
-  });
-  yearEl.addEventListener('blur', () => {
-    if (yearEl.value === '') {return;}
-    yearEl.value = String(clamp(parseInt(yearEl.value, 10) || new Date().getFullYear(), 1970, 2100)).padStart(4, '0');
+    if (rawValue(dayEl) === '') {return;}
+    const isJalali = getLocale() === 'fa';
+    const month = parseInt(rawValue(monthEl), 10) || 1;
+    const year = parseInt(rawValue(yearEl), 10) || (isJalali ? 1405 : new Date().getFullYear());
+    setSegmentValue(dayEl, String(clamp(parseInt(rawValue(dayEl), 10) || 1, 1, daysInMonth(month, year, isJalali))).padStart(2, '0'));
   });
 
   return {
     getValue() {
-      if (monthEl.value === '' || dayEl.value === '' || yearEl.value.length !== 4) {return null;}
-      const year = clamp(parseInt(yearEl.value, 10), 1970, 2100);
-      const month = clamp(parseInt(monthEl.value, 10), 1, 12);
-      const day = clamp(parseInt(dayEl.value, 10), 1, daysInMonth(month, year));
-      return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      if (rawValue(monthEl) === '' || rawValue(dayEl) === '' || rawValue(yearEl).length !== 4) {return null;}
+      const isJalali = getLocale() === 'fa';
+      const m = clamp(parseInt(rawValue(monthEl), 10), 1, 12);
+      const y = parseInt(rawValue(yearEl), 10);
+      const d = clamp(parseInt(rawValue(dayEl), 10), 1, daysInMonth(m, y, isJalali));
+
+      if (isJalali) {
+        // Convert Jalali date to Gregorian YYYY-MM-DD
+        const { gy, gm, gd } = jalaliToGregorian(y, m, d);
+        return `${String(gy).padStart(4, '0')}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}`;
+      }
+
+      return `${String(y).padStart(4, '0')}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     },
     setValue(dateStr) {
       if (!dateStr) {
-        monthEl.value = '';
-        dayEl.value = '';
-        yearEl.value = '';
+        setSegmentValue(monthEl, '');
+        setSegmentValue(dayEl, '');
+        setSegmentValue(yearEl, '');
         return;
       }
-      const [y, m, d] = dateStr.split('-');
-      yearEl.value = y || '';
-      monthEl.value = m || '';
-      dayEl.value = d || '';
+      const isJalali = getLocale() === 'fa';
+      const [gy, gm, gd] = dateStr.split('-').map(Number);
+
+      if (isJalali && gy && gm && gd) {
+        const { jy, jm, jd } = gregorianToJalali(gy, gm, gd);
+        setSegmentValue(yearEl, String(jy).padStart(4, '0'));
+        setSegmentValue(monthEl, String(jm).padStart(2, '0'));
+        setSegmentValue(dayEl, String(jd).padStart(2, '0'));
+        return;
+      }
+
+      setSegmentValue(yearEl, String(gy || '').padStart(4, '0'));
+      setSegmentValue(monthEl, String(gm || '').padStart(2, '0'));
+      setSegmentValue(dayEl, String(gd || '').padStart(2, '0'));
     },
     focus() {
-      monthEl.focus();
+      yearEl.focus();
     },
   };
 }

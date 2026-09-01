@@ -8,7 +8,9 @@ import { playAlarm } from '../../shared/audio.js';
 import { showToast } from '../../shared/toast/toast.js';
 import { icons } from '../../core/dom-utils.js';
 import { readJSON, writeJSON, readRaw, remove, STORAGE_KEYS } from '../../core/storage.js';
-import { getLocalDateKey } from '../../core/date-utils.js';
+import { getLocalDateKey, toPersianDigits } from '../../core/date-utils.js';
+import { t, formatNumber, getLocale } from '../../core/i18n.js';
+import { readNumericValue } from '../../shared/stepper/stepper-utils.js';
 
 // Task-name length shown in the browser tab title, kept short since tab
 // width is limited. Centralized as a constant so it's easy to find/tune
@@ -113,9 +115,14 @@ export function loadTimerState() {
 
   const FOUR_HOURS = 4 * 60 * 60 * 1000;
 
-  // Invalidate state if it's older than 4 hours
-  if (Date.now() - state.lastSaved > FOUR_HOURS) {
-    remove('focusTimerState');
+  // Invalidate state if it's older than 4 hours or contains invalid/null/NaN time
+  if (
+    Date.now() - state.lastSaved > FOUR_HOURS ||
+    typeof state.timeLeft !== 'number' || Number.isNaN(state.timeLeft) ||
+    typeof state.totalTime !== 'number' || Number.isNaN(state.totalTime) ||
+    state.timeLeft < 0 || state.totalTime <= 0
+  ) {
+    remove(STORAGE_KEYS.TIMER_STATE);
     return false;
   }
 
@@ -151,7 +158,13 @@ export function updateDisplay() {
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
-  const formattedTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  // FIX: this was the app's main, most-looked-at number and it never went
+  // through Persian digit formatting at all — every other timer/progress
+  // number in the app does. toPersianDigits (not formatNumber) so the
+  // zero-padding survives — formatNumber round-trips through a parsed
+  // number and would turn "05" into a bare "۵".
+  const asciiTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const formattedTime = getLocale() === 'fa' ? toPersianDigits(asciiTime) : asciiTime;
 
   timeDisplay.textContent = formattedTime;
 
@@ -160,7 +173,7 @@ export function updateDisplay() {
   // checks — the first computation was dead code that never got used.
   // Now there's a single lookup, reused for both the tab title (below) and
   // the truncation length is a shared constant instead of a bare "10".
-  let activeTaskName = 'Focus App';
+  let activeTaskName = t('app_title');
   if (focusedTaskId !== null && tasks) {
     const activeTask = tasks.find(t => t.id === focusedTaskId);
     if (activeTask) {activeTaskName = activeTask.text;}
@@ -177,6 +190,8 @@ export function updateDisplay() {
 }
 
 export function updatePhaseText() {
+  updateTimerButtonText();
+
   const currentPhaseEl = document.getElementById('current-phase');
   const nextPhaseEl = document.getElementById('next-phase');
   const breaksToggle = document.getElementById('breaks-toggle');
@@ -189,20 +204,20 @@ export function updatePhaseText() {
 
   if (currentPhase === 'work') {
     if (breaksEnabled) {
-      currentPhaseEl.innerHTML = `${icons.work} Work ${completedSessions + 1}/4`;
+      currentPhaseEl.innerHTML = `${icons.work} ${t('work_phase')} ${formatNumber(completedSessions + 1)}/${formatNumber(4)}`;
       nextPhaseEl.innerHTML = (completedSessions === 3)
-      ? `Next: ${icons.long} Long Break`
-      : `Next: ${icons.short} Short Break`;
+      ? `${icons.long} ${t('next_long_break')}`
+      : `${icons.short} ${t('next_short_break')}`;
     } else {
-      currentPhaseEl.innerHTML = `${icons.work} Work (Session ${completedSessions + 1})`;
-      nextPhaseEl.innerHTML = `Breaks disabled`;
+      currentPhaseEl.innerHTML = `${icons.work} ${t('work_phase')} (${formatNumber(completedSessions + 1)})`;
+      nextPhaseEl.innerHTML = t('breaks_disabled');
     }
   } else if (currentPhase === 'shortBreak') {
-    currentPhaseEl.innerHTML = `${icons.short} Short Break`;
-    nextPhaseEl.innerHTML = `Next: ${icons.work} Work ${completedSessions + 1}/4`;
+    currentPhaseEl.innerHTML = `${icons.short} ${t('short_break_phase')}`;
+    nextPhaseEl.innerHTML = `${icons.work} ${t('next_work')} ${formatNumber(completedSessions + 1)}/${formatNumber(4)}`;
   } else if (currentPhase === 'longBreak') {
-    currentPhaseEl.innerHTML = `${icons.long} Long Break`;
-    nextPhaseEl.innerHTML = `Next: ${icons.work} Work 1/4`;
+    currentPhaseEl.innerHTML = `${icons.long} ${t('long_break_phase')}`;
+    nextPhaseEl.innerHTML = `${icons.work} ${t('next_work')} ${formatNumber(1)}/${formatNumber(4)}`;
   }
 }
 
@@ -232,14 +247,29 @@ export function updatePhaseColors() {
 // repeated this by hand — which is exactly how the isRunning-desync bug
 // got introduced there in the first place. One shared function means
 // there's only one place this logic can go wrong, not seven.
+export function updateTimerButtonText() {
+  const btn = startBtn || document.getElementById('start-btn');
+  if (btn) {
+    const btnText = btn.querySelector('.btn-text');
+    if (btnText) {
+      const active = btn.classList.contains('pause') || isRunning;
+      btnText.textContent = active ? t('pause') : t('start');
+    }
+  }
+}
+
 export function stopTimer() {
   clearInterval(timerId);
   setTimerId(null);
   setIsRunning(false);
 
-  if (startBtn) {
-    startBtn.querySelector('.btn-text').textContent = 'Start';
-    startBtn.classList.remove('pause');
+  const btn = startBtn || document.getElementById('start-btn');
+  if (btn) {
+    const btnText = btn.querySelector('.btn-text');
+    if (btnText) {
+      btnText.textContent = t('start');
+    }
+    btn.classList.remove('pause');
   }
 }
 
@@ -268,7 +298,8 @@ export function switchPhase() {
   const workDurationSelect = document.getElementById('work-duration');
 
   const breaksEnabled = breaksToggle ? breaksToggle.checked : true;
-  const workDuration = workDurationSelect ? parseInt(workDurationSelect.value) * 60 : 25 * 60;
+  const parsedWorkDur = workDurationSelect ? readNumericValue(workDurationSelect) : 25;
+  const workDuration = (Number.isNaN(parsedWorkDur) ? 25 : parsedWorkDur) * 60;
 
   if (currentPhase === 'work') {
     setCompletedSessions(completedSessions + 1);
@@ -315,7 +346,7 @@ export function toggleTimer() {
       document.dispatchEvent(event);
     } else {
       const currentTaskLabel = document.getElementById('current-task-name');
-      if (currentTaskLabel) {currentTaskLabel.textContent = 'No Task';}
+      if (currentTaskLabel) {currentTaskLabel.textContent = t('focus_no_task');}
     }
   }
 
@@ -336,9 +367,13 @@ export function toggleTimer() {
     // Start timer
     setIsRunning(true);
 
-    if (startBtn) {
-      startBtn.querySelector('.btn-text').textContent = 'Pause';
-      startBtn.classList.add('pause');
+    const btn = startBtn || document.getElementById('start-btn');
+    if (btn) {
+      const btnText = btn.querySelector('.btn-text');
+      if (btnText) {
+        btnText.textContent = t('pause');
+      }
+      btn.classList.add('pause');
     }
 
     // Anchor drift-correction to right now, at whatever timeLeft currently is
@@ -455,6 +490,8 @@ export function setupTimerEvents() {
     }
   });
 
+  document.addEventListener('languageChanged', updateTimerButtonText);
+
   if (startBtn) {startBtn.addEventListener('click', toggleTimer);}
   if (resetBtn) {
     let suppressNextClick = false;
@@ -480,14 +517,15 @@ export function setupTimerEvents() {
         updatePhaseColors();
 
         const workDuration = document.getElementById('work-duration');
-        const newTotal = workDuration ? parseInt(workDuration.value) * 60 : 25 * 60;
+        const parsedDur = workDuration ? readNumericValue(workDuration) : 25;
+        const newTotal = (Number.isNaN(parsedDur) ? 25 : parsedDur) * 60;
         setTotalTime(newTotal);
         setTimeLeft(newTotal);
 
         updateDisplay();
         updateCircle();
         saveTimerState();
-        showToast('Full Session Reset! Back to Work 1.', 'info');
+        showToast(t('full_session_reset_toast'), 'info');
       }
     }
 

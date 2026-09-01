@@ -10,14 +10,23 @@
 // habits.js); a shared leaf dependency with nothing of its own to
 // import keeps it one-way instead. Mirrors tasks-storage.js exactly,
 // which solves the identical problem for tasks.js/tasks-render.js.
-import { habits, savedHabitCategories, categoryColors } from '../../core/state.js';
+import { habits, savedHabitCategories, categoryColors, currentHabitFilter, currentHabitSort, habitSortOrder } from '../../core/state.js';
 import { writeJSON, STORAGE_KEYS } from '../../core/storage.js';
 
 export function saveHabits() {
   writeJSON(STORAGE_KEYS.HABITS, habits);
+  saveHabitViewPrefs();
 }
 
 export function saveHabitCategories() {
   writeJSON(STORAGE_KEYS.HABIT_CATEGORIES, savedHabitCategories);
   writeJSON(STORAGE_KEYS.CATEGORY_COLORS, categoryColors);
+}
+
+export function saveHabitViewPrefs() {
+  writeJSON(STORAGE_KEYS.HABIT_VIEW_PREFS, {
+    filter: currentHabitFilter,
+    sort: currentHabitSort,
+    sortOrder: habitSortOrder
+  });
 }

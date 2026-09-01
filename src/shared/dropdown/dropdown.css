@@ -70,11 +70,11 @@
 .icon-inline-sm {
   width: 14px;
   height: 14px;
-  margin-right: 8px;
+  margin-inline-end: 8px;
 }
 
 .sort-dir {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 0.8rem;
 }
 
@@ -83,6 +83,10 @@
     background: var(--btn-bg);
     color: var(--text-main);
     transform: translateX(3px);
+  }
+
+  [dir="rtl"] .dropdown-item:hover {
+    transform: translateX(-3px);
   }
 }
 
@@ -98,28 +102,11 @@
   background: color-mix(in srgb, var(--theme-color, #3b82f6) 12%, transparent);
 }
 
-/*
-  FIX: setupSelectDropdown() (ui-utils.js) — the shared dropdown used by
-  the 4 Settings modal selects (Work Duration, Sound Alert, etc.), the
-  category picker, and the date-range picker — correctly sets
-  aria-selected="true" on the current item, but nothing ever styled
-  that attribute. Only .active-sort (the Sort dropdowns' own separate,
-  manually-toggled class) had a visual treatment, so every dropdown
-  built on the shared component silently showed no selection at all.
-
-  FIX 2: both this and .active-sort above were hardcoded to a fixed
-  blue (#3b82f6) regardless of the active tab/phase — every other
-  "selected" state in the app (.tag-chip.selectable.selected,
-  .tag-select-btn.selected, etc.) themes to var(--theme-color), the
-  variable each tab/phase already redefines (see variables.css), so
-  these are brought in line with that instead of staying a fixed color.
-*/
 .dropdown-item[aria-selected="true"] {
   color: var(--theme-color, #3b82f6);
   background: rgba(59, 130, 246, 0.1);
   background: color-mix(in srgb, var(--theme-color, #3b82f6) 12%, transparent);
 }
-
 
 /* --- DROPDOWN POSITION FIXES --- */
 .sort-wrapper {
@@ -131,5 +118,11 @@
   right: 0;
   left: auto;
   bottom: auto;
+}
+
+[dir="rtl"] #sort-dropdown,
+[dir="rtl"] #habit-sort-dropdown {
+  left: 0 !important;
+  right: auto !important;
 }
 

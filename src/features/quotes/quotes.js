@@ -14,8 +14,16 @@ import {
   getUserQuotes, addUserQuote, updateUserQuote, deleteUserQuote, toggleUserQuoteEnabled,
   getBuiltInQuotesForManagement, updateBuiltInQuoteOverride, toggleBuiltInQuoteEnabled, resetBuiltInQuoteOverride
 } from './motivation.js';
+import { t } from '../../core/i18n.js';
 
-const CATEGORY_LABELS = { general: 'General', focus: 'Focus', habits: 'Habits' };
+function getCategoryLabels() {
+  return {
+    general: t('quote_category_general'),
+    focus: t('quote_category_focus'),
+    habits: t('quote_category_habits')
+  };
+}
+
 const MAX_QUOTE_LENGTH = 140;
 
 export function setupQuotesEvents() {
@@ -45,8 +53,8 @@ export function setupQuotesEvents() {
   function resetForm() {
     editingId = null;
     textInput.value = '';
-    setCategory('general', CATEGORY_LABELS.general);
-    addBtn.textContent = 'Add';
+    setCategory('general', getCategoryLabels().general);
+    addBtn.textContent = t('add');
   }
 
   function renderList() {
@@ -55,6 +63,7 @@ export function setupQuotesEvents() {
 
     if (emptyMsg) {emptyMsg.style.display = quotes.length === 0 ? 'block' : 'none';}
 
+    const catLabels = getCategoryLabels();
     quotes.forEach(q => {
       const row = document.createElement('div');
       const isEnabled = q.enabled !== false;
@@ -64,17 +73,17 @@ export function setupQuotesEvents() {
       // only user-supplied strings in this template.
       row.innerHTML = `
         <div class="quote-manage-text">
-          <span class="quote-category-badge">${escapeHTML(CATEGORY_LABELS[q.category] || 'General')}</span>
+          <span class="quote-category-badge">${escapeHTML(catLabels[q.category] || catLabels.general)}</span>
           <p>&ldquo;${escapeHTML(q.quote)}&rdquo;</p>
         </div>
         <div class="quote-manage-actions">
-          <button type="button" class="icon-btn toggle-quote-btn" title="${isEnabled ? 'Disable quote' : 'Enable quote'}" aria-label="${isEnabled ? 'Disable quote' : 'Enable quote'}" aria-pressed="${isEnabled}" data-sound="click">
+          <button type="button" class="icon-btn toggle-quote-btn" title="${isEnabled ? t('disable_quote') : t('enable_quote')}" aria-label="${isEnabled ? t('disable_quote') : t('enable_quote')}" aria-pressed="${isEnabled}" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${isEnabled ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>' : '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.85M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'}</svg>
           </button>
-          <button type="button" class="icon-btn edit-quote-btn" title="Edit quote" aria-label="Edit quote" data-sound="click">
+          <button type="button" class="icon-btn edit-quote-btn" title="${t('edit_quote')}" aria-label="${t('edit_quote')}" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
           </button>
-          <button type="button" class="icon-btn delete-quote-btn" title="Delete quote" aria-label="Delete quote" data-sound="click">
+          <button type="button" class="icon-btn delete-quote-btn" title="${t('delete_quote')}" aria-label="${t('delete_quote')}" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
@@ -82,24 +91,25 @@ export function setupQuotesEvents() {
 
       row.querySelector('.toggle-quote-btn').addEventListener('click', () => {
         const nowEnabled = toggleUserQuoteEnabled(q.id);
-        showToast(nowEnabled ? 'Quote enabled' : 'Quote disabled', 'success');
+        showToast(nowEnabled ? t('quote_enabled_toast') : t('quote_disabled_toast'), 'success');
         renderList();
       });
 
       row.querySelector('.edit-quote-btn').addEventListener('click', () => {
         editingId = q.id;
         textInput.value = q.quote;
-        setCategory(q.category, CATEGORY_LABELS[q.category] || 'General');
-        addBtn.textContent = 'Save';
+        const catLabels = getCategoryLabels();
+        setCategory(q.category, catLabels[q.category] || catLabels.general);
+        addBtn.textContent = t('save_changes');
         textInput.focus();
       });
 
       row.querySelector('.delete-quote-btn').addEventListener('click', () => {
-        customConfirm('Delete this quote?', () => {
+        customConfirm(t('delete_quote_confirm'), () => {
           deleteUserQuote(q.id);
           if (editingId === q.id) {resetForm();}
           renderList();
-          showToast('Quote deleted', 'success');
+          showToast(t('quote_deleted_toast'), 'success');
         });
       });
 
@@ -121,6 +131,7 @@ export function setupQuotesEvents() {
     const quotes = await getBuiltInQuotesForManagement();
     builtInListEl.innerHTML = '';
 
+    const catLabels = getCategoryLabels();
     quotes.forEach(q => {
       const row = document.createElement('div');
       const isEnabled = q.enabled !== false;
@@ -128,18 +139,18 @@ export function setupQuotesEvents() {
       row.dataset.id = q.id;
       row.innerHTML = `
         <div class="quote-manage-text">
-          <span class="quote-category-badge">${escapeHTML(CATEGORY_LABELS[q.category] || 'General')}</span>
-          <span class="quote-default-badge">Default</span>
+          <span class="quote-category-badge">${escapeHTML(catLabels[q.category] || catLabels.general)}</span>
+          <span class="quote-default-badge">${t('default_badge')}</span>
           <p>&ldquo;${escapeHTML(q.quote)}&rdquo;</p>
         </div>
         <div class="quote-manage-actions">
-          <button type="button" class="icon-btn toggle-quote-btn" title="${isEnabled ? 'Disable quote' : 'Enable quote'}" aria-label="${isEnabled ? 'Disable quote' : 'Enable quote'}" aria-pressed="${isEnabled}" data-sound="click">
+          <button type="button" class="icon-btn toggle-quote-btn" title="${isEnabled ? t('disable_quote') : t('enable_quote')}" aria-label="${isEnabled ? t('disable_quote') : t('enable_quote')}" aria-pressed="${isEnabled}" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${isEnabled ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>' : '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-2.61 3.85M14.12 14.12a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'}</svg>
           </button>
-          <button type="button" class="icon-btn edit-quote-btn" title="Edit quote" aria-label="Edit quote" data-sound="click">
+          <button type="button" class="icon-btn edit-quote-btn" title="${t('edit_quote')}" aria-label="${t('edit_quote')}" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
           </button>
-          ${q.isEdited ? `<button type="button" class="icon-btn reset-quote-btn" title="Reset to original wording" aria-label="Reset to original wording" data-sound="click">
+          ${q.isEdited ? `<button type="button" class="icon-btn reset-quote-btn" title="${t('reset_to_original_wording')}" aria-label="${t('reset_to_original_wording')}" data-sound="click">
             <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
           </button>` : ''}
         </div>
@@ -147,15 +158,16 @@ export function setupQuotesEvents() {
 
       row.querySelector('.toggle-quote-btn').addEventListener('click', () => {
         const nowEnabled = toggleBuiltInQuoteEnabled(q.id);
-        showToast(nowEnabled ? 'Quote enabled' : 'Quote disabled', 'success');
+        showToast(nowEnabled ? t('quote_enabled_toast') : t('quote_disabled_toast'), 'success');
         renderBuiltInList();
       });
 
       row.querySelector('.edit-quote-btn').addEventListener('click', () => {
         editingId = q.id;
         textInput.value = q.quote;
-        setCategory(q.category, CATEGORY_LABELS[q.category] || 'General');
-        addBtn.textContent = 'Save';
+        const catLabels = getCategoryLabels();
+        setCategory(q.category, catLabels[q.category] || catLabels.general);
+        addBtn.textContent = t('save_changes');
         textInput.focus();
       });
 
@@ -163,7 +175,7 @@ export function setupQuotesEvents() {
         resetBuiltInQuoteOverride(q.id);
         if (editingId === q.id) {resetForm();}
         renderBuiltInList();
-        showToast('Reverted to the original quote', 'success');
+        showToast(t('reverted_to_original_quote_toast'), 'success');
       });
 
       builtInListEl.appendChild(row);
@@ -190,11 +202,11 @@ export function setupQuotesEvents() {
     const category = categorySelect.value;
 
     if (!text) {
-      showToast('Please write a quote first.', 'warning');
+      showToast(t('please_write_quote_warning'), 'warning');
       return;
     }
     if (text.length > MAX_QUOTE_LENGTH) {
-      showToast(`Quotes must be ${MAX_QUOTE_LENGTH} characters or fewer.`, 'warning');
+      showToast(t('quote_length_limit_warning', { max: MAX_QUOTE_LENGTH }), 'warning');
       return;
     }
 
@@ -206,10 +218,10 @@ export function setupQuotesEvents() {
         updateUserQuote(editingId, { quote: text, category });
         renderList();
       }
-      showToast('Quote updated', 'success');
+      showToast(t('quote_updated_toast'), 'success');
     } else {
       const newQuote = addUserQuote(text, category);
-      showToast('Quote added', 'success');
+      showToast(t('quote_added_toast'), 'success');
       renderList();
       animateNewListItem(listEl, newQuote.id);
     }
@@ -222,6 +234,23 @@ export function setupQuotesEvents() {
       e.preventDefault();
       addBtn.click();
     }
+  });
+
+  // Re-render the lists and form chrome when the language changes while
+  // this modal is open (it's reachable from the same settings flow that
+  // dispatches languageChanged). renderBuiltInList() re-derives quote text
+  // for the active locale (quote_fa under fa), so the Default Quotes list
+  // can't stay English after a switch. resetForm() is deliberately NOT
+  // called — it would wipe text the user is mid-typing; only the
+  // locale-derived labels (Add/Save, category display) are refreshed.
+  document.addEventListener('languageChanged', () => {
+    if (modal.classList.contains('show')) {
+      renderList();
+      renderBuiltInList();
+    }
+    addBtn.textContent = editingId ? t('save_changes') : t('add');
+    const labels = getCategoryLabels();
+    categoryDisplay.value = labels[categorySelect.value] || labels.general;
   });
 
   // --- CATEGORY DROPDOWN ---

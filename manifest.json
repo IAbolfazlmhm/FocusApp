@@ -4,8 +4,6 @@
   "description": "A Pomodoro timer, task manager, and habit tracker with focus sessions, streaks, and heatmaps.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#a8edea",
-  "theme_color": "#3b82f6",
   "icons": [
     {
       "src": "assets/icon.svg",

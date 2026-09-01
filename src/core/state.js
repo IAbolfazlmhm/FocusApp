@@ -31,28 +31,23 @@ export let savedTags = readJSON(STORAGE_KEYS.TAGS_LIST, ['Work', 'Study', 'Perso
 // (see getTagColor in color-utils.js) — this only needs to store the tags
 // someone has actually chosen to override.
 export let tagColors = readJSON(STORAGE_KEYS.TAG_COLORS, {});
-export let currentFilter = 'all';
-export let currentSort = 'newest';
-export let sortOrder = 'desc';
+
+const savedTaskPrefs = readJSON(STORAGE_KEYS.TASK_VIEW_PREFS, {});
+export let currentFilter = savedTaskPrefs.filter || 'all';
+export let currentSort = savedTaskPrefs.sort || 'newest';
+export let sortOrder = savedTaskPrefs.sortOrder || 'desc';
 
 // --- HABITS STATE ---
 export let habits = readJSON(STORAGE_KEYS.HABITS, [], 'array');
 export let savedHabitCategories = readJSON(STORAGE_KEYS.HABIT_CATEGORIES, ['Health', 'Learning', 'Productivity', 'Mindfulness'], 'array');
-// FIX: categories had no per-item color at all — every badge rendered in
-// the same flat muted style regardless of category, unlike tags (which
-// at least got a deterministic hash-based color). Mirrors tagColors
-// exactly: {} until a color is set, keyed by category name, and reuses
-// the same getTagColor()/suggestTagColor() machinery (color-utils.js) —
-// neither of those functions are actually tag-specific despite the name.
 export let categoryColors = readJSON(STORAGE_KEYS.CATEGORY_COLORS, {});
 export let currentHabitDate = new Date();
 currentHabitDate.setHours(0, 0, 0, 0);
-// The habits-tab equivalents of currentFilter/currentSort/sortOrder above
-// — previously local `let`s inside habits.js itself rather than
-// centralized here with their task-state counterparts.
-export let currentHabitFilter = 'all';
-export let currentHabitSort = 'newest';
-export let habitSortOrder = 'desc';
+
+const savedHabitPrefs = readJSON(STORAGE_KEYS.HABIT_VIEW_PREFS, {});
+export let currentHabitFilter = savedHabitPrefs.filter || 'all';
+export let currentHabitSort = savedHabitPrefs.sort || 'newest';
+export let habitSortOrder = savedHabitPrefs.sortOrder || 'desc';
 
 // --- POMODORO/TASKS DATE STATE ---
 // FIX: used to be an `export let` living directly in tasks.js — the one

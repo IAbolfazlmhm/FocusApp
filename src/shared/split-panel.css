@@ -141,15 +141,12 @@
     flex: 1 1 100%;
     min-width: 0;
     width: 100%;
-    max-height: none;
     padding: 22px;
   }
 }
 
 /*
-  Slightly tighter still on small phones — keeps the timer circle and
-  its clock text comfortably inside the panel's padding instead of
-  crowding the edges.
+  Slightly tighter padding on small phones while preserving identical height across both panels
 */
 @media (max-width: 420px) {
   .timer-section, .tasks-section {

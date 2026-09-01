@@ -9,13 +9,15 @@
 
 import { habits } from '../../core/state.js';
 import { habitModalState, setCustomSwatchSelected } from './habits-modal-state.js';
+import { t } from '../../core/i18n.js';
+import { setDisplayValue } from '../../shared/stepper/stepper-utils.js';
 
 function openHabitEditModal(habitId) {
   const habitToEdit = habits.find(h => h.id === habitId);
   if (!habitToEdit) {return;}
 
   habitModalState.editingHabitId = habitId;
-  document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Edit Habit';
+  document.getElementById('habit-modal-title').innerHTML = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> ${t('edit_habit')}`;
 
   document.getElementById('habit-name-input').value = habitToEdit.name || '';
   document.getElementById('habit-category-input').value = habitToEdit.category || '';
@@ -23,15 +25,11 @@ function openHabitEditModal(habitId) {
   const fVal = habitToEdit.frequency || 'everyday';
   const freqValueInput = document.getElementById('habit-frequency-value');
   freqValueInput.value = fVal;
-  // FIX: was missing the 7 single-day entries (monday..sunday), so
-  // editing a habit set to e.g. "Every Monday" showed the raw value
-  // "monday" as its display text instead of matching what the
-  // dropdown itself labels that option.
   const displayMap = {
-    everyday: 'Every Day', weekly: 'Once a Week', biweekly: 'Every 2 Weeks',
-    monday: 'Every Monday', tuesday: 'Every Tuesday', wednesday: 'Every Wednesday',
-    thursday: 'Every Thursday', friday: 'Every Friday', saturday: 'Every Saturday',
-    sunday: 'Every Sunday', custom: 'Custom Days...'
+    everyday: t('every_day'), weekly: t('once_a_week'), biweekly: t('every_2_weeks'),
+    monday: t('every_monday'), tuesday: t('every_tuesday'), wednesday: t('every_wednesday'),
+    thursday: t('every_thursday'), friday: t('every_friday'), saturday: t('every_saturday'),
+    sunday: t('every_sunday'), custom: t('custom_days')
   };
   document.getElementById('habit-frequency-input-display').value = displayMap[fVal] || fVal;
   // FIX: setting .value above doesn't fire 'change' on its own, and
@@ -78,12 +76,20 @@ function openHabitEditModal(habitId) {
     });
     const repeatEvery = habitToEdit.repeatEvery || { value: 1, unit: 'week' };
     const repeatEveryInput = document.getElementById('habit-repeat-every-input');
-    if (repeatEveryInput) {repeatEveryInput.value = repeatEvery.value || 1;}
+    // FIX: setting .value directly always displayed plain Latin digits,
+    // even under fa locale — setDisplayValue() (the same helper the
+    // stepper itself uses) applies the current locale's script.
+    if (repeatEveryInput) {setDisplayValue(repeatEveryInput, repeatEvery.value || 1);}
     const repeatUnitValue = document.getElementById('habit-repeat-unit-value');
     const repeatUnitDisplay = document.getElementById('habit-repeat-unit-display');
     const isMonth = repeatEvery.unit === 'month';
     if (repeatUnitValue) {repeatUnitValue.value = isMonth ? 'month' : 'week';}
-    if (repeatUnitDisplay) {repeatUnitDisplay.value = isMonth ? 'Month(s)' : 'Week(s)';}
+    // FIX: these used to be hardcoded English 'Week(s)'/'Month(s)' — in fa
+    // the dropdown OPTIONS were translated but this readonly preview input
+    // wasn't (input .value is invisible to translateDOM()), so the picker
+    // opened showing English until the user re-picked a unit. Use the same
+    // locale keys the options themselves map to.
+    if (repeatUnitDisplay) {repeatUnitDisplay.value = isMonth ? t('months') : t('weeks');}
   } else {
     document.getElementById('custom-days-picker').style.display = 'none';
   }
@@ -133,7 +139,7 @@ export function setupHabitModalOpenClose() {
   if (openAddHabitBtn) {
     openAddHabitBtn.addEventListener('click', () => {
       habitModalState.editingHabitId = null; // CRITICAL: Tells the form we are creating, not editing
-      document.getElementById('habit-modal-title').innerHTML = '<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit';
+      document.getElementById('habit-modal-title').innerHTML = `<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> ${t('create_habit')}`;
 
       // Sync Quick Input to Modal
       const quickInput = document.getElementById('quick-habit-input');
@@ -145,7 +151,7 @@ export function setupHabitModalOpenClose() {
 
       // Reset frequency to default (Every Day)
       const freqInputDisplay = document.getElementById('habit-frequency-input-display');
-      if (freqInputDisplay) {freqInputDisplay.value = 'Every Day';}
+      if (freqInputDisplay) {freqInputDisplay.value = t('every_day');}
 
       // Set hidden frequency value to "everyday" for form submission
       const freqValue = document.getElementById('habit-frequency-value');
@@ -163,11 +169,11 @@ export function setupHabitModalOpenClose() {
       const customDaysPicker = document.getElementById('custom-days-picker');
       if (customDaysPicker) {customDaysPicker.style.display = 'none';}
       const repeatEveryResetInput = document.getElementById('habit-repeat-every-input');
-      if (repeatEveryResetInput) {repeatEveryResetInput.value = 1;}
+      if (repeatEveryResetInput) {setDisplayValue(repeatEveryResetInput, 1);}
       const repeatUnitResetValue = document.getElementById('habit-repeat-unit-value');
       const repeatUnitResetDisplay = document.getElementById('habit-repeat-unit-display');
       if (repeatUnitResetValue) {repeatUnitResetValue.value = 'week';}
-      if (repeatUnitResetDisplay) {repeatUnitResetDisplay.value = 'Week(s)';}
+      if (repeatUnitResetDisplay) {repeatUnitResetDisplay.value = t('weeks');}
       dayOptions.forEach(d => {
         d.classList.remove('selected');
         d.setAttribute('aria-pressed', 'false');

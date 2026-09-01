@@ -3,6 +3,18 @@
 // ==========================================
 import { playUI } from '../audio.js';
 
+// Pure mapping from toast type to which sound it should play (or null for
+// none) — kept separate from the DOM/audio side effects below so it's
+// testable on its own without needing a real AudioContext.
+// FIX: 'warning' used to map to 'click' — the exact same neutral tap that
+// plays for an ordinary successful interaction, so a blocked action (e.g.
+// "task name can't be empty") sounded no different from one that worked.
+export function soundForToastType(type) {
+  if (type === 'success') {return 'success';}
+  if (type === 'warning') {return 'error';}
+  return null;
+}
+
 export function showToast(message, type = 'info', silent = false) {
   const container = document.getElementById('toast-container');
   if (!container) {return;}
@@ -42,10 +54,12 @@ export function showToast(message, type = 'info', silent = false) {
   container.appendChild(toast);
 
   if (type !== 'info' && !silent) {
-    const soundToggle = document.getElementById('sound-toggle');
-    if (!soundToggle || soundToggle.checked) {
-      if (type === 'success') {playUI('success');}
-      if (type === 'warning') {playUI('click');}
+    const soundType = soundForToastType(type);
+    if (soundType) {
+      const soundToggle = document.getElementById('sound-toggle');
+      if (!soundToggle || soundToggle.checked) {
+        playUI(soundType);
+      }
     }
   }
 

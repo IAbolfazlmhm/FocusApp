@@ -18,6 +18,7 @@ import { customConfirm } from '../../shared/modal/modal-utils.js';
 import { moveToTrash } from '../trash/trash.js';
 import { saveTasks } from './tasks-storage.js';
 import { renderTasks, renderFilters } from './tasks-render.js';
+import { t } from '../../core/i18n.js';
 
 export function renderTagsManagement() {
   const tagsManagementList = document.getElementById('tags-management-list');
@@ -38,8 +39,8 @@ export function renderTagsManagement() {
     swatch.type = 'color';
     swatch.className = 'tag-color-swatch';
     swatch.value = currentColor.hex;
-    swatch.title = `Choose a color for #${tag}`;
-    swatch.setAttribute('aria-label', `Color for tag ${tag}`);
+    swatch.title = t('choose_color_for_tag', { tag });
+    swatch.setAttribute('aria-label', t('color_for_tag', { tag }));
     swatch.addEventListener('input', (e) => {
       // Stop this from also triggering the chip's own click→delete handler.
       e.stopPropagation();
@@ -72,7 +73,7 @@ export function renderTagsManagement() {
     // now matches).
     chip.tabIndex = 0;
     chip.setAttribute('role', 'button');
-    chip.setAttribute('aria-label', `Delete tag ${tag}`);
+    chip.setAttribute('aria-label', t('delete_tag_aria', { tag }));
 
     // Only a custom color needs a way back to "no override" — the hash
     // default has nothing to reset away from.
@@ -80,8 +81,8 @@ export function renderTagsManagement() {
       const resetBtn = document.createElement('button');
       resetBtn.type = 'button';
       resetBtn.className = 'tag-color-reset';
-      resetBtn.title = `Reset #${tag} to its default color`;
-      resetBtn.setAttribute('aria-label', `Reset color for tag ${tag}`);
+      resetBtn.title = t('reset_tag_color', { tag });
+      resetBtn.setAttribute('aria-label', t('reset_tag_color_aria', { tag }));
       resetBtn.innerHTML = icons.reset || '↺';
       resetBtn.dataset.sound = 'click';
       resetBtn.addEventListener('click', (e) => {
@@ -101,7 +102,7 @@ export function renderTagsManagement() {
     }
 
     const deleteTag = () => {
-      customConfirm(`Delete tag "${tag}"?`, () => {
+      customConfirm(t('delete_tag_confirm', { tag }), () => {
         setSavedTags(savedTags.filter(t => t !== tag));
 
         tasks.forEach(t => {
@@ -206,7 +207,7 @@ export function setupTagsManagement() {
       const newTagName = manageNewTagInput.value.trim();
 
       if (!newTagName) {
-        showToast('Please enter a valid tag name.', 'warning');
+        showToast(t('invalid_tag_name_warning'), 'warning');
         return;
       }
 
@@ -239,9 +240,9 @@ export function setupTagsManagement() {
         animateNewListItem(document.getElementById('tags-management-list'), finalName, 'data-tag');
         manageNewTagInput.value = '';
         refreshSuggestedTagColor();
-        showToast(collision ? 'Tag added — that color is already in use by another tag.' : 'Tag added', collision ? 'warning' : 'success');
+        showToast(collision ? t('tag_color_collision_warning') : t('tag_added'), collision ? 'warning' : 'success');
       } else {
-        showToast('That tag already exists.', 'warning');
+        showToast(t('tag_already_exists'), 'warning');
       }
     });
   }
@@ -250,5 +251,16 @@ export function setupTagsManagement() {
   // to update this modal's list, in case it happens to already be open.
   document.addEventListener('refreshTagsManagement', () => {
     renderTagsManagement();
+  });
+
+  // FIX: this modal's per-tag aria-labels/titles (color swatch, reset
+  // button, delete chip) are all localized, but nothing re-rendered them
+  // if language changed while the modal happened to be open — same gap
+  // as habits-categories.js's Manage Categories modal, fixed the same
+  // way, mirroring quotes.js's setupQuotesEvents pattern.
+  document.addEventListener('languageChanged', () => {
+    if (tagsModal && tagsModal.classList.contains('show')) {
+      renderTagsManagement();
+    }
   });
 }

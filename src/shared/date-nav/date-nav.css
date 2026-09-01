@@ -66,8 +66,13 @@
 }
 
 
-#pomodoro-date-display, #habit-date-display { 
-  color: var(--text-main); 
+/* Flip directional arrows in RTL */
+[dir="rtl"] .date-arrow svg {
+  transform: scaleX(-1);
+}
+
+#pomodoro-date-display, #habit-date-display {
+  color: var(--text-main);
 }
 
 body[data-theme="dark"] #pomodoro-date-display, body[data-theme="dark"] #habit-date-display { 

@@ -11,6 +11,7 @@ import { getLocalDateKey } from '../../core/date-utils.js';
 import { getHabitLogKey } from './progress-stats.js';
 import { clearTasklessTime } from '../timer/timer.js';
 import { customConfirm } from '../../shared/modal/modal-utils.js';
+import { t, formatDate } from '../../core/i18n.js';
 
 // showPomodoro/showHabits are passed in explicitly by whichever heatmap
 // block was clicked (progress-heatmap.js) rather than read from shared
@@ -29,12 +30,12 @@ export function openDailyReport(dateObj, showPomodoro = true, showHabits = true)
   const habitLogKey = getHabitLogKey(dateObj);
   let tasklessSeconds = 0;
 
-  title.textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  title.textContent = formatDate(dateObj, { weekday: 'long', month: 'short', day: 'numeric' });
 
   let html = '';
 
   if (showPomodoro) {
-    html += `<div class="report-section-title">Pomodoro Tasks</div>`;
+    html += `<div class="report-section-title">${t('pomodoro_tasks_report')}</div>`;
     // A task belongs on this day's report if it was CREATED that day,
     // OR if focus time was actually logged for it that day (timeByDate) —
     // previously only createdAt was checked, so working on an
@@ -42,55 +43,49 @@ export function openDailyReport(dateObj, showPomodoro = true, showHabits = true)
     const dayTasks = currentTasks.filter(t =>
       getLocalDateKey(t.createdAt) === localDateStr || (t.timeByDate && t.timeByDate[localDateStr] > 0)
     );
-    if (dayTasks.length === 0) {html += `<p class="report-empty-msg">No tasks recorded.</p>`;}
-    dayTasks.forEach(t => {
+    if (dayTasks.length === 0) {html += `<p class="report-empty-msg">${t('no_tasks_recorded_report')}</p>`;}
+    dayTasks.forEach(tTask => {
       // Show THIS day's time, not the task's all-time total — legacy
       // tasks with no timeByDate fall back to their full total since
       // that's all we ever recorded for them.
-      const dayTimeSeconds = t.timeByDate
-      ? (t.timeByDate[localDateStr] || 0)
-      : (t.timeSpent || 0);
+      const dayTimeSeconds = tTask.timeByDate
+      ? (tTask.timeByDate[localDateStr] || 0)
+      : (tTask.timeSpent || 0);
       const timeBadge = formatTaskTime(dayTimeSeconds);
-      if (t.completed) {html += `<div class="report-item success"><span><strike>${escapeHTML(t.text)}</strike></span> <span>${timeBadge}</span></div>`;}
-      else {html += `<div class="report-item failed"><span>${escapeHTML(t.text)}</span> <span>${timeBadge}</span></div>`;}
+      if (tTask.completed) {html += `<div class="report-item success"><span><strike>${escapeHTML(tTask.text)}</strike></span> <span>${timeBadge}</span></div>`;}
+      else {html += `<div class="report-item failed"><span>${escapeHTML(tTask.text)}</span> <span>${timeBadge}</span></div>`;}
     });
 
-    // Taskless sessions (see timer.js's addTasklessFocusTime) — kept as
-    // its own line rather than folded into a task, since it's real
-    // focus time earned with no task attached to it. Deletable in place
-    // (unlike the task/habit rows above) since this is the one place in
-    // the app that surfaces it at all — a stray entry from testing the
-    // timer with nothing selected has nowhere else to go.
     const tasklessByDate = readJSON(STORAGE_KEYS.TASKLESS_TIME, {});
     tasklessSeconds = tasklessByDate[localDateStr] || 0;
     if (tasklessSeconds > 0) {
-      html += `<div class="report-item report-item-deletable"><span>Focus time (no task)</span> <span class="report-item-value"><span>${formatTaskTime(tasklessSeconds)}</span><button type="button" class="icon-btn report-edit-taskless-btn" id="edit-taskless-btn" title="Turn into a task" aria-label="Turn this no-task focus time into a task" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button><button type="button" class="icon-btn report-delete-taskless-btn" id="delete-taskless-btn" title="Delete this entry" aria-label="Delete this no-task focus time entry" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></span></div>`;
+      html += `<div class="report-item report-item-deletable"><span>${t('focus_time_no_task')}</span> <span class="report-item-value"><span>${formatTaskTime(tasklessSeconds)}</span><button type="button" class="icon-btn report-edit-taskless-btn" id="edit-taskless-btn" title="${t('turn_into_task')}" aria-label="${t('turn_into_task')}" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button><button type="button" class="icon-btn report-delete-taskless-btn" id="delete-taskless-btn" title="${t('delete_entry')}" aria-label="${t('delete_entry')}" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></span></div>`;
     }
   }
 
   if (showHabits) {
-    html += `<div class="report-section-title spaced">Habits</div>`;
+    html += `<div class="report-section-title spaced">${t('habits_report')}</div>`;
     let habitFound = false;
     currentHabits.forEach(h => {
       const created = new Date(h.createdAt || h.id).setHours(0,0,0,0);
       if (dateObj.getTime() >= created && isHabitActiveOnDate(h, dateObj)) {
         habitFound = true;
         const status = h.logs && h.logs[habitLogKey];
-        if (status === 'done') {html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Done</span></div>`;}
-        else if (status === 'skipped') {html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Skipped</span></div>`;}
-        else {html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">Missed</span></div>`;}
+        if (status === 'done') {html += `<div class="report-item success"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">${t('done')}</span></div>`;}
+        else if (status === 'skipped') {html += `<div class="report-item skipped"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">${t('skip_today')}</span></div>`;}
+        else {html += `<div class="report-item failed"><span>${escapeHTML(h.name)}</span> <span class="report-status-label">${t('filter_active')}</span></div>`;}
       }
     });
-    if (!habitFound) {html += `<p class="report-empty-msg">No habits scheduled.</p>`;}
+    if (!habitFound) {html += `<p class="report-empty-msg">${t('no_habits_scheduled_report')}</p>`;}
   }
 
   // BUG FIX: Only show buttons for active sections
   let buttonsHTML = '';
   if (showPomodoro) {
-    buttonsHTML += `<button class="btn report-goto-btn focus" id="goto-focus-btn">Go to Pomodoro</button>`;
+    buttonsHTML += `<button class="btn report-goto-btn focus" id="goto-focus-btn">${t('go_to_pomodoro')}</button>`;
   }
   if (showHabits) {
-    buttonsHTML += `<button class="btn report-goto-btn habits" id="goto-habits-btn">Go to Habits</button>`;
+    buttonsHTML += `<button class="btn report-goto-btn habits" id="goto-habits-btn">${t('go_to_habits')}</button>`;
   }
 
   if (buttonsHTML !== '') {
@@ -142,7 +137,7 @@ export function openDailyReport(dateObj, showPomodoro = true, showHabits = true)
   const deleteTasklessBtn = document.getElementById('delete-taskless-btn');
   if (deleteTasklessBtn) {
     deleteTasklessBtn.addEventListener('click', () => {
-      customConfirm('Delete this no-task focus time?', () => {
+      customConfirm(t('delete_taskless_confirm'), () => {
         clearTasklessTime(localDateStr);
         // Re-render this same modal so the row disappears immediately,
         // and let the rest of the app (heatmap, stat totals) know its

@@ -1,5 +1,5 @@
 /* ========================================== */
-/* SEGMENTED DATE INPUT (MM / DD / YYYY)       */
+/* SEGMENTED DATE INPUT (YYYY / MM / DD)       */
 /* ========================================== */
 /* See shared/date-segment-input/date-segment-input.js for the JS half —
    currently used by Progress's Custom Range modal, built as reusable

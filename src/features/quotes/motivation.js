@@ -13,14 +13,15 @@ import { userQuotes, setUserQuotes } from '../../core/state.js';
 import { writeJSON, readJSON, STORAGE_KEYS } from '../../core/storage.js';
 import { generateId } from '../../core/dom-utils.js';
 import { moveToTrash } from '../trash/trash.js';
+import { getLocale } from '../../core/i18n.js';
 
-const MOTIVATION_URL = 'assets/motivation.json';
+const MOTIVATION_URL = 'assets/motivation.json?v=2';
 
 const FALLBACK_QUOTES = [
-  { quote: 'Small steps every day.', category: 'habits' },
-  { quote: 'Consistency over intensity.', category: 'habits' },
-  { quote: 'One task at a time.', category: 'focus' },
-  { quote: 'Done is better than perfect.', category: 'general' },
+  { quote: 'Small steps every day.', quote_fa: 'هر روز گام‌های کوچک بردارید.', category: 'habits' },
+  { quote: 'Consistency over intensity.', quote_fa: 'استمرار مهم‌تر از شدت است.', category: 'habits' },
+  { quote: 'One task at a time.', quote_fa: 'یک کار در هر لحظه.', category: 'focus' },
+  { quote: 'Done is better than perfect.', quote_fa: 'کار انجام‌شده بهتر از کار بی‌نقص اما ناتمام است.', category: 'general' },
 ];
 
 let quotesCache = null;
@@ -59,22 +60,22 @@ function loadQuotes() {
  */
 async function getCombinedQuotes() {
   const builtIn = await loadQuotes();
+  const isFa = getLocale() === 'fa';
   // Apply any saved built-in overrides (edited text/category, or
   // disabled) on top of the static asset — this always produces a new
   // array via map/filter rather than touching `builtIn`/quotesCache in
   // place, since that cached array is the same object returned to every
   // caller (including tests asserting the built-in pool is untouched).
   const overrides = readJSON(STORAGE_KEYS.BUILT_IN_QUOTE_OVERRIDES, {});
-  const overriddenBuiltIn = Object.keys(overrides).length === 0
-    ? builtIn
-    : builtIn
-      .map((q, i) => {
-        const ov = overrides[`builtin-${i}`];
-        if (!ov) {return q;}
-        if (ov.enabled === false) {return null;}
-        return { quote: ov.quote !== undefined ? ov.quote : q.quote, category: ov.category !== undefined ? ov.category : q.category };
-      })
-      .filter(Boolean);
+  const overriddenBuiltIn = builtIn
+    .map((q, i) => {
+      const ov = overrides[`builtin-${i}`];
+      if (ov && ov.enabled === false) {return null;}
+      const text = ov?.quote !== undefined ? ov.quote : (isFa && q.quote_fa ? q.quote_fa : q.quote);
+      const cat = ov?.category !== undefined ? ov.category : q.category;
+      return { quote: text, category: cat };
+    })
+    .filter(Boolean);
   // Built-ins have no `enabled` field and are always eligible; a user
   // quote is excluded only when explicitly disabled (enabled === false),
   // so quotes added before this feature existed (enabled === undefined)
@@ -83,7 +84,7 @@ async function getCombinedQuotes() {
   return activeUserQuotes.length > 0 ? overriddenBuiltIn.concat(activeUserQuotes) : overriddenBuiltIn;
 }
 
-export async function getRandomQuote(category = null) {
+export async function getRandomQuote(category = null, excludeText = null) {
   const quotes = await getCombinedQuotes();
   // A quote tagged "general" fits anywhere, so it's included alongside an
   // exact category match rather than requiring category === null to ever
@@ -92,7 +93,13 @@ export async function getRandomQuote(category = null) {
   // every current call site asks for a specific category.
   const pool = category ? quotes.filter(q => q.category === category || q.category === 'general') : quotes;
   const list = pool.length > 0 ? pool : quotes;
-  return list[Math.floor(Math.random() * list.length)];
+  // FIX: avoid showing the same quote twice back-to-back. If there's only
+  // one quote available for this category, repeating is unavoidable and
+  // fine — the point is just to not visibly repeat when a different
+  // option actually exists.
+  const candidates = excludeText && list.length > 1 ? list.filter(q => q.quote !== excludeText) : list;
+  const pickFrom = candidates.length > 0 ? candidates : list;
+  return pickFrom[Math.floor(Math.random() * pickFrom.length)];
 }
 
 // ==========================================
@@ -180,12 +187,14 @@ function getBuiltInOverrides() {
 export async function getBuiltInQuotesForManagement() {
   const builtIn = await loadQuotes();
   const overrides = getBuiltInOverrides();
+  const isFa = getLocale() === 'fa';
   return builtIn.map((q, i) => {
     const id = `builtin-${i}`;
     const ov = overrides[id] || {};
+    const defaultText = isFa && q.quote_fa ? q.quote_fa : q.quote;
     return {
       id,
-      quote: ov.quote !== undefined ? ov.quote : q.quote,
+      quote: ov.quote !== undefined ? ov.quote : defaultText,
       category: ov.category !== undefined ? ov.category : q.category,
       enabled: ov.enabled !== false,
       isEdited: ov.quote !== undefined || ov.category !== undefined,
@@ -226,10 +235,12 @@ export function resetBuiltInQuoteOverride(id) {
 export function startQuoteRotation(el, { category = null, intervalMs = 8000, fadeMs = 800, fadeClass = 'fade-out' } = {}) {
   if (!el) {return () => {};}
   let stopped = false;
+  let lastQuoteText = null;
 
   const applyRandomQuote = async () => {
-    const { quote } = await getRandomQuote(category);
+    const { quote } = await getRandomQuote(category, lastQuoteText);
     if (stopped) {return;}
+    lastQuoteText = quote;
     el.textContent = `"${quote}"`;
   };
 

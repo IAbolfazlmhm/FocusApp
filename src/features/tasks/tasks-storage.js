@@ -9,7 +9,7 @@
 // other in the opposite direction (tasks.js calls into tasks-render.js's
 // renderTasks/renderFilters). A shared leaf dependency with nothing of
 // its own to import keeps that a one-way relationship instead of a cycle.
-import { tasks, focusedTaskId, savedTags, tagColors } from '../../core/state.js';
+import { tasks, focusedTaskId, savedTags, tagColors, currentFilter, currentSort, sortOrder } from '../../core/state.js';
 import { writeJSON, STORAGE_KEYS } from '../../core/storage.js';
 
 export function saveTasks() {
@@ -17,4 +17,13 @@ export function saveTasks() {
   writeJSON(STORAGE_KEYS.FOCUSED_TASK_ID, focusedTaskId);
   writeJSON(STORAGE_KEYS.TAGS_LIST, savedTags);
   writeJSON(STORAGE_KEYS.TAG_COLORS, tagColors);
+  saveTaskViewPrefs();
+}
+
+export function saveTaskViewPrefs() {
+  writeJSON(STORAGE_KEYS.TASK_VIEW_PREFS, {
+    filter: currentFilter,
+    sort: currentSort,
+    sortOrder
+  });
 }

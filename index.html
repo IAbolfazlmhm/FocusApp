@@ -2,36 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual">
   <title>Focus App</title>
   <meta name="description" content="A Pomodoro timer, task manager, and habit tracker with focus sessions, streaks, heatmaps, and data export. All data stored locally in your browser.">
-  <meta name="theme-color" content="#3b82f6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <link rel="manifest" href="manifest.json">
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="src/styles/fonts.css">
-  <link rel="stylesheet" href="src/styles/variables.css">
-  <link rel="stylesheet" href="src/styles/reset.css">
-  <link rel="stylesheet" href="src/styles/utilities.css">
-  <link rel="stylesheet" href="src/styles/layout.css">
-  <link rel="stylesheet" href="src/shared/buttons.css">
-  <link rel="stylesheet" href="src/shared/toast/toast.css">
-  <link rel="stylesheet" href="src/shared/dropdown/dropdown.css">
-  <link rel="stylesheet" href="src/shared/tag-chip/tag-chip.css">
-  <link rel="stylesheet" href="src/shared/stepper/stepper.css">
-  <link rel="stylesheet" href="src/shared/date-segment-input/date-segment-input.css">
-  <link rel="stylesheet" href="src/shared/modal/modal.css">
-  <link rel="stylesheet" href="src/shared/split-panel.css">
-  <link rel="stylesheet" href="src/shared/pill.css">
-  <link rel="stylesheet" href="src/shared/filter-bar.css">
-  <link rel="stylesheet" href="src/shared/tabs/tabs.css">
-  <link rel="stylesheet" href="src/shared/date-nav/date-nav.css">
-  <link rel="stylesheet" href="src/features/timer/timer.css">
-  <link rel="stylesheet" href="src/features/tasks/tasks.css">
-  <link rel="stylesheet" href="src/features/habits/habits.css">
-  <link rel="stylesheet" href="src/features/progress/progress.css">
-  <link rel="stylesheet" href="src/features/quotes/quotes.css">
-  <link rel="stylesheet" href="src/features/trash/trash.css">
-  <link rel="stylesheet" href="src/features/help/help.css">
+  <link rel="stylesheet" href="src/styles/fonts.css?v=2">
+  <link rel="stylesheet" href="src/styles/variables.css?v=2">
+  <link rel="stylesheet" href="src/styles/reset.css?v=2">
+  <link rel="stylesheet" href="src/styles/utilities.css?v=2">
+  <link rel="stylesheet" href="src/styles/layout.css?v=2">
+  <link rel="stylesheet" href="src/shared/buttons.css?v=2">
+  <link rel="stylesheet" href="src/shared/toast/toast.css?v=2">
+  <link rel="stylesheet" href="src/shared/dropdown/dropdown.css?v=2">
+  <link rel="stylesheet" href="src/shared/tag-chip/tag-chip.css?v=2">
+  <link rel="stylesheet" href="src/shared/stepper/stepper.css?v=2">
+  <link rel="stylesheet" href="src/shared/date-segment-input/date-segment-input.css?v=2">
+  <link rel="stylesheet" href="src/shared/modal/modal.css?v=2">
+  <link rel="stylesheet" href="src/shared/split-panel.css?v=2">
+  <link rel="stylesheet" href="src/shared/pill.css?v=2">
+  <link rel="stylesheet" href="src/shared/filter-bar.css?v=2">
+  <link rel="stylesheet" href="src/shared/tabs/tabs.css?v=2">
+  <link rel="stylesheet" href="src/shared/date-nav/date-nav.css?v=2">
+  <link rel="stylesheet" href="src/features/timer/timer.css?v=2">
+  <link rel="stylesheet" href="src/features/tasks/tasks.css?v=2">
+  <link rel="stylesheet" href="src/features/habits/habits.css?v=2">
+  <link rel="stylesheet" href="src/features/progress/progress.css?v=2">
+  <link rel="stylesheet" href="src/features/quotes/quotes.css?v=2">
+  <link rel="stylesheet" href="src/features/trash/trash.css?v=2">
+  <link rel="stylesheet" href="src/features/help/help.css?v=2">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
 </head>
 <body class="preload">
@@ -77,25 +78,35 @@
     <symbol id="icon-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polyline points="6 9 12 15 18 9"/>
     </symbol>
+    <symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+    </symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    </symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+    </symbol>
+    <symbol id="icon-trending-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+    </symbol>
   </svg>
-
 
   <script>
     (function() {
       const savedTimer = localStorage.getItem('focusTimerState');
       const savedSettings = localStorage.getItem('focusSettings');
 
-      // This runs before the page paints, purely to avoid a flash of the
-      // wrong theme/phase color. It's a separate, minimal read from the
-      // same localStorage keys state.js also reads (safely) later — so if
-      // parsing fails here, we just skip the pre-paint styling for this
-      // load rather than let it throw and skip past the code below it.
       if (savedSettings) {
         try {
           const settings = JSON.parse(savedSettings);
           if (settings.darkMode) document.body.setAttribute('data-theme', 'dark');
+          if (settings.language === 'fa') {
+            document.documentElement.lang = 'fa';
+            document.documentElement.dir = 'rtl';
+          }
         } catch (err) {
-          console.warn('Corrupted focusSettings in localStorage, skipping pre-paint theme.', err);
+          console.warn('Corrupted focusSettings in localStorage, skipping pre-paint settings.', err);
         }
       }
 
@@ -118,16 +129,16 @@
   <div id="toast-container" role="status" aria-live="polite"></div>
 
   <div class="header-container">
-    <nav class="glass-tabs-container" role="tablist" aria-label="App sections">
+    <nav class="glass-tabs-container" role="tablist" aria-label="App sections" data-i18n-aria-label="app_sections_nav">
       <div class="active-bubble"></div>
-      <button class="tab active" role="tab" aria-selected="true" id="tab-pomodoro" aria-controls="pomodoro-view" data-sound="click">Pomodoro</button>
-      <button class="tab" role="tab" aria-selected="false" id="tab-habits" aria-controls="habits-view" data-sound="click">Habits</button>
-      <button class="tab" role="tab" aria-selected="false" id="tab-progress" aria-controls="progress-view" data-sound="click">Progress</button>
+      <button class="tab active" role="tab" aria-selected="true" id="tab-pomodoro" aria-controls="pomodoro-view" data-i18n="tab_pomodoro" data-sound="click">Pomodoro</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-habits" aria-controls="habits-view" data-i18n="tab_habits" data-sound="click">Habits</button>
+      <button class="tab" role="tab" aria-selected="false" id="tab-progress" aria-controls="progress-view" data-i18n="tab_progress" data-sound="click">Progress</button>
     </nav>
   </div>
 
   <main class="container">
-    <h1 class="sr-only">FocusApp — Pomodoro Timer, Tasks, and Habit Tracker</h1>
+    <h1 class="sr-only" data-i18n="app_heading">FocusApp — Pomodoro Timer, Tasks, and Habit Tracker</h1>
 
     <div id="pomodoro-view" class="view-section active-view" role="tabpanel" aria-labelledby="tab-pomodoro">
 
@@ -135,13 +146,13 @@
         <div class="timer-header glass-pill">
           <span class="locked-task-label">
             <svg class="ui-icon" aria-hidden="true"><use href="#icon-target"/></svg>
-            Focus: <strong id="current-task-name">Nothing</strong>
+            <span data-i18n="focus_label">Focus:</span> <strong id="current-task-name">Nothing</strong>
           </span>
           <div class="timer-header-actions">
-            <button class="icon-btn focus-mode-toggle-btn" id="focus-mode-toggle-btn" title="Focus Mode" aria-label="Enter Focus Mode" aria-pressed="false" data-sound="click">
+            <button class="icon-btn focus-mode-toggle-btn" id="focus-mode-toggle-btn" title="Focus Mode" aria-label="Enter Focus Mode" aria-pressed="false" data-i18n-title="focus_mode" data-i18n-aria-label="focus_mode" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-glasses"/></svg>
             </button>
-            <button class="icon-btn settings-btn" title="Settings" aria-label="Settings" data-sound="click">
+            <button class="icon-btn settings-btn" title="Settings" aria-label="Settings" data-i18n-title="settings" data-i18n-aria-label="settings" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
             </button>
           </div>
@@ -161,16 +172,16 @@
         </div>
 
         <div class="timer-controls glass-pill">
-          <button class="icon-btn reset-btn" id="reset-btn" title="Reset (double-click or press &amp; hold for full session reset)" aria-label="Reset (double-click or press and hold for full session reset)">
-            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          <button class="icon-btn reset-btn" id="reset-btn" title="Reset (double-click or press &amp; hold for full session reset)" aria-label="Reset (double-click or press and hold for full session reset)" data-i18n-title="reset_timer_label" data-i18n-aria-label="reset_timer_label">
+            <svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
           </button>
 
           <button class="start-btn" id="start-btn" data-sound="click">
             <span class="btn-text">Start</span>
           </button>
 
-          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase" data-sound="click">
-            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          <button class="icon-btn skip-btn" id="skip-btn" title="Skip to Next Phase" aria-label="Skip to Next Phase" data-i18n-title="skip_phase" data-i18n-aria-label="skip_phase" data-sound="click">
+            <svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
         </div>
 
@@ -182,17 +193,17 @@
       <section class="tasks-section">
         <div class="section-top-wrapper">
           <div class="date-nav-full glass-pill">
-            <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="pomodoro-prev-date" title="Previous day" aria-label="Previous day" data-i18n-title="previous_day" data-i18n-aria-label="previous_day" data-sound="click"><svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <div class="date-display-toggle">
               <button type="button" class="date-display-button" id="pomodoro-date-display" aria-haspopup="dialog" aria-expanded="false">Today</button>
               <input type="date" id="pomodoro-date-picker" class="native-date-input">
             </div>
-            <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="pomodoro-next-date" title="Next day" aria-label="Next day" data-i18n-title="next_day" data-i18n-aria-label="next_day" data-sound="click"><svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
           </div>
 
           <div class="filter-row-unified">
-            <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            <button class="theme-circle-btn" id="manage-tags-btn" title="Manage Tags" aria-label="Manage Tags" data-i18n-title="manage_tags" data-i18n-aria-label="manage_tags" data-sound="click">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-sliders"/></svg>
             </button>
 
             <div class="filter-scroll-area glass-pill dense" id="filter-list">
@@ -200,25 +211,25 @@
             </div>
 
             <div class="sort-wrapper" id="task-sort-wrapper">
-              <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks" data-sound="click">
-                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
+              <button class="theme-circle-btn" id="task-sort-btn" title="Sort Tasks" aria-label="Sort Tasks" data-i18n-title="sort_tasks" data-i18n-aria-label="sort_tasks" data-sound="click">
+                <svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
               </button>
               <div id="sort-dropdown" class="custom-dropdown glass-effect w-140">
                 <div class="dropdown-item active-sort" data-sort="newest" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  <span>Newest</span> <span class="sort-dir">↓</span>
+                  <span data-i18n="sort_newest">Newest</span> <span class="sort-dir">↓</span>
                 </div>
                 <div class="dropdown-item" data-sort="time" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 22h14M5 2h14M7 22V16l5-6-5-6V2M17 22V16l-5-6 5-6V2"/></svg>
-                  <span>Time Spent</span> <span class="sort-dir"></span>
+                  <span data-i18n="sort_time">Time Spent</span> <span class="sort-dir"></span>
                 </div>
                 <div class="dropdown-item" data-sort="az" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
-                  <span>A-Z</span> <span class="sort-dir"></span>
+                  <span data-i18n="sort_az">A-Z</span> <span class="sort-dir"></span>
                 </div>
                 <div class="dropdown-item" data-sort="tag" data-sound="click">
-                  <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                  <span>By Tag</span> <span class="sort-dir"></span>
+                  <svg class="ui-icon icon-inline-sm" aria-hidden="true"><use href="#icon-tag"/></svg>
+                  <span data-i18n="sort_tag">By Tag</span> <span class="sort-dir"></span>
                 </div>
               </div>
             </div>
@@ -227,27 +238,27 @@
         </div>
 
         <div class="task-list-container">
-          <div id="guide-text" class="guide-text">
+          <div id="guide-text" class="guide-text" data-i18n="no_tasks_empty">
             Your tasks will be grouped by date here...
           </div>
         </div>
 
         <div class="taskless-convert-banner" id="taskless-convert-banner" style="display: none;">
           <span id="taskless-convert-banner-text"></span>
-          <button type="button" class="taskless-convert-cancel" id="taskless-convert-cancel-btn" aria-label="Cancel converting this focus time into a task" data-sound="click">
+          <button type="button" class="taskless-convert-cancel" id="taskless-convert-cancel-btn" aria-label="Cancel" data-i18n-aria-label="cancel" data-sound="click">
             <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
           </button>
         </div>
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div class="pill-icon-btn-wrapper">
-            <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" aria-label="Set Tag" data-sound="click">
+            <button class="theme-circle-btn" id="advanced-task-btn" title="Set Tag" aria-label="Set Tag" data-i18n-title="set_tag" data-i18n-aria-label="set_tag" data-sound="click">
               <svg class="ui-icon" aria-hidden="true"><use href="#icon-tag"/></svg>
             </button>
           </div>
 
-          <input type="text" id="task-input" placeholder="Add a new task..." class="task-input" maxlength="30">
-          <button class="btn btn-primary" id="add-task-btn" data-sound="click">Add</button>
+          <input type="text" id="task-input" placeholder="Add a new task..." data-i18n-placeholder="add_task_placeholder" class="task-input" maxlength="30">
+          <button class="btn btn-primary" id="add-task-btn" data-i18n="add" data-sound="click">Add</button>
         </div>
       </section>
 
@@ -259,10 +270,10 @@
 
         <div class="timer-header glass-pill" style="margin-bottom: 0;">
           <span class="locked-task-label lg">
-            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            <strong class="dashboard-title-text">Daily Overview</strong>
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"/></svg>
+            <strong class="dashboard-title-text" data-i18n="daily_overview">Daily Overview</strong>
           </span>
-          <button class="icon-btn habit-settings-btn header-action" aria-label="Habit Settings" title="Habit Settings" data-sound="click">
+          <button class="icon-btn habit-settings-btn header-action" aria-label="Habit Settings" title="Habit Settings" data-i18n-title="habit_settings" data-i18n-aria-label="habit_settings" data-sound="click">
             <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
           </button>
         </div>
@@ -270,7 +281,7 @@
         <div class="text-center">
           <p style="font-size: 1rem; color: var(--text-main); margin-bottom: 5px;" class="dashboard-stats-text"><strong>0/0</strong></p>
           <div style="min-height: 20px; display: flex; align-items: center; justify-content: center;">
-            <p id="motivational-quote" class="habit-quote-text" style="font-size: 0.85rem; margin: 0;">"Small steps every day."</p>
+            <p id="motivational-quote" class="habit-quote-text" style="font-size: 0.85rem; margin: 0;"></p>
           </div>
         </div>
 
@@ -287,7 +298,7 @@
         </div>
 
         <div class="side-label-row">
-          <div class="vertical-side-label">
+          <div class="vertical-side-label" data-i18n="top_streaks">
             Top Streaks
           </div>
           <div id="top-streaks-list" class="side-label-stack">
@@ -299,17 +310,17 @@
 
         <div class="section-top-wrapper">
           <div class="date-nav-full glass-pill">
-            <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="prev-day-btn" title="Previous day" aria-label="Previous day" data-i18n-title="previous_day" data-i18n-aria-label="previous_day" data-sound="click"><svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <div class="date-display-toggle">
               <button type="button" class="date-display-button" id="habit-date-display" aria-haspopup="dialog" aria-expanded="false">Today</button>
               <input type="date" id="native-date-picker" class="native-date-input">
             </div>
-            <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+            <button class="icon-btn date-arrow" id="next-day-btn" title="Next day" aria-label="Next day" data-i18n-title="next_day" data-i18n-aria-label="next_day" data-sound="click"><svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
           </div>
 
           <div class="filter-row-unified">
-            <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            <button class="theme-circle-btn" id="manage-categories-btn" title="Manage Categories" aria-label="Manage Categories" data-i18n-title="manage_categories" data-i18n-aria-label="manage_categories" data-sound="click">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-sliders"/></svg>
             </button>
 
             <div class="filter-scroll-area glass-pill dense" id="habit-filter-container">
@@ -317,43 +328,42 @@
             </div>
 
             <div class="sort-wrapper" id="habit-sort-wrapper">
-              <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits" data-sound="click">
-                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
+              <button class="theme-circle-btn" id="habit-sort-btn" title="Sort Habits" aria-label="Sort Habits" data-i18n-title="sort_habits" data-i18n-aria-label="sort_habits" data-sound="click">
+                <svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="14" y2="12"></line><line x1="4" y1="18" x2="8" y2="18"></line></svg>
               </button>
               <div id="habit-sort-dropdown" class="custom-dropdown glass-effect w-140">
                 <div class="dropdown-item active-sort" data-sort="newest" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                  <span>Newest</span> <span class="sort-dir">↓</span>
+                  <span data-i18n="sort_newest">Newest</span> <span class="sort-dir">↓</span>
                 </div>
                 <div class="dropdown-item" data-sort="az" data-sound="click">
                   <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
-                  <span>A-Z</span> <span class="sort-dir"></span>
+                  <span data-i18n="sort_az">A-Z</span> <span class="sort-dir"></span>
                 </div>
-                <div class="dropdown-item" data-sort="category">
-                  <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                  <span>By Category</span> <span class="sort-dir"></span>
+                <div class="dropdown-item" data-sort="category" data-sound="click">
+                  <svg class="ui-icon icon-inline-sm" aria-hidden="true"><use href="#icon-tag"/></svg>
+                  <span data-i18n="sort_category">By Category</span> <span class="sort-dir"></span>
                 </div>
-                <div class="dropdown-item" data-sort="streak">
-                  <svg class="ui-icon icon-inline-sm" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polyline></svg>
-                  <span>By Streak</span> <span class="sort-dir"></span>
+                <div class="dropdown-item" data-sort="streak" data-sound="click">
+                  <svg class="ui-icon icon-inline-sm" aria-hidden="true"><use href="#icon-trending-up"/></svg>
+                  <span data-i18n="sort_streak">By Streak</span> <span class="sort-dir"></span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="task-list-container" id="habit-list-container" style="padding-bottom: 10px;">
-          </div>
+        <div class="task-list-container" id="habit-list-container" style="padding-bottom: 10px;"></div>
 
         <div class="add-task-area glass-pill" style="display: flex; align-items: center; padding: 6px; gap: 10px; margin-top: auto;">
           <div class="pill-icon-btn-wrapper">
-            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings" data-sound="click">
-              <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <button class="theme-circle-btn" id="open-add-habit-btn" title="Detailed Habit Settings" aria-label="Detailed Habit Settings" data-i18n-title="detailed_habit_settings" data-i18n-aria-label="detailed_habit_settings" data-sound="click">
+              <svg class="ui-icon" aria-hidden="true"><use href="#icon-edit"/></svg>
             </button>
           </div>
 
-          <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." autocomplete="off" maxlength="30">
-          <button class="btn btn-primary" id="quick-add-habit-btn" data-sound="click">Add</button>
+          <input type="text" id="quick-habit-input" class="task-input" placeholder="Quick add habit..." data-i18n-placeholder="quick_habit_placeholder" autocomplete="off" maxlength="30">
+          <button class="btn btn-primary" id="quick-add-habit-btn" data-i18n="add" data-sound="click">Add</button>
         </div>
       </section>
 
@@ -368,16 +378,16 @@
 
         <div class="timer-header glass-pill" style="margin-bottom: 0px;">
           <span class="locked-task-label lg">
-            <svg class="ui-icon phase-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            <svg class="ui-icon phase-icon" aria-hidden="true"><use href="#icon-trending-up"/></svg>
             <strong class="dashboard-title-text" id="left-panel-title">This Week</strong>
           </span>
-          <button class="icon-btn header-action" id="prog-settings-btn" aria-label="Dashboard Settings" title="Dashboard Settings" data-sound="click">
-            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"></path></svg>
+          <button class="icon-btn header-action" id="prog-settings-btn" aria-label="Dashboard Settings" title="Dashboard Settings" data-i18n-title="settings" data-i18n-aria-label="settings" data-sound="click">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
           </button>
         </div>
 
         <div class="text-center">
-          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;">Your Stats</span>
+          <span style="color: var(--text-muted); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 2px;" data-i18n="your_stats">Your Stats</span>
         </div>
 
         <div class="progress-hero tight">
@@ -388,20 +398,20 @@
             </svg>
             <div class="ring-center-overlay">
               <span class="time-display mini" id="hero-score-value">0%</span>
-              <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Success</span>
+              <span style="font-size: 0.85rem; font-weight: bold; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;" data-i18n="success_rate">Success</span>
             </div>
           </div>
         </div>
 
         <div class="side-label-row">
-          <div class="vertical-side-label">
+          <div class="vertical-side-label" data-i18n="overview">
             Overview
           </div>
           <div class="stat-stack side-label-stack">
             <div class="stat-row">
               <div class="stat-icon color-blue"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
               <div class="stat-details">
-                <span class="stat-label">Focus Time</span>
+                <span class="stat-label" data-i18n="focus_time">Focus Time</span>
                 <div class="stat-value-row">
                   <span class="stat-value" id="stat-total-focus">0h 0m</span>
                   <span class="delta-badge" id="delta-focus"></span>
@@ -411,7 +421,7 @@
             <div class="stat-row">
               <div class="stat-icon color-green"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
               <div class="stat-details">
-                <span class="stat-label">Items Completed</span>
+                <span class="stat-label" data-i18n="items_completed">Items Completed</span>
                 <div class="stat-value-row">
                   <span class="stat-value" id="stat-items-done">0</span>
                   <span class="delta-badge" id="delta-items"></span>
@@ -421,7 +431,7 @@
             <div class="stat-row">
               <div class="stat-icon color-orange"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div>
               <div class="stat-details">
-                <span class="stat-label">Perfect Days</span>
+                <span class="stat-label" data-i18n="perfect_days">Perfect Days</span>
                 <div class="stat-value-row">
                   <span class="stat-value" id="stat-perfect-days">0</span>
                   <span class="delta-badge" id="delta-perfect"></span>
@@ -435,7 +445,7 @@
       <section class="tasks-section" style="justify-content: flex-start; gap: 15px; overflow-y: auto;">
 
         <div class="date-nav-full glass-pill no-margin-stacked">
-          <button class="icon-btn date-arrow" id="prog-prev-btn" title="Previous period" aria-label="Previous period" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+          <button class="icon-btn date-arrow" id="prog-prev-btn" title="Previous period" aria-label="Previous period" data-i18n-title="previous_period" data-i18n-aria-label="previous_period" data-sound="click"><svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
 
           <div class="sort-wrapper" id="prog-range-wrapper" style="flex: 1; text-align: center; position: relative;">
             <button class="date-selector-btn" id="prog-range-btn" style="width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;" data-sound="click">
@@ -443,47 +453,47 @@
               <svg class="ui-icon phase-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <div id="prog-range-dropdown" class="custom-dropdown glass-effect centered">
-              <div class="dropdown-item" data-range="daily" data-sound="click">Daily</div>
-              <div class="dropdown-item active-sort" data-range="weekly" data-sound="click">Weekly</div>
-              <div class="dropdown-item" data-range="monthly" data-sound="click">Monthly</div>
-              <div class="dropdown-item" data-range="custom" data-sound="click">Custom Range...</div>
+              <div class="dropdown-item" data-range="daily" data-i18n="daily_range" data-sound="click">Daily</div>
+              <div class="dropdown-item active-sort" data-range="weekly" data-i18n="weekly_range" data-sound="click">Weekly</div>
+              <div class="dropdown-item" data-range="monthly" data-i18n="monthly_range" data-sound="click">Monthly</div>
+              <div class="dropdown-item" data-range="custom" data-i18n="custom_range" data-sound="click">Custom Range...</div>
             </div>
           </div>
 
-          <button class="icon-btn date-arrow" id="prog-next-btn" title="Next period" aria-label="Next period" data-sound="click"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+          <button class="icon-btn date-arrow" id="prog-next-btn" title="Next period" aria-label="Next period" data-i18n-title="next_period" data-i18n-aria-label="next_period" data-sound="click"><svg class="ui-icon icon-mirror-rtl" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
         </div>
 
         <div class="chart-block" id="prog-focus-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
           <div class="date-header" style="margin-top: 0; font-size: 0.75rem; margin-bottom: 5px;">
-            <svg class="ui-icon phase-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-            Pomodoro
+            <svg class="ui-icon phase-icon" aria-hidden="true"><use href="#icon-target"/></svg>
+            <span data-i18n="tab_pomodoro">Pomodoro</span>
             <div class="date-header-line"></div>
           </div>
           <div class="heatmap-grid" id="focus-heatmap"></div>
           <div class="heatmap-legend">
-            <span class="legend-label">Less</span>
+            <span class="legend-label" data-i18n="less">Less</span>
             <div class="heatmap-block"></div>
             <div class="heatmap-block focus-level-1"></div>
             <div class="heatmap-block focus-level-2"></div>
             <div class="heatmap-block focus-level-3"></div>
-            <span class="legend-label">More</span>
+            <span class="legend-label" data-i18n="more">More</span>
           </div>
         </div>
 
         <div class="chart-block" id="prog-habit-container" style="padding: 15px; min-height: 180px; position: relative; z-index: 1;">
           <div class="date-header" style="margin-top: 0; font-size: 0.75rem; margin-bottom: 5px;">
-            <svg class="ui-icon phase-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            Habits
+            <svg class="ui-icon phase-icon" aria-hidden="true"><use href="#icon-calendar"/></svg>
+            <span data-i18n="tab_habits">Habits</span>
             <div class="date-header-line"></div>
           </div>
           <div class="heatmap-grid" id="habit-heatmap"></div>
           <div class="heatmap-legend">
-            <span class="legend-label">Less</span>
+            <span class="legend-label" data-i18n="less">Less</span>
             <div class="heatmap-block"></div>
             <div class="heatmap-block habit-level-1"></div>
             <div class="heatmap-block habit-level-2"></div>
             <div class="heatmap-block habit-level-3"></div>
-            <span class="legend-label">More</span>
+            <span class="legend-label" data-i18n="more">More</span>
           </div>
         </div>
       </section>
@@ -491,475 +501,359 @@
 
   </main>
   <div class="modal-overlay" id="settings-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
         <h2>
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg>
-          Settings
+          <span data-i18n="settings">Settings</span>
         </h2>
-        <button class="close-btn" id="close-settings" title="Close" aria-label="Close" data-sound="click">
+        <button class="close-btn" id="close-settings" title="Close" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click">
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
         </button>
       </div>
       <div class="modal-body">
+        <div class="setting-group dropdown-anchor" id="language-wrapper">
+          <label data-i18n="language">Language:</label>
+          <input type="text" id="language-display" class="custom-select" value="English" readonly style="cursor: pointer;">
+          <input type="hidden" id="language-select" value="en">
+          <div id="language-dropdown" class="custom-dropdown glass-effect full-width">
+            <div class="dropdown-item" data-val="en" data-i18n="language_en" data-sound="click">English</div>
+            <div class="dropdown-item" data-val="fa" data-i18n="language_fa" data-sound="click">فارسی (Persian)</div>
+          </div>
+        </div>
+
         <div class="setting-group dropdown-anchor" id="mode-wrapper">
-          <label>Mode:</label>
+          <label data-i18n="mode">Mode:</label>
           <input type="text" id="mode-display" class="custom-select" value="Pomodoro Timer" readonly style="cursor: pointer;">
           <input type="hidden" id="mode-select" value="pomodoro">
           <div id="mode-dropdown" class="custom-dropdown glass-effect full-width">
-            <div class="dropdown-item" data-val="pomodoro" data-sound="click">Pomodoro Timer</div>
-            <div class="dropdown-item" data-val="stopwatch" data-sound="click">Stopwatch (Count up)</div>
+            <div class="dropdown-item" data-val="pomodoro" data-i18n="pomodoro_timer_mode" data-sound="click">Pomodoro Timer</div>
+            <div class="dropdown-item" data-val="stopwatch" data-i18n="stopwatch_mode" data-sound="click">Stopwatch (Count up)</div>
           </div>
         </div>
         <div class="setting-group toggle-group">
-          <label for="dark-mode-toggle">Dark mode</label>
+          <label for="dark-mode-toggle" data-i18n="dark_mode">Dark mode</label>
           <label class="switch"><input type="checkbox" id="dark-mode-toggle" data-sound="click" role="switch" aria-checked="false"><span class="slider round"></span></label>
         </div>
         <div class="setting-group toggle-group">
-          <label for="sound-toggle">Sound Effects (Haptics):</label>
+          <label for="sound-toggle" data-i18n="sound_effects">Sound Effects (Haptics):</label>
           <label class="switch"><input type="checkbox" id="sound-toggle" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
         </div>
 
         <div id="pomodoro-settings-wrapper">
           <div class="setting-group" id="duration-wrapper">
-            <label for="work-duration">Work Duration:</label>
+            <label for="work-duration" data-i18n="work_duration">Work Duration:</label>
             <div class="stepper-control" id="duration-stepper">
-              <button type="button" class="stepper-btn" id="duration-minus" aria-label="Decrease work duration by 1 minute" data-sound="click">
+              <button type="button" class="stepper-btn" id="duration-minus" aria-label="Decrease work duration" data-i18n-aria-label="decrease_work_duration" data-sound="click">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               </button>
               <div class="stepper-value">
-                <input type="number" id="work-duration" class="stepper-input" value="25" min="1" max="180" step="1" inputmode="numeric" aria-label="Work duration in minutes">
-                <span class="stepper-unit">min</span>
+                <input type="text" pattern="[0-9]*" id="work-duration" class="stepper-input" value="25" inputmode="numeric" aria-label="Work duration in minutes" data-i18n-aria-label="work_duration_input_label">
+                <span class="stepper-unit" data-i18n="minute_short">min</span>
               </div>
-              <button type="button" class="stepper-btn" id="duration-plus" aria-label="Increase work duration by 1 minute" data-sound="click">
+              <button type="button" class="stepper-btn" id="duration-plus" aria-label="Increase work duration" data-i18n-aria-label="increase_work_duration" data-sound="click">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               </button>
             </div>
           </div>
 
           <div class="setting-group toggle-group">
-            <label for="breaks-toggle">Enable Breaks (Short/Long):</label>
+            <label for="breaks-toggle" data-i18n="enable_breaks">Enable Breaks (Short/Long):</label>
             <label class="switch"><input type="checkbox" id="breaks-toggle" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
           </div>
           <div class="setting-group toggle-group">
-            <label for="autostart-breaks-toggle">Auto-start Breaks:</label>
+            <label for="autostart-breaks-toggle" data-i18n="autostart_breaks">Auto-start Breaks:</label>
             <label class="switch"><input type="checkbox" id="autostart-breaks-toggle" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
           </div>
 
           <div class="setting-group dropdown-anchor" id="sound-wrapper">
-            <label>Sound Alert:</label>
+            <label data-i18n="sound_alert">Sound Alert:</label>
             <input type="text" id="sound-display" class="custom-select" value="Soft Bell" readonly style="cursor: pointer;">
             <input type="hidden" id="sound-select" value="bell">
             <div id="sound-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="mute" data-sound="click">Mute (No Sound)</div>
-              <div class="dropdown-item" data-val="bell" data-sound="click">Soft Bell</div>
-              <div class="dropdown-item" data-val="digital" data-sound="click">Digital Beep</div>
-              <div class="dropdown-item" data-val="bird" data-sound="click">Bird Chirp</div>
+              <div class="dropdown-item" data-val="mute" data-i18n="sound_mute" data-sound="click">Mute (No Sound)</div>
+              <div class="dropdown-item" data-val="bell" data-i18n="sound_bell" data-sound="click">Soft Bell</div>
+              <div class="dropdown-item" data-val="digital" data-i18n="sound_digital" data-sound="click">Digital Beep</div>
+              <div class="dropdown-item" data-val="bird" data-i18n="sound_bird" data-sound="click">Bird Chirp</div>
             </div>
           </div>
         </div>
 
+        <div class="setting-group progress-dashboard-section" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
+          <label style="display:block; margin-bottom: 8px;" data-i18n="progress_dashboard_label">Progress Dashboard</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;" data-i18n="progress_dashboard_desc">
+            Choose what shows up on the Progress tab's dashboard and heatmaps.
+          </p>
+          <div class="setting-group toggle-group">
+            <label for="prog-toggle-focus" data-i18n="show_pomodoro_data">Show Pomodoro Data</label>
+            <label class="switch" for="prog-toggle-focus"><input type="checkbox" id="prog-toggle-focus" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          </div>
+          <div class="setting-group toggle-group">
+            <label for="prog-toggle-habits" data-i18n="show_habits_data">Show Habits Data</label>
+            <label class="switch" for="prog-toggle-habits"><input type="checkbox" id="prog-toggle-habits" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          </div>
+          <div class="setting-group toggle-group">
+            <label for="prog-toggle-compare" data-i18n="show_comparisons">Show Comparisons (↑↓)</label>
+            <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
+          </div>
+        </div>
+
         <div class="setting-group help-settings-row" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
-          <label style="display:block; margin-bottom: 8px;">Help</label>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
+          <label style="display:block; margin-bottom: 8px;" data-i18n="help_settings_label">Help</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;" data-i18n="help_settings_desc">
             New here, or just want a refresher? Open the guide to see how the timer, tasks, habits, and progress dashboard all work.
           </p>
-          <button type="button" class="btn-outline" id="open-help-btn" aria-label="Open Help and Guide" data-sound="click" style="width:100%;">
+          <button type="button" class="btn-outline" id="open-help-btn" aria-label="Open Help and Guide" data-i18n-aria-label="help_and_guide" data-sound="click" style="width:100%;">
             <svg class="ui-icon icon-inline-sm" aria-hidden="true"><use href="#icon-help-circle"/></svg>
-            <span>Help &amp; Guide</span>
+            <span data-i18n="help_and_guide">Help &amp; Guide</span>
           </button>
         </div>
 
         <div class="setting-group" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
-          <label style="display:block; margin-bottom: 8px;">Motivational Quotes</label>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
+          <label style="display:block; margin-bottom: 8px;" data-i18n="motivational_quotes">Motivational Quotes</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;" data-i18n="motivational_quotes_desc">
             Add your own quotes to the rotation, or edit, disable, and remove any quote — including the built-in ones.
           </p>
-          <button type="button" class="btn-outline" id="manage-quotes-btn" aria-label="Manage motivational quotes" data-sound="click" style="width:100%;">Manage Quotes</button>
+          <button type="button" class="btn-outline" id="manage-quotes-btn" aria-label="Manage motivational quotes" data-i18n="manage_quotes" data-i18n-aria-label="manage_quotes" data-sound="click" style="width:100%;">Manage Quotes</button>
         </div>
 
         <div class="setting-group" style="border-top: 1px solid var(--glass-border); padding-top: 15px; margin-top: 5px;">
-          <label style="display:block; margin-bottom: 8px;">Your Data</label>
-          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
+          <label style="display:block; margin-bottom: 8px;" data-i18n="your_data">Your Data</label>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;" data-i18n="your_data_desc">
             Everything is stored only in this browser. Clearing site data, private browsing, or a browser reset can erase it — export a backup you can restore later.
           </p>
           <div style="display: flex; gap: 10px;">
-            <button type="button" class="btn-outline flex-1" id="export-data-btn" aria-label="Export all data as a JSON file" data-sound="click">Export Data</button>
-            <button type="button" class="btn-outline flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-sound="click">Import Data</button>
+            <button type="button" class="btn-outline flex-1" id="export-data-btn" aria-label="Export all data as a JSON file" data-i18n-aria-label="export_data" data-i18n="export_data" data-sound="click">Export Data</button>
+            <button type="button" class="btn-outline flex-1" id="import-data-btn" aria-label="Import data from a JSON file" data-i18n-aria-label="import_data" data-i18n="import_data" data-sound="click">Import Data</button>
           </div>
           <input type="file" id="import-data-input" accept="application/json" style="display:none;">
-          <button type="button" class="btn-outline" id="open-trash-btn" aria-label="Open Trash" data-sound="click" style="width:100%; margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;">
-            <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            <span>Trash</span>
+          <button type="button" class="btn-outline" id="open-trash-btn" aria-label="Open Trash" data-i18n-aria-label="trash" data-sound="click" style="width:100%; margin-top: 10px; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-trash"/></svg>
+            <span data-i18n="trash">Trash</span>
             <span class="trash-count-badge" id="trash-count-badge" style="display:none;">0</span>
           </button>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-block" id="save-settings" data-sound="success">Save & Apply</button>
+        <button class="btn-block" id="save-settings" data-i18n="save_and_apply" data-sound="success">Save & Apply</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="help-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
         <h2>
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-help-circle"/></svg>
-          Help &amp; Guide
+          <span data-i18n="help_and_guide">Help &amp; Guide</span>
         </h2>
-        <button class="close-btn" id="close-help-modal" title="Close" aria-label="Close" data-sound="click">
+        <button class="close-btn" id="close-help-modal" title="Close" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click">
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <p class="help-intro" id="help-intro-text">
-          FocusApp has three parts: a Pomodoro timer for focused work sessions, a habit tracker, and a progress dashboard. Everything below is a quick reference — tap a section to expand it, or jump straight to one.
+        <p class="help-intro" id="help-intro-text" data-i18n="help_settings_desc">
+          FocusApp has three parts: a Pomodoro timer for focused work sessions, a habit tracker, and a progress dashboard. Everything below is a quick reference — tap a section to expand it.
         </p>
-
-        <details class="help-section" id="help-getting-started" open>
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-check-circle"/></svg>
-            <span>Getting Started</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <p>The three tabs at the top switch between the app's main sections: <strong>Pomodoro</strong> (timer + today's tasks), <strong>Habits</strong> (daily/weekly habit tracking), and <strong>Progress</strong> (your stats over time).</p>
-            <p>Everything you create — tasks, habits, tags, quotes — is saved only in this browser, automatically, as you go. There's no account and nothing is sent anywhere.</p>
-            <p>Whenever you're unsure what something does, tap the <strong>?</strong> icon at the top of any section, or open <strong>Settings → Help &amp; Guide</strong> to come back here.</p>
-          </div>
-        </details>
-
-        <details class="help-section" id="help-pomodoro">
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-target"/></svg>
-            <span>Pomodoro Timer</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <p>Tap <strong>Start</strong> to begin a work session. The ring fills in as time passes, and the app cycles automatically through Work → Short Break → Long Break (shown in the session tracker, e.g. "Work 1/4").</p>
-            <ul>
-              <li><strong>Skip</strong> jumps straight to the next phase.</li>
-              <li><strong>Reset</strong> resets the current phase; double-click or press and hold it for a full session reset.</li>
-              <li>The glasses icon opens <strong>Focus Mode</strong> — a distraction-free full timer view.</li>
-              <li>The target icon shows which task is currently locked in as your focus.</li>
-            </ul>
-            <p>In Settings you can switch to <strong>Stopwatch</strong> mode (count up instead of down), change the work duration, enable/disable breaks, auto-start breaks, and pick the alert sound.</p>
-          </div>
-        </details>
-
-        <details class="help-section" id="help-tasks">
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-tag"/></svg>
-            <span>Tasks</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <p>Type a task into the input at the bottom of the Pomodoro tab and tap <strong>Add</strong>. Tap a task to lock it in as your current focus — its name then shows next to the target icon above the timer, and completed focus time is tracked against it.</p>
-            <ul>
-              <li>The tag icon next to the input lets you assign a color tag before adding.</li>
-              <li>Use the sliders icon to <strong>Manage Tags</strong> (create, recolor, rename, delete).</li>
-              <li>The sort icon lets you order tasks by Newest, Time Spent, A-Z, or by Tag.</li>
-              <li>Use the arrows next to the date to review or plan tasks for other days.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="help-section" id="help-habits">
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-            <span>Habits</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <p>Use <strong>Quick add habit</strong> at the bottom for a simple daily habit, or open the pencil icon next to it for full control over a habit's name, category, icon, and goal cadence.</p>
-            <ul>
-              <li><strong>Goal</strong> can be Every Day, a specific weekday, Custom Days (pick any combination), or Every N Weeks/Months.</li>
-              <li>Tap a habit to mark it done for the selected day; your streak builds as long as you keep meeting the goal.</li>
-              <li>The sliders icon opens <strong>Manage Categories</strong> to group habits and color-code them.</li>
-              <li>The ring and "Top Streaks" panel above the list summarize how the selected day (or your best streaks) are going.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="help-section" id="help-progress">
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-            <span>Progress Dashboard</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <p>This tab summarizes your Focus Time, Items Completed, and Perfect Days over a date range, with a consistency ring showing your overall success rate.</p>
-            <ul>
-              <li>Switch the date range (e.g. This Week) or pick a Custom Range from the date navigator below the stats.</li>
-              <li>Tap any day in the list to open its <strong>Daily Report</strong> — a full breakdown of that day's tasks and habits.</li>
-              <li>The gear icon opens Dashboard Settings, where you can toggle Dark Mode, sound effects, and which data (Pomodoro/Habits/comparison arrows) the dashboard shows.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="help-section" id="help-data">
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            <span>Your Data &amp; Backup</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <p>Everything is stored only in this browser (localStorage) — there's no cloud sync. Clearing site data, private browsing, or resetting the browser can erase it.</p>
-            <ul>
-              <li><strong>Export Data</strong> (in Settings) downloads a JSON backup you can keep or move to another browser/device.</li>
-              <li><strong>Import Data</strong> restores from a backup file — this replaces what's currently saved, so use it carefully.</li>
-              <li><strong>Trash</strong> holds deleted tasks, habits, tags, categories, and quotes so you can restore them, until you empty it.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details class="help-section" id="help-tips">
-          <summary class="help-section-summary">
-            <svg class="ui-icon help-topic-icon" aria-hidden="true"><use href="#icon-sliders"/></svg>
-            <span>Tips &amp; Shortcuts</span>
-            <svg class="ui-icon help-chevron" aria-hidden="true"><use href="#icon-chevron-down"/></svg>
-          </summary>
-          <div class="help-section-body">
-            <ul>
-              <li><span class="help-kbd">Space</span> starts or pauses the timer (when you're not typing in a field).</li>
-              <li><span class="help-kbd">Esc</span> closes the topmost open dialog, or exits Focus Mode if nothing is open.</li>
-              <li>Press and hold the Reset button for a full session reset instead of just the current phase.</li>
-              <li>Dark Mode and Sound Effects can be toggled from either Settings or the Progress dashboard's own settings.</li>
-            </ul>
-          </div>
-        </details>
+        <div class="help-sections-container" id="help-sections-container"></div>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="trash-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
         <h2>
-          <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          Trash
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-trash"/></svg>
+          <span data-i18n="trash">Trash</span>
         </h2>
-        <button class="close-btn" id="close-trash-modal" title="Close" aria-label="Close" data-sound="click">
+        <button class="close-btn" id="close-trash-modal" title="Close" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click">
           <svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg>
         </button>
       </div>
       <div class="modal-body">
-        <p class="field-hint" id="trash-empty-message">Nothing in the Trash. Deleted tasks, habits, tags, categories, and quotes show up here.</p>
+        <p class="field-hint" id="trash-empty-message" data-i18n="trash_empty_msg">Nothing in the Trash. Deleted tasks, habits, tags, categories, and quotes show up here.</p>
         <div id="trash-list" class="trash-list"></div>
       </div>
-      <div class="modal-footer" style="display: flex; gap: 12px;">
-        <button class="btn btn-secondary flex-1" id="close-trash-modal-btn" data-sound="click">Close</button>
-        <button class="btn btn-danger flex-1" id="empty-trash-btn" data-sound="trash">Empty Trash</button>
+      <div class="modal-footer modal-actions-row">
+        <button class="btn btn-secondary" id="close-trash-modal-btn" data-i18n="close" data-sound="click">Close</button>
+        <button class="btn btn-danger" id="empty-trash-btn" data-i18n="empty_trash" data-sound="trash">Empty Trash</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="tags-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> Manage Tags</h2>
-        <button class="close-btn" id="close-tags-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-tag"/></svg> <span data-i18n="manage_tags">Manage Tags</span></h2>
+        <button class="close-btn" id="close-tags-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
-          <input type="color" id="manage-new-tag-color" class="tag-color-swatch" title="Tag color" aria-label="New tag color">
-          <input type="text" id="manage-new-tag-input" placeholder="New tag name..." class="custom-select flex-1" maxlength="20">
-          <button id="manage-add-tag-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
+          <input type="color" id="manage-new-tag-color" class="tag-color-swatch" title="Tag color" data-i18n-title="new_tag_color" aria-label="New tag color" data-i18n-aria-label="new_tag_color">
+          <input type="text" id="manage-new-tag-input" placeholder="New tag name..." data-i18n-placeholder="new_tag_name_placeholder" class="custom-select flex-1" maxlength="20">
+          <button id="manage-add-tag-btn" class="btn btn-primary btn-sm" data-i18n="add" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="tags-management-list" class="tags-list-grid"></div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; text-align: center;">Click to delete.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; text-align: center;" data-i18n="click_to_delete_hint">Click to delete.</p>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="confirm-modal">
-    <div class="modal-content glass-effect" style="max-width: 320px; text-align: center; padding: 30px 20px;">
-      <h3 id="confirm-message" style="margin-bottom: 25px; font-size: 1.2rem; font-weight: bold;">Are you sure?</h3>
-      <div style="display: flex; gap: 12px;">
-        <button id="confirm-no-btn" class="btn btn-secondary" data-sound="click">Cancel</button>
-        <button id="confirm-yes-btn" class="btn btn-danger" data-sound="trash">Yes, Delete</button>
+    <div class="modal-content modal-sm glass-effect">
+      <div class="modal-body confirm-modal-body">
+        <h3 id="confirm-message" class="confirm-modal-message" data-i18n="are_you_sure">Are you sure?</h3>
+      </div>
+      <div class="modal-footer modal-actions-row">
+        <button id="confirm-no-btn" class="btn btn-secondary" data-i18n="cancel" data-sound="click">Cancel</button>
+        <button id="confirm-yes-btn" class="btn btn-danger" data-i18n="yes_delete" data-sound="trash">Yes, Delete</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="edit-tag-modal">
-    <div class="modal-content glass-effect" style="max-width: 380px;">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header" style="margin-bottom: 15px;">
         <h2>
-          <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-          Edit Task
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-edit"/></svg>
+          <span data-i18n="edit_task">Edit Task</span>
         </h2>
-        <button class="close-btn" id="close-edit-tag-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-edit-tag-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="setting-group" style="margin-bottom: 15px;">
-          <label>Task Name</label>
+          <label data-i18n="task_name">Task Name</label>
           <input type="text" id="edit-task-name-input" class="custom-select" style="width: 100%;" maxlength="30" autocomplete="off">
         </div>
         <div class="setting-group" style="margin-bottom: 20px;">
-          <label>Task Tag</label>
+          <label data-i18n="task_tag">Task Tag</label>
           <div id="edit-task-tag-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px;">
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-block" id="save-task-edit-btn" data-sound="success">Save Changes</button>
+        <button class="btn-block" id="save-task-edit-btn" data-i18n="save_changes" data-sound="success">Save Changes</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="habit-modal">
-    <div class="modal-content glass-effect" style="max-width: 420px;">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
-        <h2 id="habit-modal-title"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Create Habit</h2>
-        <button class="close-btn" id="close-habit-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <h2 id="habit-modal-title"><svg class="ui-icon" aria-hidden="true"><use href="#icon-edit"/></svg> <span data-i18n="create_habit">Create Habit</span></h2>
+        <button class="close-btn" id="close-habit-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
 
       <div class="modal-body">
         <div class="setting-group">
-          <label>Name</label>
-          <input type="text" id="habit-name-input" class="custom-select" placeholder="e.g., Drink Water, Read..." autocomplete="off" maxlength="30">
+          <label data-i18n="task_name">Name</label>
+          <input type="text" id="habit-name-input" class="custom-select" placeholder="e.g., Drink Water, Read..." data-i18n-placeholder="habit_name_placeholder" autocomplete="off" maxlength="30">
         </div>
 
         <div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
           <div class="setting-group" id="habit-category-wrapper" style="flex: 1; margin: 0; position: relative; min-width: 140px;">
-            <label>Category</label>
-            <input type="text" id="habit-category-input" class="custom-select" placeholder="e.g., Health" autocomplete="off" maxlength="20">
+            <label data-i18n="category">Category</label>
+            <input type="text" id="habit-category-input" class="custom-select" placeholder="e.g., Health" data-i18n-placeholder="category_placeholder" autocomplete="off" maxlength="20">
             <div id="habit-category-dropdown" class="custom-dropdown glass-effect full-width"></div>
           </div>
           <div class="setting-group" id="habit-frequency-wrapper" style="flex: 1; margin: 0; position: relative; min-width: 140px;">
-            <label>Goal</label>
+            <label data-i18n="goal">Goal</label>
             <input type="text" id="habit-frequency-input-display" class="custom-select" value="Every Day" readonly style="cursor: pointer;">
             <input type="hidden" id="habit-frequency-value" value="everyday">
 
             <div id="habit-frequency-dropdown" class="custom-dropdown glass-effect full-width">
-              <div class="dropdown-item" data-val="everyday" data-sound="click">Every Day</div>
-              <div class="dropdown-item" data-val="weekly" data-sound="click">Once a Week</div>
-              <div class="dropdown-item" data-val="biweekly" data-sound="click">Every 2 Weeks</div>
-              <div class="dropdown-item" data-val="monday" data-sound="click">Every Monday</div>
-              <div class="dropdown-item" data-val="tuesday" data-sound="click">Every Tuesday</div>
-              <div class="dropdown-item" data-val="wednesday" data-sound="click">Every Wednesday</div>
-              <div class="dropdown-item" data-val="thursday" data-sound="click">Every Thursday</div>
-              <div class="dropdown-item" data-val="friday" data-sound="click">Every Friday</div>
-              <div class="dropdown-item" data-val="saturday" data-sound="click">Every Saturday</div>
-              <div class="dropdown-item" data-val="sunday" data-sound="click">Every Sunday</div>
-              <div class="dropdown-item" data-val="custom" data-sound="click">Custom Days...</div>
+              <div class="dropdown-item" data-val="everyday" data-i18n="every_day" data-sound="click">Every Day</div>
+              <div class="dropdown-item" data-val="weekly" data-i18n="once_a_week" data-sound="click">Once a Week</div>
+              <div class="dropdown-item" data-val="biweekly" data-i18n="every_2_weeks" data-sound="click">Every 2 Weeks</div>
+              <div class="dropdown-item" data-val="monday" data-i18n="every_monday" data-sound="click">Every Monday</div>
+              <div class="dropdown-item" data-val="tuesday" data-i18n="every_tuesday" data-sound="click">Every Tuesday</div>
+              <div class="dropdown-item" data-val="wednesday" data-i18n="every_wednesday" data-sound="click">Every Wednesday</div>
+              <div class="dropdown-item" data-val="thursday" data-i18n="every_thursday" data-sound="click">Every Thursday</div>
+              <div class="dropdown-item" data-val="friday" data-i18n="every_friday" data-sound="click">Every Friday</div>
+              <div class="dropdown-item" data-val="saturday" data-i18n="every_saturday" data-sound="click">Every Saturday</div>
+              <div class="dropdown-item" data-val="sunday" data-i18n="every_sunday" data-sound="click">Every Sunday</div>
+              <div class="dropdown-item" data-val="custom" data-i18n="custom_days" data-sound="click">Custom Days...</div>
             </div>
           </div>
         </div>
 
         <div class="setting-group" id="custom-days-picker" style="display: none; margin-bottom: 20px;">
-          <label>Select Days</label>
+          <label data-i18n="select_days">Select Days</label>
           <div class="picker-grid" id="custom-days-grid">
-            <button type="button" class="day-option" data-day="1" aria-pressed="false" aria-label="Monday" data-sound="click">M</button>
-            <button type="button" class="day-option" data-day="2" aria-pressed="false" aria-label="Tuesday" data-sound="click">T</button>
-            <button type="button" class="day-option" data-day="3" aria-pressed="false" aria-label="Wednesday" data-sound="click">W</button>
-            <button type="button" class="day-option" data-day="4" aria-pressed="false" aria-label="Thursday" data-sound="click">T</button>
-            <button type="button" class="day-option" data-day="5" aria-pressed="false" aria-label="Friday" data-sound="click">F</button>
-            <button type="button" class="day-option" data-day="6" aria-pressed="false" aria-label="Saturday" data-sound="click">S</button>
-            <button type="button" class="day-option" data-day="0" aria-pressed="false" aria-label="Sunday" data-sound="click">S</button>
+            <button type="button" class="day-option" data-day="1" aria-pressed="false" aria-label="Monday" data-i18n-aria-label="day_monday" data-sound="click">M</button>
+            <button type="button" class="day-option" data-day="2" aria-pressed="false" aria-label="Tuesday" data-i18n-aria-label="day_tuesday" data-sound="click">T</button>
+            <button type="button" class="day-option" data-day="3" aria-pressed="false" aria-label="Wednesday" data-i18n-aria-label="day_wednesday" data-sound="click">W</button>
+            <button type="button" class="day-option" data-day="4" aria-pressed="false" aria-label="Thursday" data-i18n-aria-label="day_thursday" data-sound="click">T</button>
+            <button type="button" class="day-option" data-day="5" aria-pressed="false" aria-label="Friday" data-i18n-aria-label="day_friday" data-sound="click">F</button>
+            <button type="button" class="day-option" data-day="6" aria-pressed="false" aria-label="Saturday" data-i18n-aria-label="day_saturday" data-sound="click">S</button>
+            <button type="button" class="day-option" data-day="0" aria-pressed="false" aria-label="Sunday" data-i18n-aria-label="day_sunday" data-sound="click">S</button>
           </div>
 
           <div class="repeat-every-row">
-            <span class="repeat-every-label">Every</span>
+            <span class="repeat-every-label" data-i18n="every">Every</span>
             <div class="stepper-control stepper-control-sm" id="habit-repeat-every-stepper">
-              <button type="button" class="stepper-btn stepper-btn-sm" id="habit-repeat-every-minus" aria-label="Decrease repeat interval" data-sound="click">
+              <button type="button" class="stepper-btn stepper-btn-sm" id="habit-repeat-every-minus" aria-label="Decrease repeat interval" data-i18n-aria-label="decrease_repeat_interval" data-sound="click">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               </button>
               <div class="stepper-value">
-                <input type="number" id="habit-repeat-every-input" class="stepper-input" value="1" min="1" max="52" step="1" inputmode="numeric" aria-label="Repeat every N weeks or months">
+                <input type="text" pattern="[0-9]*" id="habit-repeat-every-input" class="stepper-input" value="1" inputmode="numeric" aria-label="Repeat interval" data-i18n-aria-label="repeat_interval_label">
               </div>
-              <button type="button" class="stepper-btn stepper-btn-sm" id="habit-repeat-every-plus" aria-label="Increase repeat interval" data-sound="click">
+              <button type="button" class="stepper-btn stepper-btn-sm" id="habit-repeat-every-plus" aria-label="Increase repeat interval" data-i18n-aria-label="increase_repeat_interval" data-sound="click">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
               </button>
             </div>
 
             <div class="repeat-unit-wrapper" id="habit-repeat-unit-wrapper" style="position: relative;">
-              <input type="text" id="habit-repeat-unit-display" class="custom-select" value="Week(s)" readonly aria-label="Repeat unit" style="cursor: pointer;">
+              <input type="text" id="habit-repeat-unit-display" class="custom-select" value="Week(s)" readonly aria-label="Repeat unit" data-i18n-aria-label="repeat_unit_label" style="cursor: pointer;">
               <input type="hidden" id="habit-repeat-unit-value" value="week">
               <div id="habit-repeat-unit-dropdown" class="custom-dropdown glass-effect">
-                <div class="dropdown-item" data-val="week" data-sound="click">Week(s)</div>
-                <div class="dropdown-item" data-val="month" data-sound="click">Month(s)</div>
+                <div class="dropdown-item" data-val="week" data-i18n="weeks" data-sound="click">Week(s)</div>
+                <div class="dropdown-item" data-val="month" data-i18n="months" data-sound="click">Month(s)</div>
               </div>
             </div>
           </div>
-          <p class="field-hint">e.g. Sat + Mon, every 2 weeks</p>
+          <p class="field-hint" data-i18n="custom_days_hint">e.g. Sat + Mon, every 2 weeks</p>
         </div>
 
         <div class="setting-group">
-          <label>Color</label>
+          <label data-i18n="color">Color</label>
           <div class="picker-grid" id="habit-color-picker">
             <button type="button" class="color-option selected" data-color="#3b82f6" aria-pressed="true" style="background: #3b82f6;" data-sound="click"></button>
             <button type="button" class="color-option" data-color="#10b981" aria-pressed="false" style="background: #10b981;" data-sound="click"></button>
             <button type="button" class="color-option" data-color="#f43f5e" aria-pressed="false" style="background: #f43f5e;" data-sound="click"></button>
             <button type="button" class="color-option" data-color="#8b5cf6" aria-pressed="false" style="background: #8b5cf6;" data-sound="click"></button>
             <button type="button" class="color-option" data-color="#f59e0b" aria-pressed="false" style="background: #f59e0b;" data-sound="click"></button>
-            <label class="custom-color-swatch-wrapper" id="habit-color-custom-wrapper" title="Custom color">
-              <input type="color" id="habit-color-custom" class="tag-color-swatch lg" value="#3b82f6" aria-label="Custom habit color" data-sound="click">
+            <label class="custom-color-swatch-wrapper" id="habit-color-custom-wrapper" title="Custom color" data-i18n-title="custom_habit_color">
+              <input type="color" id="habit-color-custom" class="tag-color-swatch lg" value="#3b82f6" aria-label="Custom habit color" data-i18n-aria-label="custom_habit_color" data-sound="click">
             </label>
           </div>
         </div>
 
         <div class="setting-group">
-          <label>Icon</label>
-          <div class="picker-grid" id="habit-icon-picker" style="flex-wrap: wrap; gap: 10px;">
-            <button type="button" class="icon-option selected" data-icon="book" aria-pressed="true" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="activity" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></button>
-            <button type="button" class="icon-option" data-icon="droplet" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="heart" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="star" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></button>
-            <button type="button" class="icon-option" data-icon="coffee" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg></button>
-            <button type="button" class="icon-option" data-icon="moon" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="sun" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></button>
-            <button type="button" class="icon-option" data-icon="monitor" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></button>
-            <button type="button" class="icon-option" data-icon="music" aria-pressed="false" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></button>
-            <button type="button" class="icon-option" data-icon="zap" aria-pressed="false" aria-label="Energy" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></button>
-            <button type="button" class="icon-option" data-icon="target" aria-pressed="false" aria-label="Target" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg></button>
-            <button type="button" class="icon-option" data-icon="trending-up" aria-pressed="false" aria-label="Progress" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></button>
-            <button type="button" class="icon-option" data-icon="check-circle" aria-pressed="false" aria-label="Checklist" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></button>
-            <button type="button" class="icon-option" data-icon="calendar" aria-pressed="false" aria-label="Calendar" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
-            <button type="button" class="icon-option" data-icon="edit-3" aria-pressed="false" aria-label="Journal" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="dollar-sign" aria-pressed="false" aria-label="Finance" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="smile" aria-pressed="false" aria-label="Mood" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></button>
-            <button type="button" class="icon-option" data-icon="briefcase" aria-pressed="false" aria-label="Work" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="code" aria-pressed="false" aria-label="Coding" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></button>
-            <button type="button" class="icon-option" data-icon="home" aria-pressed="false" aria-label="Home" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
-            <button type="button" class="icon-option" data-icon="award" aria-pressed="false" aria-label="Achievement" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg></button>
-            <button type="button" class="icon-option" data-icon="bell" aria-pressed="false" aria-label="Reminder" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="book-open" aria-pressed="false" aria-label="Reading" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="compass" aria-pressed="false" aria-label="Mindfulness" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></button>
-            <button type="button" class="icon-option" data-icon="flag" aria-pressed="false" aria-label="Goal" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg></button>
-            <button type="button" class="icon-option" data-icon="globe" aria-pressed="false" aria-label="Language" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="headphones" aria-pressed="false" aria-label="Podcast" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="map-pin" aria-pressed="false" aria-label="Walk" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></button>
-            <button type="button" class="icon-option" data-icon="repeat" aria-pressed="false" aria-label="Routine" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="watch" aria-pressed="false" aria-label="Time" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="7"></circle><polyline points="12 9 12 12 13.5 13.5"></polyline><path d="M16.51 17.35l-.35 3.83a2 2 0 0 1-2 1.82H9.83a2 2 0 0 1-2-1.82l-.35-3.83m.01-10.7l.35-3.83A2 2 0 0 1 9.83 1h4.35a2 2 0 0 1 2 1.82l.35 3.83"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="users" aria-pressed="false" aria-label="Social" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></button>
-            <button type="button" class="icon-option" data-icon="camera" aria-pressed="false" aria-label="Photography" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></button>
-            <button type="button" class="icon-option" data-icon="shopping-bag" aria-pressed="false" aria-label="Shopping" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg></button>
-          </div>
+          <label data-i18n="icon">Icon</label>
+          <div class="picker-grid" id="habit-icon-picker" style="flex-wrap: wrap; gap: 10px;"></div>
         </div>
 
         <div class="modal-footer">
-          <button class="btn-block" id="save-habit-btn" data-sound="success">Save Habit</button>
+          <button class="btn-block" id="save-habit-btn" data-i18n="save_habit" data-sound="success">Save Habit</button>
         </div>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="quick-tag-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-tag"/></svg> Set Task Tag</h2>
-        <button class="close-btn" id="close-quick-tag-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-tag"/></svg> <span data-i18n="set_tag">Set Task Tag</span></h2>
+        <button class="close-btn" id="close-quick-tag-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
-          <input type="text" id="quick-modal-tag-input" placeholder="New tag name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-          <button id="quick-modal-add-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
+          <input type="text" id="quick-modal-tag-input" placeholder="New tag name..." data-i18n-placeholder="new_tag_name_placeholder" class="custom-select flex-1" autocomplete="off" maxlength="20">
+          <button id="quick-modal-add-btn" class="btn btn-primary btn-sm" data-i18n="add" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="quick-modal-tag-list" class="tags-list-grid"></div>
@@ -968,132 +862,97 @@
   </div>
 
   <div class="modal-overlay" id="categories-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg> Manage Categories</h2>
-        <button class="close-btn" id="close-categories-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-sliders"/></svg> <span data-i18n="manage_categories">Manage Categories</span></h2>
+        <button class="close-btn" id="close-categories-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="add-tag-row">
-          <input type="color" id="manage-new-category-color" class="tag-color-swatch" title="Category color" aria-label="New category color">
-          <input type="text" id="manage-new-category-input" placeholder="New category name..." class="custom-select flex-1" autocomplete="off" maxlength="20">
-          <button id="manage-add-category-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
+          <input type="color" id="manage-new-category-color" class="tag-color-swatch" title="Category color" data-i18n-title="new_category_color" aria-label="New category color" data-i18n-aria-label="new_category_color">
+          <input type="text" id="manage-new-category-input" placeholder="New category name..." data-i18n-placeholder="new_category_name_placeholder" class="custom-select flex-1" autocomplete="off" maxlength="20">
+          <button id="manage-add-category-btn" class="btn btn-primary btn-sm" data-i18n="add" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
         <div id="categories-management-list" class="tags-list-grid"></div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; text-align: center;">Click to delete.</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 15px; text-align: center;" data-i18n="click_to_delete_hint">Click to delete.</p>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="quotes-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Manage Quotes</h2>
-        <button class="close-btn" id="close-quotes-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> <span data-i18n="manage_quotes">Manage Quotes</span></h2>
+        <button class="close-btn" id="close-quotes-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="setting-group dropdown-anchor" id="quote-category-wrapper">
-          <label>Category</label>
+          <label data-i18n="category">Category</label>
           <input type="text" id="quote-category-display" class="custom-select" value="General" readonly style="cursor: pointer;">
           <input type="hidden" id="quote-category-select" value="general">
           <div id="quote-category-dropdown" class="custom-dropdown glass-effect full-width">
-            <div class="dropdown-item" data-val="general" data-sound="click">General</div>
-            <div class="dropdown-item" data-val="focus" data-sound="click">Focus</div>
-            <div class="dropdown-item" data-val="habits" data-sound="click">Habits</div>
+            <div class="dropdown-item" data-val="general" data-i18n="quote_category_general" data-sound="click">General</div>
+            <div class="dropdown-item" data-val="focus" data-i18n="quote_category_focus" data-sound="click">Focus</div>
+            <div class="dropdown-item" data-val="habits" data-i18n="quote_category_habits" data-sound="click">Habits</div>
           </div>
         </div>
         <div class="add-tag-row">
-          <input type="text" id="new-quote-input" placeholder="Write a quote..." class="custom-select flex-1" autocomplete="off" maxlength="140">
-          <button id="add-quote-btn" class="btn btn-primary btn-sm" data-sound="click">Add</button>
+          <input type="text" id="new-quote-input" placeholder="Write a quote..." data-i18n-placeholder="write_quote_placeholder" class="custom-select flex-1" autocomplete="off" maxlength="140">
+          <button id="add-quote-btn" class="btn btn-primary btn-sm" data-i18n="add" data-sound="click">Add</button>
         </div>
         <hr class="modal-divider">
-        <label style="display:block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted);">Your Quotes</label>
+        <label style="display:block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted);" data-i18n="your_quotes">Your Quotes</label>
         <div id="user-quotes-list" class="quotes-management-list"></div>
-        <p id="user-quotes-empty" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; text-align: center;">You haven't added any quotes yet.</p>
+        <p id="user-quotes-empty" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; text-align: center;" data-i18n="no_quotes_yet">You haven't added any quotes yet.</p>
 
         <hr class="modal-divider">
-        <label style="display:block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted);">Default Quotes</label>
+        <label style="display:block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted);" data-i18n="default_quotes">Default Quotes</label>
         <div id="builtin-quotes-list" class="quotes-management-list"></div>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="custom-range-modal">
-    <div class="modal-content glass-effect">
+    <div class="modal-content modal-md glass-effect">
       <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Custom Range</h2>
-        <button class="close-btn" id="close-custom-range" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-calendar"/></svg> <span data-i18n="custom_range">Custom Range</span></h2>
+        <button class="close-btn" id="close-custom-range" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="setting-group">
-          <label for="range-start-month">Start Date</label>
+          <label for="range-start-year" data-i18n="start_date">Start Date</label>
           <div class="date-segment-group" id="range-start-group">
-            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-start-month" placeholder="MM" maxlength="2" aria-label="Start month" autocomplete="off">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment date-segment-year" id="range-start-year" placeholder="YYYY" maxlength="4" aria-label="Start year" data-i18n-aria-label="start_year_label" autocomplete="off">
             <span class="date-segment-sep">/</span>
-            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-start-day" placeholder="DD" maxlength="2" aria-label="Start day" autocomplete="off">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-start-month" placeholder="MM" maxlength="2" aria-label="Start month" data-i18n-aria-label="start_month_label" autocomplete="off">
             <span class="date-segment-sep">/</span>
-            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment date-segment-year" id="range-start-year" placeholder="YYYY" maxlength="4" aria-label="Start year" autocomplete="off">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-start-day" placeholder="DD" maxlength="2" aria-label="Start day" data-i18n-aria-label="start_day_label" autocomplete="off">
           </div>
         </div>
         <div class="setting-group">
-          <label for="range-end-month">End Date</label>
+          <label for="range-end-year" data-i18n="end_date">End Date</label>
           <div class="date-segment-group" id="range-end-group">
-            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-end-month" placeholder="MM" maxlength="2" aria-label="End month" autocomplete="off">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment date-segment-year" id="range-end-year" placeholder="YYYY" maxlength="4" aria-label="End year" data-i18n-aria-label="end_year_label" autocomplete="off">
             <span class="date-segment-sep">/</span>
-            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-end-day" placeholder="DD" maxlength="2" aria-label="End day" autocomplete="off">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-end-month" placeholder="MM" maxlength="2" aria-label="End month" data-i18n-aria-label="end_month_label" autocomplete="off">
             <span class="date-segment-sep">/</span>
-            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment date-segment-year" id="range-end-year" placeholder="YYYY" maxlength="4" aria-label="End year" autocomplete="off">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" class="date-segment" id="range-end-day" placeholder="DD" maxlength="2" aria-label="End day" data-i18n-aria-label="end_day_label" autocomplete="off">
           </div>
         </div>
-        <div style="display: flex; gap: 12px;">
-          <button class="btn btn-secondary" id="cancel-custom-range" data-sound="click">Cancel</button>
-          <button class="btn btn-primary" id="apply-custom-range" style="flex: 1;" data-sound="success">Apply Range</button>
-        </div>
       </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="progress-settings-modal">
-    <div class="modal-content glass-effect">
-      <div class="modal-header">
-        <h2><svg class="ui-icon" aria-hidden="true"><use href="#icon-gear"/></svg> Settings</h2>
-        <button class="close-btn" id="close-prog-settings" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
-      </div>
-      <div class="modal-body">
-        <div class="setting-group toggle-group">
-          <label for="prog-dark-mode">Global Dark Mode</label>
-          <label class="switch" for="prog-dark-mode"><input type="checkbox" id="prog-dark-mode" data-sound="click" role="switch" aria-checked="false"><span class="slider round"></span></label>
-        </div>
-        <div class="setting-group toggle-group">
-          <label for="prog-sound-toggle">Sound Effects</label>
-          <label class="switch" for="prog-sound-toggle"><input type="checkbox" id="prog-sound-toggle" data-sound="click" role="switch" aria-checked="false"><span class="slider round"></span></label>
-        </div>
-        <hr style="border: 0; border-top: 1px solid var(--glass-border); margin: 15px 0;">
-        <div class="setting-group toggle-group">
-          <label for="prog-toggle-focus">Show Pomodoro Data</label>
-          <label class="switch" for="prog-toggle-focus"><input type="checkbox" id="prog-toggle-focus" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
-        </div>
-        <div class="setting-group toggle-group">
-          <label for="prog-toggle-habits">Show Habits Data</label>
-          <label class="switch" for="prog-toggle-habits"><input type="checkbox" id="prog-toggle-habits" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
-        </div>
-        <div class="setting-group toggle-group">
-          <label for="prog-toggle-compare">Show Comparisons (↑↓)</label>
-          <label class="switch" for="prog-toggle-compare"><input type="checkbox" id="prog-toggle-compare" data-sound="click" checked role="switch" aria-checked="true"><span class="slider round"></span></label>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-block" id="save-prog-settings" data-sound="success">Save & Apply</button>
+      <div class="modal-footer modal-actions-row">
+        <button class="btn btn-secondary" id="cancel-custom-range" data-i18n="cancel" data-sound="click">Cancel</button>
+        <button class="btn btn-primary" id="apply-custom-range" data-i18n="apply_range" data-sound="success">Apply Range</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="daily-report-modal">
-    <div class="modal-content glass-effect" style="max-width: 380px;">
+    <div class="modal-content modal-md glass-effect" style="max-width: 380px;">
       <div class="modal-header" style="margin-bottom: 10px;">
         <h2 id="report-date-title">Report</h2>
-        <button class="close-btn" id="close-report-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-report-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
       <div class="modal-body" id="report-modal-body">
       </div>
@@ -1101,23 +960,23 @@
   </div>
 
   <div class="modal-overlay" id="delete-habit-modal">
-    <div class="modal-content glass-effect" style="max-width: 400px; text-align: center;">
+    <div class="modal-content modal-md glass-effect" style="text-align: center;">
       <div class="modal-header" style="margin-bottom: 20px;">
         <h2 style="color: var(--danger-color);">
-          <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-          Delete Habit
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-trash"/></svg>
+          <span data-i18n="delete_habit">Delete Habit</span>
         </h2>
-        <button class="close-btn" id="close-delete-habit-modal" aria-label="Close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
+        <button class="close-btn" id="close-delete-habit-modal" aria-label="Close" data-i18n-title="close" data-i18n-aria-label="close" data-sound="click"><svg class="ui-icon" aria-hidden="true"><use href="#icon-close"/></svg></button>
       </div>
 
       <div class="modal-body">
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">How would you like to handle this habit?</p>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;" data-i18n="handle_habit_question">How would you like to handle this habit?</p>
+      </div>
 
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <button class="btn btn-secondary" id="delete-habit-today-btn" data-sound="trash">Clear Today's Record</button>
-          <button class="btn btn-warning" id="delete-habit-future-btn" data-sound="trash">Stop Tracking (Keep History)</button>
-          <button class="btn btn-danger" id="delete-habit-all-btn" data-sound="trash">Delete All History</button>
-        </div>
+      <div class="modal-footer modal-actions-col">
+        <button class="btn btn-secondary" id="delete-habit-today-btn" data-i18n="clear_today_record" data-sound="trash">Clear Today's Record</button>
+        <button class="btn btn-warning" id="delete-habit-future-btn" data-i18n="stop_tracking_keep_history" data-sound="trash">Stop Tracking (Keep History)</button>
+        <button class="btn btn-danger" id="delete-habit-all-btn" data-i18n="delete_all_history" data-sound="trash">Delete All History</button>
       </div>
     </div>
   </div>

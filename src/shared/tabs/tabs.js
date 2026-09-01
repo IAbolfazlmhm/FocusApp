@@ -3,23 +3,53 @@
 // ==========================================
 import { readRaw, writeRaw, STORAGE_KEYS } from '../../core/storage.js';
 
+export function updateBubble(targetTab, immediate = false) {
+  const bubble = document.querySelector('.active-bubble');
+  if (!targetTab || !bubble) {return;}
+  if (immediate) {
+    bubble.style.transition = 'none';
+  }
+  bubble.style.width = `${targetTab.offsetWidth}px`;
+  bubble.style.transform = `translateX(${targetTab.offsetLeft}px)`;
+  if (immediate) {
+    void bubble.offsetWidth;
+    bubble.style.transition = '';
+  }
+}
+
 export function setupTabs() {
   const tabs = document.querySelectorAll('.tab');
-  const bubble = document.querySelector('.active-bubble');
 
-  // FIX: previously animated by changing `left`/`width` directly, which
-  // (a) forces a layout recalc every frame and (b) sits inside a
-  // `backdrop-filter: blur()` container, so every frame also re-ran an
-  // expensive blur repaint — together these made the slide look laggy
-  // instead of smooth. Width barely ever changes (the 3 tabs are equal
-  // flex-1 slices of the same bar), so only position needs to animate;
-  // driving that with `transform: translateX()` lets the browser animate
-  // it on the compositor (GPU) without touching layout at all. See the
-  // matching `.active-bubble` rule in layout.css.
-  function updateBubble(targetTab) {
-    if (!targetTab || !bubble) {return;}
-    bubble.style.width = `${targetTab.offsetWidth}px`;
-    bubble.style.transform = `translateX(${targetTab.offsetLeft}px)`;
+  document.addEventListener('languageChanged', () => {
+    const activeTab = document.querySelector('.tab.active');
+    if (!activeTab) {return;}
+    // FIX: switching to fa can be the very first time any Persian text
+    // has ever been rendered on the page — --font-sans lists Vazirmatn
+    // third in a multi-script fallback stack, and browsers only fetch a
+    // fallback-chain font once a character that actually needs it shows
+    // up. If that font is still loading when this ran (previously: just
+    // a requestAnimationFrame, no font-load wait), offsetWidth/
+    // offsetLeft would be measured against the fallback font's metrics
+    // — a plausible one-off mis-sized/mis-positioned bubble on someone's
+    // very first switch to fa, self-correcting only on the next resize
+    // or tab click. document.fonts.ready resolves immediately if
+    // nothing's actually loading, so this costs nothing on every other
+    // (non-first) language switch.
+    const waitForFonts = (typeof document.fonts !== 'undefined' && document.fonts.ready)
+      ? document.fonts.ready
+      : Promise.resolve();
+    waitForFonts.then(() => {
+      requestAnimationFrame(() => updateBubble(activeTab, true));
+    });
+  });
+
+  if (typeof document !== 'undefined' && document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      const activeTab = document.querySelector('.tab.active');
+      if (activeTab) {
+        updateBubble(activeTab, true);
+      }
+    });
   }
 
   window.addEventListener('load', () => {
@@ -139,6 +169,13 @@ export function setupTabs() {
       // Trigger bubble recalculation if switching to Habits tab (index 1)
       if (index === 1) {
           document.dispatchEvent(new Event('habitsTabOpened'));
+      }
+      // Same for the Pomodoro tab (index 0): the task filter bubble is
+      // measured while this view is display:none whenever renderFilters()
+      // runs from the languageChanged cascade on another tab, zero-sizing
+      // it. tasks-render.js listens for this to re-measure on return.
+      if (index === 0) {
+          document.dispatchEvent(new Event('pomodoroTabOpened'));
       }
       if (modeSelect) {
           const modeWrapper = modeSelect.closest('.setting-group');

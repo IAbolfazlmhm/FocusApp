@@ -30,6 +30,7 @@ import { setupTagsManagement } from './tasks-tags-modal.js';
 import { setupQuickTagModal } from './tasks-quick-tag-modal.js';
 import { setupPomodoroDateNav } from './tasks-date-nav.js';
 import { setupTaskSort } from './tasks-sort.js';
+import { t, formatDate, formatNumber } from '../../core/i18n.js';
 
 const taskInput = document.getElementById('task-input');
 const addBtn = document.getElementById('add-task-btn');
@@ -42,12 +43,24 @@ const taskListContainer = document.querySelector('.task-list-container');
 // inherits that day's untracked time — see both functions below.
 let pendingTasklessConversion = null; // { dateKey, seconds } | null
 
+// FIX: this duplicated tasks-render.js's formatTaskTime() but without the
+// formatNumber() call, so the taskless-conversion banner showed Latin
+// digits even under fa locale while the identical-looking time badges
+// elsewhere in the tab (which go through formatTaskTime) didn't.
+// Deliberately NOT consolidated into one shared helper: the two aren't
+// actually equivalent. formatTaskTime always shows both components
+// ("1m 0s") and prepends an inline SVG icon meant for innerHTML;
+// this one drops a zero component ("1m", not "1m 0s") for a natural-
+// language toast/banner sentence, and returns plain text for
+// textContent. Forcing them into one function would need a mode flag
+// for what's really a 2-line shared core (Math.floor/modulo +
+// formatNumber) — more complexity for less duplication, not a win.
 function formatMinutesSeconds(totalSeconds) {
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
-  if (m === 0) {return `${s}s`;}
-  if (s === 0) {return `${m}m`;}
-  return `${m}m ${s}s`;
+  if (m === 0) {return `${formatNumber(s)}s`;}
+  if (s === 0) {return `${formatNumber(m)}m`;}
+  return `${formatNumber(m)}m ${formatNumber(s)}s`;
 }
 
 /**
@@ -64,8 +77,8 @@ export function beginTasklessConversion(dateObj, seconds) {
   const banner = document.getElementById('taskless-convert-banner');
   const bannerText = document.getElementById('taskless-convert-banner-text');
   if (bannerText) {
-    const label = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    bannerText.textContent = `Name this task to give it the ${formatMinutesSeconds(seconds)} of focus time from ${label}.`;
+    const label = formatDate(dateObj, { month: 'short', day: 'numeric' });
+    bannerText.textContent = t('task_conversion_banner', { time: formatMinutesSeconds(seconds), date: label });
   }
   if (banner) {banner.style.display = 'flex';}
 
@@ -94,7 +107,7 @@ export function addTask() {
   const tag = tagRaw ? tagRaw.charAt(0).toUpperCase() + tagRaw.slice(1) : null;
 
   if (!text) {
-    showToast('Please enter a valid task.', 'warning');
+    showToast(t('please_enter_valid_task'), 'warning');
     return;
   }
 
@@ -153,7 +166,7 @@ export function addTask() {
 
   if (convertedSeconds > 0) {
     document.dispatchEvent(new Event('dataUpdated'));
-    showToast(`Task created with ${formatMinutesSeconds(convertedSeconds)} carried over.`, 'success');
+    showToast(t('task_converted_toast', { time: formatMinutesSeconds(convertedSeconds) }), 'success');
   }
 
   if (taskInput) {taskInput.value = '';}
@@ -227,9 +240,9 @@ function toggleCompleted(id) {
 }
 
 function toggleFocus(id) {
-  const t = tasks.find(x => x.id === id);
-  if (t && t.completed) {
-    showToast('Task completed!', 'warning');
+  const tTask = tasks.find(x => x.id === id);
+  if (tTask && tTask.completed) {
+    showToast(t('task_completed_toast'), 'warning');
     return;
   }
   setFocusedTaskId(focusedTaskId === id ? null : id);
@@ -256,7 +269,7 @@ function checkAutoPause() {
 setTaskHandlers({
   onFocus: toggleFocus,
   onComplete: toggleCompleted,
-  onRemove: (id) => customConfirm("Delete this task?", () => removeTask(id)),
+  onRemove: (id) => customConfirm(t('delete_task_confirm'), () => removeTask(id)),
 });
 
 // ==========================================
@@ -299,6 +312,19 @@ export function setupTaskEvents() {
     }, 0);
   });
 
+  // Re-derive the banner text if language changed while conversion is armed
+  document.addEventListener('languageChanged', () => {
+    if (!pendingTasklessConversion) {return;}
+    const bannerText = document.getElementById('taskless-convert-banner-text');
+    if (bannerText && currentPomodoroDate) {
+      const label = formatDate(currentPomodoroDate, { month: 'short', day: 'numeric' });
+      bannerText.textContent = t('task_conversion_banner', {
+        time: formatMinutesSeconds(pendingTasklessConversion.seconds),
+        date: label
+      });
+    }
+  });
+
   // External trigger for focusing from timer
   document.addEventListener('autoFocusTask', (e) => {
     if (e.detail && e.detail.id) {
@@ -319,10 +345,10 @@ export function setTaskDate(dateObj) {
     today.setHours(0,0,0,0);
     const diffDays = Math.ceil((currentPomodoroDate - today) / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {display.textContent = 'Today';}
-    else if (diffDays === -1) {display.textContent = 'Yesterday';}
-    else if (diffDays === 1) {display.textContent = 'Tomorrow';}
-    else {display.textContent = currentPomodoroDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });}
+    if (diffDays === 0) {display.textContent = t('today');}
+    else if (diffDays === -1) {display.textContent = t('yesterday');}
+    else if (diffDays === 1) {display.textContent = t('tomorrow');}
+    else {display.textContent = formatDate(currentPomodoroDate, { month: 'short', day: 'numeric' });}
   }
   renderTasks();
 }

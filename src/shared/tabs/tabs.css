@@ -8,17 +8,22 @@
    behavior, tint included, is readable in one place. */
 
 .glass-tabs-container {
-  display: flex; 
-  position: relative; 
+  display: flex;
+  position: relative;
   background: var(--glass-bg);
-  backdrop-filter: blur(20px); 
+  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--glass-border); 
+  border: 1px solid var(--glass-border);
   border-radius: 50px;
-  padding: 5px; 
+  padding: 5px;
   box-shadow: inset 1px 1px 0px var(--glass-border), var(--glass-shadow);
-  width: 100%; 
+  width: 100%;
   max-width: 400px;
+}
+
+[dir="rtl"] .glass-tabs-container {
+  direction: ltr;
+  flex-direction: row-reverse;
 }
 
 .tab {
@@ -55,16 +60,21 @@
   pointlessly) watch box-shadow/border-radius/z-index for changes. 
 */
 .active-bubble {
-  position: absolute; 
-  top: 5px; 
-  left: 0; 
+  position: absolute;
+  top: 5px;
+  left: 0;
   height: calc(100% - 10px);
-  background: var(--text-main); 
+  background: var(--text-main);
   border-radius: 50px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
   z-index: 0;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.4s ease;
   will-change: transform;
+}
+
+[dir="rtl"] .active-bubble {
+  left: 0;
+  right: auto;
 }
 
 /* --- TIMER & PHASE OVERRIDES --- */

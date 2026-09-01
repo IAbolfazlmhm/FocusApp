@@ -11,6 +11,8 @@ import { centerButtonInScrollArea, setupHorizontalWheelScroll } from '../../shar
 import { readRaw, STORAGE_KEYS } from '../../core/storage.js';
 import { getDateKey, isHabitActiveOnDate, calculateStreak } from './habits-logic.js';
 import { habitIconsDict } from './habit-icons.js';
+import { saveHabitViewPrefs } from './habits-storage.js';
+import { t, formatNumber } from '../../core/i18n.js';
 
 const habitListContainer = document.getElementById('habit-list-container');
 
@@ -58,7 +60,7 @@ export function renderHabits() {
     habitListContainer.innerHTML = `
       <div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        <p>No habits scheduled for this day.</p>
+        <p>${t('no_habits_scheduled')}</p>
       </div>
     `;
     return;
@@ -118,7 +120,7 @@ export function renderHabits() {
     // (habits.js) for the matching keydown handler.
     habitDiv.tabIndex = 0;
     habitDiv.setAttribute('role', 'button');
-    habitDiv.setAttribute('aria-label', `Edit habit: ${habit.name}`);
+    habitDiv.setAttribute('aria-label', `${t('edit_habit')}: ${habit.name}`);
 
     // 2. Pristine 2-Row Layout WITH Original Streak SVG
     habitDiv.innerHTML = `
@@ -138,9 +140,9 @@ export function renderHabits() {
           <!-- Bottom Row: Category & Original Streak SVG -->
           <div class="habit-meta-row">
             ${catHTML}
-            <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="Current Streak">
+            <div class="streak-flame ${currentStreak > 0 ? 'active' : ''}" title="${t('streak_flame_title')}">
               <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-              <span>${currentStreak}</span>
+              <span>${formatNumber(currentStreak)}</span>
             </div>
           </div>
 
@@ -148,9 +150,9 @@ export function renderHabits() {
       </div>
 
       <div class="task-actions">
-        <button class="remove-btn advanced-delete-btn" title="Delete Habit"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-        <button class="focus-btn skip-habit-btn" title="Skip Today" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
-        <button class="done-btn done-habit-btn" title="Done!" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
+        <button class="remove-btn advanced-delete-btn" title="${t('delete_habit')}"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        <button class="focus-btn skip-habit-btn" title="${t('skip_today')}" data-sound="click"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg></button>
+        <button class="done-btn done-habit-btn" title="${t('done_exclamation')}" data-sound="success"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></button>
       </div>
     `;
 
@@ -210,22 +212,41 @@ export function updateHabitProgress() {
 
     if (prevVal !== percentage) {
       animatePercentage(percentageText, prevVal, percentage, 800);
-    } else if (percentageText.textContent === '') {
-      percentageText.textContent = `${percentage}%`;
+    } else {
+      // FIX: this used to only refresh here if textContent was still the
+      // empty string, on the assumption that "value unchanged" means
+      // "nothing to do" — true for the number itself, but not for which
+      // script it's displayed in. On a languageChanged event the
+      // percentage is almost always unchanged (switching language
+      // doesn't complete any habits), so this branch is exactly the one
+      // that runs — and it was leaving the digits frozen in whatever
+      // locale last actually changed the value, until the next real
+      // completion toggle finally passed through the animatePercentage()
+      // branch above and refreshed them. Always re-formatting here (not
+      // just when empty) is simpler than adding an extra
+      // "did the locale change" flag to track, and free either way — a
+      // few characters of textContent, not a real cost.
+      percentageText.textContent = `${formatNumber(percentage)}%`;
     }
   }
 
   // 3. Update the text counters (e.g., "2/4 Completed")
   const statsText = document.querySelector('.dashboard-stats-text strong');
+  const completedCountText = t('completed_count', { done: completed, total });
   if (statsText) {
-    statsText.textContent = `${completed}/${total} Completed`;
+    statsText.textContent = completedCountText;
   }
 
   // Update streaks UI
   renderTopStreaks();
 
+  // FIX: this used to be a hardcoded English string ('Focus App - Habits
+  // (2/4)') that never localized and never used formatNumber() for the
+  // counts. Reuses the exact same t('completed_count', ...) string just
+  // computed above for the on-page counter, so the two can never say
+  // different things.
   const activeTab = readRaw(STORAGE_KEYS.ACTIVE_TAB);
-  if (activeTab === '1') {document.title = `Focus App - Habits (${completed}/${total})`;}
+  if (activeTab === '1') {document.title = `${t('app_title')} - ${t('tab_habits')} (${completedCountText})`;}
 }
 
 // ==========================================
@@ -239,7 +260,7 @@ export function animatePercentage(element, start, end, duration) {
 
   // Snap immediately if there's no change needed
   if (start === end) {
-    element.textContent = `${end}%`;
+    element.textContent = `${formatNumber(end)}%`;
     return;
   }
 
@@ -252,12 +273,12 @@ export function animatePercentage(element, start, end, duration) {
     const easeProgress = 1 - Math.pow(1 - progress, 4);
     const currentVal = Math.floor(easeProgress * (end - start) + start);
 
-    element.textContent = `${currentVal}%`;
+    element.textContent = `${formatNumber(currentVal)}%`;
 
     if (progress < 1) {
       element.animationId = window.requestAnimationFrame(step);
     } else {
-      element.textContent = `${end}%`;
+      element.textContent = `${formatNumber(end)}%`;
       if (end === 100) {
         element.classList.add('pop-success-anim');
         setTimeout(() => element.classList.remove('pop-success-anim'), 600);
@@ -274,19 +295,20 @@ export function renderHabitCategories() {
   const filterContainer = document.getElementById('habit-filter-container');
   if (!filterContainer) {return;}
 
-  // Maintain current active filter state, default to 'all'
-  const currentFilter = filterContainer.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+  // Maintain current active filter state, default to state value or 'all'
+  const currentFilter = currentHabitFilter || 'all';
 
   const bubbleHTML = '<div class="filter-bubble" id="habit-filter-bubble"></div>';
   const usedCats = habits.map(h => h.category || 'Uncategorized');
   const uniqueCategories = [...new Set([...savedHabitCategories, ...usedCats])].filter(cat => cat && cat.trim() !== '');
 
-  let buttonsHTML = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">All</button>`;
-  buttonsHTML += `<button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">Active</button>`;
-  buttonsHTML += `<button class="filter-btn ${currentFilter === 'done' ? 'active' : ''}" data-filter="done" data-sound="click">Done</button>`;
+  let buttonsHTML = `<button class="filter-btn ${currentFilter === 'all' ? 'active' : ''}" data-filter="all" data-sound="click">${t('filter_all')}</button>`;
+  buttonsHTML += `<button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" data-filter="active" data-sound="click">${t('filter_active')}</button>`;
+  buttonsHTML += `<button class="filter-btn ${currentFilter === 'done' ? 'active' : ''}" data-filter="done" data-sound="click">${t('filter_done')}</button>`;
 
   uniqueCategories.forEach(cat => {
-    buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${escapeHTML(cat)}" data-sound="click">${escapeHTML(cat)}</button>`;
+    const label = cat === 'Uncategorized' ? t('uncategorized') : escapeHTML(cat);
+    buttonsHTML += `<button class="filter-btn ${currentFilter === cat ? 'active' : ''}" data-filter="${escapeHTML(cat)}" data-sound="click">${label}</button>`;
   });
 
   filterContainer.innerHTML = bubbleHTML + buttonsHTML;
@@ -313,23 +335,43 @@ export function renderHabitCategories() {
       centerButtonInScrollArea(filterContainer, this);
 
       setCurrentHabitFilter(this.dataset.filter);
+      saveHabitViewPrefs();
       renderHabits();
     });
   });
 
   // Initialize Bubble position seamlessly
-  setTimeout(() => {
-    const activeBtn = filterContainer.querySelector('.filter-btn.active');
-    const bubble = document.getElementById('habit-filter-bubble');
-    if (activeBtn && bubble) {
-      bubble.style.transition = 'none'; // Turn off animation
-      bubble.style.width = `${activeBtn.offsetWidth}px`;
-      bubble.style.left = `${activeBtn.offsetLeft}px`;
-      void bubble.offsetWidth; // Force CSS refresh
-      bubble.style.transition = ''; // Turn animation back on
-      centerButtonInScrollArea(filterContainer, activeBtn);
-    }
-  }, 50);
+  // FIX: this used to be a flat setTimeout(..., 50) with no awareness of
+  // font loading — renderHabitCategories() is one of the functions the
+  // languageChanged cascade calls, and switching to fa can be the very
+  // first time Persian text (and its fallback-chain font, Vazirmatn) has
+  // ever needed to render. If the font was still loading when this fired,
+  // offsetWidth/offsetLeft reflected the wrong (fallback-font) metrics —
+  // exactly why the bubble could vanish/misplace itself on a language
+  // switch and only reappear correctly once a filter click ran this same
+  // measurement again, well after the font had finished loading. Mirrors
+  // the identical fix in tabs.js's languageChanged listener and
+  // tasks-render.js's renderFilters(). document.fonts.ready resolves
+  // immediately when nothing's actually loading, so this costs nothing on
+  // every other call to renderHabitCategories() (initial load, category
+  // changes, tab switches).
+  const waitForFonts = (typeof document.fonts !== 'undefined' && document.fonts.ready)
+    ? document.fonts.ready
+    : Promise.resolve();
+  waitForFonts.then(() => {
+    requestAnimationFrame(() => {
+      const activeBtn = filterContainer.querySelector('.filter-btn.active');
+      const bubble = document.getElementById('habit-filter-bubble');
+      if (activeBtn && bubble) {
+        bubble.style.transition = 'none'; // Turn off animation
+        bubble.style.width = `${activeBtn.offsetWidth}px`;
+        bubble.style.left = `${activeBtn.offsetLeft}px`;
+        void bubble.offsetWidth; // Force CSS refresh
+        bubble.style.transition = ''; // Turn animation back on
+        centerButtonInScrollArea(filterContainer, activeBtn);
+      }
+    });
+  });
 }
 
 // Recalculate bubble position when switching to the Habits tab
@@ -379,7 +421,7 @@ export function renderTopStreaks() {
           <span class="stat-label" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:120px; display:block;">${escapeHTML(h.name)}</span>
           <div class="streak-flame active lg">
             <svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-            <span>${h.currentStreak}</span>
+            <span>${formatNumber(h.currentStreak)}</span>
           </div>
         </div>
       `;
@@ -389,7 +431,7 @@ export function renderTopStreaks() {
       pill.innerHTML = `
         <div class="stat-icon mini" style="background: transparent;"></div>
         <div class="stat-details">
-          <span class="stat-label">Empty</span>
+          <span class="stat-label">${t('empty_slot')}</span>
         </div>
       `;
     }

@@ -19,6 +19,9 @@
 // on or off.
 
 import { startQuoteRotation } from '../quotes/motivation.js';
+import { t } from '../../core/i18n.js';
+import { updateBubble } from '../../shared/tabs/tabs.js';
+import { updateFilterBubble } from '../tasks/tasks-render.js';
 
 let focusModeActive = false;
 let stopQuoteRotationFn = null;
@@ -31,16 +34,8 @@ function setToggleButtonState(active) {
   const btn = document.getElementById('focus-mode-toggle-btn');
   if (!btn) {return;}
   btn.setAttribute('aria-pressed', active ? 'true' : 'false');
-  btn.setAttribute('aria-label', active ? 'Exit Focus Mode' : 'Enter Focus Mode');
-  btn.title = active ? 'Exit Focus Mode' : 'Focus Mode';
-  // No icon swap on activation — every other toggle-style control in
-  // the app (tabs, filter pills) signals its active state with color,
-  // not by swapping to a different glyph, and the swapped-in close (X)
-  // icon here was styled as an isolated one-off rather than matching
-  // any of those. aria-pressed above already drives the same active
-  // treatment (see .focus-mode-toggle-btn in pomodoro.css) that an
-  // active tab/filter gets, so the button stays visually consistent
-  // with the rest of the app in both states.
+  btn.setAttribute('aria-label', active ? t('exit_focus_mode') : t('focus_mode'));
+  btn.title = active ? t('exit_focus_mode') : t('focus_mode');
 }
 
 export function enterFocusMode() {
@@ -48,6 +43,25 @@ export function enterFocusMode() {
   focusModeActive = true;
   document.body.classList.add('focus-mode-active');
   setToggleButtonState(true);
+  stopQuoteRotationFn = startQuoteRotation(document.getElementById('focus-mode-quote'), { category: 'focus' });
+}
+
+// FIX: the settings gear stays reachable while Focus Mode is active (it
+// lives in .timer-header, which focus-mode.css never hides — only the
+// tab nav and task list get hidden), so changing language from inside
+// Focus Mode is a real, reachable path. But nothing here ever restarted
+// this rotation on languageChanged the way initHabitQuotes() does for
+// Habits — so the quote already on screen stayed in whatever language it
+// was shown in until its own next scheduled tick (up to 8s later), and
+// exiting Focus Mode right after a language switch could show it still
+// sitting in the old language. main.js calls this from its
+// languageChanged handler; it's a no-op when Focus Mode isn't active.
+export function refreshFocusModeQuoteIfActive() {
+  if (!focusModeActive) {return;}
+  setToggleButtonState(true);
+  if (stopQuoteRotationFn) {
+    stopQuoteRotationFn();
+  }
   stopQuoteRotationFn = startQuoteRotation(document.getElementById('focus-mode-quote'), { category: 'focus' });
 }
 
@@ -60,6 +74,25 @@ export function exitFocusMode() {
     stopQuoteRotationFn();
     stopQuoteRotationFn = null;
   }
+  // FIX: Focus Mode hides both the tab nav (.header-container) and the
+  // task list (.tasks-section) via CSS — including their active-tab and
+  // active-filter bubbles. If a languageChanged event fired while Focus
+  // Mode was active (the settings gear stays reachable from inside it —
+  // see refreshFocusModeQuoteIfActive's comment above), tabs.js's and
+  // tasks-render.js's own bubble-reposition logic would have measured
+  // offsetWidth/offsetLeft on elements that were display:none at that
+  // exact moment — hidden elements report zero for both, so the bubble
+  // got resized/repositioned to nothing and stayed that way, since
+  // nothing else re-measures it once Focus Mode exits and the real
+  // layout becomes visible again. One extra reposition right here, now
+  // that both are visible again, fixes it — harmless even when nothing
+  // was actually wrong (re-applying the same already-correct width/left
+  // is a no-op).
+  requestAnimationFrame(() => {
+    const activeTab = document.querySelector('.tab.active');
+    if (activeTab) {updateBubble(activeTab, true);}
+    updateFilterBubble();
+  });
 }
 
 export function toggleFocusMode() {
@@ -71,4 +104,7 @@ export function setupFocusMode() {
   if (btn) {
     btn.addEventListener('click', toggleFocusMode);
   }
+  document.addEventListener('languageChanged', () => {
+    setToggleButtonState(focusModeActive);
+  });
 }

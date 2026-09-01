@@ -76,3 +76,20 @@ test('loadTimerState accepts state saved just under the 4-hour cutoff', () => {
   assert.equal(restored, true);
   assert.equal(state.timeLeft, 321);
 });
+
+test('loadTimerState rejects corrupted null or NaN timeLeft/totalTime state', () => {
+  localStorage.setItem('focusTimerState', JSON.stringify({
+    timeLeft: null,
+    totalTime: null,
+    currentPhase: 'work',
+    completedSessions: 0,
+    lastSaved: Date.now()
+  }));
+
+  setTimeLeft(1500);
+  const restored = loadTimerState();
+
+  assert.equal(restored, false);
+  assert.equal(state.timeLeft, 1500);
+  assert.equal(localStorage.getItem('focusTimerState'), null);
+});
